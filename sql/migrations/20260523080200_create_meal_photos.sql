@@ -2,7 +2,7 @@
 CREATE TABLE meal_photos (
   id             BINARY(16)   NOT NULL,
   meal_id        BINARY(16)   NOT NULL,
-  url            VARCHAR(500) NOT NULL,
+  image_path     VARCHAR(255) NOT NULL,
   display_order  INT          NOT NULL DEFAULT 0,
   created_at     DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
