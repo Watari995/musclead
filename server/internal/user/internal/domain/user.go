@@ -41,6 +41,12 @@ func (u *User) DeletedAt() *time.Time {
 	return u.deletedAt
 }
 
+func (u *User) MarkAsDeleted() {
+	now := time.Now()
+	u.deletedAt = &now
+	u.updatedAt = now
+}
+
 func (u *User) CreatedAt() time.Time {
 	return u.createdAt
 }
