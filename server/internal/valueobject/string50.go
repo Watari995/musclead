@@ -6,8 +6,13 @@ type String50 struct {
 	LiteralBase[string]
 }
 
+var string50ValidationRules = []validation.Rule{
+	validation.Required,
+	validation.RuneLength(1, 50),
+}
+
 func (s String50) Validate() error {
-	return validation.Validate(s.Value(), validation.Required, validation.RuneLength(1, 50))
+	return validation.Validate(s.Value(), string50ValidationRules...)
 }
 
 func NewString50(s string) (*String50, error) {

@@ -6,8 +6,13 @@ type String100 struct {
 	LiteralBase[string]
 }
 
+var string100ValidationRules = []validation.Rule{
+	validation.Required,
+	validation.RuneLength(1, 100),
+}
+
 func (s String100) Validate() error {
-	return validation.Validate(s.Value(), validation.Required, validation.RuneLength(1, 100))
+	return validation.Validate(s.Value(), string100ValidationRules...)
 }
 
 func NewString100(s string) (*String100, error) {
