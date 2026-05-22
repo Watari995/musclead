@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	id           UserID
+	id           valueobject.UserID
 	name         valueobject.String50
 	email        valueobject.Email
 	passwordHash valueobject.HashedPassword
@@ -17,7 +17,7 @@ type User struct {
 	updatedAt    time.Time
 }
 
-func (u *User) ID() UserID {
+func (u *User) ID() valueobject.UserID {
 	return u.id
 }
 
@@ -51,7 +51,7 @@ func (u *User) UpdatedAt() time.Time {
 
 func CreateUser(name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time) *User {
 	return &User{
-		id:           valueobject.NewPrimaryId[UserID](),
+		id:           valueobject.NewPrimaryId[valueobject.UserID](),
 		name:         name,
 		email:        email,
 		passwordHash: passwordHash,
@@ -61,7 +61,7 @@ func CreateUser(name valueobject.String50, email valueobject.Email, passwordHash
 	}
 }
 
-func NewUser(id UserID, name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time, createdAt time.Time, updatedAt time.Time) *User {
+func NewUser(id valueobject.UserID, name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time, createdAt time.Time, updatedAt time.Time) *User {
 	return &User{
 		id:           id,
 		name:         name,
