@@ -1,0 +1,120 @@
+---
+description: Handler 層で VO 変換、 UseCase は VO のみ受け取る (Clean Architecture)
+globs: server/**/*.go
+alwaysApply: true
+---
+
+# Handler での VO 変換ルール
+
+## 原則: **Handler 層で VO 変換、 UseCase Input は VO のみ**
+
+Clean Architecture(Uncle Bob)の Interface Adapter Layer が「外部表現 ⇔ 内部表現」 の変換責務を持つ。 これにより:
+
+- Handler が境界として **早く不正入力を弾く** (Fail Fast)
+- UseCase は **VO のみ扱う純粋なオーケストレータ**
+- 「不正値が UseCase / Domain に侵入しない」 が**型レベルで保証**
+
+---
+
+## レイヤごとの責務
+
+### Handler 層
+- Protobuf message などの外部入力を受け取る
+- **プリミティブ → VO 変換**(`valueobject.NewEmail()` 等)
+- バリデーションエラーは `connect.CodeInvalidArgument` 等で返却
+- レスポンスは Protobuf message に再変換
+
+### UseCase 層
+- **VO のみ受け取る**(プリミティブ string/int NG)
+- ドメインロジックのオーケストレーション
+- バリデーション責務は持たない(Handler が完了済み)
+
+### Domain 層
+- Entity / VO / Repository interface
+- 外部世界を知らない
+
+---
+
+## 実装パターン
+
+### Handler
+
+```go
+func (h *UserHandler) RegisterUser(
+    ctx context.Context,
+    req *connect.Request[pb.RegisterUserRequest],
+) (*connect.Response[pb.RegisterUserResponse], error) {
+    // ① プリミティブ → VO 変換(ここで弾く)
+    name, err := valueobject.NewString50(req.Msg.Name)
+    if err != nil {
+        return nil, connect.NewError(connect.CodeInvalidArgument, err)
+    }
+    email, err := valueobject.NewEmail(req.Msg.Email)
+    if err != nil {
+        return nil, connect.NewError(connect.CodeInvalidArgument, err)
+    }
+
+    // ② UseCase 呼び出し(VO のみ渡す)
+    output, err := h.registerUC.Execute(ctx, userusecase.RegisterUserInput{
+        Name:     *name,
+        Email:    *email,
+        Password: req.Msg.Password,  // 例外: 平文 → UseCase 内でハッシュ化
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    // ③ レスポンス変換
+    return connect.NewResponse(&pb.RegisterUserResponse{
+        UserId: output.UserID,
+    }), nil
+}
+```
+
+### UseCase
+
+```go
+type RegisterUserInput struct {
+    Name     valueobject.String50  // ← VO
+    Email    valueobject.Email
+    Password string                 // ← 例外: 平文(ハッシュ化前)
+    Birthday *time.Time             // 単純な型はプリミティブ
+}
+
+func (uc *RegisterUser) Execute(
+    ctx context.Context,
+    input RegisterUserInput,
+) (*Output, error) {
+    // VO は変換済み → ドメイン操作に集中
+    hash, err := uc.hasher.Hash(input.Password)
+    if err != nil {
+        return nil, err
+    }
+
+    user := userdomain.CreateUser(input.Name, input.Email, *hash, input.Birthday)
+    if err := uc.repo.Save(ctx, user); err != nil {
+        return nil, err
+    }
+
+    return &Output{UserID: user.ID().String()}, nil
+}
+```
+
+---
+
+## 例外: VO 化しない値
+
+| 値 | 理由 |
+|---|---|
+| **平文 Password** | ハッシュ化前なので VO 化できない。 UseCase 内で bcrypt 処理 |
+| `*time.Time`(任意項目) | プリミティブのまま使う |
+| `int`(単純な数値) | 場合による、 VO 必須でなければプリミティブ |
+
+---
+
+## 禁止事項
+
+- ❌ UseCase Input に `string` の Email を入れる
+- ❌ UseCase 内で `valueobject.NewEmail()` 等を呼ぶ
+- ❌ Handler で `valueobject.NewXxx()` の error を握りつぶす
+- ✅ Handler が境界でエラーを `connect.NewError(connect.CodeInvalidArgument, err)` で返す
