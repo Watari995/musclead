@@ -1,0 +1,48 @@
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Go
+server/bin/
+server/*.exe
+*.test
+*.out
+vendor/
+
+# Node / Web
+web/node_modules/
+web/dist/
+web/.env*
+!web/.env.example
+
+# Mobile (Flutter)
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/ios/Pods/
+mobile/android/.gradle/
+mobile/android/local.properties
+
+# Terraform
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+terraform/**/.terraform.lock.hcl
+terraform/**/terraform.tfvars
+
+# Secrets / Env
+.env
+.env.local
+*.pem
+*.key
+
+# Generated
+proto/gen/
+server/internal/**/gen/
+
+# Logs
+*.log
