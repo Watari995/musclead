@@ -1,54 +1,117 @@
 ---
 description: 値オブジェクト実装パターン
-globs: server/internal/**/value_object/**/*.go
+globs: server/internal/valueobject/**/*.go,server/internal/**/internal/domain/**/*.go
 alwaysApply: true
 ---
 
 # 値オブジェクト実装パターン
 
+## 配置
+
+- **共通VO**: `server/internal/valueobject/`(package `valueobject`)
+- **モジュール固有ID**: `server/internal/{module}/internal/domain/{name}_id.go`
+
+## パッケージ名は **`valueobject`**(アンスコ無し)
+
+Go 公式規約に従い `value_object` ではなく **`valueobject`** を使う。
+ファイル名は snake_case OK(`string_50.go` ではなく `string50.go`)。
+
 ## 共通基底
 
 ```go
-// LiteralBase[T any]: ジェネリック基底、 v は unexported
+package valueobject
+
+// ジェネリック基底
 type LiteralBase[T any] struct {
-    v T
+    v T  // 必ず unexported
 }
 
-// PrimaryIdBase: ID共通基底
-type PrimaryIdBase struct {
-    LiteralBase[string]  // UUID格納
+func (l LiteralBase[T]) Value() T { return l.v }
+func (l LiteralBase[T]) Equals(o LiteralBase[T]) bool {
+    return reflect.DeepEqual(l.v, o.v)
 }
+
+// ID共通基底
+type PrimaryIdBase struct {
+    LiteralBase[string]  // UUID v7 格納
+}
+
+func newPrimaryIdBase() PrimaryIdBase { /* uuid.NewV7() */ }
+func newPrimaryIdBaseFromString(s string) (PrimaryIdBase, error) { /* uuid.Parse() */ }
 ```
 
-## ID(Brand型)
+## ID(`~struct { PrimaryIdBase }` 制約)
 
 ```go
+package valueobject
+
 type PrimaryId interface {
     ~struct{ PrimaryIdBase }
 }
 
-type UserID struct { PrimaryIdBase }
-type MealID struct { PrimaryIdBase }
+func NewPrimaryId[T PrimaryId]() T {
+    return T{PrimaryIdBase: newPrimaryIdBase()}
+}
 
-// 生成
-id := NewPrimaryId[UserID]()
-id, err := NewPrimaryIdFromString[UserID](s)
+func NewPrimaryIdFromString[T PrimaryId](s string) (*T, error) {
+    p, err := newPrimaryIdBaseFromString(s)
+    if err != nil { return nil, err }
+    return &T{PrimaryIdBase: p}, nil
+}
 ```
 
-## 文字列VO
+各モジュールの ID:
+```go
+// internal/user/internal/domain/user_id.go
+package userdomain
 
-- `String20` / `String50` / `String100` / `String1000`
-- `ozzo-validation` で `Required` + `RuneLength` 検証
-- `NewXxx()` でコンストラクタ強制(直接生成不可)
+type UserID struct { valueobject.PrimaryIdBase }
 
-## 数値VO
+// 使い方
+id := valueobject.NewPrimaryId[UserID]()
+```
 
-- 共通: `NonNegativeInt` / `NonNegativeDecimal`
-- 特化: `Reps`(1以上)/ `WeightKg`(0より大、 1000未満)/ `Percentage`(0-100)
+## 文字列VO(コンストラクタ強制)
+
+```go
+package valueobject
+
+import validation "github.com/go-ozzo/ozzo-validation/v4"
+
+type String50 struct {
+    LiteralBase[string]
+}
+
+func (s String50) Validate() error {
+    return validation.Validate(s.v,
+        validation.Required,
+        validation.RuneLength(1, 50),
+    )
+}
+
+func NewString50(s string) (*String50, error) {
+    v := String50{LiteralBase: LiteralBase[string]{v: s}}
+    if err := v.Validate(); err != nil { return nil, err }
+    return &v, nil
+}
+```
+
+## 数値VO(同パターン)
+
+```go
+type Reps struct { LiteralBase[int] }
+
+func (r Reps) Validate() error {
+    return validation.Validate(r.v, validation.Min(1))
+}
+
+func NewReps(v int) (*Reps, error) { ... }
+```
 
 ## ルール
 
 - フィールドは全て **unexported**(`v` のみ)
 - **Setter禁止** — 変更時は新規生成
 - コンストラクタで必ずバリデーション
-- `Validate()` メソッドで再検証可能に
+- `Validate() error` で再検証可能に
+- 等価比較は `Equals()`(`==` 禁止、 比較不可型を含むかも)

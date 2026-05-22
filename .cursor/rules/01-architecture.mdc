@@ -1,34 +1,76 @@
 ---
-description: DDD + Modular Monolith アーキテクチャ方針
+description: DDD + Modular Monolith(Go internal で境界強制)
 globs: server/**/*.go
 alwaysApply: true
 ---
 
 # アーキテクチャ
 
-## レイヤ構成
+## ディレクトリ構造
 
 ```
-server/internal/{context}/
-├── domain/    # Entity / 値オブジェクト / Repository interface
-├── usecase/   # アプリケーションサービス
-├── infra/     # Repository 実装(sqlc 使用)
-└── handler/   # Connect-RPC ハンドラ
+server/internal/
+├── valueobject/             # 全モジュール共通VO(汎用ドメイン)
+│   ├── literal_base.go
+│   ├── primary_id_base.go
+│   ├── string50.go ... 等
+│
+├── user/                    # User Bounded Context
+│   ├── api/                 # 🟢 公開ファサード(他モジュールから参照可)
+│   │   ├── service.go       # public interface
+│   │   ├── dto.go           # public DTO(domain.Entity ではない)
+│   │   └── impl.go          # 内部 usecase を呼ぶ
+│   └── internal/            # 🔴 user モジュール内部(他モジュール禁止)
+│       ├── domain/          # Entity / VO(固有) / Repository interface
+│       ├── usecase/         # Application Service
+│       ├── infra/           # Repository実装(sqlc使用)
+│       └── handler/         # Connect-RPC ハンドラ
+│
+├── meal/                    # Meal Context(同構造)
+└── shared/                  # logger / config / errors 等 infra寄り
 ```
 
-## Bounded Context
+## モジュール境界(Go `internal/` で強制)
 
-- `user/` / `meal/` / `training/` / `weight/`
-- 共通: `shared/value_object/` (LiteralBase / PrimaryIdBase / String系 など)
+- `internal/{module}/internal/` 配下は **`internal/{module}/` サブツリーからしか import 不可**(コンパイル時強制)
+- 他モジュールは `internal/{module}/api/` のみ参照可能
+- → `meal/internal/usecase/` が `user/internal/domain/` を import すると**コンパイル失敗**
 
-## 依存方向
+## レイヤ依存方向
 
-- `handler` → `usecase` → `domain`
-- `infra` → `domain`(Repository interface 実装)
-- **domain は何にも依存しない**(純粋なドメインロジック)
+```
+handler → usecase → domain
+                       ↑
+                     infra (interface 実装)
+```
 
-## モジュール間ルール
+- **domain は何にも依存しない**(純粋ロジック)
+- **infra が domain interface を実装**(依存性逆転)
 
-- **直接参照禁止**: meal の domain が user の domain を直接 import しない
-- 必要な場合は ID で疎結合(`UserID` だけ受け取る)
-- 跨ぐ場合は usecase 層で組み合わせる
+## モジュール間連携
+
+| 種類 | OK / NG |
+|---|---|
+| `mealusecase` が `userapi.Service` を呼ぶ | ✅ 公開 API 経由 |
+| `mealdomain` が `userapi.UserDTO` を参照 | ✅ DTO のみ |
+| `mealusecase` が `userdomain.User` を import | ❌ `user/internal/` 配下、 コンパイル失敗 |
+| `mealdomain` が `valueobject.PrimaryIdBase` を埋め込み | ✅ 共通VO は OK |
+
+## パッケージ命名
+
+| レイヤ | パッケージ名 |
+|---|---|
+| api | `userapi` / `mealapi` |
+| domain | `userdomain` / `mealdomain` |
+| usecase | `userusecase` / `mealusecase` |
+| infra | `userinfra` / `mealinfra` |
+| handler | `userhandler` / `mealhandler` |
+| 共通VO | `valueobject`(アンスコ無し) |
+
+→ import alias 不要、 衝突しない命名
+
+## 公開ファサード(api)の責務
+
+- public interface 定義
+- public DTO 定義(domain.Entity を漏らさない)
+- 内部の usecase を呼んで結果を DTO に変換
