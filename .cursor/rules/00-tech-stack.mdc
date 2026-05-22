@@ -1,0 +1,33 @@
+---
+description: musclead プロジェクトの技術スタック決定事項
+alwaysApply: true
+---
+
+# 技術スタック
+
+## 採用ツール(すべて最新安定版)
+
+| 領域 | 採用 |
+|---|---|
+| 言語 (BE) | Go 1.24+ |
+| API | Connect-RPC |
+| ORM | sqlc |
+| Migration | goose |
+| Validation | ozzo-validation v4 |
+| Logger | log/slog(Go標準) |
+| Test | gomock + testify |
+| Linter | golangci-lint |
+| Error | morikuni/failure |
+| DB | MySQL 8.0 / Aurora Serverless v2 |
+| Infra | AWS ECS Fargate / ALB / S3 |
+| IaC | Terraform |
+| 監視 | Sentry + CloudWatch |
+| CI/CD | GitHub Actions + AWS OIDC |
+| FE | React + TypeScript + Connect-Web(将来) |
+| Mobile | Flutter(将来) |
+
+## バージョン管理ルール
+
+- 全ツール常に最新安定版
+- メジャー更新は `docs/adr/` に記録
+- `go.mod` / `package.json` / Terraform `required_version` に明示
