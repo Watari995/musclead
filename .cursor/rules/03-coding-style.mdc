@@ -1,0 +1,42 @@
+---
+description: コーディング規約
+globs: server/**/*.go
+alwaysApply: true
+---
+
+# コーディング規約
+
+## 命名
+
+- パッケージ名: `snake_case`(例: `value_object`)
+- ファイル名: `snake_case`(例: `user_id.go`)
+- 構造体: `PascalCase`
+- メソッド: `PascalCase`(exported) / `camelCase`(unexported)
+- 定数: `UPPER_SNAKE_CASE` or `PascalCase`
+
+## エラー処理
+
+- `error` を**最後の戻り値**に
+- nil チェックは**早期 return**
+- ロギングはハンドラ層で**1回のみ**(下位レイヤは return)
+- `morikuni/failure` で context 付きエラー
+
+## テスト
+
+- **テーブル駆動テスト**(`tests := []struct { name, input, want }{...}`)
+- **gomock** でモック生成
+- 各実装ファイルと対になる `_test.go`
+- assertion は **testify/assert**(直感的な書き味)
+
+## コメント
+
+- **WHY を書く**(WHAT はコードを読めば分かる)
+- exported は godoc 形式(1行サマリ)
+- 過剰なコメント禁止
+
+## commit
+
+- **Conventional Commits**: `feat / fix / refactor / chore / docs / test / perf`
+- 1機能 = 1 commit
+- メッセージは英語 or 日本語、 統一
+- 例: `feat(user): add UserID value object`

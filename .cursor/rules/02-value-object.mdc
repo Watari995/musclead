@@ -1,0 +1,54 @@
+---
+description: 値オブジェクト実装パターン
+globs: server/internal/**/value_object/**/*.go
+alwaysApply: true
+---
+
+# 値オブジェクト実装パターン
+
+## 共通基底
+
+```go
+// LiteralBase[T any]: ジェネリック基底、 v は unexported
+type LiteralBase[T any] struct {
+    v T
+}
+
+// PrimaryIdBase: ID共通基底
+type PrimaryIdBase struct {
+    LiteralBase[string]  // UUID格納
+}
+```
+
+## ID(Brand型)
+
+```go
+type PrimaryId interface {
+    ~struct{ PrimaryIdBase }
+}
+
+type UserID struct { PrimaryIdBase }
+type MealID struct { PrimaryIdBase }
+
+// 生成
+id := NewPrimaryId[UserID]()
+id, err := NewPrimaryIdFromString[UserID](s)
+```
+
+## 文字列VO
+
+- `String20` / `String50` / `String100` / `String1000`
+- `ozzo-validation` で `Required` + `RuneLength` 検証
+- `NewXxx()` でコンストラクタ強制(直接生成不可)
+
+## 数値VO
+
+- 共通: `NonNegativeInt` / `NonNegativeDecimal`
+- 特化: `Reps`(1以上)/ `WeightKg`(0より大、 1000未満)/ `Percentage`(0-100)
+
+## ルール
+
+- フィールドは全て **unexported**(`v` のみ)
+- **Setter禁止** — 変更時は新規生成
+- コンストラクタで必ずバリデーション
+- `Validate()` メソッドで再検証可能に

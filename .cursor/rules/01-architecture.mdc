@@ -1,0 +1,34 @@
+---
+description: DDD + Modular Monolith アーキテクチャ方針
+globs: server/**/*.go
+alwaysApply: true
+---
+
+# アーキテクチャ
+
+## レイヤ構成
+
+```
+server/internal/{context}/
+├── domain/    # Entity / 値オブジェクト / Repository interface
+├── usecase/   # アプリケーションサービス
+├── infra/     # Repository 実装(sqlc 使用)
+└── handler/   # Connect-RPC ハンドラ
+```
+
+## Bounded Context
+
+- `user/` / `meal/` / `training/` / `weight/`
+- 共通: `shared/value_object/` (LiteralBase / PrimaryIdBase / String系 など)
+
+## 依存方向
+
+- `handler` → `usecase` → `domain`
+- `infra` → `domain`(Repository interface 実装)
+- **domain は何にも依存しない**(純粋なドメインロジック)
+
+## モジュール間ルール
+
+- **直接参照禁止**: meal の domain が user の domain を直接 import しない
+- 必要な場合は ID で疎結合(`UserID` だけ受け取る)
+- 跨ぐ場合は usecase 層で組み合わせる
