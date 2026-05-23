@@ -55,7 +55,12 @@ func (u *User) UpdatedAt() time.Time {
 	return u.updatedAt
 }
 
-func CreateUser(name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time) *User {
+func CreateUser(
+	name valueobject.String50,
+	email valueobject.Email,
+	passwordHash valueobject.HashedPassword,
+	birthday *time.Time,
+) *User {
 	return &User{
 		id:           valueobject.NewPrimaryId[valueobject.UserID](),
 		name:         name,
