@@ -11,34 +11,6 @@ import (
 	"time"
 )
 
-const createUser = `-- name: CreateUser :exec
-INSERT INTO users (id, name, email, password_hash, birthday, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?)
-`
-
-type CreateUserParams struct {
-	ID           []byte
-	Name         string
-	Email        string
-	PasswordHash string
-	Birthday     sql.NullTime
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.ExecContext(ctx, createUser,
-		arg.ID,
-		arg.Name,
-		arg.Email,
-		arg.PasswordHash,
-		arg.Birthday,
-		arg.CreatedAt,
-		arg.UpdatedAt,
-	)
-	return err
-}
-
 const findUserByEmail = `-- name: FindUserByEmail :one
 SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at
 FROM users
@@ -83,29 +55,39 @@ func (q *Queries) FindUserByID(ctx context.Context, id []byte) (User, error) {
 	return i, err
 }
 
-const updateUser = `-- name: UpdateUser :exec
-UPDATE users SET name = ?, email = ?, password_hash = ?, birthday = ?, deleted_at = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL
+const upsertUser = `-- name: UpsertUser :exec
+INSERT INTO users (id, name, email, password_hash, birthday, deleted_at, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+name = VALUES(name),
+email = VALUES(email),
+password_hash = VALUES(password_hash),
+birthday = VALUES(birthday),
+deleted_at = VALUES(deleted_at),
+updated_at = VALUES(updated_at)
 `
 
-type UpdateUserParams struct {
+type UpsertUserParams struct {
+	ID           []byte
 	Name         string
 	Email        string
 	PasswordHash string
 	Birthday     sql.NullTime
 	DeletedAt    sql.NullTime
+	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	ID           []byte
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.ExecContext(ctx, updateUser,
+func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) error {
+	_, err := q.db.ExecContext(ctx, upsertUser,
+		arg.ID,
 		arg.Name,
 		arg.Email,
 		arg.PasswordHash,
 		arg.Birthday,
 		arg.DeletedAt,
+		arg.CreatedAt,
 		arg.UpdatedAt,
-		arg.ID,
 	)
 	return err
 }
