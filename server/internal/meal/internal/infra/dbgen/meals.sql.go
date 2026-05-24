@@ -8,6 +8,7 @@ package mealdbgen
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 )
 
@@ -146,6 +147,51 @@ WHERE meal_id = ? ORDER BY display_order ASC
 
 func (q *Queries) FindMealPhotosByMealID(ctx context.Context, mealID []byte) ([]MealPhoto, error) {
 	rows, err := q.db.QueryContext(ctx, findMealPhotosByMealID, mealID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MealPhoto{}
+	for rows.Next() {
+		var i MealPhoto
+		if err := rows.Scan(
+			&i.ID,
+			&i.MealID,
+			&i.ImagePath,
+			&i.DisplayOrder,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const findMealPhotosByMealIDs = `-- name: FindMealPhotosByMealIDs :many
+SELECT id, meal_id, image_path, display_order, created_at
+FROM meal_photos
+WHERE meal_id IN (/*SLICE:meal_ids*/?) ORDER BY meal_id ASC, display_order ASC
+`
+
+func (q *Queries) FindMealPhotosByMealIDs(ctx context.Context, mealIds [][]byte) ([]MealPhoto, error) {
+	query := findMealPhotosByMealIDs
+	var queryParams []interface{}
+	if len(mealIds) > 0 {
+		for _, v := range mealIds {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:meal_ids*/?", strings.Repeat(",?", len(mealIds))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:meal_ids*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
 	if err != nil {
 		return nil, err
 	}

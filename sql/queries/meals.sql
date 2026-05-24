@@ -13,6 +13,11 @@ SELECT id, meal_id, image_path, display_order, created_at
 FROM meal_photos
 WHERE meal_id = ? ORDER BY display_order ASC;
 
+-- name: FindMealPhotosByMealIDs :many
+SELECT id, meal_id, image_path, display_order, created_at
+FROM meal_photos
+WHERE meal_id IN (sqlc.slice('meal_ids')) ORDER BY meal_id ASC, display_order ASC;
+
 -- name: UpsertMeal :exec
 INSERT INTO meals (id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)

@@ -16,6 +16,7 @@ type Querier interface {
 	FindAllMealsByUserIDWithOffsetPagination(ctx context.Context, arg FindAllMealsByUserIDWithOffsetPaginationParams) ([]Meal, error)
 	FindMealByID(ctx context.Context, id []byte) (Meal, error)
 	FindMealPhotosByMealID(ctx context.Context, mealID []byte) ([]MealPhoto, error)
+	FindMealPhotosByMealIDs(ctx context.Context, mealIds [][]byte) ([]MealPhoto, error)
 	UpsertMeal(ctx context.Context, arg UpsertMealParams) error
 }
 

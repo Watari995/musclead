@@ -2,6 +2,7 @@ package mealinfra
 
 import (
 	"context"
+	"math"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	mealdbgen "github.com/Watari995/musclead/internal/meal/internal/infra/dbgen"
@@ -16,8 +17,54 @@ type mealRepository struct {
 }
 
 func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context, userId valueobject.UserID, limit int, offset int) ([]*mealdomain.Meal, pagination.OffsetPaginator, error) {
-	// TODO: implement
-	return nil, pagination.OffsetPaginator{}, nil
+	bytes, err := userId.Bytes()
+	if err != nil {
+		return nil, pagination.OffsetPaginator{}, err
+	}
+	meals, err := r.db.FindAllMealsByUserIDWithOffsetPagination(ctx, mealdbgen.FindAllMealsByUserIDWithOffsetPaginationParams{
+		UserID: bytes,
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	})
+	if err != nil {
+		return nil, pagination.OffsetPaginator{}, err
+	}
+	total, err := r.db.CountMealsByUserID(ctx, bytes)
+	if err != nil {
+		return nil, pagination.OffsetPaginator{}, err
+	}
+
+	paginator := pagination.OffsetPaginator{
+		CurrentPage:  offset/limit + 1,
+		ItemsPerPage: limit,
+		TotalItems:   int(total),
+		TotalPages:   int(math.Ceil(float64(total) / float64(limit))),
+	}
+	if len(meals) == 0 {
+		return []*mealdomain.Meal{}, paginator, nil
+	}
+
+	photos, err := r.db.FindMealPhotosByMealIDs(ctx, lo.Map(meals, func(meal mealdbgen.Meal, _ int) []byte {
+		return meal.ID
+	}))
+	if err != nil {
+		return nil, pagination.OffsetPaginator{}, err
+	}
+	photosByMealID := lo.GroupBy(photos, func(photo mealdbgen.MealPhoto) string {
+		return string(photo.MealID)
+	})
+
+	result := make([]*mealdomain.Meal, len(meals))
+	for i, meal := range meals {
+		photos := photosByMealID[string(meal.ID)]
+		mealEntity, err := toMeal(meal, photos)
+		if err != nil {
+			return nil, pagination.OffsetPaginator{}, err
+		}
+		result[i] = mealEntity
+	}
+
+	return result, paginator, nil
 }
 
 func toPhotoData(photos []mealdbgen.MealPhoto) []mealdomain.PhotoData {
