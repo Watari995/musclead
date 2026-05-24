@@ -25,3 +25,13 @@ func newPrimaryIdBaseFromString(s string) (PrimaryIdBase, error) {
 		LiteralBase: LiteralBase[string]{v: id.String()},
 	}, nil
 }
+
+func (p PrimaryIdBase) Bytes() ([]byte, error) {
+	// uuid.Parse() は 16 バイトの配列を返す
+	u, err := uuid.Parse(p.v)
+	if err != nil {
+		return nil, err
+	}
+	// これを []byte に変換
+	return u[:], nil
+}
