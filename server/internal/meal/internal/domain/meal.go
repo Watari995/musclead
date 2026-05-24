@@ -17,9 +17,9 @@ type Meal struct {
 	eatenAt       time.Time
 	mealType      valueobject.String20
 	calories      valueobject.NonNegativeInt
-	proteinG      valueobject.NonNegativeInt
-	fatG          valueobject.NonNegativeInt
-	carbohydrateG valueobject.NonNegativeInt
+	proteinG      valueobject.NonNegativeDecimal
+	fatG          valueobject.NonNegativeDecimal
+	carbohydrateG valueobject.NonNegativeDecimal
 	memo          *valueobject.String1000
 	createdAt     time.Time
 	updatedAt     time.Time
@@ -47,15 +47,15 @@ func (m *Meal) Calories() valueobject.NonNegativeInt {
 	return m.calories
 }
 
-func (m *Meal) ProteinG() valueobject.NonNegativeInt {
+func (m *Meal) ProteinG() valueobject.NonNegativeDecimal {
 	return m.proteinG
 }
 
-func (m *Meal) FatG() valueobject.NonNegativeInt {
+func (m *Meal) FatG() valueobject.NonNegativeDecimal {
 	return m.fatG
 }
 
-func (m *Meal) CarbohydrateG() valueobject.NonNegativeInt {
+func (m *Meal) CarbohydrateG() valueobject.NonNegativeDecimal {
 	return m.carbohydrateG
 }
 
@@ -80,7 +80,17 @@ func (m *Meal) ReplacePhotos(photos []PhotoData) {
 	m.updatedAt = time.Now()
 }
 
-func CreateMeal(userId valueobject.UserID, eatenAt time.Time, mealType valueobject.String20, calories valueobject.NonNegativeInt, proteinG valueobject.NonNegativeInt, fatG valueobject.NonNegativeInt, carbohydrateG valueobject.NonNegativeInt, memo *valueobject.String1000, photos []PhotoData) *Meal {
+func CreateMeal(
+	userId valueobject.UserID,
+	eatenAt time.Time,
+	mealType valueobject.String20,
+	calories valueobject.NonNegativeInt,
+	proteinG valueobject.NonNegativeDecimal,
+	fatG valueobject.NonNegativeDecimal,
+	carbohydrateG valueobject.NonNegativeDecimal,
+	memo *valueobject.String1000,
+	photos []PhotoData,
+) *Meal {
 	now := time.Now()
 	return &Meal{
 		id:            valueobject.NewPrimaryId[valueobject.MealID](),
@@ -98,7 +108,20 @@ func CreateMeal(userId valueobject.UserID, eatenAt time.Time, mealType valueobje
 	}
 }
 
-func NewMeal(id valueobject.MealID, userId valueobject.UserID, eatenAt time.Time, mealType valueobject.String20, calories valueobject.NonNegativeInt, proteinG valueobject.NonNegativeInt, fatG valueobject.NonNegativeInt, carbohydrateG valueobject.NonNegativeInt, memo *valueobject.String1000, createdAt time.Time, updatedAt time.Time, photos []PhotoData) *Meal {
+func NewMeal(
+	id valueobject.MealID,
+	userId valueobject.UserID,
+	eatenAt time.Time,
+	mealType valueobject.String20,
+	calories valueobject.NonNegativeInt,
+	proteinG valueobject.NonNegativeDecimal,
+	fatG valueobject.NonNegativeDecimal,
+	carbohydrateG valueobject.NonNegativeDecimal,
+	memo *valueobject.String1000,
+	createdAt time.Time,
+	updatedAt time.Time,
+	photos []PhotoData,
+) *Meal {
 	return &Meal{
 		id:            id,
 		userId:        userId,
