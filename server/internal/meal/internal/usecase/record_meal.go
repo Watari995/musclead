@@ -14,9 +14,9 @@ type RecordMealInput struct {
 	EatenAt       time.Time
 	MealType      valueobject.String20
 	Calories      valueobject.NonNegativeInt
-	ProteinG      valueobject.NonNegativeInt
-	FatG          valueobject.NonNegativeInt
-	CarbohydrateG valueobject.NonNegativeInt
+	ProteinG      *valueobject.NonNegativeDecimal
+	FatG          *valueobject.NonNegativeDecimal
+	CarbohydrateG *valueobject.NonNegativeDecimal
 	Memo          *valueobject.String1000
 	PhotoData     []mealdomain.PhotoData
 }

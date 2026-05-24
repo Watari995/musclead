@@ -17,9 +17,9 @@ type Meal struct {
 	eatenAt       time.Time
 	mealType      valueobject.String20
 	calories      valueobject.NonNegativeInt
-	proteinG      valueobject.NonNegativeDecimal
-	fatG          valueobject.NonNegativeDecimal
-	carbohydrateG valueobject.NonNegativeDecimal
+	proteinG      *valueobject.NonNegativeDecimal
+	fatG          *valueobject.NonNegativeDecimal
+	carbohydrateG *valueobject.NonNegativeDecimal
 	memo          *valueobject.String1000
 	createdAt     time.Time
 	updatedAt     time.Time
@@ -47,15 +47,15 @@ func (m *Meal) Calories() valueobject.NonNegativeInt {
 	return m.calories
 }
 
-func (m *Meal) ProteinG() valueobject.NonNegativeDecimal {
+func (m *Meal) ProteinG() *valueobject.NonNegativeDecimal {
 	return m.proteinG
 }
 
-func (m *Meal) FatG() valueobject.NonNegativeDecimal {
+func (m *Meal) FatG() *valueobject.NonNegativeDecimal {
 	return m.fatG
 }
 
-func (m *Meal) CarbohydrateG() valueobject.NonNegativeDecimal {
+func (m *Meal) CarbohydrateG() *valueobject.NonNegativeDecimal {
 	return m.carbohydrateG
 }
 
@@ -85,9 +85,9 @@ func CreateMeal(
 	eatenAt time.Time,
 	mealType valueobject.String20,
 	calories valueobject.NonNegativeInt,
-	proteinG valueobject.NonNegativeDecimal,
-	fatG valueobject.NonNegativeDecimal,
-	carbohydrateG valueobject.NonNegativeDecimal,
+	proteinG *valueobject.NonNegativeDecimal,
+	fatG *valueobject.NonNegativeDecimal,
+	carbohydrateG *valueobject.NonNegativeDecimal,
 	memo *valueobject.String1000,
 	photos []PhotoData,
 ) *Meal {
@@ -114,9 +114,9 @@ func NewMeal(
 	eatenAt time.Time,
 	mealType valueobject.String20,
 	calories valueobject.NonNegativeInt,
-	proteinG valueobject.NonNegativeDecimal,
-	fatG valueobject.NonNegativeDecimal,
-	carbohydrateG valueobject.NonNegativeDecimal,
+	proteinG *valueobject.NonNegativeDecimal,
+	fatG *valueobject.NonNegativeDecimal,
+	carbohydrateG *valueobject.NonNegativeDecimal,
 	memo *valueobject.String1000,
 	createdAt time.Time,
 	updatedAt time.Time,
