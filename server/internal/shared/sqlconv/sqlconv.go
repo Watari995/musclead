@@ -52,6 +52,13 @@ func DecimalToNullString(d decimal.Decimal) sql.NullString {
 	}
 }
 
+func StringToNullString(s string) sql.NullString {
+	return sql.NullString{
+		String: s,
+		Valid:  true,
+	}
+}
+
 func NewNonNegativeDecimalFromNullString(s sql.NullString) (*valueobject.NonNegativeDecimal, error) {
 	d, err := DecimalFromNullString(s)
 	if err != nil {

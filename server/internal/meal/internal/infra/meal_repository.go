@@ -2,18 +2,23 @@ package mealinfra
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"math"
+	"time"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	mealdbgen "github.com/Watari995/musclead/internal/meal/internal/infra/dbgen"
 	"github.com/Watari995/musclead/internal/pagination"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/samber/lo"
 )
 
 type mealRepository struct {
-	db *mealdbgen.Queries
+	db      *sql.DB
+	queries *mealdbgen.Queries
 }
 
 func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context, userId valueobject.UserID, limit int, offset int) ([]*mealdomain.Meal, pagination.OffsetPaginator, error) {
@@ -21,7 +26,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
 	}
-	meals, err := r.db.FindAllMealsByUserIDWithOffsetPagination(ctx, mealdbgen.FindAllMealsByUserIDWithOffsetPaginationParams{
+	meals, err := r.queries.FindAllMealsByUserIDWithOffsetPagination(ctx, mealdbgen.FindAllMealsByUserIDWithOffsetPaginationParams{
 		UserID: bytes,
 		Limit:  int32(limit),
 		Offset: int32(offset),
@@ -29,7 +34,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
 	}
-	total, err := r.db.CountMealsByUserID(ctx, bytes)
+	total, err := r.queries.CountMealsByUserID(ctx, bytes)
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
 	}
@@ -44,7 +49,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 		return []*mealdomain.Meal{}, paginator, nil
 	}
 
-	photos, err := r.db.FindMealPhotosByMealIDs(ctx, lo.Map(meals, func(meal mealdbgen.Meal, _ int) []byte {
+	photos, err := r.queries.FindMealPhotosByMealIDs(ctx, lo.Map(meals, func(meal mealdbgen.Meal, _ int) []byte {
 		return meal.ID
 	}))
 	if err != nil {
@@ -65,6 +70,70 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 	}
 
 	return result, paginator, nil
+}
+
+func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*mealdomain.Meal, error) {
+	bytes, err := id.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	meal, err := r.queries.FindMealByID(ctx, bytes)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	photos, err := r.queries.FindMealPhotosByMealID(ctx, bytes)
+	if err != nil {
+		return nil, err
+	}
+	return toMeal(meal, photos)
+}
+
+func (r *mealRepository) Save(ctx context.Context, meal *mealdomain.Meal) error {
+	bytes, err := meal.ID().Bytes()
+	if err != nil {
+		return err
+	}
+	params, err := toUpsertMealParams(meal)
+	if err != nil {
+		return err
+	}
+	return dbtx.RunInTx(ctx, r.db, func(tx *sql.Tx) error {
+		q := r.queries.WithTx(tx)
+		if err := q.UpsertMeal(ctx, params); err != nil {
+			return err
+		}
+		if err := q.DeleteMealPhotosByMealID(ctx, bytes); err != nil {
+			return err
+		}
+		for _, photo := range meal.Photos() {
+			mealPhotoId := valueobject.NewPrimaryId[valueobject.MealPhotoID]()
+			mealPhotoIdBytes, err := mealPhotoId.Bytes()
+			if err != nil {
+				return err
+			}
+			if err := q.CreateMealPhoto(ctx, mealdbgen.CreateMealPhotoParams{
+				ID:           mealPhotoIdBytes,
+				MealID:       bytes,
+				ImagePath:    photo.ImagePath,
+				DisplayOrder: int32(photo.DisplayOrder),
+				CreatedAt:    time.Now(),
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (r *mealRepository) DeleteByID(ctx context.Context, id valueobject.MealID) error {
+	bytes, err := id.Bytes()
+	if err != nil {
+		return err
+	}
+	return r.queries.DeleteMealByID(ctx, bytes)
 }
 
 func toPhotoData(photos []mealdbgen.MealPhoto) []mealdomain.PhotoData {
@@ -122,4 +191,48 @@ func toMeal(mealRow mealdbgen.Meal, photos []mealdbgen.MealPhoto) (*mealdomain.M
 		}
 	}
 	return mealdomain.NewMeal(*mealId, *userId, eatenAt, *mealType, *calories, proteinG, fatG, carbohydrateG, memoVO, mealRow.CreatedAt, mealRow.UpdatedAt, toPhotoData(photos)), nil
+}
+
+func toUpsertMealParams(meal *mealdomain.Meal) (mealdbgen.UpsertMealParams, error) {
+	bytes, err := meal.ID().Bytes()
+	if err != nil {
+		return mealdbgen.UpsertMealParams{}, err
+	}
+	userIdBytes, err := meal.UserID().Bytes()
+	if err != nil {
+		return mealdbgen.UpsertMealParams{}, err
+	}
+	var proteinG sql.NullString
+	if meal.ProteinG() != nil {
+		proteinG = sqlconv.DecimalToNullString(meal.ProteinG().Value())
+	}
+	var fatG sql.NullString
+	if meal.FatG() != nil {
+		fatG = sqlconv.DecimalToNullString(meal.FatG().Value())
+	}
+	var carbohydrateG sql.NullString
+	if meal.CarbohydrateG() != nil {
+		carbohydrateG = sqlconv.DecimalToNullString(meal.CarbohydrateG().Value())
+	}
+	var memo sql.NullString
+	if meal.Memo() != nil {
+		memo = sqlconv.StringToNullString(meal.Memo().Value())
+	}
+	return mealdbgen.UpsertMealParams{
+		ID:            bytes,
+		UserID:        userIdBytes,
+		EatenAt:       meal.EatenAt(),
+		MealType:      meal.MealType().Value(),
+		Calories:      int32(meal.Calories().Value()),
+		ProteinG:      proteinG,
+		FatG:          fatG,
+		CarbohydrateG: carbohydrateG,
+		Memo:          memo,
+		CreatedAt:     meal.CreatedAt(),
+		UpdatedAt:     meal.UpdatedAt(),
+	}, nil
+}
+
+func NewMealRepository(db *sql.DB) mealdomain.MealRepository {
+	return &mealRepository{db: db, queries: mealdbgen.New(db)}
 }
