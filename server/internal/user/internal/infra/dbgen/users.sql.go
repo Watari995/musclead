@@ -38,3 +38,74 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	)
 	return err
 }
+
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at
+FROM users
+WHERE email = ? AND deleted_at IS NULL
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, findUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Birthday,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const findUserByID = `-- name: FindUserByID :one
+SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at
+FROM users
+WHERE id = ? AND deleted_at IS NULL
+`
+
+func (q *Queries) FindUserByID(ctx context.Context, id []byte) (User, error) {
+	row := q.db.QueryRowContext(ctx, findUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Birthday,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users SET name = ?, email = ?, password_hash = ?, birthday = ?, deleted_at = ?, updated_at = ? WHERE id = ? AND deleted_at IS NULL
+`
+
+type UpdateUserParams struct {
+	Name         string
+	Email        string
+	PasswordHash string
+	Birthday     sql.NullTime
+	DeletedAt    sql.NullTime
+	UpdatedAt    time.Time
+	ID           []byte
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser,
+		arg.Name,
+		arg.Email,
+		arg.PasswordHash,
+		arg.Birthday,
+		arg.DeletedAt,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
+}
