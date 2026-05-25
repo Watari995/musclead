@@ -1,0 +1,28 @@
+package mealinfra
+
+import (
+	"database/sql"
+	"time"
+)
+
+type mealModel struct {
+	ID            []byte         `db:"id"`
+	UserID        []byte         `db:"user_id"`
+	EatenAt       time.Time      `db:"eaten_at"`
+	MealType      string         `db:"meal_type"`
+	Calories      int32          `db:"calories"`
+	ProteinG      sql.NullString `db:"protein_g"`
+	FatG          sql.NullString `db:"fat_g"`
+	CarbohydrateG sql.NullString `db:"carbohydrate_g"`
+	Memo          sql.NullString `db:"memo"`
+	CreatedAt     time.Time      `db:"created_at"`
+	UpdatedAt     time.Time      `db:"updated_at"`
+}
+
+type mealPhotoModel struct {
+	ID           []byte    `db:"id"`
+	MealID       []byte    `db:"meal_id"`
+	ImagePath    string    `db:"image_path"`
+	DisplayOrder int32     `db:"display_order"`
+	CreatedAt    time.Time `db:"created_at"`
+}

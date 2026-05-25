@@ -7,51 +7,80 @@ import (
 
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
-	userdbgen "github.com/Watari995/musclead/internal/user/internal/infra/dbgen"
 	"github.com/Watari995/musclead/internal/valueobject"
+	"github.com/go-gorp/gorp/v3"
 )
 
 type userRepository struct {
-	db *userdbgen.Queries
+	dbmap *gorp.DbMap
 }
+
+const upsertUserSQL = `
+INSERT INTO users (id, name, email, password_hash, birthday, deleted_at, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    email = VALUES(email),
+    password_hash = VALUES(password_hash),
+    birthday = VALUES(birthday),
+    deleted_at = VALUES(deleted_at),
+    updated_at = VALUES(updated_at)
+`
 
 func (r *userRepository) FindByID(ctx context.Context, id valueobject.UserID) (*userdomain.User, error) {
 	bytes, err := id.Bytes()
 	if err != nil {
 		return nil, err
 	}
-	userRow, err := r.db.FindUserByID(ctx, bytes)
+	var row userModel
+	err = r.dbmap.WithContext(ctx).SelectOne(&row,
+		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE id = ? AND deleted_at IS NULL",
+		bytes,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return toUser(userRow)
+	return toUser(row)
 }
 
 func (r *userRepository) FindByEmail(ctx context.Context, email valueobject.Email) (*userdomain.User, error) {
-	userRow, err := r.db.FindUserByEmail(ctx, email.Value())
+	var row userModel
+	err := r.dbmap.WithContext(ctx).SelectOne(&row,
+		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE email = ? AND deleted_at IS NULL",
+		email.Value(),
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return toUser(userRow)
+	return toUser(row)
 }
 
 func (r *userRepository) Save(ctx context.Context, user *userdomain.User) error {
-	params, err := toUpsertUserParams(user)
+	bytes, err := user.ID().Bytes()
 	if err != nil {
 		return err
 	}
-	return r.db.UpsertUser(ctx, params)
+	_, err = r.dbmap.WithContext(ctx).Exec(upsertUserSQL,
+		bytes,
+		user.Name().Value(),
+		user.Email().Value(),
+		user.PasswordHash().Value(),
+		sqlconv.ToNullTime(user.Birthday()),
+		sqlconv.ToNullTime(user.DeletedAt()),
+		user.CreatedAt(),
+		user.UpdatedAt(),
+	)
+	return err
 }
 
-// toUser is a helper function to convert a userdbgen.User to a userdomain.User
-func toUser(userRow userdbgen.User) (*userdomain.User, error) {
-	userIdString, err := sqlconv.UUIDStringFromBytes(userRow.ID)
+func toUser(row userModel) (*userdomain.User, error) {
+	userIdString, err := sqlconv.UUIDStringFromBytes(row.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -59,39 +88,27 @@ func toUser(userRow userdbgen.User) (*userdomain.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	name, err := valueobject.NewString50(userRow.Name)
+	name, err := valueobject.NewString50(row.Name)
 	if err != nil {
 		return nil, err
 	}
-	email, err := valueobject.NewEmail(userRow.Email)
+	email, err := valueobject.NewEmail(row.Email)
 	if err != nil {
 		return nil, err
 	}
-	passwordHash, err := valueobject.NewHashedPassword(userRow.PasswordHash)
+	passwordHash, err := valueobject.NewHashedPassword(row.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
-	birthday := sqlconv.FromNullTime(userRow.Birthday)
-	return userdomain.NewUser(*userId, *name, *email, *passwordHash, birthday, userRow.CreatedAt, userRow.UpdatedAt), nil
+	birthday := sqlconv.FromNullTime(row.Birthday)
+	return userdomain.NewUser(*userId, *name, *email, *passwordHash, birthday, row.CreatedAt, row.UpdatedAt), nil
 }
 
-func toUpsertUserParams(user *userdomain.User) (userdbgen.UpsertUserParams, error) {
-	bytes, err := user.ID().Bytes()
-	if err != nil {
-		return userdbgen.UpsertUserParams{}, err
+func NewUserRepository(db *sql.DB) userdomain.UserRepository {
+	dbmap := &gorp.DbMap{
+		Db:      db,
+		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
 	}
-	return userdbgen.UpsertUserParams{
-		ID:           bytes,
-		Name:         user.Name().Value(),
-		Email:        user.Email().Value(),
-		PasswordHash: user.PasswordHash().Value(),
-		Birthday:     sqlconv.ToNullTime(user.Birthday()),
-		DeletedAt:    sqlconv.ToNullTime(user.DeletedAt()),
-		CreatedAt:    user.CreatedAt(),
-		UpdatedAt:    user.UpdatedAt(),
-	}, nil
-}
-
-func NewUserRepository(db *userdbgen.Queries) userdomain.UserRepository {
-	return &userRepository{db: db}
+	dbmap.AddTableWithName(userModel{}, "users").SetKeys(false, "ID")
+	return &userRepository{dbmap: dbmap}
 }
