@@ -43,6 +43,7 @@ terraform/**/terraform.tfvars
 # Generated
 proto/gen/
 server/internal/**/gen/
+server/docs/
 
 # Logs
 *.log

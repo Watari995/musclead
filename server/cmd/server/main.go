@@ -1,0 +1,146 @@
+// Package main is the entry point of the musclead API server.
+//
+//	@title			musclead API
+//	@version		0.1.0
+//	@description	musclead (筋トレ・食事・体重 一元管理 SaaS) のバックエンド API。
+//	@host			localhost:8080
+//	@BasePath		/
+package main
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/Watari995/musclead/internal/meal"
+	_ "github.com/Watari995/musclead/internal/shared"
+	"github.com/Watari995/musclead/internal/user"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	slog.SetDefault(logger)
+
+	if err := run(); err != nil {
+		slog.Error("server terminated with error", "error", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	_ = godotenv.Load("../.env", ".env")
+
+	addr := getenv("ADDR", ":8080")
+
+	db, err := openDB()
+	if err != nil {
+		return fmt.Errorf("open db: %w", err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		return fmt.Errorf("ping db: %w", err)
+	}
+
+	mux := newMux(db)
+
+	server := &http.Server{
+		Addr:              addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	errCh := make(chan error, 1)
+	go func() {
+		slog.Info("server starting", "addr", addr)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- err
+		}
+		close(errCh)
+	}()
+
+	select {
+	case <-ctx.Done():
+		slog.Info("shutdown signal received")
+	case err := <-errCh:
+		return fmt.Errorf("listen: %w", err)
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("shutdown: %w", err)
+	}
+	slog.Info("server stopped gracefully")
+	return nil
+}
+
+func openDB() (*sql.DB, error) {
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&multiStatements=true&loc=UTC",
+		getenv("DB_USER", "musclead"),
+		getenv("DB_PASSWORD", "musclead"),
+		getenv("DB_HOST", "127.0.0.1"),
+		getenv("DB_PORT", "3306"),
+		getenv("DB_NAME", "musclead"),
+	)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+	return db, nil
+}
+
+// newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
+// 各モジュールは自身の Handler を Module.Handler として公開する。
+func newMux(db *sql.DB) *http.ServeMux {
+	mux := http.NewServeMux()
+
+	// ヘルスチェック
+	mux.HandleFunc("GET /health", healthHandler)
+
+	// 各モジュールを組み立て、 そのハンドラをマウント
+	userModule := user.NewModule(db)
+	mealModule := meal.NewModule(db)
+	mux.Handle("/users", userModule.Handler)
+	mux.Handle("/users/", userModule.Handler)
+	mux.Handle("/meals", mealModule.Handler)
+	mux.Handle("/meals/", mealModule.Handler)
+
+	return mux
+}
+
+// healthHandler はサーバー稼働確認用のシンプルなヘルスチェック。
+//
+//	@Summary	ヘルスチェック
+//	@Tags		health
+//	@Produce	json
+//	@Success	200	{object}	map[string]string
+//	@Router		/health [get]
+func healthHandler(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status":"ok"}`))
+}
+
+func getenv(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
