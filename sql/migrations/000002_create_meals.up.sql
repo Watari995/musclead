@@ -1,4 +1,3 @@
--- +goose Up
 CREATE TABLE meals (
   id              BINARY(16)    NOT NULL,
   user_id         BINARY(16)    NOT NULL,
@@ -19,6 +18,3 @@ CREATE TABLE meals (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_0900_ai_ci;
-
--- +goose Down
-DROP TABLE meals;

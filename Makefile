@@ -1,7 +1,7 @@
 include .env
 export
 
-.PHONY: db-up db-down db-logs db-shell migrate-up migrate-down migrate-status migrate-create
+.PHONY: db-up db-down db-reset db-logs db-shell migrate-up migrate-down migrate-status migrate-create migrate-force
 
 db-up: ## MySQL コンテナ起動
 	docker compose up -d mysql
@@ -22,13 +22,16 @@ db-shell: ## MySQL CLI に接続
 	docker exec -it musclead-mysql mysql -u$(DB_USER) -p$(DB_PASSWORD) $(DB_NAME)
 
 migrate-up: ## 全 migration を適用
-	goose -dir $(GOOSE_MIGRATION_DIR) up
+	migrate -path $(MIGRATION_DIR) -database "$(DB_URL)" up
 
 migrate-down: ## 1つロールバック
-	goose -dir $(GOOSE_MIGRATION_DIR) down
+	migrate -path $(MIGRATION_DIR) -database "$(DB_URL)" down 1
 
-migrate-status:
-	goose -dir $(GOOSE_MIGRATION_DIR) status
+migrate-status: ## 現在の version を表示
+	migrate -path $(MIGRATION_DIR) -database "$(DB_URL)" version
 
 migrate-create: ## name=xxx で新規 migration を作成
-	goose -dir $(GOOSE_MIGRATION_DIR) create $(name) sql
+	migrate create -ext sql -dir $(MIGRATION_DIR) -seq $(name)
+
+migrate-force: ## version=N で強制的に version を設定(dirty 状態の復旧用)
+	migrate -path $(MIGRATION_DIR) -database "$(DB_URL)" force $(version)
