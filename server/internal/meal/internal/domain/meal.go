@@ -80,6 +80,31 @@ func (m *Meal) ReplacePhotos(photos []PhotoData) {
 	m.updatedAt = time.Now()
 }
 
+type UpdateMealParams struct {
+	EatenAt       time.Time
+	MealType      valueobject.String20
+	Calories      valueobject.NonNegativeInt
+	ProteinG      *valueobject.NonNegativeDecimal
+	FatG          *valueobject.NonNegativeDecimal
+	CarbohydrateG *valueobject.NonNegativeDecimal
+	Memo          *valueobject.String1000
+	Photos        []PhotoData
+}
+
+func (m *Meal) Update(
+	params UpdateMealParams,
+) {
+	m.eatenAt = params.EatenAt
+	m.mealType = params.MealType
+	m.calories = params.Calories
+	m.proteinG = params.ProteinG
+	m.fatG = params.FatG
+	m.carbohydrateG = params.CarbohydrateG
+	m.memo = params.Memo
+	m.photos = params.Photos
+	m.updatedAt = time.Now()
+}
+
 func CreateMeal(
 	userId valueobject.UserID,
 	eatenAt time.Time,
