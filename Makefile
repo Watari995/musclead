@@ -49,8 +49,14 @@ migrate-force: ## version=N で強制的に version を設定(dirty 状態の復
 
 # ---- Go (build / run / test) ----
 
-run: ## サーバー起動
+run: ## サーバー起動(本番風、 リロードなし)
 	cd server && go run ./cmd/server
+
+dev: ## サーバー起動(air でホットリロード、 開発用)
+	cd server && $(shell go env GOPATH)/bin/air
+
+air-install: ## air をインストール
+	GOBIN=$(shell go env GOPATH)/bin go install github.com/air-verse/air@latest
 
 build: ## サーバービルド
 	cd server && go build -o ../bin/server ./cmd/server

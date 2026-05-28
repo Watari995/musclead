@@ -7,6 +7,7 @@ import (
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	userdto "github.com/Watari995/musclead/internal/user/dto"
 	userusecase "github.com/Watari995/musclead/internal/user/internal/usecase"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -90,7 +91,35 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 // Find
-func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {}
+func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
+	// path parameterからuserIDを取得
+	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid userID"))
+		return
+	}
+	params := userusecase.FindUserInput{
+		UserID: *userID,
+	}
+	output, err := h.find.Execute(r.Context(), params)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	resp := userdto.NewUserDTO(output.UserID, output.Name, output.Email, output.Birthday, output.CreatedAt, output.UpdatedAt)
+	httpx.WriteJSON(w, http.StatusOK, resp)
+}
 
 // Delete
-func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {}
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid userID"))
+		return
+	}
+	if err := h.delete.Execute(r.Context(), userusecase.DeleteUserInput{UserID: *userID}); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteNoContent(w)
+}
