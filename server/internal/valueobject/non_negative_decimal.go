@@ -33,3 +33,15 @@ func NewNonNegativeDecimal(v decimal.Decimal) (*NonNegativeDecimal, error) {
 	}
 	return &n, nil
 }
+
+// parse optional non negative decimal for handler parse to vo
+func ParseOptionalNonNegativeDecimal(f *float64) (*NonNegativeDecimal, error) {
+	if f == nil {
+		return nil, nil
+	}
+	d, err := NewNonNegativeDecimal(decimal.NewFromFloat(*f))
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
+}

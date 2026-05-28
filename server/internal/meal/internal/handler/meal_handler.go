@@ -11,7 +11,6 @@ import (
 	"github.com/Watari995/musclead/internal/shared/httpx"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/samber/lo"
-	"github.com/shopspring/decimal"
 )
 
 type MealHandler struct {
@@ -88,29 +87,20 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid calories"))
 		return
 	}
-	var proteinG *valueobject.NonNegativeDecimal
-	if req.ProteinG != nil {
-		proteinG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.ProteinG))
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid protein g"))
-			return
-		}
+	proteinG, err := valueobject.ParseOptionalNonNegativeDecimal(req.ProteinG)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid protein g"))
+		return
 	}
-	var fatG *valueobject.NonNegativeDecimal
-	if req.FatG != nil {
-		fatG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.FatG))
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid fat g"))
-			return
-		}
+	fatG, err := valueobject.ParseOptionalNonNegativeDecimal(req.FatG)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid fat g"))
+		return
 	}
-	var carbohydrateG *valueobject.NonNegativeDecimal
-	if req.CarbohydrateG != nil {
-		carbohydrateG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.CarbohydrateG))
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid carbohydrate g"))
-			return
-		}
+	carbohydrateG, err := valueobject.ParseOptionalNonNegativeDecimal(req.CarbohydrateG)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid carbohydrate g"))
+		return
 	}
 	var memo *valueobject.String1000
 	if req.Memo != nil {
@@ -220,29 +210,20 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid calories"))
 		return
 	}
-	var proteinG *valueobject.NonNegativeDecimal
-	if req.ProteinG != nil {
-		proteinG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.ProteinG))
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid protein g"))
-			return
-		}
+	proteinG, err := valueobject.ParseOptionalNonNegativeDecimal(req.ProteinG)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid protein g"))
+		return
 	}
-	var fatG *valueobject.NonNegativeDecimal
-	if req.FatG != nil {
-		fatG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.FatG))
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid fat g"))
-			return
-		}
+	fatG, err := valueobject.ParseOptionalNonNegativeDecimal(req.FatG)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid fat g"))
+		return
 	}
-	var carbohydrateG *valueobject.NonNegativeDecimal
-	if req.CarbohydrateG != nil {
-		carbohydrateG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.CarbohydrateG))
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid carbohydrate g"))
-			return
-		}
+	carbohydrateG, err := valueobject.ParseOptionalNonNegativeDecimal(req.CarbohydrateG)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid carbohydrate g"))
+		return
 	}
 	var memo *valueobject.String1000
 	if req.Memo != nil {
@@ -306,4 +287,10 @@ func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteNoContent(w)
 }
 
-func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {}
+func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+	}
+	
+}
