@@ -3,7 +3,12 @@ package userhandler
 import (
 	"net/http"
 
+	"time"
+
+	"github.com/Watari995/musclead/internal/myerror"
+	"github.com/Watari995/musclead/internal/shared/httpx"
 	userusecase "github.com/Watari995/musclead/internal/user/internal/usecase"
+	"github.com/Watari995/musclead/internal/valueobject"
 )
 
 type UserHandler struct {
@@ -26,9 +31,62 @@ func New(register *userusecase.RegisterUser, find *userusecase.FindUser, delete 
 	return mux
 }
 
+type RegisterRequest struct {
+	Name     string  `json:"name"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Birthday *string `json:"birthday,omitempty"`
+}
+
+type RegisterResponse struct {
+	UserID string `json:"user_id"`
+}
+
 // Register
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	
+	var req RegisterRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+
+	name, err := valueobject.NewString50(req.Name)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid name"))
+		return
+	}
+	email, err := valueobject.NewEmail(req.Email)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid email"))
+		return
+	}
+	var birthday *time.Time
+	if req.Birthday != nil {
+		t, err := time.Parse("2006-01-02", *req.Birthday)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid birthday"))
+			return
+		}
+		birthday = &t
+	}
+
+	params := userusecase.RegisterUserInput{
+		Name:     *name,
+		Email:    *email,
+		Birthday: birthday,
+		Password: req.Password,
+	}
+
+	output, err := h.register.Execute(r.Context(), params)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	resp := RegisterResponse{
+		UserID: output.UserID.Value(),
+	}
+	httpx.WriteJSON(w, http.StatusCreated, resp)
 }
 
 // Find

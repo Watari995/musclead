@@ -26,8 +26,6 @@ func New(
 	h.mux.HandleFunc("GET /meals/{id}", notImplemented("find meal"))
 	h.mux.HandleFunc("POST /meals", notImplemented("create meal"))
 	h.mux.HandleFunc("PUT /meals/{id}", notImplemented("update meal"))
-	h.mux.HandleFunc("DELETE /meals/{id}", notImplemented("delete meal"))
-
 	_ = listMeals
 	_ = deleteMealByID
 
