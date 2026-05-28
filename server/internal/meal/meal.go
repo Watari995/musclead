@@ -23,10 +23,10 @@ func NewModule(db *sql.DB, cdnBaseURL string) *Module {
 	record := mealusecase.NewRecordMeal(repo)
 	find := mealusecase.NewFindMealByID(repo)
 	update := mealusecase.NewUpdateMeal(repo)
-	deleteMeal := mealusecase.NewDeleteMealByID(repo)
+	delete := mealusecase.NewDeleteMealByID(repo)
 	list := mealusecase.NewListMeals(repo)
 
 	return &Module{
-		Handler: mealhandler.New(record, find, update, deleteMeal, list, cdnBaseURL),
+		Handler: mealhandler.New(record, find, update, delete, list, cdnBaseURL),
 	}
 }

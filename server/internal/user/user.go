@@ -14,7 +14,8 @@ import (
 // Module は user モジュールの公開 API。
 // HTTP ハンドラだけを外に出すことで、 内部の usecase / repository を隠蔽する。
 type Module struct {
-	Handler http.Handler
+	PublicHandler http.Handler
+	Handler       http.Handler
 }
 
 func NewModule(db *sql.DB) *Module {
@@ -26,6 +27,7 @@ func NewModule(db *sql.DB) *Module {
 	deleteUser := userusecase.NewDeleteUser(repo)
 
 	return &Module{
-		Handler: userhandler.New(register, find, deleteUser),
+		PublicHandler: userhandler.NewPublic(register),
+		Handler:       userhandler.NewAuthenticated(find, deleteUser),
 	}
 }

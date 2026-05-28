@@ -18,15 +18,22 @@ type UserHandler struct {
 	delete   *userusecase.DeleteUser
 }
 
-func New(register *userusecase.RegisterUser, find *userusecase.FindUser, delete *userusecase.DeleteUser) http.Handler {
-	// ServeHTTP interfaceを満たしている必要がある
+func NewPublic(register *userusecase.RegisterUser) http.Handler {
 	h := &UserHandler{
 		register: register,
-		find:     find,
-		delete:   delete,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /users", h.Register)
+	return mux
+}
+
+func NewAuthenticated(find *userusecase.FindUser, delete *userusecase.DeleteUser) http.Handler {
+	// ServeHTTP interfaceを満たしている必要がある
+	h := &UserHandler{
+		find:   find,
+		delete: delete,
+	}
+	mux := http.NewServeMux()
 	mux.HandleFunc("GET /users/{id}", h.Find)
 	mux.HandleFunc("DELETE /users/{id}", h.Delete)
 	return mux

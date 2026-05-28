@@ -21,6 +21,7 @@ import (
 
 	"github.com/Watari995/musclead/internal/meal"
 	_ "github.com/Watari995/musclead/internal/shared"
+	"github.com/Watari995/musclead/internal/shared/httpx"
 	"github.com/Watari995/musclead/internal/user"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -118,10 +119,10 @@ func newMux(db *sql.DB) *http.ServeMux {
 	userModule := user.NewModule(db)
 	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
 	mealModule := meal.NewModule(db, cdnBaseURL)
-	mux.Handle("/users", userModule.Handler)
-	mux.Handle("/users/", userModule.Handler)
-	mux.Handle("/meals", mealModule.Handler)
-	mux.Handle("/meals/", mealModule.Handler)
+	mux.Handle("/users", userModule.PublicHandler)
+	mux.Handle("/users/", httpx.AuthMiddleware(userModule.Handler))
+	mux.Handle("/meals", httpx.AuthMiddleware(mealModule.Handler))
+	mux.Handle("/meals/", httpx.AuthMiddleware(mealModule.Handler))
 
 	return mux
 }
