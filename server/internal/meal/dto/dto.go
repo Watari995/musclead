@@ -1,0 +1,80 @@
+package mealdto
+
+import (
+	"time"
+
+	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
+	"github.com/Watari995/musclead/internal/shared/storage"
+	"github.com/samber/lo"
+)
+
+type PhotoDTO struct {
+	ImageURL     string `json:"image_url"`
+	DisplayOrder int    `json:"display_order"`
+}
+
+func NewPhotoDTO(p mealdomain.PhotoData, cdnBaseURL string) PhotoDTO {
+	return PhotoDTO{
+		ImageURL:     storage.BuildImageURL(cdnBaseURL, p.ImagePath),
+		DisplayOrder: p.DisplayOrder,
+	}
+}
+
+type MealDTO struct {
+	ID            string     `json:"id"`
+	UserID        string     `json:"user_id"`
+	EatenAt       time.Time  `json:"eaten_at"`
+	MealType      string     `json:"meal_type"`
+	Calories      int        `json:"calories"`
+	ProteinG      *string    `json:"protein_g,omitempty"`
+	FatG          *string    `json:"fat_g,omitempty"`
+	CarbohydrateG *string    `json:"carbohydrate_g,omitempty"`
+	Memo          *string    `json:"memo,omitempty"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	Photos        []PhotoDTO `json:"photos"`
+}
+
+func NewMealDTO(m *mealdomain.Meal, cdnBaseURL string) MealDTO {
+
+	// nullable な voをstringに変換する
+	var proteinGStr *string
+	if m.ProteinG() != nil {
+		s := m.ProteinG().Value().String()
+		proteinGStr = &s
+	}
+	var fatGStr *string
+	if m.FatG() != nil {
+		s := m.FatG().Value().String()
+		fatGStr = &s
+	}
+	var carbohydrateGStr *string
+	if m.CarbohydrateG() != nil {
+		s := m.CarbohydrateG().Value().String()
+		carbohydrateGStr = &s
+	}
+	var memoStr *string
+	if m.Memo() != nil {
+		s := m.Memo().Value()
+		memoStr = &s
+	}
+
+	photos := lo.Map(m.Photos(), func(p mealdomain.PhotoData, idx int) PhotoDTO {
+		return NewPhotoDTO(p, cdnBaseURL)
+	})
+
+	return MealDTO{
+		ID:            m.ID().Value(),
+		UserID:        m.UserID().Value(),
+		EatenAt:       m.EatenAt(),
+		MealType:      m.MealType().Value(),
+		Calories:      m.Calories().Value(),
+		ProteinG:      proteinGStr,
+		FatG:          fatGStr,
+		CarbohydrateG: carbohydrateGStr,
+		Memo:          memoStr,
+		CreatedAt:     m.CreatedAt(),
+		UpdatedAt:     m.UpdatedAt(),
+		Photos:        photos,
+	}
+}
