@@ -176,6 +176,24 @@ func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
+type UpdateMealRequest struct {
+	EatenAt       time.Time `json:"eaten_at"`
+	MealType      string    `json:"meal_type"`
+	Calories      int       `json:"calories"`
+	ProteinG      *float64  `json:"protein_g,omitempty"`
+	FatG          *float64  `json:"fat_g,omitempty"`
+	CarbohydrateG *float64  `json:"carbohydrate_g,omitempty"`
+	Memo          *string   `json:"memo,omitempty"`
+	Photos        []struct {
+		ImagePath    string `json:"image_path"`
+		DisplayOrder int    `json:"display_order"`
+	} `json:"photos"`
+}
+
+type UpdateMealResponse struct {
+	MealID string `json:"meal_id"`
+}
+
 func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -187,7 +205,83 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
 		return
 	}
-	input := 
+	var req UpdateMealRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	mealType, err := valueobject.NewString20(req.MealType)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid meal type"))
+		return
+	}
+	calories, err := valueobject.NewNonNegativeInt(req.Calories)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid calories"))
+		return
+	}
+	var proteinG *valueobject.NonNegativeDecimal
+	if req.ProteinG != nil {
+		proteinG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.ProteinG))
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid protein g"))
+			return
+		}
+	}
+	var fatG *valueobject.NonNegativeDecimal
+	if req.FatG != nil {
+		fatG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.FatG))
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid fat g"))
+			return
+		}
+	}
+	var carbohydrateG *valueobject.NonNegativeDecimal
+	if req.CarbohydrateG != nil {
+		carbohydrateG, err = valueobject.NewNonNegativeDecimal(decimal.NewFromFloat(*req.CarbohydrateG))
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid carbohydrate g"))
+			return
+		}
+	}
+	var memo *valueobject.String1000
+	if req.Memo != nil {
+		memo, err = valueobject.NewString1000(*req.Memo)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid memo"))
+			return
+		}
+	}
+	photos := lo.Map(req.Photos, func(p struct {
+		ImagePath    string `json:"image_path"`
+		DisplayOrder int    `json:"display_order"`
+	}, _ int) mealdomain.PhotoData {
+		return mealdomain.PhotoData{
+			ImagePath:    p.ImagePath,
+			DisplayOrder: p.DisplayOrder,
+		}
+	})
+	input := mealusecase.UpdateMealInput{
+		MealID:        *mealID,
+		UserID:        userID,
+		EatenAt:       req.EatenAt,
+		MealType:      *mealType,
+		Calories:      *calories,
+		ProteinG:      proteinG,
+		FatG:          fatG,
+		CarbohydrateG: carbohydrateG,
+		Memo:          memo,
+		Photos:        photos,
+	}
+	output, err := h.update.Execute(r.Context(), input)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	resp := UpdateMealResponse{
+		MealID: output.MealID.Value(),
+	}
+	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
 func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
