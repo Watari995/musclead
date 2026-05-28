@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	mealdto "github.com/Watari995/musclead/internal/meal/dto"
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
 	"github.com/Watari995/musclead/internal/myerror"
@@ -151,7 +152,64 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated, resp)
 }
 
-func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request)   {}
-func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {}
-func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {}
-func (h *MealHandler) List(w http.ResponseWriter, r *http.Request)   {}
+func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	mealID, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
+		return
+	}
+	input := mealusecase.FindMealByIDInput{
+		MealID: *mealID,
+		UserID: userID,
+	}
+	output, err := h.find.Execute(r.Context(), input)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	resp := mealdto.NewMealDTO(output.Meal, h.cdnBaseURL)
+	httpx.WriteJSON(w, http.StatusOK, resp)
+}
+
+func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	mealID, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
+		return
+	}
+	input := 
+}
+
+func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	mealID, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
+		return
+	}
+	input := mealusecase.DeleteMealByIDInput{
+		MealID: *mealID,
+		UserID: userID,
+	}
+	if err := h.delete.Execute(r.Context(), input); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteNoContent(w)
+}
+
+func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {}
