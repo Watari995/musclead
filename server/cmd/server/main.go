@@ -116,7 +116,8 @@ func newMux(db *sql.DB) *http.ServeMux {
 
 	// 各モジュールを組み立て、 そのハンドラをマウント
 	userModule := user.NewModule(db)
-	mealModule := meal.NewModule(db)
+	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
+	mealModule := meal.NewModule(db, cdnBaseURL)
 	mux.Handle("/users", userModule.Handler)
 	mux.Handle("/users/", userModule.Handler)
 	mux.Handle("/meals", mealModule.Handler)

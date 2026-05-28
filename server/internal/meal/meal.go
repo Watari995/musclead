@@ -17,13 +17,16 @@ type Module struct {
 	Handler http.Handler
 }
 
-func NewModule(db *sql.DB) *Module {
+func NewModule(db *sql.DB, cdnBaseURL string) *Module {
 	repo := mealinfra.NewMealRepository(db)
 
-	listMeals := mealusecase.NewListMeals(repo)
-	deleteMealByID := mealusecase.NewDeleteMealByID(repo)
+	record := mealusecase.NewRecordMeal(repo)
+	find := mealusecase.NewFindMealByID(repo)
+	update := mealusecase.NewUpdateMeal(repo)
+	deleteMeal := mealusecase.NewDeleteMealByID(repo)
+	list := mealusecase.NewListMeals(repo)
 
 	return &Module{
-		Handler: mealhandler.New(listMeals, deleteMealByID),
+		Handler: mealhandler.New(record, find, update, deleteMeal, list, cdnBaseURL),
 	}
 }
