@@ -8,6 +8,7 @@ import (
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
 	"github.com/Watari995/musclead/internal/myerror"
+	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/shared/httpx"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/samber/lo"
@@ -287,10 +288,32 @@ func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteNoContent(w)
 }
 
+type ListMealsResponse struct {
+	Meals      []mealdto.MealDTO       `json:"meals"`
+	Pagination shareddto.PaginationDTO `json:"pagination"`
+}
+
 func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
 		httpx.WriteError(w, err)
 	}
-	
+	limit, offset := httpx.ParseOffsetPagination(r)
+	input := mealusecase.ListMealsInput{
+		UserID: userID,
+		Limit:  limit,
+		Offset: offset,
+	}
+	output, err := h.list.Execute(r.Context(), input)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	response := ListMealsResponse{
+		Meals: lo.Map(output.Meals, func(m *mealdomain.Meal, _ int) mealdto.MealDTO {
+			return mealdto.NewMealDTO(m, h.cdnBaseURL)
+		}),
+		Pagination: shareddto.NewPaginationDTO(output.Pagination),
+	}
+	httpx.WriteJSON(w, http.StatusOK, response)
 }
