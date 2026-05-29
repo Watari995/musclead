@@ -50,7 +50,18 @@ type RegisterResponse struct {
 	UserID string `json:"user_id"`
 }
 
-// Register
+// Register godoc
+//
+// @Summary ユーザー登録
+// @Description 新規ユーザーを作成する(認証不要)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body RegisterRequest true "ユーザー登録情報"
+// @Success 201 {object} RegisterResponse "ユーザー登録成功"
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 409 {object} httpx.ErrorResponse
+// @Router /users [post]
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := httpx.DecodeJSON(r, &req); err != nil {
@@ -97,7 +108,16 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated, resp)
 }
 
-// Find
+// Find godoc
+//
+// @Summary ユーザー取得
+// @Tags users
+// @Produce json
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param id path string true "対象 UserID"
+// @Success 200 {object} userdto.UserDTO
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
 func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 	// path parameterからuserIDを取得
 	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
@@ -117,7 +137,16 @@ func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
-// Delete
+// Delete godoc
+//
+// @Summary ユーザー削除
+// @Tags users
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param id path string true "対象 UserID"
+// @Success 204
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /users/{id} [delete]
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
 	if err != nil {

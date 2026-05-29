@@ -66,6 +66,17 @@ type RecordMealResponse struct {
 	MealID string `json:"meal_id"`
 }
 
+// Record godoc
+//
+// @Summary 食事記録
+// @Tags meals
+// @Accept json
+// @Produce json
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param request body RecordMealRequest true "食事記録"
+// @Success 201 {object} RecordMealResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Router /meals [post]
 func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -143,6 +154,19 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated, resp)
 }
 
+// Find godoc
+//
+// @Summary 食事取得
+// @Tags meals
+// @Produce json
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param id path string true "対象 MealID"
+// @Success 200 {object} mealdto.MealDTO
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 403 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /meals/{id} [get]
 func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -185,6 +209,21 @@ type UpdateMealResponse struct {
 	MealID string `json:"meal_id"`
 }
 
+// Update godoc
+//
+// @Summary 食事更新
+// @Tags meals
+// @Accept json
+// @Produce json
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param id path string true "対象 MealID"
+// @Param request body UpdateMealRequest true "更新内容"
+// @Success 200 {object} UpdateMealResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 403 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /meals/{id} [put]
 func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -266,6 +305,18 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
+// Delete godoc
+//
+// @Summary 食事削除
+// @Tags meals
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param id path string true "対象 MealID"
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 403 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /meals/{id} [delete]
 func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -293,6 +344,17 @@ type ListMealsResponse struct {
 	Pagination shareddto.PaginationDTO `json:"pagination"`
 }
 
+// List godoc
+//
+// @Summary 食事一覧
+// @Tags meals
+// @Produce json
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Param limit query int false "1ページの件数 (default: 20, max: 100)"
+// @Param offset query int false "開始位置 (default: 0)"
+// @Success 200 {object} ListMealsResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /meals [get]
 func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
