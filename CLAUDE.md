@@ -21,6 +21,7 @@
 | [01-architecture.mdc](.cursor/rules/01-architecture.mdc) | DDD + Modular Monolith |
 | [02-value-object.mdc](.cursor/rules/02-value-object.mdc) | 値オブジェクト実装パターン |
 | [03-coding-style.mdc](.cursor/rules/03-coding-style.mdc) | コーディング規約 |
+| [10-web-design-system.mdc](.cursor/rules/10-web-design-system.mdc) | Web UI デザインシステム(snkrdunk テイスト)、 web/ 編集時必読 |
 
 ---
 

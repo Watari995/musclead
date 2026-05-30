@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiClient, type MealDTO, type RecordMealRequest } from "@/api/client";
 import { useUserId } from "@/lib/auth";
+import {
+  Button,
+  Card,
+  ErrorText,
+  Label,
+  SectionTitle,
+  TextInput,
+} from "@/components/ui";
 
 const MEALS_QUERY_KEY = ["meals"] as const;
 
@@ -31,30 +39,35 @@ export default function MealsPage() {
   if (!ready || !userId) return null;
 
   return (
-    <div className="space-y-6">
-      <RecordMealForm />
+    <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <section>
-        <h2 className="text-lg font-bold mb-3">食事一覧</h2>
-        {query.isLoading && <p className="text-sm text-slate-500">読み込み中…</p>}
-        {query.isError && (
-          <p className="text-sm text-red-600">{(query.error as Error).message}</p>
+        <SectionTitle>食事一覧</SectionTitle>
+        {query.isLoading && (
+          <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
         )}
+        {query.isError && <ErrorText>{(query.error as Error).message}</ErrorText>}
         {query.data && query.data.length === 0 && (
-          <p className="text-sm text-slate-500">まだ食事が記録されていません。</p>
+          <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
+            まだ食事が記録されていません。
+          </Card>
         )}
         {query.data && query.data.length > 0 && (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-[var(--color-line)] border border-[var(--color-line)] rounded-lg overflow-hidden bg-white">
             {query.data.map((m) => (
-              <MealCard key={m.id} meal={m} />
+              <MealRow key={m.id} meal={m} />
             ))}
           </ul>
         )}
       </section>
+      <aside>
+        <SectionTitle>食事を記録</SectionTitle>
+        <RecordMealForm />
+      </aside>
     </div>
   );
 }
 
-function MealCard({ meal }: { meal: MealDTO }) {
+function MealRow({ meal }: { meal: MealDTO }) {
   const queryClient = useQueryClient();
   const del = useMutation({
     mutationFn: async () => {
@@ -67,25 +80,38 @@ function MealCard({ meal }: { meal: MealDTO }) {
   });
 
   return (
-    <li className="bg-white border border-slate-200 rounded p-4 flex items-start justify-between gap-4">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold">{labelOfType(meal.meal_type)}</span>
-          <span className="text-xs text-slate-500">{formatDateTime(meal.eaten_at)}</span>
+    <li className="p-4 flex items-start gap-4">
+      <div className="w-14 h-14 shrink-0 rounded-md bg-[var(--color-surface-alt)] flex items-center justify-center text-xl">
+        {emojiOfType(meal.meal_type)}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold tracking-tight">
+            {labelOfType(meal.meal_type)}
+          </span>
+          <span className="text-xs text-[var(--color-ink-muted)]">
+            {formatDateTime(meal.eaten_at)}
+          </span>
         </div>
-        {meal.memo && <p className="text-sm text-slate-700">{meal.memo}</p>}
-        <div className="text-xs text-slate-500 flex flex-wrap gap-x-3">
-          <span>カロリー: {meal.calories ?? 0} kcal</span>
-          <span>P: {meal.protein_g ?? "0"}g</span>
-          <span>F: {meal.fat_g ?? "0"}g</span>
-          <span>C: {meal.carbohydrate_g ?? "0"}g</span>
+        {meal.memo && (
+          <p className="mt-1 text-sm text-[var(--color-ink)] line-clamp-2">
+            {meal.memo}
+          </p>
+        )}
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--color-ink-muted)]">
+          <span className="font-medium text-[var(--color-ink)]">
+            {meal.calories ?? 0} kcal
+          </span>
+          <span>P {meal.protein_g ?? "0"}g</span>
+          <span>F {meal.fat_g ?? "0"}g</span>
+          <span>C {meal.carbohydrate_g ?? "0"}g</span>
         </div>
       </div>
       <button
         type="button"
         onClick={() => del.mutate()}
         disabled={del.isPending}
-        className="text-sm text-red-600 hover:text-red-800 disabled:opacity-50"
+        className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0"
       >
         削除
       </button>
@@ -110,10 +136,9 @@ function RecordMealForm() {
   });
 
   return (
-    <section className="bg-white border border-slate-200 rounded p-4">
-      <h2 className="text-lg font-bold mb-3">食事を記録</h2>
+    <Card className="p-5">
       <form
-        className="grid grid-cols-2 gap-3"
+        className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           mutation.mutate({
@@ -122,75 +147,67 @@ function RecordMealForm() {
           });
         }}
       >
-        <label className="col-span-2 block">
-          <span className="text-sm font-medium text-slate-700">種類</span>
+        <Label label="種類">
           <select
             value={form.meal_type}
             onChange={(e) => setForm({ ...form, meal_type: e.target.value })}
-            className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-white focus:outline-none focus:border-[var(--color-ink)]"
           >
             <option value="breakfast">朝食</option>
             <option value="lunch">昼食</option>
             <option value="dinner">夕食</option>
             <option value="snack">間食</option>
           </select>
-        </label>
-        <label className="col-span-2 block">
-          <span className="text-sm font-medium text-slate-700">日時</span>
-          <input
+        </Label>
+        <Label label="日時">
+          <TextInput
             type="datetime-local"
             value={form.eaten_at}
             onChange={(e) => setForm({ ...form, eaten_at: e.target.value })}
-            className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
             required
           />
-        </label>
-        <NumField
-          label="カロリー (kcal)"
-          value={form.calories}
-          onChange={(v) => setForm({ ...form, calories: v })}
-        />
-        <NumField
-          label="タンパク質 (g)"
-          step="0.1"
-          value={form.protein_g}
-          onChange={(v) => setForm({ ...form, protein_g: v })}
-        />
-        <NumField
-          label="脂質 (g)"
-          step="0.1"
-          value={form.fat_g}
-          onChange={(v) => setForm({ ...form, fat_g: v })}
-        />
-        <NumField
-          label="炭水化物 (g)"
-          step="0.1"
-          value={form.carbohydrate_g}
-          onChange={(v) => setForm({ ...form, carbohydrate_g: v })}
-        />
-        <label className="col-span-2 block">
-          <span className="text-sm font-medium text-slate-700">メモ</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-3">
+          <NumField
+            label="カロリー (kcal)"
+            value={form.calories}
+            onChange={(v) => setForm({ ...form, calories: v })}
+          />
+          <NumField
+            label="タンパク質 (g)"
+            step="0.1"
+            value={form.protein_g}
+            onChange={(v) => setForm({ ...form, protein_g: v })}
+          />
+          <NumField
+            label="脂質 (g)"
+            step="0.1"
+            value={form.fat_g}
+            onChange={(v) => setForm({ ...form, fat_g: v })}
+          />
+          <NumField
+            label="炭水化物 (g)"
+            step="0.1"
+            value={form.carbohydrate_g}
+            onChange={(v) => setForm({ ...form, carbohydrate_g: v })}
+          />
+        </div>
+        <Label label="メモ">
           <textarea
             value={form.memo ?? ""}
             onChange={(e) => setForm({ ...form, memo: e.target.value })}
             rows={2}
-            className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
+            className="block w-full px-3 py-2 rounded-md border border-[var(--color-line)] bg-white focus:outline-none focus:border-[var(--color-ink)]"
           />
-        </label>
+        </Label>
         {mutation.isError && (
-          <p className="col-span-2 text-sm text-red-600">
-            {(mutation.error as Error).message}
-          </p>
+          <ErrorText>{(mutation.error as Error).message}</ErrorText>
         )}
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="col-span-2 rounded bg-slate-900 text-white py-2 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {mutation.isPending ? "記録中…" : "記録"}
-        </button>
+        <Button type="submit" fullWidth disabled={mutation.isPending}>
+          {mutation.isPending ? "記録中…" : "記録する"}
+        </Button>
       </form>
-    </section>
+    </Card>
   );
 }
 
@@ -206,17 +223,15 @@ function NumField({
   step?: string;
 }) {
   return (
-    <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-      <input
+    <Label label={label}>
+      <TextInput
         type="number"
         step={step}
         min={0}
         value={value ?? 0}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-1 block w-full rounded border border-slate-300 px-3 py-2"
       />
-    </label>
+    </Label>
   );
 }
 
@@ -245,15 +260,20 @@ function formatDateTime(iso?: string): string {
 
 function labelOfType(t?: string): string {
   switch (t) {
-    case "breakfast":
-      return "朝食";
-    case "lunch":
-      return "昼食";
-    case "dinner":
-      return "夕食";
-    case "snack":
-      return "間食";
-    default:
-      return t ?? "";
+    case "breakfast": return "朝食";
+    case "lunch": return "昼食";
+    case "dinner": return "夕食";
+    case "snack": return "間食";
+    default: return t ?? "";
+  }
+}
+
+function emojiOfType(t?: string): string {
+  switch (t) {
+    case "breakfast": return "🍳";
+    case "lunch": return "🍱";
+    case "dinner": return "🍽️";
+    case "snack": return "🍎";
+    default: return "🍴";
   }
 }

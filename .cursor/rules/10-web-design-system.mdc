@@ -1,0 +1,90 @@
+---
+description: musclead Web UI のデザインシステム(snkrdunk テイスト)
+globs: web/**/*.{ts,tsx,css}
+alwaysApply: true
+---
+
+# Web Design System
+
+スニーカーダンク(snkrdunk.com) の **ミニマル × モノクロベース** を踏襲する。
+新規 UI を作るとき、 既存ページを編集するときは必ずこの規約に従う。
+
+## 1. 思想
+
+- **モノクロ基調**(白 + 黒 + グレー階調)+ 最小限の差し色
+- **余白広め、 装飾は最小限**(影は薄く、 角丸は小さめ)
+- 文字は **左揃え基本、 タイポは詰めて(`tracking-tight`)** 視認性重視
+- カード型 UI で情報をグルーピング、 罫線で区切る
+
+## 2. カラートークン(globals.css 定義)
+
+| 用途 | CSS変数 | 値 |
+|---|---|---|
+| 本文 | `--color-ink` | `#111111` |
+| 補助テキスト | `--color-ink-muted` | `#6b7280` |
+| 罫線 | `--color-line` | `#e5e7eb` |
+| 背景(基本) | `--color-surface` | `#ffffff` |
+| 背景(薄グレー) | `--color-surface-alt` | `#f6f6f6` |
+| エラー/差し色 | `--color-accent` | `#ef3a3a` |
+
+**Tailwind の `slate-*` `gray-*` 等は使わない**。 必ず CSS 変数経由で参照する:
+```tsx
+className="text-[var(--color-ink)] border-[var(--color-line)]"
+```
+
+## 3. フォント
+
+- Geist Sans を main、 日本語フォールバックは Hiragino Sans → Yu Gothic
+- 見出しは `font-bold tracking-tight`
+- 本文は通常ウェイト、 補助情報は `text-xs` か `text-sm` + `text-[var(--color-ink-muted)]`
+
+## 4. 共通コンポーネント(`src/components/ui.tsx`)
+
+| 用途 | コンポーネント |
+|---|---|
+| カード | `<Card>` (白bg + 1px 罫線 + 角丸 `rounded-lg`) |
+| 見出し | `<SectionTitle>` (`text-base font-bold tracking-tight`) |
+| ラベル | `<Label label="...">` (子要素は input 等) |
+| テキスト入力 | `<TextInput>` (`h-11`、 罫線、 focus 時 ink) |
+| ボタン | `<Button variant="primary"|"ghost"|"danger">` |
+| エラー文 | `<ErrorText>` |
+
+**新しい入力フォーム/カードは必ずこれを使う**。 個別に Tailwind で書き直さない。
+
+## 5. レイアウト規約
+
+- コンテナ: `max-w-5xl mx-auto px-5 sm:px-6`
+- セクション間: `space-y-8` / `gap-8`
+- ヘッダー: `h-14`、 sticky top、 下罫線 1px
+- フッター: 上罫線 + `text-xs text-ink-muted`
+
+## 6. ボタン規約
+
+- 主要 CTA: `Button variant="primary"`(黒地白文字、 `h-11`、 `rounded-md`)
+- セカンダリ: `variant="ghost"`(白地黒文字 + 罫線)
+- 破壊的: `variant="danger"`(白地アクセント色 + 罫線)
+- フォーム末尾は `fullWidth`
+
+## 7. リスト/カード
+
+- 一覧は `<ul>` + `divide-y divide-[var(--color-line)]` で区切り
+- 個別の要素を Card で囲まない(罫線で十分)
+- アイコン枠は `w-14 h-14 rounded-md bg-[var(--color-surface-alt)]`
+
+## 8. アニメーション
+
+- 過度なトランジション禁止
+- 許可: `transition-opacity`(hover/active)、 `transition-colors`(focus)
+- duration はデフォルト(指定しない)
+
+## 9. ダークモード
+
+- **対応しない**(globals.css に `prefers-color-scheme` 分岐を入れない)
+- 将来必要になったら CSS 変数のオーバーライドで対応
+
+## 10. 禁則
+
+- 派手な色のグラデーション禁止
+- 大きな影 `shadow-lg` 以上禁止
+- 角丸は最大 `rounded-lg`、 円形は明示意図のあるアイコンのみ
+- 絵文字は **情報補助の最小限**(食事種別のアイコン枠など)、 装飾目的では使わない

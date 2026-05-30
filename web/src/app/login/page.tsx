@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { setStoredUserId } from "@/lib/auth";
+import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,37 +23,38 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-      <h1 className="text-xl font-bold mb-4">ログイン</h1>
-      <p className="text-sm text-slate-600 mb-4">
+    <div className="max-w-md mx-auto">
+      <h1 className="text-2xl font-bold tracking-tight mb-2">ログイン</h1>
+      <p className="text-sm text-[var(--color-ink-muted)] mb-6">
         現状は UserID(UUID)を入力してログインします。 認証は今後実装予定。
       </p>
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">UserID</span>
-          <input
-            type="text"
-            value={userId}
-            onChange={(e) => {
-              setUserId(e.target.value);
-              setError(null);
-            }}
-            placeholder="00000000-0000-0000-0000-000000000000"
-            className="mt-1 block w-full rounded border border-slate-300 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-            required
-          />
-        </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          className="w-full rounded bg-slate-900 text-white py-2 hover:bg-slate-700"
-        >
-          ログイン
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-slate-600">
+      <Card className="p-6">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <Label label="UserID">
+            <TextInput
+              type="text"
+              value={userId}
+              onChange={(e) => {
+                setUserId(e.target.value);
+                setError(null);
+              }}
+              placeholder="00000000-0000-0000-0000-000000000000"
+              className="font-mono text-sm"
+              required
+            />
+          </Label>
+          {error && <ErrorText>{error}</ErrorText>}
+          <Button type="submit" fullWidth>
+            ログイン
+          </Button>
+        </form>
+      </Card>
+      <p className="mt-6 text-sm text-[var(--color-ink-muted)] text-center">
         アカウントをお持ちでないですか?{" "}
-        <Link href="/register" className="text-blue-600 hover:underline">
+        <Link
+          href="/register"
+          className="text-[var(--color-ink)] font-medium hover:opacity-60"
+        >
           新規登録
         </Link>
       </p>

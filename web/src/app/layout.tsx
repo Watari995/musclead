@@ -29,10 +29,18 @@ export default function RootLayout({
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
+      <body className="min-h-full flex flex-col">
         <Providers>
           <Header />
-          <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-8">{children}</main>
+          <main className="flex-1 w-full max-w-5xl mx-auto px-5 sm:px-6 py-8">
+            {children}
+          </main>
+          <footer className="border-t border-[var(--color-line)] mt-12">
+            <div className="w-full max-w-5xl mx-auto px-5 sm:px-6 py-6 text-xs text-[var(--color-ink-muted)] flex justify-between">
+              <span>© musclead</span>
+              <span>Beta</span>
+            </div>
+          </footer>
         </Providers>
       </body>
     </html>
