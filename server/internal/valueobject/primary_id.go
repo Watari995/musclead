@@ -18,6 +18,8 @@ func NewPrimaryIdFromString[T PrimaryId](s string) (*T, error) {
 }
 
 // ID 型一覧(Shared Kernel として全モジュール共通の参照子)
+type SessionID struct{ PrimaryIdBase }
+
 type UserID struct{ PrimaryIdBase }
 type MealID struct{ PrimaryIdBase }
 type MealPhotoID struct{ PrimaryIdBase }
