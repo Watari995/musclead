@@ -8,7 +8,7 @@ import (
 )
 
 type MealRepository interface {
-	FindAllByUserIDWithOffsetPagination(ctx context.Context, userId valueobject.UserID, limit int, offset int) ([]*Meal, pagination.OffsetPaginator, error)
+	FindAllByUserIDWithOffsetPagination(ctx context.Context, userID valueobject.UserID, limit int, offset int) ([]*Meal, pagination.OffsetPaginator, error)
 	FindByID(ctx context.Context, id valueobject.MealID) (*Meal, error)
 	Save(ctx context.Context, meal *Meal) error
 	DeleteByID(ctx context.Context, id valueobject.MealID) error

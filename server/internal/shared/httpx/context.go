@@ -10,7 +10,7 @@ import (
 type contextKey string
 
 // contextKeyはcontextのキー衝突を防ぐ
-const userIDKey contextKey = "userId"
+const userIDKey contextKey = "userID"
 
 // middlewareが userIDを載せる時に使う
 func WithUserID(ctx context.Context, userID valueobject.UserID) context.Context {

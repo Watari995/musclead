@@ -16,11 +16,11 @@ type MockMealRepository struct {
 
 func (m *MockMealRepository) FindAllByUserIDWithOffsetPagination(
 	ctx context.Context,
-	userId valueobject.UserID,
+	userID valueobject.UserID,
 	limit int,
 	offset int,
 ) ([]*mealdomain.Meal, pagination.OffsetPaginator, error) {
-	args := m.Called(ctx, userId, limit, offset)
+	args := m.Called(ctx, userID, limit, offset)
 	meals, _ := args.Get(0).([]*mealdomain.Meal)
 	pg, _ := args.Get(1).(pagination.OffsetPaginator)
 	return meals, pg, args.Error(2)

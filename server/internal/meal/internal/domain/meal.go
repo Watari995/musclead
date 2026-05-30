@@ -13,7 +13,7 @@ type PhotoData struct {
 
 type Meal struct {
 	id            valueobject.MealID
-	userId        valueobject.UserID
+	userID        valueobject.UserID
 	eatenAt       time.Time
 	mealType      valueobject.String20
 	calories      valueobject.NonNegativeInt
@@ -32,7 +32,7 @@ func (m *Meal) ID() valueobject.MealID {
 }
 
 func (m *Meal) UserID() valueobject.UserID {
-	return m.userId
+	return m.userID
 }
 
 func (m *Meal) EatenAt() time.Time {
@@ -106,7 +106,7 @@ func (m *Meal) Update(
 }
 
 func CreateMeal(
-	userId valueobject.UserID,
+	userID valueobject.UserID,
 	eatenAt time.Time,
 	mealType valueobject.String20,
 	calories valueobject.NonNegativeInt,
@@ -119,7 +119,7 @@ func CreateMeal(
 	now := time.Now()
 	return &Meal{
 		id:            valueobject.NewPrimaryID[valueobject.MealID](),
-		userId:        userId,
+		userID:        userID,
 		eatenAt:       eatenAt,
 		mealType:      mealType,
 		calories:      calories,
@@ -135,7 +135,7 @@ func CreateMeal(
 
 func NewMeal(
 	id valueobject.MealID,
-	userId valueobject.UserID,
+	userID valueobject.UserID,
 	eatenAt time.Time,
 	mealType valueobject.String20,
 	calories valueobject.NonNegativeInt,
@@ -149,7 +149,7 @@ func NewMeal(
 ) *Meal {
 	return &Meal{
 		id:            id,
-		userId:        userId,
+		userID:        userID,
 		eatenAt:       eatenAt,
 		mealType:      mealType,
 		calories:      calories,
