@@ -111,7 +111,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(db *sql.DB) *http.ServeMux {
+func newMux(db *sql.DB) http.Handler {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -128,7 +128,7 @@ func newMux(db *sql.DB) *http.ServeMux {
 	mux.Handle("/meals", httpx.AuthMiddleware(mealModule.Handler))
 	mux.Handle("/meals/", httpx.AuthMiddleware(mealModule.Handler))
 
-	return mux
+	return httpx.CORSMiddleware(mux)
 }
 
 // healthHandler はサーバー稼働確認用のシンプルなヘルスチェック。
