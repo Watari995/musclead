@@ -81,3 +81,12 @@ func toSession(row sessionModel) (*sessiondomain.Session, error) {
 	}
 	return sessiondomain.NewSession(*sessionID, *userID, row.RefreshHash, row.UserAgent, row.IPAddress, row.ExpiresAt, sqlconv.FromNullTime(row.RevokedAt), row.CreatedAt), nil
 }
+
+func NewSessionRepository(db *sql.DB) sessiondomain.SessionRepository {
+	dbmap := &gorp.DbMap{
+		Db:      db,
+		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
+	}
+	dbmap.AddTableWithName(sessionModel{}, "sessions").SetKeys(false, "ID")
+	return &sessionRepository{db: db, dbmap: dbmap}
+}
