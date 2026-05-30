@@ -12,7 +12,7 @@ type Email struct {
 var emailValidationRules = []validation.Rule{
 	validation.Required,
 	validation.RuneLength(1, 255),
-	is.Email,
+	is.EmailFormat,
 }
 
 func (e Email) Validate() error {
