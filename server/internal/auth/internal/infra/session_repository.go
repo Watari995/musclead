@@ -67,7 +67,7 @@ func toSession(row sessionModel) (*sessiondomain.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	sessionID, err := valueobject.NewPrimaryIdFromString[valueobject.SessionID](sessionIDString)
+	sessionID, err := valueobject.NewPrimaryIDFromString[valueobject.SessionID](sessionIDString)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func toSession(row sessionModel) (*sessiondomain.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](userIDString)
+	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIDString)
 	if err != nil {
 		return nil, err
 	}

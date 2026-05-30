@@ -15,7 +15,7 @@ import (
 func TestFindMealByID_Success(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
 	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
@@ -39,8 +39,8 @@ func TestFindMealByID_NotFound(t *testing.T) {
 
 	uc := mealusecase.NewFindMealByID(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.FindMealByIDInput{
-		MealID: valueobject.NewPrimaryId[valueobject.MealID](),
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		MealID: valueobject.NewPrimaryID[valueobject.MealID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)
@@ -52,8 +52,8 @@ func TestFindMealByID_OwnerMismatch(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
-	ownerID := valueobject.NewPrimaryId[valueobject.UserID]()
-	otherID := valueobject.NewPrimaryId[valueobject.UserID]()
+	ownerID := valueobject.NewPrimaryID[valueobject.UserID]()
+	otherID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, ownerID)
 
 	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
@@ -77,8 +77,8 @@ func TestFindMealByID_DBError(t *testing.T) {
 
 	uc := mealusecase.NewFindMealByID(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.FindMealByIDInput{
-		MealID: valueobject.NewPrimaryId[valueobject.MealID](),
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		MealID: valueobject.NewPrimaryID[valueobject.MealID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)

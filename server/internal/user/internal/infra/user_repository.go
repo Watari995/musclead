@@ -84,7 +84,7 @@ func toUser(row userModel) (*userdomain.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	userId, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](userIdString)
+	userId, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIdString)
 	if err != nil {
 		return nil, err
 	}

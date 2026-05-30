@@ -121,7 +121,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Router /users/{id} [get]
 func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 	// path parameterからuserIDを取得
-	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
+	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](r.PathValue("id"))
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid userID"))
 		return
@@ -149,7 +149,7 @@ func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} httpx.ErrorResponse
 // @Router /users/{id} [delete]
 func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
+	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](r.PathValue("id"))
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid userID"))
 		return

@@ -35,7 +35,7 @@ func TestDeleteUser_NotFound(t *testing.T) {
 
 	uc := userusecase.NewDeleteUser(repo)
 	err := uc.Execute(context.Background(), userusecase.DeleteUserInput{
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)
@@ -50,7 +50,7 @@ func TestDeleteUser_FindError(t *testing.T) {
 
 	uc := userusecase.NewDeleteUser(repo)
 	err := uc.Execute(context.Background(), userusecase.DeleteUserInput{
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)

@@ -14,7 +14,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			WriteError(w, myerror.NewUnauthorizedError().SetMessage("X-User-ID header is required"))
 			return
 		}
-		id, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](raw)
+		id, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](raw)
 		if err != nil {
 			WriteError(w, myerror.NewUnauthorizedError().SetMessage("invalid X-User-ID header"))
 			return

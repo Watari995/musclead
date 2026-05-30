@@ -15,7 +15,7 @@ import (
 func TestDeleteMealByID_Success(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
 	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
@@ -39,8 +39,8 @@ func TestDeleteMealByID_NotFound(t *testing.T) {
 
 	uc := mealusecase.NewDeleteMealByID(repo)
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
-		MealID: valueobject.NewPrimaryId[valueobject.MealID](),
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		MealID: valueobject.NewPrimaryID[valueobject.MealID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)
@@ -51,8 +51,8 @@ func TestDeleteMealByID_OwnerMismatch(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
-	ownerID := valueobject.NewPrimaryId[valueobject.UserID]()
-	otherID := valueobject.NewPrimaryId[valueobject.UserID]()
+	ownerID := valueobject.NewPrimaryID[valueobject.UserID]()
+	otherID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, ownerID)
 
 	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
@@ -70,7 +70,7 @@ func TestDeleteMealByID_OwnerMismatch(t *testing.T) {
 func TestDeleteMealByID_DeleteError(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
 	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)

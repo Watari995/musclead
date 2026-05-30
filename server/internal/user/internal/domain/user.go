@@ -62,7 +62,7 @@ func CreateUser(
 	birthday *time.Time,
 ) *User {
 	return &User{
-		id:           valueobject.NewPrimaryId[valueobject.UserID](),
+		id:           valueobject.NewPrimaryID[valueobject.UserID](),
 		name:         name,
 		email:        email,
 		passwordHash: passwordHash,

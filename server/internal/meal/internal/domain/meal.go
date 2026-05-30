@@ -118,7 +118,7 @@ func CreateMeal(
 ) *Meal {
 	now := time.Now()
 	return &Meal{
-		id:            valueobject.NewPrimaryId[valueobject.MealID](),
+		id:            valueobject.NewPrimaryID[valueobject.MealID](),
 		userId:        userId,
 		eatenAt:       eatenAt,
 		mealType:      mealType,

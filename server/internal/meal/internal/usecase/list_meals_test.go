@@ -16,7 +16,7 @@ import (
 func TestListMeals_Success(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 
 	meals := []*mealdomain.Meal{
 		newDummyMeal(t, userID),
@@ -47,7 +47,7 @@ func TestListMeals_Success(t *testing.T) {
 func TestListMeals_Empty(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 
 	pg := pagination.OffsetPaginator{
 		CurrentPage: 1, ItemsPerPage: 20, TotalItems: 0, TotalPages: 0,
@@ -75,7 +75,7 @@ func TestListMeals_DBError(t *testing.T) {
 
 	uc := mealusecase.NewListMeals(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.ListMealsInput{
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 		Limit:  20, Offset: 0,
 	})
 

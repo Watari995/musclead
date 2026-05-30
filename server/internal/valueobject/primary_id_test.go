@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewPrimaryId_GeneratesUUIDv7(t *testing.T) {
+func TestNewPrimaryID_GeneratesUUIDv7(t *testing.T) {
 	t.Parallel()
 
-	id := valueobject.NewPrimaryId[valueobject.UserID]()
+	id := valueobject.NewPrimaryID[valueobject.UserID]()
 
 	// UUID v7 として parse できる
 	parsed, err := uuid.Parse(id.Value())
@@ -19,16 +19,16 @@ func TestNewPrimaryId_GeneratesUUIDv7(t *testing.T) {
 	assert.Equal(t, uuid.Version(7), parsed.Version())
 }
 
-func TestNewPrimaryId_UniquePerCall(t *testing.T) {
+func TestNewPrimaryID_UniquePerCall(t *testing.T) {
 	t.Parallel()
 
-	a := valueobject.NewPrimaryId[valueobject.UserID]()
-	b := valueobject.NewPrimaryId[valueobject.UserID]()
+	a := valueobject.NewPrimaryID[valueobject.UserID]()
+	b := valueobject.NewPrimaryID[valueobject.UserID]()
 
 	assert.NotEqual(t, a.Value(), b.Value())
 }
 
-func TestNewPrimaryIdFromString(t *testing.T) {
+func TestNewPrimaryIDFromString(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -45,7 +45,7 @@ func TestNewPrimaryIdFromString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](tt.input)
+			got, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -56,10 +56,10 @@ func TestNewPrimaryIdFromString(t *testing.T) {
 	}
 }
 
-func TestPrimaryId_Bytes(t *testing.T) {
+func TestPrimaryID_Bytes(t *testing.T) {
 	t.Parallel()
 
-	id, err := valueobject.NewPrimaryIdFromString[valueobject.UserID]("019e6ce9-5253-7816-8af8-6603ae0516e6")
+	id, err := valueobject.NewPrimaryIDFromString[valueobject.UserID]("019e6ce9-5253-7816-8af8-6603ae0516e6")
 	assert.NoError(t, err)
 
 	b, err := id.Bytes()

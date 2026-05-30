@@ -173,7 +173,7 @@ func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	mealID, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](r.PathValue("id"))
+	mealID, err := valueobject.NewPrimaryIDFromString[valueobject.MealID](r.PathValue("id"))
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
 		return
@@ -230,7 +230,7 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	mealID, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](r.PathValue("id"))
+	mealID, err := valueobject.NewPrimaryIDFromString[valueobject.MealID](r.PathValue("id"))
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
 		return
@@ -323,7 +323,7 @@ func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	mealID, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](r.PathValue("id"))
+	mealID, err := valueobject.NewPrimaryIDFromString[valueobject.MealID](r.PathValue("id"))
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
 		return

@@ -2,31 +2,31 @@ package valueobject
 
 import "github.com/google/uuid"
 
-type PrimaryIdBase struct {
+type PrimaryIDBase struct {
 	LiteralBase[string]
 }
 
-func newPrimaryIdBase() PrimaryIdBase {
+func newPrimaryIDBase() PrimaryIDBase {
 	id, err := uuid.NewV7()
 	if err != nil {
 		panic(err)
 	}
-	return PrimaryIdBase{
+	return PrimaryIDBase{
 		LiteralBase: LiteralBase[string]{v: id.String()},
 	}
 }
 
-func newPrimaryIdBaseFromString(s string) (PrimaryIdBase, error) {
+func newPrimaryIDBaseFromString(s string) (PrimaryIDBase, error) {
 	id, err := uuid.Parse(s)
 	if err != nil {
-		return PrimaryIdBase{}, err
+		return PrimaryIDBase{}, err
 	}
-	return PrimaryIdBase{
+	return PrimaryIDBase{
 		LiteralBase: LiteralBase[string]{v: id.String()},
 	}, nil
 }
 
-func (p PrimaryIdBase) Bytes() ([]byte, error) {
+func (p PrimaryIDBase) Bytes() ([]byte, error) {
 	// uuid.Parse() は 16 バイトの配列を返す
 	u, err := uuid.Parse(p.v)
 	if err != nil {

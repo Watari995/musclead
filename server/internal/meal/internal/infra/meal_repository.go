@@ -146,7 +146,7 @@ func (r *mealRepository) Save(ctx context.Context, meal *mealdomain.Meal) error 
 		return err
 	}
 	for _, photo := range meal.Photos() {
-		mealPhotoId, err := valueobject.NewPrimaryId[valueobject.MealPhotoID]().Bytes()
+		mealPhotoId, err := valueobject.NewPrimaryID[valueobject.MealPhotoID]().Bytes()
 		if err != nil {
 			return err
 		}
@@ -206,7 +206,7 @@ func toMeal(row mealModel, photos []mealPhotoModel) (*mealdomain.Meal, error) {
 	if err != nil {
 		return nil, err
 	}
-	mealId, err := valueobject.NewPrimaryIdFromString[valueobject.MealID](mealIdString)
+	mealId, err := valueobject.NewPrimaryIDFromString[valueobject.MealID](mealIdString)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func toMeal(row mealModel, photos []mealPhotoModel) (*mealdomain.Meal, error) {
 	if err != nil {
 		return nil, err
 	}
-	userId, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](userIdString)
+	userId, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIdString)
 	if err != nil {
 		return nil, err
 	}

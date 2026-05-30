@@ -26,7 +26,7 @@ func recordInput(userID valueobject.UserID) mealusecase.RecordMealInput {
 func TestRecordMeal_Success(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(nil)
 
@@ -42,7 +42,7 @@ func TestRecordMeal_Success(t *testing.T) {
 func TestRecordMeal_SaveError(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
-	userID := valueobject.NewPrimaryId[valueobject.UserID]()
+	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(errors.New("db down"))
 

@@ -69,7 +69,7 @@ func CreateSession(
 	expiresAt time.Time,
 ) *Session {
 	return &Session{
-		id:          valueobject.NewPrimaryId[valueobject.SessionID](),
+		id:          valueobject.NewPrimaryID[valueobject.SessionID](),
 		userID:      userID,
 		refreshHash: refreshHash,
 		userAgent:   userAgent,

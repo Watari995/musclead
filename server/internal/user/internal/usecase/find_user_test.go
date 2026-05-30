@@ -17,7 +17,7 @@ import (
 
 func newDummyUser(t *testing.T) *userdomain.User {
 	t.Helper()
-	id := valueobject.NewPrimaryId[valueobject.UserID]()
+	id := valueobject.NewPrimaryID[valueobject.UserID]()
 	name, _ := valueobject.NewString50("dummy")
 	email, _ := valueobject.NewEmail("dummy@example.com")
 	rawHash, _ := bcrypt.GenerateFromPassword([]byte("secret123"), bcrypt.MinCost)
@@ -50,7 +50,7 @@ func TestFindUser_NotFound(t *testing.T) {
 
 	uc := userusecase.NewFindUser(repo)
 	output, err := uc.Execute(context.Background(), userusecase.FindUserInput{
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)
@@ -66,7 +66,7 @@ func TestFindUser_DBError(t *testing.T) {
 
 	uc := userusecase.NewFindUser(repo)
 	output, err := uc.Execute(context.Background(), userusecase.FindUserInput{
-		UserID: valueobject.NewPrimaryId[valueobject.UserID](),
+		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
 	})
 
 	assert.Error(t, err)

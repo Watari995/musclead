@@ -1,30 +1,30 @@
 package valueobject
 
-type PrimaryId interface {
-	// PrimaryIdBase を埋め込んだ型を指定
-	~struct{ PrimaryIdBase }
+type PrimaryID interface {
+	// PrimaryIDBase を埋め込んだ型を指定
+	~struct{ PrimaryIDBase }
 }
 
-func NewPrimaryId[T PrimaryId]() T {
-	return T{PrimaryIdBase: newPrimaryIdBase()}
+func NewPrimaryID[T PrimaryID]() T {
+	return T{PrimaryIDBase: newPrimaryIDBase()}
 }
 
-func NewPrimaryIdFromString[T PrimaryId](s string) (*T, error) {
-	p, err := newPrimaryIdBaseFromString(s)
+func NewPrimaryIDFromString[T PrimaryID](s string) (*T, error) {
+	p, err := newPrimaryIDBaseFromString(s)
 	if err != nil {
 		return nil, err
 	}
-	return &T{PrimaryIdBase: p}, nil
+	return &T{PrimaryIDBase: p}, nil
 }
 
 // ID 型一覧(Shared Kernel として全モジュール共通の参照子)
-type SessionID struct{ PrimaryIdBase }
+type SessionID struct{ PrimaryIDBase }
 
-type UserID struct{ PrimaryIdBase }
-type MealID struct{ PrimaryIdBase }
-type MealPhotoID struct{ PrimaryIdBase }
-type TrainingID struct{ PrimaryIdBase }
-type ExerciseID struct{ PrimaryIdBase }
-type SetID struct{ PrimaryIdBase }
-type RoutineID struct{ PrimaryIdBase }
-type WeightID struct{ PrimaryIdBase }
+type UserID struct{ PrimaryIDBase }
+type MealID struct{ PrimaryIDBase }
+type MealPhotoID struct{ PrimaryIDBase }
+type TrainingID struct{ PrimaryIDBase }
+type ExerciseID struct{ PrimaryIDBase }
+type SetID struct{ PrimaryIDBase }
+type RoutineID struct{ PrimaryIDBase }
+type WeightID struct{ PrimaryIDBase }
