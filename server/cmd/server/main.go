@@ -19,12 +19,14 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/meal"
 	_ "github.com/Watari995/musclead/internal/shared"
 	"github.com/Watari995/musclead/internal/shared/httpx"
 	"github.com/Watari995/musclead/internal/user"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
@@ -116,6 +118,8 @@ func newMux(db *sql.DB) *http.ServeMux {
 	mux.HandleFunc("GET /health", healthHandler)
 
 	// 各モジュールを組み立て、 そのハンドラをマウント
+	// swaggerのマウント
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	userModule := user.NewModule(db)
 	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
 	mealModule := meal.NewModule(db, cdnBaseURL)

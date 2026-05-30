@@ -118,6 +118,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} userdto.UserDTO
 // @Failure 401 {object} httpx.ErrorResponse
 // @Failure 404 {object} httpx.ErrorResponse
+// @Router /users/{id} [get]
 func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 	// path parameterからuserIDを取得
 	userID, err := valueobject.NewPrimaryIdFromString[valueobject.UserID](r.PathValue("id"))
