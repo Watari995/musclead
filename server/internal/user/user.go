@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/Watari995/musclead/internal/user/interface/publicfunctions"
 	userhandler "github.com/Watari995/musclead/internal/user/internal/handler"
 	userinfra "github.com/Watari995/musclead/internal/user/internal/infra"
 	userusecase "github.com/Watari995/musclead/internal/user/internal/usecase"
@@ -16,6 +17,7 @@ import (
 type Module struct {
 	PublicHandler http.Handler
 	Handler       http.Handler
+	userCommand   publicfunctions.UserCommand
 }
 
 func NewModule(db *sql.DB) *Module {
@@ -26,8 +28,16 @@ func NewModule(db *sql.DB) *Module {
 	find := userusecase.NewFindUser(repo)
 	deleteUser := userusecase.NewDeleteUser(repo)
 
+	authenticate := userusecase.NewAuthenticate(repo, hasher)
+
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
 		Handler:       userhandler.NewAuthenticated(find, deleteUser),
+		userCommand:   authenticate,
 	}
+}
+
+// immutableにするためにゲッター経由で取得する
+func (m *Module) UserCommand() publicfunctions.UserCommand {
+	return m.userCommand
 }
