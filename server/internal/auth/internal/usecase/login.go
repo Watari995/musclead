@@ -9,8 +9,7 @@ import (
 	"time"
 
 	sessiondomain "github.com/Watari995/musclead/internal/auth/internal/domain"
-	"github.com/Watari995/musclead/internal/myerror"
-	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
+	"github.com/Watari995/musclead/internal/user/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
@@ -29,21 +28,17 @@ type LoginOutput struct {
 }
 
 type Login struct {
-	userRepo       userdomain.UserRepository
-	passwordHasher userdomain.PasswordHasher
-	sessionRepo    sessiondomain.SessionRepository
-	tokenSigner    sessiondomain.TokenSigner
+	userCommand publicfunctions.UserCommand
+	sessionRepo sessiondomain.SessionRepository
+	tokenSigner sessiondomain.TokenSigner
 }
 
 func (uc *Login) Execute(ctx context.Context, input LoginInput) (*LoginOutput, error) {
-	user, err := uc.userRepo.FindByEmail(ctx, input.Email)
+	userRes, err := uc.userCommand.Authenticate(ctx, publicfunctions.AuthenticateRequest{
+		Email:    input.Email,
+		Password: input.Password,
+	})
 	if err != nil {
-		return nil, err
-	}
-	if user == nil {
-		return nil, myerror.NewUserNotFoundError()
-	}
-	if err := uc.passwordHasher.Compare(input.Password, &user.PasswordHash()); err != nil {
 		return nil, err
 	}
 
@@ -57,18 +52,26 @@ func (uc *Login) Execute(ctx context.Context, input LoginInput) (*LoginOutput, e
 	sum := sha256.Sum256([]byte(refreshRaw))
 	refreshHash := hex.EncodeToString(sum[:])
 	// refresh tokenは7日間有効
-	expiresAt := time.Now().Add(7 * 24 * time.Hour)
-	session := sessiondomain.CreateSession(user.ID(), refreshHash, input.UserAgent, input.IPAddress, expiresAt)
+	now := time.Now()
+	refreshTokenExpiresAt := now.Add(7 * 24 * time.Hour)
+	session := sessiondomain.CreateSession(userRes.UserID, refreshHash, input.UserAgent, input.IPAddress, refreshTokenExpiresAt)
 	if err := uc.sessionRepo.Save(ctx, session); err != nil {
 		return nil, err
 	}
 
-	accessToken, err := uc.tokenSigner.SignAccessToken(user.ID(), time.Now().Add(1*time.Hour))
+	accessTokenExpiresAt := now.Add(15 * time.Minute)
+	accessToken, err := uc.tokenSigner.SignAccessToken(userRes.UserID, accessTokenExpiresAt)
 	if err != nil {
 		return nil, err
 	}
 	return &LoginOutput{
-		AccessToken:  accessToken,
-		RefreshToken: refreshHash,
+		AccessToken:           accessToken,
+		AccessTokenExpiresAt:  accessTokenExpiresAt,
+		RefreshToken:          refreshRaw,
+		RefreshTokenExpiresAt: refreshTokenExpiresAt,
 	}, nil
+}
+
+func NewLogin(userCommand publicfunctions.UserCommand, sessionRepo sessiondomain.SessionRepository, tokenSigner sessiondomain.TokenSigner) *Login {
+	return &Login{userCommand: userCommand, sessionRepo: sessionRepo, tokenSigner: tokenSigner}
 }
