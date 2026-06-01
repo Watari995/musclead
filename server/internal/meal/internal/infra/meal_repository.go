@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math"
 	"time"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
@@ -57,12 +56,8 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	paginator := pagination.OffsetPaginator{
-		CurrentPage:  offset/limit + 1,
-		ItemsPerPage: limit,
-		TotalItems:   int(total),
-		TotalPages:   int(math.Ceil(float64(total) / float64(limit))),
-	}
+	paginator := pagination.NewOffsetPaginator(int(total), offset, limit)
+
 	if len(mealRows) == 0 {
 		return []*mealdomain.Meal{}, paginator, nil
 	}

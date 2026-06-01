@@ -177,12 +177,7 @@ func (r *trainingRepository) FindAllByUserIDWithOffsetPagination(
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	paginator := pagination.OffsetPaginator{
-		CurrentPage:  offset/limit + 1,
-		ItemsPerPage: limit,
-		TotalItems:   int(total),
-		TotalPages:   (int(total) + limit - 1) / limit,
-	}
+	paginator := pagination.NewOffsetPaginator(int(total), offset, limit)
 
 	if len(rows) == 0 {
 		return []*trainingdomain.Training{}, paginator, nil
