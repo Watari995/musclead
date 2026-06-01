@@ -13,10 +13,10 @@ import (
 )
 
 type UserHandler struct {
+	me       *userusecase.Me
 	register *userusecase.RegisterUser
 	find     *userusecase.FindUser
 	delete   *userusecase.DeleteUser
-	me       *userusecase.Me
 }
 
 func NewPublic(register *userusecase.RegisterUser) http.Handler {
@@ -65,7 +65,8 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, output.User)
+	resp := userdto.NewUserDTO(output.User.ID(), output.User.Name(), output.User.Email(), output.User.Birthday(), output.User.CreatedAt(), output.User.UpdatedAt())
+	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
 type RegisterRequest struct {
