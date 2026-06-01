@@ -67,7 +67,40 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	refreshRaw, err := httpx.ReadRefreshCookie(r)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewUnauthorizedError().SetMessage("invalid refresh token"))
+		return
+	}
+	output, err := h.refresh.Execute(r.Context(), authusecase.RefreshInput{
+		RefreshRaw: refreshRaw,
+		UserAgent:  r.UserAgent(),
+		IPAddress:  r.RemoteAddr,
+	})
+	if err != nil {
+		httpx.ClearRefreshCookie(w)
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.SetRefreshCookie(w, output.RefreshToken, output.RefreshTokenExpiresAt)
+	httpx.WriteJSON(w, http.StatusOK, map[string]string{
+		"access_token":            output.AccessToken,
+		"access_token_expires_at": output.AccessTokenExpiresAt.Format(time.RFC3339),
+	})
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	refreshRaw, err := httpx.ReadRefreshCookie(r)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewUnauthorizedError().SetMessage("invalid refresh token"))
+		return
+	}
+	if err := h.logout.Execute(r.Context(), authusecase.LogoutInput{
+		RefreshRaw: refreshRaw,
+	}); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.ClearRefreshCookie(w)
+	httpx.WriteNoContent(w)
 }
