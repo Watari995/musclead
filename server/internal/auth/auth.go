@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	authhandler "github.com/Watari995/musclead/internal/auth/internal/handler"
 	sessioninfra "github.com/Watari995/musclead/internal/auth/internal/infra"
 	authusecase "github.com/Watari995/musclead/internal/auth/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -23,10 +24,10 @@ func NewModule(dbmap *gorp.DbMap, userCommand publicfunctions.UserCommand) *Modu
 	repo := sessioninfra.NewSessionRepository(dbmap)
 	tokenSigner := sessioninfra.NewJWTSigner(os.Getenv("JWT_SECRET"))
 
-	_ = authusecase.NewLogin(userCommand, repo, tokenSigner)
-	_ = authusecase.NewRefresh(repo, tokenSigner, txManager)
-	// _ = authusecase.NewLogout(repo)
-	// _ = authusecase.NewMe(repo)
+	login := authusecase.NewLogin(userCommand, repo, tokenSigner)
+	refresh := authusecase.NewRefresh(repo, tokenSigner, txManager)
+	logout := authusecase.NewLogout(repo)
 
-	return &Module{}
+	return &Module{
+		Handler: authhandler.NewAuthHandler(login, refresh, logout)}
 }
