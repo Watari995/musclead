@@ -1,0 +1,39 @@
+---
+description: shared/ 配下のヘルパー優先、 局所重複定義の禁止
+globs: server/**/*.go
+alwaysApply: true
+---
+
+# Shared-First / 局所重複禁止
+
+「動けばよい」 を理由に **同じパッケージ内にヘルパーを直書き** することを禁止する。
+
+## 違反する典型例
+
+- `repository.go` の末尾に NULL 変換ヘルパーを直書き(`toNullString` 等)
+- 既に `shared/sqlconv/` `shared/httpx/` 配下に類似 API が存在するのに気付かず重複定義
+- コメント無しの新規パブリック関数を量産
+- パッケージ間の置き場所を再検討せず「使う側」 にぶら下げる
+
+## 守るべき手順
+
+1. **新しいヘルパー関数を書く前に必ず `shared/` 配下を grep**
+2. 適切なパッケージが既に存在するなら **そこに追加**(命名規約を守る)
+3. 適切なパッケージが無い場合のみ新規追加、 ただし配置場所を明示的に議論
+4. やむを得ず局所定義する場合は **`// TODO: shared/XXX に移動` を明示**
+
+## 既存の置き場所
+
+| 種類 | 配置 | 命名規約 |
+|---|---|---|
+| VO / 値 ↔ sql.NullXxx | `internal/shared/sqlconv/` | `To<NullType>` / `From<NullType>` / `New<VO>FromNullXxx` |
+| HTTP リクエスト/レスポンスヘルパー | `internal/shared/httpx/` | `WriteJSON` / `DecodeJSON` / `WriteError` 等 |
+| エラー型 | `internal/myerror/` | `NewXxxError()` ファクトリ |
+| トランザクション制御 | `internal/shared/dbtx/` | `TransactionManager.Processing` / `Querier` |
+| ページネーション | `internal/pagination/` | `OffsetPaginator` |
+
+新しい横断的関心事を追加したい時は、 既存パッケージのいずれかに収まるかを **必ず最初に確認**する。
+
+## レビュー時の対応
+
+「置き場所おかしくない?」 と指摘されたら、 言い訳せず即座にリファクタ案を出して実行する。

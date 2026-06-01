@@ -21,6 +21,7 @@
 | [01-architecture.mdc](.cursor/rules/01-architecture.mdc) | DDD + Modular Monolith |
 | [02-value-object.mdc](.cursor/rules/02-value-object.mdc) | 値オブジェクト実装パターン |
 | [03-coding-style.mdc](.cursor/rules/03-coding-style.mdc) | コーディング規約 |
+| [05-shared-first.mdc](.cursor/rules/05-shared-first.mdc) | shared/ 優先、 局所ヘルパー重複定義の禁止 |
 | [10-web-design-system.mdc](.cursor/rules/10-web-design-system.mdc) | Web UI デザインシステム(snkrdunk テイスト)、 web/ 編集時必読 |
 
 ---
@@ -48,6 +49,9 @@
 - **1機能 = 1 commit**(Conventional Commits)
 - **すべて最新安定版**を採用
 - メジャー更新は ADR 記録
+- **shipping を急いだ局所最適コードは禁止**(詳細は [05-shared-first.mdc](.cursor/rules/05-shared-first.mdc))
+  - 新しいヘルパー関数は `shared/` 配下を grep してから書く
+  - 既存パッケージに収まる時は必ずそこに追加、 既存命名規約を踏襲
 
 ## 💬 回答スタイル(重要)
 
