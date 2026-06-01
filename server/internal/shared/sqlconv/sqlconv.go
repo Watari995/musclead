@@ -127,3 +127,12 @@ func UUIDStringFromBytes(b []byte) (string, error) {
 	}
 	return u.String(), nil
 }
+
+// byte->PrimaryIDVOに変換する
+func NewPrimaryIDFromBytes[T valueobject.PrimaryID](b []byte) (*T, error) {
+	s, err := UUIDStringFromBytes(b)
+	if err != nil {
+		return nil, err
+	}
+	return valueobject.NewPrimaryIDFromString[T](s)
+}

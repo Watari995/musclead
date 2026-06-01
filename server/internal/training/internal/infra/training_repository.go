@@ -352,19 +352,11 @@ func (r *trainingRepository) loadSets(
 // toTraining は DB row + 子 exercises から domain 上の Training entity を組み立てる。
 // 各 VO への変換時に検証ロジックが走るので、 異常データは error として上にバブルさせる。
 func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise) (*trainingdomain.Training, error) {
-	idStr, err := sqlconv.UUIDStringFromBytes(row.ID)
+	trainingID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingID](row.ID)
 	if err != nil {
 		return nil, err
 	}
-	trainingID, err := valueobject.NewPrimaryIDFromString[valueobject.TrainingID](idStr)
-	if err != nil {
-		return nil, err
-	}
-	userIDStr, err := sqlconv.UUIDStringFromBytes(row.UserID)
-	if err != nil {
-		return nil, err
-	}
-	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIDStr)
+	userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -389,19 +381,11 @@ func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise)
 }
 
 func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.TrainingSet) (*trainingdomain.TrainingExercise, error) {
-	idStr, err := sqlconv.UUIDStringFromBytes(row.ID)
+	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.ID)
 	if err != nil {
 		return nil, err
 	}
-	exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](idStr)
-	if err != nil {
-		return nil, err
-	}
-	trainingIDStr, err := sqlconv.UUIDStringFromBytes(row.TrainingID)
-	if err != nil {
-		return nil, err
-	}
-	trainingID, err := valueobject.NewPrimaryIDFromString[valueobject.TrainingID](trainingIDStr)
+	trainingID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingID](row.TrainingID)
 	if err != nil {
 		return nil, err
 	}
@@ -438,19 +422,11 @@ func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.Traini
 }
 
 func toTrainingSet(row TrainingSetModel) (*trainingdomain.TrainingSet, error) {
-	idStr, err := sqlconv.UUIDStringFromBytes(row.ID)
+	setID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.SetID](row.ID)
 	if err != nil {
 		return nil, err
 	}
-	setID, err := valueobject.NewPrimaryIDFromString[valueobject.SetID](idStr)
-	if err != nil {
-		return nil, err
-	}
-	exerciseIDStr, err := sqlconv.UUIDStringFromBytes(row.TrainingExerciseID)
-	if err != nil {
-		return nil, err
-	}
-	exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](exerciseIDStr)
+	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.TrainingExerciseID)
 	if err != nil {
 		return nil, err
 	}
