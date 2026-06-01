@@ -1,3 +1,15 @@
+// Package sqlconv は DB の sql.NullXxx / 生バイト型と、 ドメイン層の VO / time.Time / decimal などを相互変換するヘルパー集。
+//
+// repository 実装が NULL 列や UUID バイト列を扱うたびに同じ詰め替えを書かないよう、
+// ここに一箇所で寄せる。 「列 = NULL 許容」 なら *valueobject.X / *time.Time のようなポインタ表現、
+// 「列 = NOT NULL」 なら値型をそのまま使う、 という Go 慣習に従う。
+//
+// 命名規約:
+//   - To<NullType>           : VO/値 → sql.NullXxx (UPDATE/INSERT 用)
+//   - From<NullType>         : sql.NullXxx → VO/値 (SELECT 用)
+//   - New<VO>FromNullXxx     : NULL 起点で VO を生成(検証込み、 error を返す)
+//
+// 新しい VO を NULL 列で扱いたい時はこのファイルに対応ペアを追加すること。
 package sqlconv
 
 import (
@@ -9,14 +21,13 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// ─── time ────────────────────────────────────────────────
+
 func ToNullTime(t *time.Time) sql.NullTime {
 	if t == nil {
 		return sql.NullTime{}
 	}
-	return sql.NullTime{
-		Time:  *t,
-		Valid: true,
-	}
+	return sql.NullTime{Time: *t, Valid: true}
 }
 
 func FromNullTime(t sql.NullTime) *time.Time {
@@ -26,13 +37,31 @@ func FromNullTime(t sql.NullTime) *time.Time {
 	return &t.Time
 }
 
-func UUIDStringFromBytes(b []byte) (string, error) {
-	u, err := uuid.FromBytes(b)
-	if err != nil {
-		return "", err
-	}
-	return u.String(), nil
+// ─── string / String1000 ─────────────────────────────────
+
+func StringToNullString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: true}
 }
+
+// String1000ToNullString は *String1000 を sql.NullString に詰める。
+// nil の時は Valid:false(= DB NULL) を返す。
+func String1000ToNullString(v *valueobject.String1000) sql.NullString {
+	if v == nil {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: v.Value(), Valid: true}
+}
+
+// NewString1000FromNullString は sql.NullString → *String1000 への復元。
+// NULL なら nil を返す。 値があるが VO 制約に違反する場合は error。
+func NewString1000FromNullString(s sql.NullString) (*valueobject.String1000, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	return valueobject.NewString1000(s.String)
+}
+
+// ─── decimal / NonNegativeDecimal ───────────────────────
 
 func DecimalFromNullString(s sql.NullString) (*decimal.Decimal, error) {
 	if !s.Valid {
@@ -46,17 +75,16 @@ func DecimalFromNullString(s sql.NullString) (*decimal.Decimal, error) {
 }
 
 func DecimalToNullString(d decimal.Decimal) sql.NullString {
-	return sql.NullString{
-		String: d.String(),
-		Valid:  true,
-	}
+	return sql.NullString{String: d.String(), Valid: true}
 }
 
-func StringToNullString(s string) sql.NullString {
-	return sql.NullString{
-		String: s,
-		Valid:  true,
+// NewNonNegativeDecimalFromString は NOT NULL DECIMAL 列(文字列で返る)を VO に変換する。
+func NewNonNegativeDecimalFromString(s string) (*valueobject.NonNegativeDecimal, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return nil, err
 	}
+	return valueobject.NewNonNegativeDecimal(d)
 }
 
 func NewNonNegativeDecimalFromNullString(s sql.NullString) (*valueobject.NonNegativeDecimal, error) {
@@ -64,12 +92,38 @@ func NewNonNegativeDecimalFromNullString(s sql.NullString) (*valueobject.NonNega
 	if err != nil {
 		return nil, err
 	}
-	if d != nil {
-		vo, err := valueobject.NewNonNegativeDecimal(*d)
-		if err != nil {
-			return nil, err
-		}
-		return vo, nil
+	if d == nil {
+		return nil, nil
 	}
-	return nil, nil
+	return valueobject.NewNonNegativeDecimal(*d)
+}
+
+// ─── int / NonNegativeInt ───────────────────────────────
+
+// NonNegativeIntToNullInt32 は *NonNegativeInt を sql.NullInt32 に詰める。
+// nil の時は Valid:false(= DB NULL)。
+func NonNegativeIntToNullInt32(v *valueobject.NonNegativeInt) sql.NullInt32 {
+	if v == nil {
+		return sql.NullInt32{}
+	}
+	return sql.NullInt32{Int32: int32(v.Value()), Valid: true}
+}
+
+// NewNonNegativeIntFromNullInt32 は sql.NullInt32 → *NonNegativeInt への復元。
+// NULL なら nil。 値が範囲外なら error。
+func NewNonNegativeIntFromNullInt32(v sql.NullInt32) (*valueobject.NonNegativeInt, error) {
+	if !v.Valid {
+		return nil, nil
+	}
+	return valueobject.NewNonNegativeInt(int(v.Int32))
+}
+
+// ─── UUID ───────────────────────────────────────────────
+
+func UUIDStringFromBytes(b []byte) (string, error) {
+	u, err := uuid.FromBytes(b)
+	if err != nil {
+		return "", err
+	}
+	return u.String(), nil
 }

@@ -11,7 +11,6 @@ import (
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
-	"github.com/shopspring/decimal"
 )
 
 type trainingRepository struct {
@@ -59,7 +58,7 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 		userIDBytes,
 		training.StartedAt(),
 		sqlconv.ToNullTime(training.EndedAt()),
-		toNullString(training.Memo()),
+		sqlconv.String1000ToNullString(training.Memo()),
 		training.CreatedAt(),
 		training.UpdatedAt(),
 	); err != nil {
@@ -80,8 +79,8 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 			idBytes,
 			ex.Name().Value(),
 			int32(ex.DisplayOrder().Value()),
-			toNullInt32FromNonNegativeInt(ex.RestSeconds()),
-			toNullString(ex.Memo()),
+			sqlconv.NonNegativeIntToNullInt32(ex.RestSeconds()),
+			sqlconv.String1000ToNullString(ex.Memo()),
 			ex.CreatedAt(),
 			ex.UpdatedAt(),
 		); err != nil {
@@ -98,8 +97,8 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 				int32(set.SetNumber().Value()),
 				set.WeightKg().String(),
 				int32(set.Reps().Value()),
-				toNullInt32FromNonNegativeInt(set.RestSeconds()),
-				toNullString(set.Memo()),
+				sqlconv.NonNegativeIntToNullInt32(set.RestSeconds()),
+				sqlconv.String1000ToNullString(set.Memo()),
 				set.CreatedAt(),
 				set.UpdatedAt(),
 			); err != nil {
@@ -326,7 +325,7 @@ func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise)
 	if err != nil {
 		return nil, err
 	}
-	memo, err := nullStringToString1000(row.Memo)
+	memo, err := sqlconv.NewString1000FromNullString(row.Memo)
 	if err != nil {
 		return nil, err
 	}
@@ -370,11 +369,11 @@ func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.Traini
 	if err != nil {
 		return nil, err
 	}
-	restSeconds, err := nullInt32ToNonNegativeInt(row.RestSeconds)
+	restSeconds, err := sqlconv.NewNonNegativeIntFromNullInt32(row.RestSeconds)
 	if err != nil {
 		return nil, err
 	}
-	memo, err := nullStringToString1000(row.Memo)
+	memo, err := sqlconv.NewString1000FromNullString(row.Memo)
 	if err != nil {
 		return nil, err
 	}
@@ -415,11 +414,7 @@ func toTrainingSet(row TrainingSetModel) (*trainingdomain.TrainingSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	weightDecimal, err := decimal.NewFromString(row.WeightKg)
-	if err != nil {
-		return nil, err
-	}
-	weightKg, err := valueobject.NewNonNegativeDecimal(weightDecimal)
+	weightKg, err := sqlconv.NewNonNegativeDecimalFromString(row.WeightKg)
 	if err != nil {
 		return nil, err
 	}
@@ -427,11 +422,11 @@ func toTrainingSet(row TrainingSetModel) (*trainingdomain.TrainingSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	restSeconds, err := nullInt32ToNonNegativeInt(row.RestSeconds)
+	restSeconds, err := sqlconv.NewNonNegativeIntFromNullInt32(row.RestSeconds)
 	if err != nil {
 		return nil, err
 	}
-	memo, err := nullStringToString1000(row.Memo)
+	memo, err := sqlconv.NewString1000FromNullString(row.Memo)
 	if err != nil {
 		return nil, err
 	}
@@ -448,38 +443,3 @@ func toTrainingSet(row TrainingSetModel) (*trainingdomain.TrainingSet, error) {
 	), nil
 }
 
-func toNullString(v *valueobject.String1000) sql.NullString {
-	if v == nil {
-		return sql.NullString{}
-	}
-	return sql.NullString{String: v.Value(), Valid: true}
-}
-
-func toNullInt32FromNonNegativeInt(v *valueobject.NonNegativeInt) sql.NullInt32 {
-	if v == nil {
-		return sql.NullInt32{}
-	}
-	return sql.NullInt32{Int32: int32(v.Value()), Valid: true}
-}
-
-func nullStringToString1000(v sql.NullString) (*valueobject.String1000, error) {
-	if !v.Valid {
-		return nil, nil
-	}
-	s, err := valueobject.NewString1000(v.String)
-	if err != nil {
-		return nil, err
-	}
-	return s, nil
-}
-
-func nullInt32ToNonNegativeInt(v sql.NullInt32) (*valueobject.NonNegativeInt, error) {
-	if !v.Valid {
-		return nil, nil
-	}
-	n, err := valueobject.NewNonNegativeInt(int(v.Int32))
-	if err != nil {
-		return nil, err
-	}
-	return n, nil
-}
