@@ -92,7 +92,8 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	refreshRaw, err := httpx.ReadRefreshCookie(r)
 	if err != nil {
-		httpx.WriteError(w, myerror.NewUnauthorizedError().SetMessage("invalid refresh token"))
+		httpx.ClearRefreshCookie(w)
+		httpx.WriteNoContent(w)
 		return
 	}
 	if err := h.logout.Execute(r.Context(), authusecase.LogoutInput{
