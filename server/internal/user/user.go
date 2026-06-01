@@ -29,6 +29,7 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	register := userusecase.NewRegisterUser(repo, hasher)
 	find := userusecase.NewFindUser(repo)
 	deleteUser := userusecase.NewDeleteUser(repo)
+	me := userusecase.NewMe(repo)
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
 
