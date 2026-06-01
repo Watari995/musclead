@@ -1,4 +1,4 @@
-# ADR 0003: DDD + Modular Monolith を採用する
+# ADR 0002: DDD + Modular Monolith を採用する
 
 ## ステータス
 採用 (2026-05-23)

@@ -1,11 +1,11 @@
-# ADR 0005: モジュール間連携は公開 Command Interface 経由にする
+# ADR 0004: モジュール間連携は公開 Command Interface 経由にする
 
 ## ステータス
 採用 (2026-05-31)
 
 ## コンテキスト
 
-[ADR 0003](./0003-ddd-modular-monolith.md) で Modular Monolith strict 構成を採用。
+[ADR 0002](./0002-ddd-modular-monolith.md) で Modular Monolith strict 構成を採用。
 Go の `internal/` 制約により、 モジュール間で内部実装を直接 import できない。
 
 例: auth モジュールがログイン処理で user の情報(email/password)が必要だが、
