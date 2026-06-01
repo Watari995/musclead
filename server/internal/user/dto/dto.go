@@ -15,7 +15,14 @@ type UserDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func NewUserDTO(id valueobject.UserID, name valueobject.String50, email valueobject.Email, birthday *time.Time, createdAt, updatedAt time.Time) UserDTO {
+func NewUserDTO(
+	id valueobject.UserID,
+	name valueobject.String50,
+	email valueobject.Email,
+	birthday *time.Time,
+	createdAt,
+	updatedAt time.Time,
+) UserDTO {
 	var birthdayStr *string
 	if birthday != nil {
 		s := birthday.Format("2006-01-02")
