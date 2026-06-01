@@ -80,11 +80,7 @@ func (r *userRepository) Save(ctx context.Context, user *userdomain.User) error 
 }
 
 func toUser(row UserModel) (*userdomain.User, error) {
-	userIDString, err := sqlconv.UUIDStringFromBytes(row.ID)
-	if err != nil {
-		return nil, err
-	}
-	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIDString)
+	userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.ID)
 	if err != nil {
 		return nil, err
 	}

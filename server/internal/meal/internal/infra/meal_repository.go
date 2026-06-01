@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strings"
 	"time"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	"github.com/Watari995/musclead/internal/pagination"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
+	"github.com/Watari995/musclead/internal/shared/sqlquery"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 	"github.com/samber/lo"
@@ -168,21 +168,17 @@ func (r *mealRepository) DeleteByID(ctx context.Context, id valueobject.MealID) 
 	return err
 }
 
-// selectPhotosByMealIDs は IN 句で複数の meal_id に紐づく photos を一括取得する
+// selectPhotosByMealIDs は IN 句で複数の meal_id に紐づく photos を一括取得する。
+// プレースホルダ生成は shared/sqlquery を経由して同種重複を避ける。
 func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.DbMap, mealIDs [][]byte) ([]MealPhotoModel, error) {
 	if len(mealIDs) == 0 {
 		return nil, nil
 	}
-	placeholders := strings.Repeat("?,", len(mealIDs))
-	placeholders = strings.TrimRight(placeholders, ",")
+	placeholders, args := sqlquery.InPlaceholders(mealIDs)
 	query := fmt.Sprintf(
 		"SELECT id, meal_id, image_path, display_order, created_at FROM meal_photos WHERE meal_id IN (%s) ORDER BY meal_id ASC, display_order ASC",
 		placeholders,
 	)
-	args := make([]interface{}, len(mealIDs))
-	for i, id := range mealIDs {
-		args[i] = id
-	}
 	var photos []MealPhotoModel
 	_, err := dbmap.WithContext(ctx).Select(&photos, query, args...)
 	if err != nil {
@@ -201,19 +197,11 @@ func toPhotoData(photos []MealPhotoModel) []mealdomain.PhotoData {
 }
 
 func toMeal(row MealModel, photos []MealPhotoModel) (*mealdomain.Meal, error) {
-	mealIDString, err := sqlconv.UUIDStringFromBytes(row.ID)
+	mealID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.MealID](row.ID)
 	if err != nil {
 		return nil, err
 	}
-	mealID, err := valueobject.NewPrimaryIDFromString[valueobject.MealID](mealIDString)
-	if err != nil {
-		return nil, err
-	}
-	userIDString, err := sqlconv.UUIDStringFromBytes(row.UserID)
-	if err != nil {
-		return nil, err
-	}
-	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIDString)
+	userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.UserID)
 	if err != nil {
 		return nil, err
 	}

@@ -50,7 +50,6 @@ func (t *Training) Exercises() []*TrainingExercise {
 	return t.exercises
 }
 
-
 func CreateTraining(
 	userID valueobject.UserID,
 	startedAt time.Time,
@@ -67,6 +66,28 @@ func CreateTraining(
 		memo:      memo,
 		createdAt: now,
 		updatedAt: now,
+		exercises: exercises,
+	}
+}
+
+func NewTraining(
+	id valueobject.TrainingID,
+	userID valueobject.UserID,
+	startedAt time.Time,
+	endedAt *time.Time,
+	memo *valueobject.String1000,
+	createdAt time.Time,
+	updatedAt time.Time,
+	exercises []*TrainingExercise,
+) *Training {
+	return &Training{
+		id:        id,
+		userID:    userID,
+		startedAt: startedAt,
+		endedAt:   endedAt,
+		memo:      memo,
+		createdAt: createdAt,
+		updatedAt: updatedAt,
 		exercises: exercises,
 	}
 }

@@ -65,19 +65,11 @@ func (r *sessionRepository) FindByRefreshHash(ctx context.Context, refreshHash s
 }
 
 func toSession(row SessionModel) (*sessiondomain.Session, error) {
-	sessionIDString, err := sqlconv.UUIDStringFromBytes(row.ID)
+	sessionID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.SessionID](row.ID)
 	if err != nil {
 		return nil, err
 	}
-	sessionID, err := valueobject.NewPrimaryIDFromString[valueobject.SessionID](sessionIDString)
-	if err != nil {
-		return nil, err
-	}
-	userIDString, err := sqlconv.UUIDStringFromBytes(row.UserID)
-	if err != nil {
-		return nil, err
-	}
-	userID, err := valueobject.NewPrimaryIDFromString[valueobject.UserID](userIDString)
+	userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.UserID)
 	if err != nil {
 		return nil, err
 	}
