@@ -32,7 +32,7 @@ func (r *userRepository) FindByID(ctx context.Context, id valueobject.UserID) (*
 	if err != nil {
 		return nil, err
 	}
-	var row userModel
+	var row UserModel
 	err = r.dbmap.WithContext(ctx).SelectOne(&row,
 		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE id = ? AND deleted_at IS NULL",
 		bytes,
@@ -47,7 +47,7 @@ func (r *userRepository) FindByID(ctx context.Context, id valueobject.UserID) (*
 }
 
 func (r *userRepository) FindByEmail(ctx context.Context, email valueobject.Email) (*userdomain.User, error) {
-	var row userModel
+	var row UserModel
 	err := r.dbmap.WithContext(ctx).SelectOne(&row,
 		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE email = ? AND deleted_at IS NULL",
 		email.Value(),
@@ -79,7 +79,7 @@ func (r *userRepository) Save(ctx context.Context, user *userdomain.User) error 
 	return err
 }
 
-func toUser(row userModel) (*userdomain.User, error) {
+func toUser(row UserModel) (*userdomain.User, error) {
 	userIDString, err := sqlconv.UUIDStringFromBytes(row.ID)
 	if err != nil {
 		return nil, err
@@ -104,11 +104,6 @@ func toUser(row userModel) (*userdomain.User, error) {
 	return userdomain.NewUser(*userID, *name, *email, *passwordHash, birthday, row.CreatedAt, row.UpdatedAt), nil
 }
 
-func NewUserRepository(db *sql.DB) userdomain.UserRepository {
-	dbmap := &gorp.DbMap{
-		Db:      db,
-		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
-	}
-	dbmap.AddTableWithName(userModel{}, "users").SetKeys(false, "ID")
+func NewUserRepository(dbmap *gorp.DbMap) userdomain.UserRepository {
 	return &userRepository{dbmap: dbmap}
 }

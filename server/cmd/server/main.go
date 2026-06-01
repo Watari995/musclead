@@ -24,6 +24,7 @@ import (
 	_ "github.com/Watari995/musclead/internal/shared"
 	"github.com/Watari995/musclead/internal/shared/httpx"
 	"github.com/Watari995/musclead/internal/user"
+	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -54,7 +55,12 @@ func run() error {
 		return fmt.Errorf("ping db: %w", err)
 	}
 
-	mux := newMux(db)
+	dbmap := &gorp.DbMap{
+		Db:      db,
+		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
+	}
+
+	mux := newMux(dbmap)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -111,7 +117,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(db *sql.DB) http.Handler {
+func newMux(dbmap *gorp.DbMap) http.Handler {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -120,9 +126,9 @@ func newMux(db *sql.DB) http.Handler {
 	// 各モジュールを組み立て、 そのハンドラをマウント
 	// swaggerのマウント
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
-	userModule := user.NewModule(db)
+	userModule := user.NewModule(dbmap)
 	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
-	mealModule := meal.NewModule(db, cdnBaseURL)
+	mealModule := meal.NewModule(dbmap.Db, cdnBaseURL)
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", httpx.AuthMiddleware(userModule.Handler))
 	mux.Handle("/meals", httpx.AuthMiddleware(mealModule.Handler))

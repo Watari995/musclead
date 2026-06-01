@@ -13,7 +13,7 @@ type Authenticate struct {
 	passwordHasher userdomain.PasswordHasher
 }
 
-func (uc *Authenticate) Execute(ctx context.Context, request publicfunctions.AuthenticateRequest) (publicfunctions.AuthenticateResponse, error) {
+func (uc *Authenticate) Authenticate(ctx context.Context, request publicfunctions.AuthenticateRequest) (publicfunctions.AuthenticateResponse, error) {
 	user, err := uc.userRepo.FindByEmail(ctx, request.Email)
 	if err != nil {
 		return publicfunctions.AuthenticateResponse{}, myerror.NewInternalError().Wrap(err)

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type userModel struct {
+type UserModel struct {
 	ID           []byte       `db:"id"`
 	Name         string       `db:"name"`
 	Email        string       `db:"email"`

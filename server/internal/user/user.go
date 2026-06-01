@@ -3,13 +3,13 @@
 package user
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/Watari995/musclead/internal/user/interface/publicfunctions"
 	userhandler "github.com/Watari995/musclead/internal/user/internal/handler"
 	userinfra "github.com/Watari995/musclead/internal/user/internal/infra"
 	userusecase "github.com/Watari995/musclead/internal/user/internal/usecase"
+	"github.com/go-gorp/gorp/v3"
 )
 
 // Module は user モジュールの公開 API。
@@ -20,8 +20,10 @@ type Module struct {
 	userCommand   publicfunctions.UserCommand
 }
 
-func NewModule(db *sql.DB) *Module {
-	repo := userinfra.NewUserRepository(db)
+func NewModule(dbmap *gorp.DbMap) *Module {
+	// repositoryを作成
+	dbmap.AddTableWithName(userinfra.UserModel{}, "users").SetKeys(false, "ID")
+	repo := userinfra.NewUserRepository(dbmap)
 	hasher := userinfra.NewBcryptPasswordHasher()
 
 	register := userusecase.NewRegisterUser(repo, hasher)
