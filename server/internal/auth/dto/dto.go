@@ -1,2 +1,6 @@
-// Package authdto は auth モジュールが外部に公開する DTO 定義。
 package authdto
+
+type AccessTokenResponse struct {
+	AccessToken          string `json:"access_token"`
+	AccessTokenExpiresAt string `json:"access_token_expires_at"`
+}
