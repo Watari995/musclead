@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiClient, type MealDTO, type RecordMealRequest } from "@/api/client";
-import { useUserId } from "@/lib/auth";
+import { useAccessToken } from "@/lib/access-token";
 import {
   Button,
   Card,
@@ -18,15 +18,15 @@ const MEALS_QUERY_KEY = ["meals"] as const;
 
 export default function MealsPage() {
   const router = useRouter();
-  const { userId, ready } = useUserId();
+  const { token, ready } = useAccessToken();
 
   useEffect(() => {
-    if (ready && !userId) router.replace("/login");
-  }, [ready, userId, router]);
+    if (ready && !token) router.replace("/login");
+  }, [ready, token, router]);
 
   const query = useQuery({
     queryKey: MEALS_QUERY_KEY,
-    enabled: Boolean(userId),
+    enabled: Boolean(token),
     queryFn: async () => {
       const { data, error, response } = await apiClient.GET("/meals", {
         params: { query: { limit: 50, offset: 0 } },
@@ -36,7 +36,7 @@ export default function MealsPage() {
     },
   });
 
-  if (!ready || !userId) return null;
+  if (!ready || !token) return null;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">

@@ -1,17 +1,37 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { clearStoredUserId, useUserId } from "@/lib/auth";
+import { logoutRequest } from "@/api/auth";
+import { apiClient, type UserDTO } from "@/api/client";
+import { clearAccessToken, useAccessToken } from "@/lib/access-token";
+
+const ME_QUERY_KEY = ["me"] as const;
 
 export function Header() {
   const router = useRouter();
-  const { userId, ready } = useUserId();
+  const queryClient = useQueryClient();
+  const { token, ready } = useAccessToken();
 
-  const handleLogout = () => {
-    clearStoredUserId();
-    router.push("/login");
+  const meQuery = useQuery({
+    queryKey: ME_QUERY_KEY,
+    enabled: Boolean(token),
+    queryFn: async () => {
+      const { data, error, response } = await apiClient.GET("/users/me");
+      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      return data as UserDTO;
+    },
+  });
+
+  const handleLogout = async () => {
+    await logoutRequest();
+    clearAccessToken();
+    queryClient.removeQueries({ queryKey: ME_QUERY_KEY });
+    router.replace("/login");
   };
+
+  const loggedIn = Boolean(token);
 
   return (
     <header className="border-b border-[var(--color-line)] bg-white sticky top-0 z-10">
@@ -22,7 +42,7 @@ export function Header() {
         >
           musclead
         </Link>
-        {ready && userId && (
+        {ready && loggedIn && (
           <nav className="hidden sm:flex items-center gap-6 text-sm text-[var(--color-ink)]">
             <Link href="/meals" className="hover:opacity-60 transition-opacity">
               食事
@@ -43,14 +63,21 @@ export function Header() {
         )}
         {ready && (
           <div className="flex items-center gap-3 text-sm">
-            {userId ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-              >
-                ログアウト
-              </button>
+            {loggedIn ? (
+              <>
+                {meQuery.data?.name && (
+                  <span className="hidden sm:inline text-[var(--color-ink-muted)]">
+                    {meQuery.data.name}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                >
+                  ログアウト
+                </button>
+              </>
             ) : (
               <>
                 <Link

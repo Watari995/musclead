@@ -4,8 +4,9 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { loginRequest } from "@/api/auth";
 import { apiClient, type RegisterRequest } from "@/api/client";
-import { setStoredUserId } from "@/lib/auth";
+import { setAccessToken } from "@/lib/access-token";
 import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
 
 export default function RegisterPage() {
@@ -19,13 +20,12 @@ export default function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: async (body: RegisterRequest) => {
-      const { data, error, response } = await apiClient.POST("/users", { body });
+      const { error, response } = await apiClient.POST("/users", { body });
       if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      if (!data?.user_id) throw new Error("user_id がレスポンスに含まれません");
-      return data.user_id;
+      return loginRequest(body.email ?? "", body.password ?? "");
     },
-    onSuccess: (userId) => {
-      setStoredUserId(userId);
+    onSuccess: (tokens) => {
+      setAccessToken(tokens.access_token);
       router.replace("/meals");
     },
   });
@@ -46,6 +46,7 @@ export default function RegisterPage() {
               value={form.name ?? ""}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
+              autoComplete="name"
             />
           </Label>
           <Label label="メールアドレス">
@@ -54,6 +55,7 @@ export default function RegisterPage() {
               value={form.email ?? ""}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
+              autoComplete="email"
             />
           </Label>
           <Label label="パスワード">
@@ -62,6 +64,7 @@ export default function RegisterPage() {
               value={form.password ?? ""}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
+              autoComplete="new-password"
             />
           </Label>
           <Label label="誕生日">

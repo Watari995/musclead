@@ -2,16 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useUserId } from "@/lib/auth";
+import { useAccessToken } from "@/lib/access-token";
 
 export default function HomePage() {
   const router = useRouter();
-  const { userId, ready } = useUserId();
+  const { token, ready } = useAccessToken();
 
   useEffect(() => {
     if (!ready) return;
-    router.replace(userId ? "/meals" : "/register");
-  }, [ready, userId, router]);
+    router.replace(token ? "/meals" : "/login");
+  }, [ready, token, router]);
 
-  return <div className="text-slate-500 text-sm">読み込み中…</div>;
+  return <div className="text-[var(--color-ink-muted)] text-sm">読み込み中…</div>;
 }
