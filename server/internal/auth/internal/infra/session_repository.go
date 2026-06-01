@@ -6,17 +6,18 @@ import (
 	"errors"
 
 	sessiondomain "github.com/Watari995/musclead/internal/auth/internal/domain"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 )
 
 type sessionRepository struct {
-	db    *sql.DB
 	dbmap *gorp.DbMap
 }
 
 func (r *sessionRepository) Save(ctx context.Context, session *sessiondomain.Session) error {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := session.ID().Bytes()
 	if err != nil {
 		return err
@@ -35,7 +36,7 @@ func (r *sessionRepository) Save(ctx context.Context, session *sessiondomain.Ses
 		sqlconv.ToNullTime(session.RevokedAt()),
 		session.CreatedAt(),
 	}
-	_, err = r.dbmap.WithContext(ctx).Exec(`
+	_, err = q.Exec(`
 INSERT INTO sessions (id, user_id, refresh_hash, user_agent, ip_address, expires_at, revoked_at, created_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
@@ -51,8 +52,9 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (r *sessionRepository) FindByRefreshHash(ctx context.Context, refreshHash string) (*sessiondomain.Session, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
 	var row SessionModel
-	err := r.dbmap.WithContext(ctx).SelectOne(&row, "SELECT id, user_id, refresh_hash, user_agent, ip_address, expires_at, revoked_at, created_at FROM sessions WHERE refresh_hash = ?", refreshHash)
+	err := q.SelectOne(&row, "SELECT id, user_id, refresh_hash, user_agent, ip_address, expires_at, revoked_at, created_at FROM sessions WHERE refresh_hash = ?", refreshHash)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
