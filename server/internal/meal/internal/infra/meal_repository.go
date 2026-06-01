@@ -18,7 +18,6 @@ import (
 )
 
 type mealRepository struct {
-	db    *sql.DB
 	dbmap *gorp.DbMap
 }
 
@@ -42,7 +41,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	var mealRows []mealModel
+	var mealRows []MealModel
 	_, err = r.dbmap.WithContext(ctx).Select(&mealRows,
 		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE user_id = ? ORDER BY eaten_at DESC LIMIT ? OFFSET ?",
 		bytes, int32(limit), int32(offset),
@@ -68,7 +67,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 		return []*mealdomain.Meal{}, paginator, nil
 	}
 
-	mealIDs := lo.Map(mealRows, func(m mealModel, _ int) []byte {
+	mealIDs := lo.Map(mealRows, func(m MealModel, _ int) []byte {
 		return m.ID
 	})
 	photos, err := r.selectPhotosByMealIDs(ctx, r.dbmap, mealIDs)
@@ -76,7 +75,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	photosByMealID := lo.GroupBy(photos, func(p mealPhotoModel) string {
+	photosByMealID := lo.GroupBy(photos, func(p MealPhotoModel) string {
 		return string(p.MealID)
 	})
 
@@ -97,7 +96,7 @@ func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*
 	if err != nil {
 		return nil, err
 	}
-	var mealRow mealModel
+	var mealRow MealModel
 	err = r.dbmap.WithContext(ctx).SelectOne(&mealRow,
 		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE id = ?",
 		bytes,
@@ -109,7 +108,7 @@ func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*
 		return nil, err
 	}
 
-	var photos []mealPhotoModel
+	var photos []MealPhotoModel
 	_, err = r.dbmap.WithContext(ctx).Select(&photos,
 		"SELECT id, meal_id, image_path, display_order, created_at FROM meal_photos WHERE meal_id = ? ORDER BY display_order ASC",
 		bytes,
@@ -170,7 +169,7 @@ func (r *mealRepository) DeleteByID(ctx context.Context, id valueobject.MealID) 
 }
 
 // selectPhotosByMealIDs は IN 句で複数の meal_id に紐づく photos を一括取得する
-func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.DbMap, mealIDs [][]byte) ([]mealPhotoModel, error) {
+func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.DbMap, mealIDs [][]byte) ([]MealPhotoModel, error) {
 	if len(mealIDs) == 0 {
 		return nil, nil
 	}
@@ -184,7 +183,7 @@ func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.
 	for i, id := range mealIDs {
 		args[i] = id
 	}
-	var photos []mealPhotoModel
+	var photos []MealPhotoModel
 	_, err := dbmap.WithContext(ctx).Select(&photos, query, args...)
 	if err != nil {
 		return nil, err
@@ -192,8 +191,8 @@ func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.
 	return photos, nil
 }
 
-func toPhotoData(photos []mealPhotoModel) []mealdomain.PhotoData {
-	return lo.Map(photos, func(p mealPhotoModel, _ int) mealdomain.PhotoData {
+func toPhotoData(photos []MealPhotoModel) []mealdomain.PhotoData {
+	return lo.Map(photos, func(p MealPhotoModel, _ int) mealdomain.PhotoData {
 		return mealdomain.PhotoData{
 			ImagePath:    p.ImagePath,
 			DisplayOrder: int(p.DisplayOrder),
@@ -201,7 +200,7 @@ func toPhotoData(photos []mealPhotoModel) []mealdomain.PhotoData {
 	})
 }
 
-func toMeal(row mealModel, photos []mealPhotoModel) (*mealdomain.Meal, error) {
+func toMeal(row MealModel, photos []MealPhotoModel) (*mealdomain.Meal, error) {
 	mealIDString, err := sqlconv.UUIDStringFromBytes(row.ID)
 	if err != nil {
 		return nil, err
@@ -288,12 +287,6 @@ func buildUpsertMealParams(meal *mealdomain.Meal) ([]interface{}, error) {
 	}, nil
 }
 
-func NewMealRepository(db *sql.DB) mealdomain.MealRepository {
-	dbmap := &gorp.DbMap{
-		Db:      db,
-		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
-	}
-	dbmap.AddTableWithName(mealModel{}, "meals").SetKeys(false, "ID")
-	dbmap.AddTableWithName(mealPhotoModel{}, "meal_photos").SetKeys(false, "ID")
-	return &mealRepository{db: db, dbmap: dbmap}
+func NewMealRepository(dbmap *gorp.DbMap) mealdomain.MealRepository {
+	return &mealRepository{dbmap: dbmap}
 }

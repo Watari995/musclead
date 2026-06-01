@@ -3,12 +3,12 @@
 package meal
 
 import (
-	"database/sql"
 	"net/http"
 
 	mealhandler "github.com/Watari995/musclead/internal/meal/internal/handler"
 	mealinfra "github.com/Watari995/musclead/internal/meal/internal/infra"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
+	"github.com/go-gorp/gorp/v3"
 )
 
 // Module は meal モジュールの公開 API。
@@ -17,8 +17,11 @@ type Module struct {
 	Handler http.Handler
 }
 
-func NewModule(db *sql.DB, cdnBaseURL string) *Module {
-	repo := mealinfra.NewMealRepository(db)
+func NewModule(dbmap *gorp.DbMap, cdnBaseURL string) *Module {
+	// repositoryを作成する
+	dbmap.AddTableWithName(mealinfra.MealModel{}, "meals").SetKeys(false, "ID")
+	dbmap.AddTableWithName(mealinfra.MealPhotoModel{}, "meal_photos").SetKeys(false, "ID")
+	repo := mealinfra.NewMealRepository(dbmap)
 
 	record := mealusecase.NewRecordMeal(repo)
 	find := mealusecase.NewFindMealByID(repo)

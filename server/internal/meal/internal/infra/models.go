@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type mealModel struct {
+type MealModel struct {
 	ID            []byte         `db:"id"`
 	UserID        []byte         `db:"user_id"`
 	EatenAt       time.Time      `db:"eaten_at"`
@@ -19,7 +19,7 @@ type mealModel struct {
 	UpdatedAt     time.Time      `db:"updated_at"`
 }
 
-type mealPhotoModel struct {
+type MealPhotoModel struct {
 	ID           []byte    `db:"id"`
 	MealID       []byte    `db:"meal_id"`
 	ImagePath    string    `db:"image_path"`

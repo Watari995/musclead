@@ -128,7 +128,7 @@ func newMux(dbmap *gorp.DbMap) http.Handler {
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	userModule := user.NewModule(dbmap)
 	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
-	mealModule := meal.NewModule(dbmap.Db, cdnBaseURL)
+	mealModule := meal.NewModule(dbmap, cdnBaseURL)
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", httpx.AuthMiddleware(userModule.Handler))
 	mux.Handle("/meals", httpx.AuthMiddleware(mealModule.Handler))

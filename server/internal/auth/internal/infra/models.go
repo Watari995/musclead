@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type sessionModel struct {
+type SessionModel struct {
 	ID          []byte       `db:"id"`
 	UserID      []byte       `db:"user_id"`
 	RefreshHash string       `db:"refresh_hash"`
