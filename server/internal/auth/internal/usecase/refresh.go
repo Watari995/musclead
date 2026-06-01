@@ -1,4 +1,4 @@
-package usecase
+package authusecase
 
 import (
 	"context"
@@ -72,4 +72,8 @@ func (uc *Refresh) Execute(ctx context.Context, input RefreshInput) (RefreshOutp
 	}
 
 	return RefreshOutput{AccessToken: accessToken, AccessTokenExpiresAt: accessTokenExpiresAt, RefreshToken: newRefreshRaw, RefreshTokenExpiresAt: refreshTokenExpiresAt}, nil
+}
+
+func NewRefresh(sessionRepo sessiondomain.SessionRepository, tokenSigner sessiondomain.TokenSigner) *Refresh {
+	return &Refresh{sessionRepo: sessionRepo, tokenSigner: tokenSigner}
 }

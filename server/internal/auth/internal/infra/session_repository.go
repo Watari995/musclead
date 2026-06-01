@@ -51,7 +51,7 @@ ON DUPLICATE KEY UPDATE
 }
 
 func (r *sessionRepository) FindByRefreshHash(ctx context.Context, refreshHash string) (*sessiondomain.Session, error) {
-	var row sessionModel
+	var row SessionModel
 	err := r.dbmap.WithContext(ctx).SelectOne(&row, "SELECT id, user_id, refresh_hash, user_agent, ip_address, expires_at, revoked_at, created_at FROM sessions WHERE refresh_hash = ?", refreshHash)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -62,7 +62,7 @@ func (r *sessionRepository) FindByRefreshHash(ctx context.Context, refreshHash s
 	return toSession(row)
 }
 
-func toSession(row sessionModel) (*sessiondomain.Session, error) {
+func toSession(row SessionModel) (*sessiondomain.Session, error) {
 	sessionIDString, err := sqlconv.UUIDStringFromBytes(row.ID)
 	if err != nil {
 		return nil, err
@@ -82,11 +82,6 @@ func toSession(row sessionModel) (*sessiondomain.Session, error) {
 	return sessiondomain.NewSession(*sessionID, *userID, row.RefreshHash, row.UserAgent, row.IPAddress, row.ExpiresAt, sqlconv.FromNullTime(row.RevokedAt), row.CreatedAt), nil
 }
 
-func NewSessionRepository(db *sql.DB) sessiondomain.SessionRepository {
-	dbmap := &gorp.DbMap{
-		Db:      db,
-		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
-	}
-	dbmap.AddTableWithName(sessionModel{}, "sessions").SetKeys(false, "ID")
-	return &sessionRepository{db: db, dbmap: dbmap}
+func NewSessionRepository(dbmap *gorp.DbMap) sessiondomain.SessionRepository {
+	return &sessionRepository{dbmap: dbmap}
 }
