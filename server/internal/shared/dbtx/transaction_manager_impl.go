@@ -38,10 +38,10 @@ func (m *transactionManager) Processing(ctx context.Context, f func(ctx context.
 }
 
 // Querierはctxからgorp.Transactionを取得し、取得できなければfallbackを返す
-func Querier(ctx context.Context, fallback gorp.SqlExecutor) gorp.SqlExecutor {
+func Querier(ctx context.Context, dbmap *gorp.DbMap) gorp.SqlExecutor {
 	if tx, ok := ctx.Value(txKey{}).(*gorp.Transaction); ok {
 		return tx
 	}
 
-	return fallback
+	return dbmap.WithContext(ctx)
 }
