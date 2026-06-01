@@ -1,8 +1,5 @@
 // Package traininginfra は Training 集約(Training → TrainingExercise → TrainingSet)を
-// MySQL に永続化する。 1集約 = 1 Repository の原則に従い、 子・孫専用の Repository は持たない。
-//
-// 読み書きは dbtx.Querier 経由なので、 呼び出し側が TransactionManager.Processing で
-// 包めば集約全体が自動的に1 TX に収まる。
+// MySQL に永続化する。 集約ルートに対する単一 Repository、 子・孫専用は持たない。
 package traininginfra
 
 import (
@@ -27,7 +24,6 @@ func NewTrainingRepository(dbmap *gorp.DbMap) trainingdomain.TrainingRepository 
 	return &trainingRepository{dbmap: dbmap}
 }
 
-// 親 = trainings は upsert(更新可能フィールドだけ ON DUPLICATE KEY UPDATE)。
 const upsertTrainingSQL = `
 INSERT INTO trainings (id, user_id, started_at, ended_at, memo, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -38,34 +34,21 @@ ON DUPLICATE KEY UPDATE
     updated_at = VALUES(updated_at)
 `
 
-// 子 = training_exercises は Save 時に「親に紐づく行を全削除 → 再 INSERT」 の戦略を取るので
-// INSERT のみで十分。 個別 UPDATE は不要。
 const upsertTrainingExerciseSQL = `
 INSERT INTO training_exercises (id, training_id, name, display_order, rest_seconds, memo, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 
-// 孫 = training_sets は親 (exercise) が CASCADE で削除されるので、 親リセット時に
-// 一緒に消える。 こちらも INSERT のみ。
 const upsertTrainingSetSQL = `
 INSERT INTO training_sets (id, training_exercise_id, set_number, weight_kg, reps, rest_seconds, memo, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
-// Save は集約全体を一括で永続化する。
+// Save は集約全体を永続化する。
 //
-// 戦略:
-//  1. 親 trainings を upsert(更新可能フィールドのみ)
-//  2. その training_id に紐づく training_exercises を全削除
-//     (CASCADE で training_sets も連鎖削除される)
-//  3. domain 側に残っている exercises / sets を全件 INSERT し直す
-//
-// 「子孫を一度全消ししてから再投入」 する理由は、 「子の削除 / 並び替え / 追加」 を
-// 1 つの Save で安全に表現するため。 部分更新は集約内部メソッドで完結させ、
-// 永続化レイヤは「集約のスナップショットを丸ごと書く」 ことに専念する。
-//
-// 呼び出し側が dbtx.TransactionManager.Processing で包んでいれば、 ここの全 Exec は
-// 同一トランザクションで実行される(dbtx.Querier が ctx の tx を拾うため)。
+// 戦略: 親 upsert → 子孫を全削除 → domain の最新スナップショットを再 INSERT。
+// 子の並び替え / 削除 / 追加を「Save 1 回」 で安全に表現するため、 永続化は常にスナップショット差し替えで扱う。
+// (呼び出し側が dbtx.Processing で包めば全 Exec が同一 TX で走る。)
 func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.Training) error {
 	idBytes, err := training.ID().Bytes()
 	if err != nil {
@@ -78,7 +61,6 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 
 	q := dbtx.Querier(ctx, r.dbmap)
 
-	// 1. trainings を upsert
 	if _, err := q.Exec(upsertTrainingSQL,
 		idBytes,
 		userIDBytes,
@@ -91,12 +73,11 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 		return err
 	}
 
-	// 2. 子(exercises)を全削除 → CASCADE で孫(sets)も削除される
+	// CASCADE で training_sets も連鎖削除される
 	if _, err := q.Exec("DELETE FROM training_exercises WHERE training_id = ?", idBytes); err != nil {
 		return err
 	}
 
-	// 3. domain 上の最新状態を順に INSERT
 	for _, ex := range training.Exercises() {
 		exIDBytes, err := ex.ID().Bytes()
 		if err != nil {
@@ -137,8 +118,7 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 	return nil
 }
 
-// FindByID は集約全体を取り出す。
-// 親 1 件 + 子の一括取得 + 孫の一括取得、 計 3 クエリで完結させる(N+1 を避ける)。
+// FindByID は集約全体を取り出す。 親 + 子一括 + 孫一括の 3 クエリ。
 func (r *trainingRepository) FindByID(ctx context.Context, id valueobject.TrainingID) (*trainingdomain.Training, error) {
 	idBytes, err := id.Bytes()
 	if err != nil {
@@ -152,7 +132,7 @@ func (r *trainingRepository) FindByID(ctx context.Context, id valueobject.Traini
 		"SELECT id, user_id, started_at, ended_at, memo, created_at, updated_at FROM trainings WHERE id = ?",
 		idBytes,
 	)
-	// 「見つからない」 は UseCase で nil 判定する設計なので、 ここでは nil, nil を返す。
+	// 「見つからない」 は UseCase で nil 判定する設計
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -160,7 +140,6 @@ func (r *trainingRepository) FindByID(ctx context.Context, id valueobject.Traini
 		return nil, err
 	}
 
-	// 子・孫を取得して map で stitched する(loadExercises 内で sets も解決済み)
 	exercises, err := r.loadExercises(ctx, [][]byte{idBytes})
 	if err != nil {
 		return nil, err
@@ -168,11 +147,7 @@ func (r *trainingRepository) FindByID(ctx context.Context, id valueobject.Traini
 	return toTraining(row, exercises[id.String()])
 }
 
-// FindAllByUserIDWithOffsetPagination は一覧版。
-// 親一覧 + 子一括 + 孫一括の 3 クエリ + COUNT クエリ、 計 4 クエリ。
-//
-// ページング後の親 ID 集合をベースに「IN 句で子・孫を1ショットで取る」 ことで
-// N+1 にならない作りにしている。
+// FindAllByUserIDWithOffsetPagination は一覧版。 親ページング + 子一括 + 孫一括 + COUNT の計 4 クエリ。
 func (r *trainingRepository) FindAllByUserIDWithOffsetPagination(
 	ctx context.Context,
 	userID valueobject.UserID,
@@ -186,7 +161,6 @@ func (r *trainingRepository) FindAllByUserIDWithOffsetPagination(
 
 	q := dbtx.Querier(ctx, r.dbmap)
 
-	// 1. 親(trainings)をページングして取得
 	var rows []TrainingModel
 	_, err = q.Select(&rows,
 		"SELECT id, user_id, started_at, ended_at, memo, created_at, updated_at FROM trainings WHERE user_id = ? ORDER BY started_at DESC LIMIT ? OFFSET ?",
@@ -196,7 +170,6 @@ func (r *trainingRepository) FindAllByUserIDWithOffsetPagination(
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	// 2. 総件数(COUNT)を取って Paginator を作る
 	total, err := q.SelectInt(
 		"SELECT COUNT(*) FROM trainings WHERE user_id = ?", userIDBytes,
 	)
@@ -211,12 +184,10 @@ func (r *trainingRepository) FindAllByUserIDWithOffsetPagination(
 		TotalPages:   (int(total) + limit - 1) / limit,
 	}
 
-	// 親 0 件なら子・孫を引きにいく必要なし
 	if len(rows) == 0 {
 		return []*trainingdomain.Training{}, paginator, nil
 	}
 
-	// 3. 親 ID 一覧を作って、 子(exercises)とその孫(sets)を一括ロード
 	trainingIDBytes := make([][]byte, 0, len(rows))
 	for _, row := range rows {
 		trainingIDBytes = append(trainingIDBytes, row.ID)
@@ -226,7 +197,6 @@ func (r *trainingRepository) FindAllByUserIDWithOffsetPagination(
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	// 4. 親 row 順に entity を組み立てる
 	trainings := make([]*trainingdomain.Training, 0, len(rows))
 	for _, row := range rows {
 		idStr, err := sqlconv.UUIDStringFromBytes(row.ID)
@@ -253,13 +223,9 @@ func (r *trainingRepository) DeleteByID(ctx context.Context, id valueobject.Trai
 	return err
 }
 
-// loadExercises は指定された複数 training_id に紐づく training_exercises を一括取得し、
-// さらにその exercises の sets も loadSets で一括取得する。
-//
-// 戻り値の map は「training_id (string)」 → 「その training に属する exercises」。
-// 呼び出し側は親を回しながら map[parentID] でアクセスして組み立てる。
-//
-// この「IN 句で兄弟集合をまとめて取る → map で束ねる」 パターンが N+1 回避の正体。
+// loadExercises は親 ID 群に紐づく子(exercises)と孫(sets)を IN 句で一括取得する。
+// 「兄弟集合をまとめて取って map で stitch」 が N+1 回避の核。
+// 戻り値は trainingID(文字列)→ []*TrainingExercise の map。
 func (r *trainingRepository) loadExercises(
 	ctx context.Context,
 	trainingIDs [][]byte,
@@ -269,7 +235,6 @@ func (r *trainingRepository) loadExercises(
 	}
 	q := dbtx.Querier(ctx, r.dbmap)
 
-	// IN 句用の "?,?,?" と args を共通ヘルパで作る
 	placeholders, args := sqlquery.InPlaceholders(trainingIDs)
 	var rows []TrainingExerciseModel
 	_, err := q.Select(&rows,
@@ -284,7 +249,6 @@ func (r *trainingRepository) loadExercises(
 		return map[string][]*trainingdomain.TrainingExercise{}, nil
 	}
 
-	// 孫(sets)もこのタイミングで全部まとめて読む
 	exerciseIDBytes := make([][]byte, 0, len(rows))
 	for _, row := range rows {
 		exerciseIDBytes = append(exerciseIDBytes, row.ID)
@@ -294,7 +258,6 @@ func (r *trainingRepository) loadExercises(
 		return nil, err
 	}
 
-	// stitched 結果: trainingID(文字列)→ []*TrainingExercise
 	result := make(map[string][]*trainingdomain.TrainingExercise, len(rows))
 	for _, row := range rows {
 		trainingIDStr, err := sqlconv.UUIDStringFromBytes(row.TrainingID)
@@ -314,7 +277,6 @@ func (r *trainingRepository) loadExercises(
 	return result, nil
 }
 
-// loadSets は指定 exercise 群に紐づく training_sets を一括取得し、 exercise_id ベースで map に束ねる。
 func (r *trainingRepository) loadSets(
 	ctx context.Context,
 	exerciseIDs [][]byte,
@@ -349,8 +311,6 @@ func (r *trainingRepository) loadSets(
 	return result, nil
 }
 
-// toTraining は DB row + 子 exercises から domain 上の Training entity を組み立てる。
-// 各 VO への変換時に検証ロジックが走るので、 異常データは error として上にバブルさせる。
 func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise) (*trainingdomain.Training, error) {
 	trainingID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingID](row.ID)
 	if err != nil {
@@ -364,7 +324,6 @@ func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise)
 	if err != nil {
 		return nil, err
 	}
-	// nil スライス保持を防ぐ。 domain は「空でも初期化済み」 の方が安全。
 	if exercises == nil {
 		exercises = []*trainingdomain.TrainingExercise{}
 	}
