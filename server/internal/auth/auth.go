@@ -14,7 +14,8 @@ import (
 )
 
 type Module struct {
-	Handler http.Handler
+	Handler    http.Handler
+	Middleware func(http.Handler) http.Handler
 }
 
 func NewModule(dbmap *gorp.DbMap, userCommand publicfunctions.UserCommand) *Module {
@@ -29,5 +30,6 @@ func NewModule(dbmap *gorp.DbMap, userCommand publicfunctions.UserCommand) *Modu
 	logout := authusecase.NewLogout(repo)
 
 	return &Module{
-		Handler: authhandler.NewAuthHandler(login, refresh, logout)}
+		Handler:    authhandler.NewAuthHandler(login, refresh, logout),
+		Middleware: authhandler.NewJWTMiddleware(tokenSigner)}
 }
