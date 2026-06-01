@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/Watari995/musclead/internal/myerror"
@@ -17,7 +18,7 @@ type ErrorDetail struct {
 }
 
 func WriteError(w http.ResponseWriter, err error) {
-	if myErr, ok := myerror.AsMyError(err); ok {
+	if myErr, ok := errors.AsType[myerror.MyError](err); ok {
 		WriteJSON(w, myErr.Status(), ErrorResponse{
 			Error: ErrorDetail{
 				Code:    string(myErr.Code()),

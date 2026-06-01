@@ -203,20 +203,8 @@ func NewWeightNotFoundError() MyError {
 }
 
 // ─── ヘルパー ───
-
-func AsMyError(err error) (MyError, bool) {
-	if err == nil {
-		return nil, false
-	}
-	var myErr MyError
-	if errors.As(err, &myErr) {
-		return myErr, true
-	}
-	return nil, false
-}
-
 func IsCode(err error, code ErrorCode) bool {
-	if myErr, ok := AsMyError(err); ok {
+	if myErr, ok := errors.AsType[MyError](err); ok {
 		return myErr.Code() == code
 	}
 	return false
