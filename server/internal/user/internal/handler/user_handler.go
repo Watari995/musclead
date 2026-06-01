@@ -16,6 +16,7 @@ type UserHandler struct {
 	register *userusecase.RegisterUser
 	find     *userusecase.FindUser
 	delete   *userusecase.DeleteUser
+	me       *userusecase.Me
 }
 
 func NewPublic(register *userusecase.RegisterUser) http.Handler {
@@ -27,16 +28,44 @@ func NewPublic(register *userusecase.RegisterUser) http.Handler {
 	return mux
 }
 
-func NewAuthenticated(find *userusecase.FindUser, delete *userusecase.DeleteUser) http.Handler {
+func NewAuthenticated(me *userusecase.Me, find *userusecase.FindUser, delete *userusecase.DeleteUser) http.Handler {
 	// ServeHTTP interfaceを満たしている必要がある
 	h := &UserHandler{
+		me:     me,
 		find:   find,
 		delete: delete,
 	}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /users/me", h.Me)
 	mux.HandleFunc("GET /users/{id}", h.Find)
 	mux.HandleFunc("DELETE /users/{id}", h.Delete)
 	return mux
+}
+
+// Me godoc
+//
+// @Summary ユーザー情報取得
+// @Tags users
+// @Produce json
+// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Success 200 {object} userdto.UserDTO
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /users/me [get]
+func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	params := userusecase.MeInput{
+		UserID: userID,
+	}
+	output, err := h.me.Execute(r.Context(), params)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, output.User)
 }
 
 type RegisterRequest struct {

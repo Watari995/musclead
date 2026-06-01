@@ -35,7 +35,7 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
-		Handler:       userhandler.NewAuthenticated(find, deleteUser),
+		Handler:       userhandler.NewAuthenticated(me, find, deleteUser),
 		userCommand:   authenticate,
 	}
 }
