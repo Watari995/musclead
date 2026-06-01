@@ -1,39 +1,64 @@
 ---
-description: shared/ 配下のヘルパー優先、 局所重複定義の禁止
-globs: server/**/*.go
+description: 長期的な品質低下を招く実装・方針を出さない
+globs: server/**/*.go,web/**/*.{ts,tsx}
 alwaysApply: true
 ---
 
-# Shared-First / 局所重複禁止
+# 長期品質を下げない / Shared-First
 
-「動けばよい」 を理由に **同じパッケージ内にヘルパーを直書き** することを禁止する。
+「動けばよい」 「ひとまず仕上げる」 「いったんここに書く」 を理由に、 **プロジェクトのルールや設計を侵食する実装・方針** を出すことを禁止する。
 
-## 違反する典型例
+短期的なベロシティと引き換えに、 既存の規律 / アーキテクチャ / 命名 / 配置 を曲げる選択肢は **AI 側からは提案も実装もしない**。 ユーザーが明示的に「妥協して速く」 と判断した時のみ可、 ただしその場合も TODO を必ず明示する。
 
-- `repository.go` の末尾に NULL 変換ヘルパーを直書き(`toNullString` 等)
-- 既に `shared/sqlconv/` `shared/httpx/` 配下に類似 API が存在するのに気付かず重複定義
-- コメント無しの新規パブリック関数を量産
-- パッケージ間の置き場所を再検討せず「使う側」 にぶら下げる
+## 違反する典型パターン
+
+### A. 配置の妥協
+- `repository.go` の末尾に汎用ヘルパーを直書き(NULL 変換 / placeholder 生成 等)
+- 既に `shared/` 配下に類似 API があるのに気付かず重複定義
+- 「使う側」 にぶら下げて済ませる(パッケージ間の責務を曲げる)
+
+### B. ルールの侵食
+- 既存の命名規約から外れた API を新規追加(`To<NullType>` の規約があるのに別命名で作る等)
+- DDD/集約境界を理由なく破る(子 entity 単独の Repository を作る、 集約ルートを介さず子を直接更新 等)
+- modular monolith strict の `internal/` を回避するために公開を増やす
+- VO を経由せず生の string / int でドメインロジックを書く
+
+### C. 観測性 / 安全性の低下
+- DB エラーをアプリ層の認証エラーに潰す(内部失敗が見えなくなる)
+- panic / log / wrap を省略して原因が追えない状態を残す
+- TX で守るべき複数操作を Save 2 回で済ませる(整合性放棄)
+
+### D. テスト容易性の犠牲
+- Entity 内で `time.Now()` 直接呼んで境界値テスト不能にする
+- 依存をコンストラクタに渡さずグローバル参照にする
+- mock 不可能な具体型をハンドラに直接持ち込む
 
 ## 守るべき手順
 
-1. **新しいヘルパー関数を書く前に必ず `shared/` 配下を grep**
-2. 適切なパッケージが既に存在するなら **そこに追加**(命名規約を守る)
-3. 適切なパッケージが無い場合のみ新規追加、 ただし配置場所を明示的に議論
-4. やむを得ず局所定義する場合は **`// TODO: shared/XXX に移動` を明示**
+1. **新しいヘルパー / 関数 / API を作る前に、 必ず `shared/` および同種既存ファイルを grep**
+2. 既存の配置・命名・規約に従う(`05-shared-first` の置き場所表を参照)
+3. **規約を破る方が明らかに筋が良いケース** は ADR(docs/adr/)を起こしてから実装する
+4. やむを得ず暫定実装する場合は **`// TODO: <なぜ暫定か / どこに移すか>`** をコード内に必ず残す
+5. 「将来必要になったらリファクタする」 を口実にした暗黙の妥協は禁止
 
-## 既存の置き場所
+## 既存の置き場所(2026-06 時点)
 
 | 種類 | 配置 | 命名規約 |
 |---|---|---|
 | VO / 値 ↔ sql.NullXxx | `internal/shared/sqlconv/` | `To<NullType>` / `From<NullType>` / `New<VO>FromNullXxx` |
-| HTTP リクエスト/レスポンスヘルパー | `internal/shared/httpx/` | `WriteJSON` / `DecodeJSON` / `WriteError` 等 |
-| エラー型 | `internal/myerror/` | `NewXxxError()` ファクトリ |
+| HTTP リクエスト/レスポンスヘルパー | `internal/shared/httpx/` | `WriteJSON` / `DecodeJSON` / `WriteError` / Cookie 操作 |
+| エラー型 | `internal/myerror/` | `New<X>Error()` ファクトリ |
 | トランザクション制御 | `internal/shared/dbtx/` | `TransactionManager.Processing` / `Querier` |
+| SQL 構文の組み立て補助 | `internal/shared/sqlquery/` | `InPlaceholders` 等 |
 | ページネーション | `internal/pagination/` | `OffsetPaginator` |
+| VO / Branded ID | `internal/valueobject/` | `New<X>` ファクトリ、 PrimaryID 共通 |
+| Module Facade | `internal/<module>/<module>.go` | `NewModule` + ゲッター |
+| 公開 Command Interface | `internal/<module>/interface/publicfunctions/` | `<Module>Command` + `<Action>Request/Response` |
 
-新しい横断的関心事を追加したい時は、 既存パッケージのいずれかに収まるかを **必ず最初に確認**する。
+新しい横断的関心事を増やす時は、 既存のいずれかに収まるかを最初に確認する。
 
 ## レビュー時の対応
 
-「置き場所おかしくない?」 と指摘されたら、 言い訳せず即座にリファクタ案を出して実行する。
+- 置き場所 / 命名 / 規約違反を指摘されたら、 **言い訳せず即リファクタ案を出して実行**
+- 「ちょっとここに置きました」 「shipping を急ぎました」 のような釈明は禁止
+- 長期視点で正しい構造を黙って崩した時点で、 それは「動けば良い」 妥協であり違反扱い
