@@ -6,7 +6,7 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
-// ExerciseSpec は新規 Training を組み立てるための「種目1件分の素材」。
+// TrainingExerciseSpec は新規 Training を組み立てるための「種目1件分の素材」。
 // ID / createdAt 等の永続化メタは持たず、 ファクトリ側で付与される。
 // DDD的にはDataよりもSpecの方がいいらしい。
 
@@ -14,18 +14,18 @@ type TrainingSpec struct {
 	StartedAt time.Time
 	EndedAt   *time.Time
 	Memo      *valueobject.String1000
-	Exercises []ExerciseSpec
+	Exercises []TrainingExerciseSpec
 }
-type ExerciseSpec struct {
+type TrainingExerciseSpec struct {
 	Name         valueobject.String50
 	DisplayOrder valueobject.NonNegativeInt
 	RestSeconds  *valueobject.NonNegativeInt
 	Memo         *valueobject.String1000
-	Sets         []SetSpec
+	Sets         []TrainingSetSpec
 }
 
-// SetSpec は ExerciseSpec の中に含めるセット 1 件分の素材。
-type SetSpec struct {
+// TrainingSetSpec は TrainingExerciseSpec の中に含めるセット 1 件分の素材。
+type TrainingSetSpec struct {
 	SetNumber   valueobject.NonNegativeInt
 	WeightKg    valueobject.NonNegativeDecimal
 	Reps        valueobject.NonNegativeInt
@@ -79,7 +79,7 @@ func (t *Training) Exercises() []*TrainingExercise {
 
 func CreateTraining(spec TrainingSpec, userID valueobject.UserID) *Training {
 	trainingID := valueobject.NewPrimaryID[valueobject.TrainingID]()
-	exerciseRows := rebuildExercises(trainingID, spec.Exercises)
+	exerciseRows := rebuildTrainingExercises(trainingID, spec.Exercises)
 	now := time.Now()
 	return &Training{
 		id:        trainingID,
@@ -97,7 +97,7 @@ func (t *Training) Update(spec TrainingSpec) {
 	t.startedAt = spec.StartedAt
 	t.endedAt = spec.EndedAt
 	t.memo = spec.Memo
-	t.exercises = rebuildExercises(t.id, spec.Exercises)
+	t.exercises = rebuildTrainingExercises(t.id, spec.Exercises)
 	t.updatedAt = time.Now()
 }
 
@@ -123,15 +123,15 @@ func NewTraining(
 	}
 }
 
-func rebuildExercises(trainingID valueobject.TrainingID, specs []ExerciseSpec) []*TrainingExercise {
+func rebuildTrainingExercises(trainingID valueobject.TrainingID, specs []TrainingExerciseSpec) []*TrainingExercise {
 	// sets, exerciseを先に作成する
 	exerciseRows := make([]*TrainingExercise, 0, len(specs))
 	for _, ex := range specs {
-		exerciseID := valueobject.NewPrimaryID[valueobject.ExerciseID]()
+		trainingExerciseID := valueobject.NewPrimaryID[valueobject.TrainingExerciseID]()
 		setRows := make([]*TrainingSet, 0, len(ex.Sets))
 		for _, set := range ex.Sets {
 			setEntity := CreateTrainingSet(
-				exerciseID,
+				trainingExerciseID,
 				set.SetNumber,
 				set.WeightKg,
 				set.Reps,

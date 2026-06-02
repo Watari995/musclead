@@ -7,8 +7,8 @@ import (
 )
 
 type TrainingSet struct {
-	id                 valueobject.SetID
-	trainingExerciseID valueobject.ExerciseID
+	id                 valueobject.TrainingSetID
+	trainingExerciseID valueobject.TrainingExerciseID
 	setNumber          valueobject.NonNegativeInt
 	weightKg           valueobject.NonNegativeDecimal
 	reps               valueobject.NonNegativeInt
@@ -18,11 +18,11 @@ type TrainingSet struct {
 	updatedAt          time.Time
 }
 
-func (s *TrainingSet) ID() valueobject.SetID {
+func (s *TrainingSet) ID() valueobject.TrainingSetID {
 	return s.id
 }
 
-func (s *TrainingSet) TrainingExerciseID() valueobject.ExerciseID {
+func (s *TrainingSet) TrainingExerciseID() valueobject.TrainingExerciseID {
 	return s.trainingExerciseID
 }
 
@@ -55,7 +55,7 @@ func (s *TrainingSet) UpdatedAt() time.Time {
 }
 
 func CreateTrainingSet(
-	trainingExerciseID valueobject.ExerciseID,
+	trainingExerciseID valueobject.TrainingExerciseID,
 	setNumber valueobject.NonNegativeInt,
 	weightKg valueobject.NonNegativeDecimal,
 	reps valueobject.NonNegativeInt,
@@ -64,7 +64,7 @@ func CreateTrainingSet(
 ) *TrainingSet {
 	now := time.Now()
 	return &TrainingSet{
-		id:                 valueobject.NewPrimaryID[valueobject.SetID](),
+		id:                 valueobject.NewPrimaryID[valueobject.TrainingSetID](),
 		trainingExerciseID: trainingExerciseID,
 		setNumber:          setNumber,
 		weightKg:           weightKg,
@@ -77,8 +77,8 @@ func CreateTrainingSet(
 }
 
 func NewTrainingSet(
-	id valueobject.SetID,
-	trainingExerciseID valueobject.ExerciseID,
+	id valueobject.TrainingSetID,
+	trainingExerciseID valueobject.TrainingExerciseID,
 	setNumber valueobject.NonNegativeInt,
 	weightKg valueobject.NonNegativeDecimal,
 	reps valueobject.NonNegativeInt,

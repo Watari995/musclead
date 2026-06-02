@@ -335,7 +335,7 @@ func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise)
 }
 
 func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.TrainingSet) (*trainingdomain.TrainingExercise, error) {
-	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.ID)
+	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingExerciseID](row.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -376,11 +376,11 @@ func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.Traini
 }
 
 func toTrainingSet(row TrainingSetModel) (*trainingdomain.TrainingSet, error) {
-	setID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.SetID](row.ID)
+	setID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingSetID](row.ID)
 	if err != nil {
 		return nil, err
 	}
-	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.TrainingExerciseID)
+	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingExerciseID](row.TrainingExerciseID)
 	if err != nil {
 		return nil, err
 	}

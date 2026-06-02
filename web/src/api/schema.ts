@@ -1002,28 +1002,28 @@ export interface components {
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
             trainings?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.TrainingDTO"][];
         };
-        "github_com_Watari995_musclead_internal_training_dto.RecordExerciseRequest": {
+        "github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest": {
             display_order?: number;
             memo?: string;
             name?: string;
             rest_seconds?: number;
-            sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordSetRequest"][];
-        };
-        "github_com_Watari995_musclead_internal_training_dto.RecordSetRequest": {
-            memo?: string;
-            reps?: number;
-            rest_seconds?: number;
-            set_number?: number;
-            weight_kg?: string;
+            sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingSetRequest"][];
         };
         "github_com_Watari995_musclead_internal_training_dto.RecordTrainingRequest": {
             ended_at?: string;
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordExerciseRequest"][];
+            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest"][];
             memo?: string;
             started_at?: string;
         };
         "github_com_Watari995_musclead_internal_training_dto.RecordTrainingResponse": {
             training_id?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.RecordTrainingSetRequest": {
+            memo?: string;
+            reps?: number;
+            rest_seconds?: number;
+            set_number?: number;
+            weight_kg?: string;
         };
         "github_com_Watari995_musclead_internal_training_dto.TrainingDTO": {
             created_at?: string;
@@ -1054,7 +1054,7 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_training_dto.UpdateTrainingRequest": {
             ended_at?: string;
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordExerciseRequest"][];
+            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest"][];
             memo?: string;
             started_at?: string;
         };

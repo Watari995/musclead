@@ -71,10 +71,10 @@ export type TrainingSetDTO =
   Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingSetDTO"];
 export type RecordTrainingRequest =
   Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingRequest"];
-export type RecordExerciseRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordExerciseRequest"];
-export type RecordSetRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordSetRequest"];
+export type RecordTrainingExerciseRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest"];
+export type RecordTrainingSetRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingSetRequest"];
 export type RecordTrainingResponse =
   Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingResponse"];
 export type ListTrainingsResponse =

@@ -24,7 +24,8 @@ type UserID struct{ PrimaryIDBase }
 type MealID struct{ PrimaryIDBase }
 type MealPhotoID struct{ PrimaryIDBase }
 type TrainingID struct{ PrimaryIDBase }
+type TrainingExerciseID struct{ PrimaryIDBase }
+type TrainingSetID struct{ PrimaryIDBase }
 type ExerciseID struct{ PrimaryIDBase }
-type SetID struct{ PrimaryIDBase }
 type RoutineID struct{ PrimaryIDBase }
 type WeightID struct{ PrimaryIDBase }
