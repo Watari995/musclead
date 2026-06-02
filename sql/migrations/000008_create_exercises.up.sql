@@ -1,0 +1,14 @@
+CREATE TABLE exercises (
+    id BINARY(16) NOT NULL,
+    user_id BINARY(16) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+
+    PRIMARY KEY(id),
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+
+    UNIQUE KEY uk_user_id_name (user_id, name)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
