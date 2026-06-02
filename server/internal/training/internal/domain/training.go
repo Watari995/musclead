@@ -74,18 +74,46 @@ func CreateTraining(
 	startedAt time.Time,
 	endedAt *time.Time,
 	memo *valueobject.String1000,
-	exercises []*TrainingExercise,
+	exercises []ExerciseSpec,
 ) *Training {
+	trainingID := valueobject.NewPrimaryID[valueobject.TrainingID]()
+	exerciseRows := make([]*TrainingExercise, 0, len(exercises))
+	// sets, exerciseを先に作成する
+	for _, ex := range exercises {
+		exerciseID := valueobject.NewPrimaryID[valueobject.ExerciseID]()
+		setRows := make([]*TrainingSet, 0, len(ex.Sets))
+		for _, set := range ex.Sets {
+			setEntity := CreateTrainingSet(
+				exerciseID,
+				set.SetNumber,
+				set.WeightKg,
+				set.Reps,
+				set.RestSeconds,
+				set.Memo,
+			)
+			setRows = append(setRows, setEntity)
+		}
+		exerciseEntity := CreateTrainingExercise(
+			trainingID,
+			ex.Name,
+			ex.DisplayOrder,
+			ex.RestSeconds,
+			ex.Memo,
+			setRows,
+		)
+		exerciseRows = append(exerciseRows, exerciseEntity)
+	}
+
 	now := time.Now()
 	return &Training{
-		id:        valueobject.NewPrimaryID[valueobject.TrainingID](),
+		id:        trainingID,
 		userID:    userID,
 		startedAt: startedAt,
 		endedAt:   endedAt,
 		memo:      memo,
 		createdAt: now,
 		updatedAt: now,
-		exercises: exercises,
+		exercises: exerciseRows,
 	}
 }
 
