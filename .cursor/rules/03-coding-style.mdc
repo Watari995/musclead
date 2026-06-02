@@ -14,6 +14,33 @@ alwaysApply: true
 - メソッド: `PascalCase`(exported) / `camelCase`(unexported)
 - 定数: `UPPER_SNAKE_CASE` or `PascalCase`
 
+### モジュール内ファイル名: `<aggregate>_<artifact>.go` 規約
+
+モジュール(`internal/<module>/`)配下のファイルは、 集約名を prefix にした命名で統一する。
+集約が 1 つしかないモジュールでも将来増える前提で最初から prefix を付ける。
+
+| レイヤ | 例 |
+|---|---|
+| domain entity | `meal.go` / `meal_photo.go` / `exercise.go` |
+| domain repository interface | `meal_repository.go` / `exercise_repository.go` |
+| infra model | `meal_models.go` / `exercise_model.go` |
+| infra repository impl | `meal_repository.go` / `exercise_repository.go` |
+| dto | `meal_dto.go` / `exercise_dto.go` |
+
+**禁止**:
+- `repository.go` / `models.go` / `dto.go` のような generic 名(後から集約追加で必ず曖昧になる)
+
+**理由**:
+- ファイル名で集約境界が一目で分かる
+- 集約追加時の rename 不要(最初から正しい命名)
+- `<aggregate>_*` で grep / IDE ナビが効く
+- domain と infra で同名ファイル(`meal_repository.go` × 2)は package が違うので衝突しない、 むしろ「interface と impl の対」 が明示される
+
+**サブディレクトリ分割は不要**:
+- 同一モジュール内は flat + prefix で十分(`net/http` 等の Go 標準パターン)
+- 別パッケージに切り出すのは「外から見える境界が必要になった時」 のみ
+  - 例: 他モジュールから参照したい → `interface/publicfunctions/` 経由で切り出し
+
 ## エラー処理
 
 - `error` を**最後の戻り値**に
