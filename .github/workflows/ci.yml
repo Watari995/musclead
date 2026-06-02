@@ -6,6 +6,17 @@ on:
   pull_request:
 
 jobs:
+  semgrep:
+    name: semgrep
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run semgrep
+        run: semgrep --config .semgrep.yml --error
+
   test:
     name: lint + test
     runs-on: ubuntu-latest

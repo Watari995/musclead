@@ -12,7 +12,6 @@
 #   - 既存違反が多いルールは段階導入(WARNING で始めて、 全修正後 ERROR に昇格)
 
 rules:
-
   # ─────────────────────────────────────────
   # HTTP ハンドラの return 抜けバグを防ぐ
   # ─────────────────────────────────────────
@@ -37,9 +36,6 @@ rules:
             httpx.WriteError(...)
             return
           }
-    paths:
-      include:
-        - "**/handler/**"
 
   - id: missing-return-after-write-no-content
     languages: [go]
@@ -59,6 +55,3 @@ rules:
             httpx.WriteNoContent(...)
             return
           }
-    paths:
-      include:
-        - "**/handler/**"

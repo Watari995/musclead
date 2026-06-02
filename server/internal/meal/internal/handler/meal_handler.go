@@ -311,6 +311,7 @@ func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
 		httpx.WriteError(w, err)
+		return
 	}
 	limit, offset := httpx.ParseOffsetPagination(r)
 	input := mealusecase.ListMealsInput{

@@ -1,0 +1,19 @@
+# semgrep 除外パターン
+# gitignore と同じ書式
+
+# ビルド成果物
+web/.next/
+web/node_modules/
+web/dist/
+web/build/
+
+# Go ビルド成果物
+bin/
+server/tmp/
+
+# 生成ファイル
+**/*.pb.go
+server/docs/
+
+# テスト一時ファイル
+**/*_test_data/
