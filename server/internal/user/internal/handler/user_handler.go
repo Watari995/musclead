@@ -47,7 +47,7 @@ func NewAuthenticated(me *userusecase.Me, find *userusecase.FindUser, delete *us
 // @Summary ユーザー情報取得
 // @Tags users
 // @Produce json
-// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Security BearerAuth
 // @Success 200 {object} userdto.UserDTO
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /users/me [get]
@@ -132,7 +132,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Summary ユーザー取得
 // @Tags users
 // @Produce json
-// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Security BearerAuth
 // @Param id path string true "対象 UserID"
 // @Success 200 {object} userdto.UserDTO
 // @Failure 401 {object} httpx.ErrorResponse
@@ -161,7 +161,7 @@ func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 //
 // @Summary ユーザー削除
 // @Tags users
-// @Param X-User-ID header string true "リクエスト元 UserID"
+// @Security BearerAuth
 // @Param id path string true "対象 UserID"
 // @Success 204
 // @Failure 401 {object} httpx.ErrorResponse
