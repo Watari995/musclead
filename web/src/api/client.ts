@@ -55,13 +55,31 @@ export type UserDTO =
 export type MealDTO =
   Schemas["github_com_Watari995_musclead_internal_meal_dto.MealDTO"];
 export type RegisterRequest =
-  Schemas["internal_user_internal_handler.RegisterRequest"];
+  Schemas["github_com_Watari995_musclead_internal_user_dto.RegisterRequest"];
 export type RegisterResponse =
-  Schemas["internal_user_internal_handler.RegisterResponse"];
+  Schemas["github_com_Watari995_musclead_internal_user_dto.RegisterResponse"];
 export type RecordMealRequest =
-  Schemas["internal_meal_internal_handler.RecordMealRequest"];
+  Schemas["github_com_Watari995_musclead_internal_meal_dto.RecordMealRequest"];
 export type ListMealsResponse =
-  Schemas["internal_meal_internal_handler.ListMealsResponse"];
+  Schemas["github_com_Watari995_musclead_internal_meal_dto.ListMealsResponse"];
+
+export type TrainingDTO =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingDTO"];
+export type TrainingExerciseDTO =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingExerciseDTO"];
+export type TrainingSetDTO =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingSetDTO"];
+export type RecordTrainingRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingRequest"];
+export type RecordExerciseRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordExerciseRequest"];
+export type RecordSetRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordSetRequest"];
+export type RecordTrainingResponse =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingResponse"];
+export type ListTrainingsResponse =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.ListTrainingsResponse"];
+
 export type ErrorResponse =
   Schemas["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
 

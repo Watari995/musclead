@@ -5,7 +5,7 @@ const BASE_URL =
 
 type Schemas = components["schemas"];
 export type LoginRequest =
-  Schemas["internal_auth_internal_handler.LoginRequest"];
+  Schemas["github_com_Watari995_musclead_internal_auth_dto.LoginRequest"];
 export type AccessTokenResponse =
   Schemas["github_com_Watari995_musclead_internal_auth_dto.AccessTokenResponse"];
 
