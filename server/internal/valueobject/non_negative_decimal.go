@@ -34,6 +34,16 @@ func NewNonNegativeDecimal(v decimal.Decimal) (*NonNegativeDecimal, error) {
 	return &n, nil
 }
 
+// NewNonNegativeDecimalFromString は数値の文字列表現("12.5" 等) から VO を生成する。
+// HTTP 入力 / DB の DECIMAL 列(string で返る)等、 string 起点の変換で共通利用する。
+func NewNonNegativeDecimalFromString(s string) (*NonNegativeDecimal, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	return NewNonNegativeDecimal(d)
+}
+
 // parse optional non negative decimal for handler parse to vo
 func ParseOptionalNonNegativeDecimal(f *float64) (*NonNegativeDecimal, error) {
 	if f == nil {

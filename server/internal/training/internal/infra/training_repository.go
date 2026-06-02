@@ -388,7 +388,7 @@ func toTrainingSet(row TrainingSetModel) (*trainingdomain.TrainingSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	weightKg, err := sqlconv.NewNonNegativeDecimalFromString(row.WeightKg)
+	weightKg, err := valueobject.NewNonNegativeDecimalFromString(row.WeightKg)
 	if err != nil {
 		return nil, err
 	}

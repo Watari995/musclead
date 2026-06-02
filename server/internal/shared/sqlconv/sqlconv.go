@@ -78,14 +78,6 @@ func DecimalToNullString(d decimal.Decimal) sql.NullString {
 	return sql.NullString{String: d.String(), Valid: true}
 }
 
-// NewNonNegativeDecimalFromString は NOT NULL DECIMAL 列(文字列で返る)を VO に変換する。
-func NewNonNegativeDecimalFromString(s string) (*valueobject.NonNegativeDecimal, error) {
-	d, err := decimal.NewFromString(s)
-	if err != nil {
-		return nil, err
-	}
-	return valueobject.NewNonNegativeDecimal(d)
-}
 
 func NewNonNegativeDecimalFromNullString(s sql.NullString) (*valueobject.NonNegativeDecimal, error) {
 	d, err := DecimalFromNullString(s)
