@@ -48,8 +48,8 @@ export function Header() {
               食事
             </Link>
             <Link
-              href="/meals"
-              className="hover:opacity-60 transition-opacity text-[var(--color-ink-muted)]"
+              href="/trainings"
+              className="hover:opacity-60 transition-opacity"
             >
               トレーニング
             </Link>
