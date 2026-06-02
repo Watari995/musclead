@@ -2,7 +2,6 @@ package mealhandler
 
 import (
 	"net/http"
-	"time"
 
 	mealdto "github.com/Watari995/musclead/internal/meal/dto"
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
@@ -48,24 +47,6 @@ func New(
 	return mux
 }
 
-type RecordMealRequest struct {
-	EatenAt       time.Time `json:"eaten_at"`
-	MealType      string    `json:"meal_type"`
-	Calories      int       `json:"calories"`
-	ProteinG      *float64  `json:"protein_g,omitempty"`
-	FatG          *float64  `json:"fat_g,omitempty"`
-	CarbohydrateG *float64  `json:"carbohydrate_g,omitempty"`
-	Memo          *string   `json:"memo,omitempty"`
-	Photos        []struct {
-		ImagePath    string `json:"image_path"`
-		DisplayOrder int    `json:"display_order"`
-	} `json:"photos"`
-}
-
-type RecordMealResponse struct {
-	MealID string `json:"meal_id"`
-}
-
 // Record godoc
 //
 // @Summary 食事記録
@@ -73,8 +54,8 @@ type RecordMealResponse struct {
 // @Accept json
 // @Produce json
 // @Param X-User-ID header string true "リクエスト元 UserID"
-// @Param request body RecordMealRequest true "食事記録"
-// @Success 201 {object} RecordMealResponse
+// @Param request body mealdto.RecordMealRequest true "食事記録"
+// @Success 201 {object} mealdto.RecordMealResponse
 // @Failure 400 {object} httpx.ErrorResponse
 // @Router /meals [post]
 func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +64,7 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	var req RecordMealRequest
+	var req mealdto.RecordMealRequest
 	if err := httpx.DecodeJSON(r, &req); err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
 		return
@@ -122,10 +103,7 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	photos := lo.Map(req.Photos, func(p struct {
-		ImagePath    string `json:"image_path"`
-		DisplayOrder int    `json:"display_order"`
-	}, _ int) mealdomain.PhotoSpec {
+	photos := lo.Map(req.Photos, func(p mealdto.MealPhotoInput, _ int) mealdomain.PhotoSpec {
 		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
 			DisplayOrder: p.DisplayOrder,
@@ -148,7 +126,7 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := RecordMealResponse{
+	resp := mealdto.RecordMealResponse{
 		MealID: output.MealID.Value(),
 	}
 	httpx.WriteJSON(w, http.StatusCreated, resp)
@@ -191,24 +169,6 @@ func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
-type UpdateMealRequest struct {
-	EatenAt       time.Time `json:"eaten_at"`
-	MealType      string    `json:"meal_type"`
-	Calories      int       `json:"calories"`
-	ProteinG      *float64  `json:"protein_g,omitempty"`
-	FatG          *float64  `json:"fat_g,omitempty"`
-	CarbohydrateG *float64  `json:"carbohydrate_g,omitempty"`
-	Memo          *string   `json:"memo,omitempty"`
-	Photos        []struct {
-		ImagePath    string `json:"image_path"`
-		DisplayOrder int    `json:"display_order"`
-	} `json:"photos"`
-}
-
-type UpdateMealResponse struct {
-	MealID string `json:"meal_id"`
-}
-
 // Update godoc
 //
 // @Summary 食事更新
@@ -217,8 +177,8 @@ type UpdateMealResponse struct {
 // @Produce json
 // @Param X-User-ID header string true "リクエスト元 UserID"
 // @Param id path string true "対象 MealID"
-// @Param request body UpdateMealRequest true "更新内容"
-// @Success 200 {object} UpdateMealResponse
+// @Param request body mealdto.UpdateMealRequest true "更新内容"
+// @Success 200 {object} mealdto.UpdateMealResponse
 // @Failure 400 {object} httpx.ErrorResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Failure 403 {object} httpx.ErrorResponse
@@ -235,7 +195,7 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid mealID"))
 		return
 	}
-	var req UpdateMealRequest
+	var req mealdto.UpdateMealRequest
 	if err := httpx.DecodeJSON(r, &req); err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
 		return
@@ -273,10 +233,7 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	photos := lo.Map(req.Photos, func(p struct {
-		ImagePath    string `json:"image_path"`
-		DisplayOrder int    `json:"display_order"`
-	}, _ int) mealdomain.PhotoSpec {
+	photos := lo.Map(req.Photos, func(p mealdto.MealPhotoInput, _ int) mealdomain.PhotoSpec {
 		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
 			DisplayOrder: p.DisplayOrder,
@@ -299,7 +256,7 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := UpdateMealResponse{
+	resp := mealdto.UpdateMealResponse{
 		MealID: output.MealID.Value(),
 	}
 	httpx.WriteJSON(w, http.StatusOK, resp)
@@ -339,11 +296,6 @@ func (h *MealHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteNoContent(w)
 }
 
-type ListMealsResponse struct {
-	Meals      []mealdto.MealDTO       `json:"meals"`
-	Pagination shareddto.PaginationDTO `json:"pagination"`
-}
-
 // List godoc
 //
 // @Summary 食事一覧
@@ -352,7 +304,7 @@ type ListMealsResponse struct {
 // @Param X-User-ID header string true "リクエスト元 UserID"
 // @Param limit query int false "1ページの件数 (default: 20, max: 100)"
 // @Param offset query int false "開始位置 (default: 0)"
-// @Success 200 {object} ListMealsResponse
+// @Success 200 {object} mealdto.ListMealsResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /meals [get]
 func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -371,7 +323,7 @@ func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	response := ListMealsResponse{
+	response := mealdto.ListMealsResponse{
 		Meals: lo.Map(output.Meals, func(m *mealdomain.Meal, _ int) mealdto.MealDTO {
 			return mealdto.NewMealDTO(m, h.cdnBaseURL)
 		}),

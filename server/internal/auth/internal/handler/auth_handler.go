@@ -30,23 +30,18 @@ func NewAuthHandler(login *authusecase.Login, refresh *authusecase.Refresh, logo
 	return mux
 }
 
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 // Login godoc
 //
 // @Summary ログイン
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param body body LoginRequest true "ログイン情報"
+// @Param body body authdto.LoginRequest true "ログイン情報"
 // @Success 200 {object} authdto.AccessTokenResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req LoginRequest
+	var req authdto.LoginRequest
 	if err := httpx.DecodeJSON(r, &req); err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
 		return

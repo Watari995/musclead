@@ -69,17 +69,6 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
-type RegisterRequest struct {
-	Name     string  `json:"name"`
-	Email    string  `json:"email"`
-	Password string  `json:"password"`
-	Birthday *string `json:"birthday,omitempty"`
-}
-
-type RegisterResponse struct {
-	UserID string `json:"user_id"`
-}
-
 // Register godoc
 //
 // @Summary ユーザー登録
@@ -87,13 +76,13 @@ type RegisterResponse struct {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param request body RegisterRequest true "ユーザー登録情報"
-// @Success 201 {object} RegisterResponse "ユーザー登録成功"
+// @Param request body userdto.RegisterRequest true "ユーザー登録情報"
+// @Success 201 {object} userdto.RegisterResponse "ユーザー登録成功"
 // @Failure 400 {object} httpx.ErrorResponse
 // @Failure 409 {object} httpx.ErrorResponse
 // @Router /users [post]
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req RegisterRequest
+	var req userdto.RegisterRequest
 	if err := httpx.DecodeJSON(r, &req); err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
 		return
@@ -132,7 +121,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := RegisterResponse{
+	resp := userdto.RegisterResponse{
 		UserID: output.UserID.Value(),
 	}
 	httpx.WriteJSON(w, http.StatusCreated, resp)

@@ -3,10 +3,54 @@ package trainingdto
 import (
 	"time"
 
+	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/samber/lo"
 )
+
+// ─── Request / Response (HTTP境界) ─────────────────────────
+
+type RecordSetRequest struct {
+	SetNumber   int     `json:"set_number"`
+	WeightKg    string  `json:"weight_kg"`
+	Reps        int     `json:"reps"`
+	RestSeconds *int    `json:"rest_seconds,omitempty"`
+	Memo        *string `json:"memo,omitempty"`
+}
+
+type RecordExerciseRequest struct {
+	Name         string             `json:"name"`
+	DisplayOrder int                `json:"display_order"`
+	RestSeconds  *int               `json:"rest_seconds,omitempty"`
+	Memo         *string            `json:"memo,omitempty"`
+	Sets         []RecordSetRequest `json:"sets"`
+}
+
+type RecordTrainingRequest struct {
+	StartedAt time.Time               `json:"started_at"`
+	EndedAt   *time.Time              `json:"ended_at,omitempty"`
+	Memo      *string                 `json:"memo,omitempty"`
+	Exercises []RecordExerciseRequest `json:"exercises"`
+}
+
+type RecordTrainingResponse struct {
+	TrainingID string `json:"training_id"`
+}
+
+// UpdateTrainingRequest は Record と同じ shape のため alias 的に使い回す。
+type UpdateTrainingRequest = RecordTrainingRequest
+
+type UpdateTrainingResponse struct {
+	TrainingID string `json:"training_id"`
+}
+
+type ListTrainingsResponse struct {
+	Trainings  []TrainingDTO           `json:"trainings"`
+	Pagination shareddto.PaginationDTO `json:"pagination"`
+}
+
+// ─── Entity view ────────────────────────────────────────
 
 type TrainingSetDTO struct {
 	ID          string  `json:"id"`

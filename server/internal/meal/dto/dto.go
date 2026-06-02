@@ -4,9 +4,54 @@ import (
 	"time"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
+	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/shared/storage"
 	"github.com/samber/lo"
 )
+
+// ─── Request / Response (HTTP境界) ─────────────────────────
+
+type MealPhotoInput struct {
+	ImagePath    string `json:"image_path"`
+	DisplayOrder int    `json:"display_order"`
+}
+
+type RecordMealRequest struct {
+	EatenAt       time.Time        `json:"eaten_at"`
+	MealType      string           `json:"meal_type"`
+	Calories      int              `json:"calories"`
+	ProteinG      *float64         `json:"protein_g,omitempty"`
+	FatG          *float64         `json:"fat_g,omitempty"`
+	CarbohydrateG *float64         `json:"carbohydrate_g,omitempty"`
+	Memo          *string          `json:"memo,omitempty"`
+	Photos        []MealPhotoInput `json:"photos"`
+}
+
+type RecordMealResponse struct {
+	MealID string `json:"meal_id"`
+}
+
+type UpdateMealRequest struct {
+	EatenAt       time.Time        `json:"eaten_at"`
+	MealType      string           `json:"meal_type"`
+	Calories      int              `json:"calories"`
+	ProteinG      *float64         `json:"protein_g,omitempty"`
+	FatG          *float64         `json:"fat_g,omitempty"`
+	CarbohydrateG *float64         `json:"carbohydrate_g,omitempty"`
+	Memo          *string          `json:"memo,omitempty"`
+	Photos        []MealPhotoInput `json:"photos"`
+}
+
+type UpdateMealResponse struct {
+	MealID string `json:"meal_id"`
+}
+
+type ListMealsResponse struct {
+	Meals      []MealDTO               `json:"meals"`
+	Pagination shareddto.PaginationDTO `json:"pagination"`
+}
+
+// ─── Entity view ────────────────────────────────────────
 
 type PhotoDTO struct {
 	ImageURL     string `json:"image_url"`
@@ -36,7 +81,6 @@ type MealDTO struct {
 }
 
 func NewMealDTO(m *mealdomain.Meal, cdnBaseURL string) MealDTO {
-
 	// nullable な voをstringに変換する
 	var proteinGStr *string
 	if m.ProteinG() != nil {
