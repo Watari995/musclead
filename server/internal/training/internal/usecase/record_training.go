@@ -2,7 +2,6 @@ package trainingusecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -11,11 +10,8 @@ import (
 )
 
 type RecordTrainingInput struct {
-	UserID    valueobject.UserID
-	StartedAt time.Time
-	EndedAt   *time.Time
-	Memo      *valueobject.String1000
-	Exercises []trainingdomain.ExerciseSpec
+	UserID       valueobject.UserID
+	TrainingSpec trainingdomain.TrainingSpec
 }
 
 type RecordTrainingOutput struct {
@@ -28,13 +24,7 @@ type RecordTraining struct {
 }
 
 func (uc *RecordTraining) Execute(ctx context.Context, input RecordTrainingInput) (*RecordTrainingOutput, error) {
-	training := trainingdomain.CreateTraining(
-		input.UserID,
-		input.StartedAt,
-		input.EndedAt,
-		input.Memo,
-		input.Exercises,
-	)
+	training := trainingdomain.CreateTraining(input.TrainingSpec, input.UserID)
 
 	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
 		if err := uc.trainingRepo.Save(txCtx, training); err != nil {

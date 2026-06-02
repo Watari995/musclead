@@ -3,6 +3,7 @@ package trainingdto
 import (
 	"time"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -19,6 +20,37 @@ type RecordSetRequest struct {
 	Memo        *string `json:"memo,omitempty"`
 }
 
+// req -> spec(vo)に変換する
+func (r RecordSetRequest) ToSpec() (trainingdomain.SetSpec, error) {
+	setNumber, err := valueobject.NewNonNegativeInt(r.SetNumber)
+	if err != nil {
+		return trainingdomain.SetSpec{}, myerror.NewBadRequestError().SetMessage("invalid set_number")
+	}
+	weightKg, err := valueobject.NewNonNegativeDecimalFromString(r.WeightKg)
+	if err != nil {
+		return trainingdomain.SetSpec{}, myerror.NewBadRequestError().SetMessage("invalid weight_kg")
+	}
+	reps, err := valueobject.NewNonNegativeInt(r.Reps)
+	if err != nil {
+		return trainingdomain.SetSpec{}, myerror.NewBadRequestError().SetMessage("invalid reps")
+	}
+	restSeconds, err := valueobject.NewNonNegativeInt(*r.RestSeconds)
+	if err != nil {
+		return trainingdomain.SetSpec{}, myerror.NewBadRequestError().SetMessage("invalid rest_seconds")
+	}
+	memo, err := valueobject.NewString1000(*r.Memo)
+	if err != nil {
+		return trainingdomain.SetSpec{}, myerror.NewBadRequestError().SetMessage("invalid memo")
+	}
+	return trainingdomain.SetSpec{
+		SetNumber:   *setNumber,
+		WeightKg:    *weightKg,
+		Reps:        *reps,
+		RestSeconds: restSeconds,
+		Memo:        memo,
+	}, nil
+}
+
 type RecordExerciseRequest struct {
 	Name         string             `json:"name"`
 	DisplayOrder int                `json:"display_order"`
@@ -27,11 +59,64 @@ type RecordExerciseRequest struct {
 	Sets         []RecordSetRequest `json:"sets"`
 }
 
+func (r RecordExerciseRequest) ToSpec() (trainingdomain.ExerciseSpec, error) {
+	name, err := valueobject.NewString50(r.Name)
+	if err != nil {
+		return trainingdomain.ExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid name")
+	}
+	displayOrder, err := valueobject.NewNonNegativeInt(r.DisplayOrder)
+	if err != nil {
+		return trainingdomain.ExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid display_order")
+	}
+	restSeconds, err := valueobject.NewNonNegativeInt(*r.RestSeconds)
+	if err != nil {
+		return trainingdomain.ExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid rest_seconds")
+	}
+	memo, err := valueobject.NewString1000(*r.Memo)
+	if err != nil {
+		return trainingdomain.ExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid memo")
+	}
+	sets := lo.Map(r.Sets, func(s RecordSetRequest, _ int) trainingdomain.SetSpec {
+		spec, err := s.ToSpec()
+		if err != nil {
+			return trainingdomain.SetSpec{}
+		}
+		return spec
+	})
+	return trainingdomain.ExerciseSpec{
+		Name:         *name,
+		DisplayOrder: *displayOrder,
+		RestSeconds:  restSeconds,
+		Memo:         memo,
+		Sets:         sets,
+	}, nil
+}
+
 type RecordTrainingRequest struct {
 	StartedAt time.Time               `json:"started_at"`
 	EndedAt   *time.Time              `json:"ended_at,omitempty"`
 	Memo      *string                 `json:"memo,omitempty"`
 	Exercises []RecordExerciseRequest `json:"exercises"`
+}
+
+func (r RecordTrainingRequest) ToSpec() (trainingdomain.TrainingSpec, error) {
+	memo, err := valueobject.NewString1000(*r.Memo)
+	if err != nil {
+		return trainingdomain.TrainingSpec{}, myerror.NewBadRequestError().SetMessage("invalid memo")
+	}
+	exercises := lo.Map(r.Exercises, func(e RecordExerciseRequest, _ int) trainingdomain.ExerciseSpec {
+		spec, err := e.ToSpec()
+		if err != nil {
+			return trainingdomain.ExerciseSpec{}
+		}
+		return spec
+	})
+	return trainingdomain.TrainingSpec{
+		StartedAt: r.StartedAt,
+		EndedAt:   r.EndedAt,
+		Memo:      memo,
+		Exercises: exercises,
+	}, nil
 }
 
 type RecordTrainingResponse struct {

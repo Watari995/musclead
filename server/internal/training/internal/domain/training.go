@@ -9,6 +9,13 @@ import (
 // ExerciseSpec は新規 Training を組み立てるための「種目1件分の素材」。
 // ID / createdAt 等の永続化メタは持たず、 ファクトリ側で付与される。
 // DDD的にはDataよりもSpecの方がいいらしい。
+
+type TrainingSpec struct {
+	StartedAt time.Time
+	EndedAt   *time.Time
+	Memo      *valueobject.String1000
+	Exercises []ExerciseSpec
+}
 type ExerciseSpec struct {
 	Name         valueobject.String50
 	DisplayOrder valueobject.NonNegativeInt
@@ -70,22 +77,16 @@ func (t *Training) Exercises() []*TrainingExercise {
 	return t.exercises
 }
 
-func CreateTraining(
-	userID valueobject.UserID,
-	startedAt time.Time,
-	endedAt *time.Time,
-	memo *valueobject.String1000,
-	exercises []ExerciseSpec,
-) *Training {
+func CreateTraining(spec TrainingSpec, userID valueobject.UserID) *Training {
 	trainingID := valueobject.NewPrimaryID[valueobject.TrainingID]()
-	exerciseRows := rebuildExercises(trainingID, exercises)
+	exerciseRows := rebuildExercises(trainingID, spec.Exercises)
 	now := time.Now()
 	return &Training{
 		id:        trainingID,
 		userID:    userID,
-		startedAt: startedAt,
-		endedAt:   endedAt,
-		memo:      memo,
+		startedAt: spec.StartedAt,
+		endedAt:   spec.EndedAt,
+		memo:      spec.Memo,
 		createdAt: now,
 		updatedAt: now,
 		exercises: exerciseRows,

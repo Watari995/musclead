@@ -9,13 +9,13 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
-type ListTrainingInput struct {
+type ListTrainingsInput struct {
 	UserID valueobject.UserID
 	Limit  int
 	Offset int
 }
 
-type ListTrainingOutput struct {
+type ListTrainingsOutput struct {
 	Trainings  []*trainingdomain.Training
 	Pagination pagination.OffsetPaginator
 }
@@ -24,13 +24,13 @@ type ListTrainings struct {
 	trainingRepo trainingdomain.TrainingRepository
 }
 
-func (uc *ListTrainings) Execute(ctx context.Context, input ListTrainingInput) (*ListTrainingOutput, error) {
+func (uc *ListTrainings) Execute(ctx context.Context, input ListTrainingsInput) (*ListTrainingsOutput, error) {
 	trainings, paginator, err := uc.trainingRepo.FindAllByUserIDWithOffsetPagination(ctx, input.UserID, input.Limit, input.Offset)
 	if err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
 
-	return &ListTrainingOutput{
+	return &ListTrainingsOutput{
 		Trainings:  trainings,
 		Pagination: paginator,
 	}, nil
