@@ -6,6 +6,25 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
+// ExerciseSpec は新規 Training を組み立てるための「種目1件分の素材」。
+// ID / createdAt 等の永続化メタは持たず、 ファクトリ側で付与される。
+type ExerciseSpec struct {
+	Name         valueobject.String50
+	DisplayOrder valueobject.NonNegativeInt
+	RestSeconds  *valueobject.NonNegativeInt
+	Memo         *valueobject.String1000
+	Sets         []SetSpec
+}
+
+// SetSpec は ExerciseSpec の中に含めるセット 1 件分の素材。
+type SetSpec struct {
+	SetNumber   valueobject.NonNegativeInt
+	WeightKg    valueobject.NonNegativeDecimal
+	Reps        valueobject.NonNegativeInt
+	RestSeconds *valueobject.NonNegativeInt
+	Memo        *valueobject.String1000
+}
+
 type Training struct {
 	id        valueobject.TrainingID
 	userID    valueobject.UserID

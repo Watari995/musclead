@@ -182,9 +182,9 @@ func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.
 	return photos, nil
 }
 
-func toPhotoData(photos []MealPhotoModel) []mealdomain.PhotoData {
-	return lo.Map(photos, func(p MealPhotoModel, _ int) mealdomain.PhotoData {
-		return mealdomain.PhotoData{
+func toPhotoSpec(photos []MealPhotoModel) []mealdomain.PhotoSpec {
+	return lo.Map(photos, func(p MealPhotoModel, _ int) mealdomain.PhotoSpec {
+		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
 			DisplayOrder: int(p.DisplayOrder),
 		}
@@ -227,7 +227,7 @@ func toMeal(row MealModel, photos []MealPhotoModel) (*mealdomain.Meal, error) {
 			return nil, err
 		}
 	}
-	return mealdomain.NewMeal(*mealID, *userID, row.EatenAt, *mealType, *calories, proteinG, fatG, carbohydrateG, memoVO, row.CreatedAt, row.UpdatedAt, toPhotoData(photos)), nil
+	return mealdomain.NewMeal(*mealID, *userID, row.EatenAt, *mealType, *calories, proteinG, fatG, carbohydrateG, memoVO, row.CreatedAt, row.UpdatedAt, toPhotoSpec(photos)), nil
 }
 
 func buildUpsertMealParams(meal *mealdomain.Meal) ([]interface{}, error) {

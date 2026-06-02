@@ -125,8 +125,8 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 	photos := lo.Map(req.Photos, func(p struct {
 		ImagePath    string `json:"image_path"`
 		DisplayOrder int    `json:"display_order"`
-	}, _ int) mealdomain.PhotoData {
-		return mealdomain.PhotoData{
+	}, _ int) mealdomain.PhotoSpec {
+		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
 			DisplayOrder: p.DisplayOrder,
 		}
@@ -140,7 +140,7 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 		FatG:          fatG,
 		CarbohydrateG: carbohydrateG,
 		Memo:          memo,
-		PhotoData:     photos,
+		Photos:        photos,
 	}
 
 	output, err := h.record.Execute(r.Context(), input)
@@ -276,8 +276,8 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 	photos := lo.Map(req.Photos, func(p struct {
 		ImagePath    string `json:"image_path"`
 		DisplayOrder int    `json:"display_order"`
-	}, _ int) mealdomain.PhotoData {
-		return mealdomain.PhotoData{
+	}, _ int) mealdomain.PhotoSpec {
+		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
 			DisplayOrder: p.DisplayOrder,
 		}

@@ -13,7 +13,7 @@ type PhotoDTO struct {
 	DisplayOrder int    `json:"display_order"`
 }
 
-func NewPhotoDTO(p mealdomain.PhotoData, cdnBaseURL string) PhotoDTO {
+func NewPhotoDTO(p mealdomain.PhotoSpec, cdnBaseURL string) PhotoDTO {
 	return PhotoDTO{
 		ImageURL:     storage.BuildImageURL(cdnBaseURL, p.ImagePath),
 		DisplayOrder: p.DisplayOrder,
@@ -59,7 +59,7 @@ func NewMealDTO(m *mealdomain.Meal, cdnBaseURL string) MealDTO {
 		memoStr = &s
 	}
 
-	photos := lo.Map(m.Photos(), func(p mealdomain.PhotoData, idx int) PhotoDTO {
+	photos := lo.Map(m.Photos(), func(p mealdomain.PhotoSpec, idx int) PhotoDTO {
 		return NewPhotoDTO(p, cdnBaseURL)
 	})
 

@@ -6,7 +6,7 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
-type PhotoData struct {
+type PhotoSpec struct {
 	ImagePath    string
 	DisplayOrder int
 }
@@ -24,7 +24,7 @@ type Meal struct {
 	createdAt     time.Time
 	updatedAt     time.Time
 
-	photos []PhotoData
+	photos []PhotoSpec
 }
 
 func (m *Meal) ID() valueobject.MealID {
@@ -71,11 +71,11 @@ func (m *Meal) UpdatedAt() time.Time {
 	return m.updatedAt
 }
 
-func (m *Meal) Photos() []PhotoData {
+func (m *Meal) Photos() []PhotoSpec {
 	return m.photos
 }
 
-func (m *Meal) ReplacePhotos(photos []PhotoData) {
+func (m *Meal) ReplacePhotos(photos []PhotoSpec) {
 	m.photos = photos
 	m.updatedAt = time.Now()
 }
@@ -88,7 +88,7 @@ type UpdateMealParams struct {
 	FatG          *valueobject.NonNegativeDecimal
 	CarbohydrateG *valueobject.NonNegativeDecimal
 	Memo          *valueobject.String1000
-	Photos        []PhotoData
+	Photos        []PhotoSpec
 }
 
 func (m *Meal) Update(
@@ -114,7 +114,7 @@ func CreateMeal(
 	fatG *valueobject.NonNegativeDecimal,
 	carbohydrateG *valueobject.NonNegativeDecimal,
 	memo *valueobject.String1000,
-	photos []PhotoData,
+	photos []PhotoSpec,
 ) *Meal {
 	now := time.Now()
 	return &Meal{
@@ -145,7 +145,7 @@ func NewMeal(
 	memo *valueobject.String1000,
 	createdAt time.Time,
 	updatedAt time.Time,
-	photos []PhotoData,
+	photos []PhotoSpec,
 ) *Meal {
 	return &Meal{
 		id:            id,

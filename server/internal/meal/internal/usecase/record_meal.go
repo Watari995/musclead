@@ -18,7 +18,7 @@ type RecordMealInput struct {
 	FatG          *valueobject.NonNegativeDecimal
 	CarbohydrateG *valueobject.NonNegativeDecimal
 	Memo          *valueobject.String1000
-	PhotoData     []mealdomain.PhotoData
+	Photos        []mealdomain.PhotoSpec
 }
 
 type RecordMealOutput struct {
@@ -30,7 +30,7 @@ type RecordMeal struct {
 }
 
 func (uc *RecordMeal) Execute(ctx context.Context, input RecordMealInput) (*RecordMealOutput, error) {
-	meal := mealdomain.CreateMeal(input.UserID, input.EatenAt, input.MealType, input.Calories, input.ProteinG, input.FatG, input.CarbohydrateG, input.Memo, input.PhotoData)
+	meal := mealdomain.CreateMeal(input.UserID, input.EatenAt, input.MealType, input.Calories, input.ProteinG, input.FatG, input.CarbohydrateG, input.Memo, input.Photos)
 	if err := uc.mealRepo.Save(ctx, meal); err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}

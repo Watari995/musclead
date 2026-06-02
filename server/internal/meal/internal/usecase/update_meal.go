@@ -19,7 +19,7 @@ type UpdateMealInput struct {
 	FatG          *valueobject.NonNegativeDecimal
 	CarbohydrateG *valueobject.NonNegativeDecimal
 	Memo          *valueobject.String1000
-	Photos        []mealdomain.PhotoData
+	Photos        []mealdomain.PhotoSpec
 }
 
 type UpdateMealOutput struct {
