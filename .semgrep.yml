@@ -1,0 +1,64 @@
+# musclead プロジェクト固有の semgrep ルール集
+#
+# 使い方:
+#   1. `brew install semgrep` で CLI 導入
+#   2. Cursor / VSCode で 「Semgrep」 拡張 (semgrep.semgrep) を有効化
+#   3. このファイルが保存時に自動スキャンされ、 該当箇所に赤波線が出る
+#   4. CI でも `semgrep --config .semgrep.yml --error` で blocking
+#
+# ルール追加方針:
+#   - 「コンパイラでは catch できないが、 ランタイムで致命的」 なパターンを優先
+#   - false positive が増えそうな箇所は WARNING、 確実な致命は ERROR
+#   - 既存違反が多いルールは段階導入(WARNING で始めて、 全修正後 ERROR に昇格)
+
+rules:
+
+  # ─────────────────────────────────────────
+  # HTTP ハンドラの return 抜けバグを防ぐ
+  # ─────────────────────────────────────────
+
+  - id: missing-return-after-write-error
+    languages: [go]
+    severity: ERROR
+    message: |
+      httpx.WriteError の後に return が抜けています。
+      レスポンスを書いたあと処理が続くため、 nil pointer panic や
+      "superfluous response.WriteHeader" が発生する可能性があります。
+      必ず WriteError の直後に `return` を入れてください。
+    patterns:
+      - pattern: |
+          if $ERR != nil {
+            ...
+            httpx.WriteError(...)
+          }
+      - pattern-not: |
+          if $ERR != nil {
+            ...
+            httpx.WriteError(...)
+            return
+          }
+    paths:
+      include:
+        - "**/handler/**"
+
+  - id: missing-return-after-write-no-content
+    languages: [go]
+    severity: ERROR
+    message: |
+      httpx.WriteNoContent の後に return が抜けています。
+      早期 return しないと続く処理がレスポンス書き込みを二重に行う恐れがあります。
+    patterns:
+      - pattern: |
+          if $ERR != nil {
+            ...
+            httpx.WriteNoContent(...)
+          }
+      - pattern-not: |
+          if $ERR != nil {
+            ...
+            httpx.WriteNoContent(...)
+            return
+          }
+    paths:
+      include:
+        - "**/handler/**"
