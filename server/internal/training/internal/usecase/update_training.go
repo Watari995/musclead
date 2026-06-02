@@ -2,7 +2,6 @@ package trainingusecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -11,12 +10,9 @@ import (
 )
 
 type UpdateTrainingInput struct {
-	TrainingID valueobject.TrainingID
-	UserID     valueobject.UserID
-	StartedAt  time.Time
-	EndedAt    *time.Time
-	Memo       *valueobject.String1000
-	Exercises  []trainingdomain.ExerciseSpec
+	TrainingID   valueobject.TrainingID
+	UserID       valueobject.UserID
+	TrainingSpec trainingdomain.TrainingSpec
 }
 
 type UpdateTrainingOutput struct {
@@ -39,12 +35,7 @@ func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput
 	if training.UserID() != input.UserID {
 		return nil, myerror.NewPermissionError().SetMessage("training does not belong to the user")
 	}
-	training.Update(trainingdomain.UpdateParams{
-		StartedAt: input.StartedAt,
-		EndedAt:   input.EndedAt,
-		Memo:      input.Memo,
-		Exercises: input.Exercises,
-	})
+	training.Update(input.TrainingSpec)
 	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
 		uc.trainingRepo.Save(txCtx, training)
 		return nil

@@ -93,18 +93,11 @@ func CreateTraining(spec TrainingSpec, userID valueobject.UserID) *Training {
 	}
 }
 
-type UpdateParams struct {
-	StartedAt time.Time
-	EndedAt   *time.Time
-	Memo      *valueobject.String1000
-	Exercises []ExerciseSpec
-}
-
-func (t *Training) Update(params UpdateParams) {
-	t.startedAt = params.StartedAt
-	t.endedAt = params.EndedAt
-	t.memo = params.Memo
-	t.exercises = rebuildExercises(t.id, params.Exercises)
+func (t *Training) Update(spec TrainingSpec) {
+	t.startedAt = spec.StartedAt
+	t.endedAt = spec.EndedAt
+	t.memo = spec.Memo
+	t.exercises = rebuildExercises(t.id, spec.Exercises)
 	t.updatedAt = time.Now()
 }
 
