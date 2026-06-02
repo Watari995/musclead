@@ -312,7 +312,6 @@ func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		httpx.WriteError(w, err)
 		return
-		// return あり
 	}
 	limit, offset := httpx.ParseOffsetPagination(r)
 	input := mealusecase.ListMealsInput{
