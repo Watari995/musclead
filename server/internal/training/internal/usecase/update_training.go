@@ -46,10 +46,7 @@ func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput
 		Exercises: input.Exercises,
 	})
 	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
-		err := uc.trainingRepo.Save(txCtx, training)
-		if err != nil {
-			return err
-		}
+		uc.trainingRepo.Save(txCtx, training)
 		return nil
 	}); err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
