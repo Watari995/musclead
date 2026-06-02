@@ -119,6 +119,53 @@ func (h *TrainingHandler) Record(w http.ResponseWriter, r *http.Request) {
 
 func (h *TrainingHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	trainingID, err := valueobject.NewPrimaryIDFromString[valueobject.TrainingID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid trainingID"))
+		return
+	}
+
+	var req trainingdto.UpdateTrainingRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	spec, err := req.ToSpec()
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	output, err := h.update.Execute(r.Context(), trainingusecase.UpdateTrainingInput{UserID: userID, TrainingID: *trainingID, TrainingSpec: spec})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, trainingdto.UpdateTrainingResponse{TrainingID: output.TrainingID.Value()})
 }
 
-func (h *TrainingHandler) Delete(w http.ResponseWriter, r *http.Request) {}
+func (h *TrainingHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	trainingID, err := valueobject.NewPrimaryIDFromString[valueobject.TrainingID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid trainingID"))
+		return
+	}
+
+	if err := h.delete.Execute(r.Context(), trainingusecase.DeleteTrainingByIDInput{TrainingID: *trainingID, UserID: userID}); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	httpx.WriteNoContent(w)
+}
