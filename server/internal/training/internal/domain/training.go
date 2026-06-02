@@ -8,6 +8,7 @@ import (
 
 // ExerciseSpec は新規 Training を組み立てるための「種目1件分の素材」。
 // ID / createdAt 等の永続化メタは持たず、 ファクトリ側で付与される。
+// DDD的にはDataよりもSpecの方がいいらしい。
 type ExerciseSpec struct {
 	Name         valueobject.String50
 	DisplayOrder valueobject.NonNegativeInt
@@ -77,9 +78,61 @@ func CreateTraining(
 	exercises []ExerciseSpec,
 ) *Training {
 	trainingID := valueobject.NewPrimaryID[valueobject.TrainingID]()
-	exerciseRows := make([]*TrainingExercise, 0, len(exercises))
+	exerciseRows := rebuildExercises(trainingID, exercises)
+	now := time.Now()
+	return &Training{
+		id:        trainingID,
+		userID:    userID,
+		startedAt: startedAt,
+		endedAt:   endedAt,
+		memo:      memo,
+		createdAt: now,
+		updatedAt: now,
+		exercises: exerciseRows,
+	}
+}
+
+type UpdateParams struct {
+	StartedAt time.Time
+	EndedAt   *time.Time
+	Memo      *valueobject.String1000
+	Exercises []ExerciseSpec
+}
+
+func (t *Training) Update(params UpdateParams) {
+	t.startedAt = params.StartedAt
+	t.endedAt = params.EndedAt
+	t.memo = params.Memo
+	t.exercises = rebuildExercises(t.id, params.Exercises)
+	t.updatedAt = time.Now()
+}
+
+func NewTraining(
+	id valueobject.TrainingID,
+	userID valueobject.UserID,
+	startedAt time.Time,
+	endedAt *time.Time,
+	memo *valueobject.String1000,
+	createdAt time.Time,
+	updatedAt time.Time,
+	exercises []*TrainingExercise,
+) *Training {
+	return &Training{
+		id:        id,
+		userID:    userID,
+		startedAt: startedAt,
+		endedAt:   endedAt,
+		memo:      memo,
+		createdAt: createdAt,
+		updatedAt: updatedAt,
+		exercises: exercises,
+	}
+}
+
+func rebuildExercises(trainingID valueobject.TrainingID, specs []ExerciseSpec) []*TrainingExercise {
 	// sets, exerciseを先に作成する
-	for _, ex := range exercises {
+	exerciseRows := make([]*TrainingExercise, 0, len(specs))
+	for _, ex := range specs {
 		exerciseID := valueobject.NewPrimaryID[valueobject.ExerciseID]()
 		setRows := make([]*TrainingSet, 0, len(ex.Sets))
 		for _, set := range ex.Sets {
@@ -103,38 +156,5 @@ func CreateTraining(
 		)
 		exerciseRows = append(exerciseRows, exerciseEntity)
 	}
-
-	now := time.Now()
-	return &Training{
-		id:        trainingID,
-		userID:    userID,
-		startedAt: startedAt,
-		endedAt:   endedAt,
-		memo:      memo,
-		createdAt: now,
-		updatedAt: now,
-		exercises: exerciseRows,
-	}
-}
-
-func NewTraining(
-	id valueobject.TrainingID,
-	userID valueobject.UserID,
-	startedAt time.Time,
-	endedAt *time.Time,
-	memo *valueobject.String1000,
-	createdAt time.Time,
-	updatedAt time.Time,
-	exercises []*TrainingExercise,
-) *Training {
-	return &Training{
-		id:        id,
-		userID:    userID,
-		startedAt: startedAt,
-		endedAt:   endedAt,
-		memo:      memo,
-		createdAt: createdAt,
-		updatedAt: updatedAt,
-		exercises: exercises,
-	}
+	return exerciseRows
 }
