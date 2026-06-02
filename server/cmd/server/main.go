@@ -5,6 +5,11 @@
 //	@description	musclead (筋トレ・食事・体重 一元管理 SaaS) のバックエンド API。
 //	@host			localhost:8080
 //	@BasePath		/
+//
+//	@securityDefinitions.apikey	BearerAuth
+//	@in							header
+//	@name						Authorization
+//	@description				"Bearer <access_token>" 形式で指定する。
 package main
 
 import (
@@ -24,6 +29,7 @@ import (
 	"github.com/Watari995/musclead/internal/meal"
 	_ "github.com/Watari995/musclead/internal/shared"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	"github.com/Watari995/musclead/internal/training"
 	"github.com/Watari995/musclead/internal/user"
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
@@ -131,11 +137,18 @@ func newMux(dbmap *gorp.DbMap) http.Handler {
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
 	mealModule := meal.NewModule(dbmap, cdnBaseURL)
+	trainingModule := training.NewModule(dbmap)
+	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))
+	// auth
 	mux.Handle("/auth/", authModule.Handler)
+	// meals
 	mux.Handle("/meals", authModule.Middleware(mealModule.Handler))
 	mux.Handle("/meals/", authModule.Middleware(mealModule.Handler))
+	// trainings
+	mux.Handle("/trainings", authModule.Middleware(trainingModule.Handler))
+	mux.Handle("/trainings/", authModule.Middleware(trainingModule.Handler))
 
 	return httpx.CORSMiddleware(mux)
 }
