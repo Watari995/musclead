@@ -35,15 +35,12 @@ type UpdateMeal struct {
 func (uc *UpdateMeal) Execute(ctx context.Context, input UpdateMealInput) (*UpdateMealOutput, error) {
 	var mealID valueobject.MealID
 	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
-		meal, err := uc.mealRepo.FindByID(txCtx, input.MealID)
+		meal, err := uc.mealRepo.FindByIDAndUserID(txCtx, input.MealID, input.UserID)
 		if err != nil {
 			return myerror.NewInternalError().Wrap(err)
 		}
 		if meal == nil {
 			return myerror.NewMealNotFoundError()
-		}
-		if meal.UserID() != input.UserID {
-			return myerror.NewPermissionError().SetMessage("meal does not belong to the user")
 		}
 		params := mealdomain.UpdateMealParams{
 			EatenAt:       input.EatenAt,

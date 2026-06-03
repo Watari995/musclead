@@ -26,8 +26,8 @@ func (m *MockMealRepository) FindAllByUserIDWithOffsetPagination(
 	return meals, pg, args.Error(2)
 }
 
-func (m *MockMealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*mealdomain.Meal, error) {
-	args := m.Called(ctx, id)
+func (m *MockMealRepository) FindByIDAndUserID(ctx context.Context, id valueobject.MealID, userID valueobject.UserID) (*mealdomain.Meal, error) {
+	args := m.Called(ctx, id, userID)
 	meal, _ := args.Get(0).(*mealdomain.Meal)
 	return meal, args.Error(1)
 }

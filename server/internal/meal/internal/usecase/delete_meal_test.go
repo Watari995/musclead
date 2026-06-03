@@ -18,7 +18,7 @@ func TestDeleteMealByID_Success(t *testing.T) {
 	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("DeleteByID", mock.Anything, mock.Anything).Return(nil)
 
 	uc := mealusecase.NewDeleteMealByID(repo)
@@ -35,7 +35,7 @@ func TestDeleteMealByID_NotFound(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(nil, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	uc := mealusecase.NewDeleteMealByID(repo)
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
@@ -47,7 +47,9 @@ func TestDeleteMealByID_NotFound(t *testing.T) {
 	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.Meal.NotFoundError))
 }
 
-func TestDeleteMealByID_OwnerMismatch(t *testing.T) {
+// 他ユーザーの meal を削除しようとした場合: repository が user_id で絞るので nil が返り、
+// NotFound として扱われる (他人の meal の存在自体を漏らさない設計)。
+func TestDeleteMealByID_OtherUserTreatedAsNotFound(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
@@ -55,7 +57,7 @@ func TestDeleteMealByID_OwnerMismatch(t *testing.T) {
 	otherID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, ownerID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	uc := mealusecase.NewDeleteMealByID(repo)
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
@@ -64,7 +66,7 @@ func TestDeleteMealByID_OwnerMismatch(t *testing.T) {
 	})
 
 	assert.Error(t, err)
-	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.General.PermissionError))
+	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.Meal.NotFoundError))
 }
 
 func TestDeleteMealByID_DeleteError(t *testing.T) {
@@ -73,7 +75,7 @@ func TestDeleteMealByID_DeleteError(t *testing.T) {
 	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("DeleteByID", mock.Anything, mock.Anything).Return(errors.New("db down"))
 
 	uc := mealusecase.NewDeleteMealByID(repo)

@@ -18,15 +18,12 @@ type DeleteMealByID struct {
 }
 
 func (uc *DeleteMealByID) Execute(ctx context.Context, input DeleteMealByIDInput) error {
-	meal, err := uc.mealRepo.FindByID(ctx, input.MealID)
+	meal, err := uc.mealRepo.FindByIDAndUserID(ctx, input.MealID, input.UserID)
 	if err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
 	if meal == nil {
 		return myerror.NewMealNotFoundError().SetMessage("meal not found")
-	}
-	if meal.UserID() != input.UserID {
-		return myerror.NewPermissionError().SetMessage("meal does not belong to the user")
 	}
 	if err := uc.mealRepo.DeleteByID(ctx, input.MealID); err != nil {
 		return myerror.NewInternalError().Wrap(err)

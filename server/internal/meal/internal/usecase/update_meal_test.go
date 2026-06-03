@@ -31,7 +31,7 @@ func TestUpdateMeal_Success(t *testing.T) {
 	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(nil)
 
 	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
@@ -46,7 +46,7 @@ func TestUpdateMeal_NotFound(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(nil, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
 	output, err := uc.Execute(context.Background(), updateInput(
@@ -59,7 +59,9 @@ func TestUpdateMeal_NotFound(t *testing.T) {
 	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.Meal.NotFoundError))
 }
 
-func TestUpdateMeal_OwnerMismatch(t *testing.T) {
+// 他ユーザーの meal を引こうとした場合: repository が user_id で絞るので nil が返り、
+// NotFound として扱われる (他人の meal の存在自体を漏らさない設計)。
+func TestUpdateMeal_OtherUserTreatedAsNotFound(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
@@ -67,14 +69,14 @@ func TestUpdateMeal_OwnerMismatch(t *testing.T) {
 	otherID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, ownerID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
 	output, err := uc.Execute(context.Background(), updateInput(meal.ID(), otherID))
 
 	assert.Error(t, err)
 	assert.Nil(t, output)
-	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.General.PermissionError))
+	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.Meal.NotFoundError))
 }
 
 func TestUpdateMeal_SaveError(t *testing.T) {
@@ -83,7 +85,7 @@ func TestUpdateMeal_SaveError(t *testing.T) {
 	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(errors.New("save failed"))
 
 	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})

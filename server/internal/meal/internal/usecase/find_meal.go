@@ -22,15 +22,12 @@ type FindMealByID struct {
 }
 
 func (uc *FindMealByID) Execute(ctx context.Context, input FindMealByIDInput) (*FindMealByIDOutput, error) {
-	meal, err := uc.mealRepo.FindByID(ctx, input.MealID)
+	meal, err := uc.mealRepo.FindByIDAndUserID(ctx, input.MealID, input.UserID)
 	if err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
 	if meal == nil {
 		return nil, myerror.NewMealNotFoundError()
-	}
-	if meal.UserID() != input.UserID {
-		return nil, myerror.NewPermissionError().SetMessage("meal does not belong to the user")
 	}
 	return &FindMealByIDOutput{Meal: meal}, nil
 }

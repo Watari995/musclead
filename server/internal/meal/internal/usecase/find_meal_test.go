@@ -18,7 +18,7 @@ func TestFindMealByID_Success(t *testing.T) {
 	userID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, userID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 
 	uc := mealusecase.NewFindMealByID(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.FindMealByIDInput{
@@ -35,7 +35,7 @@ func TestFindMealByID_NotFound(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(nil, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	uc := mealusecase.NewFindMealByID(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.FindMealByIDInput{
@@ -48,7 +48,9 @@ func TestFindMealByID_NotFound(t *testing.T) {
 	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.Meal.NotFoundError))
 }
 
-func TestFindMealByID_OwnerMismatch(t *testing.T) {
+// 他ユーザーの meal を引こうとした場合: repository が user_id で絞るので nil が返り、
+// NotFound として扱われる (他人の meal の存在自体を漏らさない設計)。
+func TestFindMealByID_OtherUserTreatedAsNotFound(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
@@ -56,7 +58,7 @@ func TestFindMealByID_OwnerMismatch(t *testing.T) {
 	otherID := valueobject.NewPrimaryID[valueobject.UserID]()
 	meal := newDummyMeal(t, ownerID)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(meal, nil)
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 	uc := mealusecase.NewFindMealByID(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.FindMealByIDInput{
@@ -66,14 +68,14 @@ func TestFindMealByID_OwnerMismatch(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, output)
-	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.General.PermissionError))
+	assert.True(t, myerror.IsCode(err, myerror.ErrorCodes.Meal.NotFoundError))
 }
 
 func TestFindMealByID_DBError(t *testing.T) {
 	t.Parallel()
 	repo := new(MockMealRepository)
 
-	repo.On("FindByID", mock.Anything, mock.Anything).Return(nil, errors.New("db down"))
+	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("db down"))
 
 	uc := mealusecase.NewFindMealByID(repo)
 	output, err := uc.Execute(context.Background(), mealusecase.FindMealByIDInput{

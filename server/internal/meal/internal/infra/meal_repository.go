@@ -88,16 +88,20 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 	return result, paginator, nil
 }
 
-func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*mealdomain.Meal, error) {
+func (r *mealRepository) FindByIDAndUserID(ctx context.Context, id valueobject.MealID, userID valueobject.UserID) (*mealdomain.Meal, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
-	bytes, err := id.Bytes()
+	idBytes, err := id.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	userIDBytes, err := userID.Bytes()
 	if err != nil {
 		return nil, err
 	}
 	var mealRow MealModel
 	err = q.SelectOne(&mealRow,
-		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE id = ?",
-		bytes,
+		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE id = ? AND user_id = ?",
+		idBytes, userIDBytes,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -109,7 +113,7 @@ func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*
 	var photos []MealPhotoModel
 	_, err = q.Select(&photos,
 		"SELECT id, meal_id, image_path, display_order, created_at FROM meal_photos WHERE meal_id = ? ORDER BY display_order ASC",
-		bytes,
+		idBytes,
 	)
 	if err != nil {
 		return nil, err
