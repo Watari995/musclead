@@ -131,6 +131,32 @@ func (r *routineQueryService) FindByIDAndUserID(ctx context.Context, id valueobj
 	}, nil
 }
 
+func toRoutineExerciseViewFromDetail(row routineDetailRow) (*trainingdomain.RoutineExerciseView, error) {
+	reID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.RoutineExerciseID](row.REID)
+	if err != nil {
+		return nil, err
+	}
+	exID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.REExerciseID)
+	if err != nil {
+		return nil, err
+	}
+	exName, err := valueobject.NewString50(row.ExerciseName.String)
+	if err != nil {
+		return nil, err
+	}
+	displayOrder, err := sqlconv.NewNonNegativeIntFromNullInt32(row.DisplayOrder)
+	if err != nil {
+		return nil, err
+	}
+	return &trainingdomain.RoutineExerciseView{
+		ID:           *reID,
+		ExerciseID:   *exID,
+		ExerciseName: *exName,
+		DisplayOrder: *displayOrder,
+	}, nil
+}
+
+// ============== LIST QUERY ==============
 type routineListRow struct {
 	ID        []byte    `db:"id"`
 	UserID    []byte    `db:"user_id"`
@@ -187,7 +213,7 @@ func (r *routineQueryService) FindAllByUserIDWithOffsetPagination(ctx context.Co
 	}
 	routineViews := make([]*trainingdomain.RoutineView, 0, len(rows))
 	for _, row := range rows {
-		routineView, err := toRoutineViewFromListRowAndExerciseMap(row, exerciseMap)
+		routineView, err := toRoutineViewFromListRow(row, exerciseMap)
 		if err != nil {
 			return nil, pagination.OffsetPaginator{}, err
 		}
@@ -196,7 +222,7 @@ func (r *routineQueryService) FindAllByUserIDWithOffsetPagination(ctx context.Co
 	return routineViews, paginator, nil
 }
 
-func toRoutineViewFromListRowAndExerciseMap(row routineListRow, exerciseMap map[string][]routineExerciseListRow) (*trainingdomain.RoutineView, error) {
+func toRoutineViewFromListRow(row routineListRow, exerciseMap map[string][]routineExerciseListRow) (*trainingdomain.RoutineView, error) {
 	routineID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.RoutineID](row.ID)
 	if err != nil {
 		return nil, err
@@ -248,31 +274,6 @@ func toRoutineExerciseViewFromListRow(row routineExerciseListRow) (*trainingdoma
 		ID:           *reID,
 		ExerciseID:   *exerciseID,
 		ExerciseName: *exerciseName,
-		DisplayOrder: *displayOrder,
-	}, nil
-}
-
-func toRoutineExerciseViewFromDetail(row routineDetailRow) (*trainingdomain.RoutineExerciseView, error) {
-	reID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.RoutineExerciseID](row.REID)
-	if err != nil {
-		return nil, err
-	}
-	exID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.REExerciseID)
-	if err != nil {
-		return nil, err
-	}
-	exName, err := valueobject.NewString50(row.ExerciseName.String)
-	if err != nil {
-		return nil, err
-	}
-	displayOrder, err := sqlconv.NewNonNegativeIntFromNullInt32(row.DisplayOrder)
-	if err != nil {
-		return nil, err
-	}
-	return &trainingdomain.RoutineExerciseView{
-		ID:           *reID,
-		ExerciseID:   *exID,
-		ExerciseName: *exName,
 		DisplayOrder: *displayOrder,
 	}, nil
 }
