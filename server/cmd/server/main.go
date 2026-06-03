@@ -147,8 +147,11 @@ func newMux(dbmap *gorp.DbMap) http.Handler {
 	mux.Handle("/meals", authModule.Middleware(mealModule.Handler))
 	mux.Handle("/meals/", authModule.Middleware(mealModule.Handler))
 	// trainings
-	mux.Handle("/trainings", authModule.Middleware(trainingModule.Handler))
-	mux.Handle("/trainings/", authModule.Middleware(trainingModule.Handler))
+	mux.Handle("/trainings", authModule.Middleware(trainingModule.TrainingHandler))
+	mux.Handle("/trainings/", authModule.Middleware(trainingModule.TrainingHandler))
+	// exercises
+	mux.Handle("/exercises", authModule.Middleware(trainingModule.ExerciseHandler))
+	mux.Handle("/exercises/", authModule.Middleware(trainingModule.ExerciseHandler))
 
 	return httpx.CORSMiddleware(mux)
 }

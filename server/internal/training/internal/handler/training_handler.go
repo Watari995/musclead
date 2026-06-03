@@ -21,7 +21,7 @@ type TrainingHandler struct {
 	delete *trainingusecase.DeleteTrainingByID
 }
 
-func New(
+func NewTrainingHandler(
 	find *trainingusecase.FindTrainingByID,
 	list *trainingusecase.ListTrainings,
 	record *trainingusecase.RecordTraining,
