@@ -47,7 +47,12 @@ func NewExerciseHandler(
 
 // Find godoc
 //
-// 
+// @Summary エクササイズ取得
+// @Tags exercises
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 ExerciseID"
+// @Success 200 {object} trainingdto.TrainingDTO
 func (h *ExerciseHandler) Find(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -94,12 +99,12 @@ func (h *ExerciseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	request := trainingdto.UpsertExerciseRequest{}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	var req trainingdto.UpsertExerciseRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
 		return
 	}
-	name, err := valueobject.NewString50(request.Name)
+	name, err := valueobject.NewString50(req.Name)
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid name"))
 		return
