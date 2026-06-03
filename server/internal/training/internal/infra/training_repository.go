@@ -217,7 +217,10 @@ func (r *trainingRepository) DeleteByID(ctx context.Context, id valueobject.Trai
 	}
 	q := dbtx.Querier(ctx, r.dbmap)
 	_, err = q.Exec("DELETE FROM trainings WHERE id = ?", idBytes)
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // loadExercises は親 ID 群に紐づく子(exercises)と孫(sets)を IN 句で一括取得する。

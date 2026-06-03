@@ -197,6 +197,7 @@ func (h *ExerciseHandler) Update(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} httpx.ErrorResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Failure 404 {object} httpx.ErrorResponse
+// @Failure 409 {object} httpx.ErrorResponse "training_exercises から参照されている時"
 // @Router /exercises/{id} [delete]
 func (h *ExerciseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())

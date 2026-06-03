@@ -27,6 +27,9 @@ func (uc *DeleteExerciseByID) Execute(ctx context.Context, input DeleteExerciseB
 	}
 
 	if err := uc.exerciseRepo.DeleteByID(ctx, ex.ID()); err != nil {
+		if myerror.IsCode(err, myerror.ErrorCodes.Training.ExerciseUsedInTrainingError) {
+			return err // repository が myerror を返してくるのでそのまま素通し
+		}
 		return myerror.NewInternalError().Wrap(err)
 	}
 	return nil

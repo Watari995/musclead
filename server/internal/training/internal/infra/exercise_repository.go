@@ -130,6 +130,9 @@ func (r *exerciseRepository) DeleteByID(ctx context.Context, id valueobject.Exer
 		return err
 	}
 	if _, err := q.Exec("DELETE FROM exercises WHERE id = ?", bytes); err != nil {
+		if sqlerr.IsForeignKeyViolation(err) {
+			return myerror.NewExerciseUsedInTrainingError()
+		}
 		return err
 	}
 	return nil

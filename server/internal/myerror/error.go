@@ -210,6 +210,14 @@ func NewExerciseNameAlreadyExistsError() MyError {
 	}
 }
 
+func NewExerciseUsedInTrainingError() MyError {
+	return &myError{
+		status:      http.StatusConflict,
+		generalCode: ErrorCodes.General.BadRequestError,
+		code:        ErrorCodes.Training.ExerciseUsedInTrainingError,
+	}
+}
+
 func NewWeightNotFoundError() MyError {
 	return &myError{
 		status:      http.StatusNotFound,
