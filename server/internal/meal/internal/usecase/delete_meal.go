@@ -18,7 +18,6 @@ type DeleteMealByID struct {
 }
 
 func (uc *DeleteMealByID) Execute(ctx context.Context, input DeleteMealByIDInput) error {
-	// check if the meal belongs to the user
 	meal, err := uc.mealRepo.FindByID(ctx, input.MealID)
 	if err != nil {
 		return myerror.NewInternalError().Wrap(err)
