@@ -41,3 +41,11 @@ func (m *MockMealRepository) DeleteByID(ctx context.Context, id valueobject.Meal
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }
+
+// fakeTxManager は dbtx.TransactionManager の偽実装(テスト用)。
+// tx を張らず、 渡された関数をそのまま呼び出すだけ。
+type fakeTxManager struct{}
+
+func (fakeTxManager) Processing(ctx context.Context, f func(ctx context.Context) error) error {
+	return f(ctx)
+}

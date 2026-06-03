@@ -6,6 +6,7 @@ import (
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	"github.com/Watari995/musclead/internal/myerror"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
@@ -27,37 +28,45 @@ type UpdateMealOutput struct {
 }
 
 type UpdateMeal struct {
-	mealRepo mealdomain.MealRepository
+	mealRepo  mealdomain.MealRepository
+	txManager dbtx.TransactionManager
 }
 
 func (uc *UpdateMeal) Execute(ctx context.Context, input UpdateMealInput) (*UpdateMealOutput, error) {
-	meal, err := uc.mealRepo.FindByID(ctx, input.MealID)
-	if err != nil {
-		return nil, myerror.NewInternalError().Wrap(err)
+	var mealID valueobject.MealID
+	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
+		meal, err := uc.mealRepo.FindByID(txCtx, input.MealID)
+		if err != nil {
+			return myerror.NewInternalError().Wrap(err)
+		}
+		if meal == nil {
+			return myerror.NewMealNotFoundError()
+		}
+		if meal.UserID() != input.UserID {
+			return myerror.NewPermissionError().SetMessage("meal does not belong to the user")
+		}
+		params := mealdomain.UpdateMealParams{
+			EatenAt:       input.EatenAt,
+			MealType:      input.MealType,
+			Calories:      input.Calories,
+			ProteinG:      input.ProteinG,
+			FatG:          input.FatG,
+			CarbohydrateG: input.CarbohydrateG,
+			Memo:          input.Memo,
+			Photos:        input.Photos,
+		}
+		meal.Update(params)
+		if err := uc.mealRepo.Save(txCtx, meal); err != nil {
+			return myerror.NewInternalError().Wrap(err)
+		}
+		mealID = meal.ID()
+		return nil
+	}); err != nil {
+		return nil, err
 	}
-	if meal == nil {
-		return nil, myerror.NewMealNotFoundError()
-	}
-	if meal.UserID() != input.UserID {
-		return nil, myerror.NewPermissionError().SetMessage("meal does not belong to the user")
-	}
-	params := mealdomain.UpdateMealParams{
-		EatenAt:       input.EatenAt,
-		MealType:      input.MealType,
-		Calories:      input.Calories,
-		ProteinG:      input.ProteinG,
-		FatG:          input.FatG,
-		CarbohydrateG: input.CarbohydrateG,
-		Memo:          input.Memo,
-		Photos:        input.Photos,
-	}
-	meal.Update(params)
-	if err := uc.mealRepo.Save(ctx, meal); err != nil {
-		return nil, myerror.NewInternalError().Wrap(err)
-	}
-	return &UpdateMealOutput{MealID: meal.ID()}, nil
+	return &UpdateMealOutput{MealID: mealID}, nil
 }
 
-func NewUpdateMeal(mealRepo mealdomain.MealRepository) *UpdateMeal {
-	return &UpdateMeal{mealRepo: mealRepo}
+func NewUpdateMeal(mealRepo mealdomain.MealRepository, txManager dbtx.TransactionManager) *UpdateMeal {
+	return &UpdateMeal{mealRepo: mealRepo, txManager: txManager}
 }

@@ -30,7 +30,7 @@ func TestRecordMeal_Success(t *testing.T) {
 
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(nil)
 
-	uc := mealusecase.NewRecordMeal(repo)
+	uc := mealusecase.NewRecordMeal(repo, fakeTxManager{})
 	output, err := uc.Execute(context.Background(), recordInput(userID))
 
 	assert.NoError(t, err)
@@ -46,7 +46,7 @@ func TestRecordMeal_SaveError(t *testing.T) {
 
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(errors.New("db down"))
 
-	uc := mealusecase.NewRecordMeal(repo)
+	uc := mealusecase.NewRecordMeal(repo, fakeTxManager{})
 	output, err := uc.Execute(context.Background(), recordInput(userID))
 
 	assert.Error(t, err)

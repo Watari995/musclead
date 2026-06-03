@@ -9,6 +9,7 @@ import (
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	"github.com/Watari995/musclead/internal/pagination"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	"github.com/Watari995/musclead/internal/shared/sqlquery"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -35,13 +36,14 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context, userID valueobject.UserID, limit int, offset int) ([]*mealdomain.Meal, pagination.OffsetPaginator, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := userID.Bytes()
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
 	var mealRows []MealModel
-	_, err = r.dbmap.WithContext(ctx).Select(&mealRows,
+	_, err = q.Select(&mealRows,
 		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE user_id = ? ORDER BY eaten_at DESC LIMIT ? OFFSET ?",
 		bytes, int32(limit), int32(offset),
 	)
@@ -49,7 +51,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 		return nil, pagination.OffsetPaginator{}, err
 	}
 
-	total, err := r.dbmap.WithContext(ctx).SelectInt(
+	total, err := q.SelectInt(
 		"SELECT COUNT(*) FROM meals WHERE user_id = ?", bytes,
 	)
 	if err != nil {
@@ -65,7 +67,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 	mealIDs := lo.Map(mealRows, func(m MealModel, _ int) []byte {
 		return m.ID
 	})
-	photos, err := r.selectPhotosByMealIDs(ctx, r.dbmap, mealIDs)
+	photos, err := r.selectPhotosByMealIDs(q, mealIDs)
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
 	}
@@ -87,12 +89,13 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 }
 
 func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*mealdomain.Meal, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := id.Bytes()
 	if err != nil {
 		return nil, err
 	}
 	var mealRow MealModel
-	err = r.dbmap.WithContext(ctx).SelectOne(&mealRow,
+	err = q.SelectOne(&mealRow,
 		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE id = ?",
 		bytes,
 	)
@@ -104,7 +107,7 @@ func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*
 	}
 
 	var photos []MealPhotoModel
-	_, err = r.dbmap.WithContext(ctx).Select(&photos,
+	_, err = q.Select(&photos,
 		"SELECT id, meal_id, image_path, display_order, created_at FROM meal_photos WHERE meal_id = ? ORDER BY display_order ASC",
 		bytes,
 	)
@@ -116,6 +119,7 @@ func (r *mealRepository) FindByID(ctx context.Context, id valueobject.MealID) (*
 }
 
 func (r *mealRepository) Save(ctx context.Context, meal *mealdomain.Meal) error {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := meal.ID().Bytes()
 	if err != nil {
 		return err
@@ -125,18 +129,10 @@ func (r *mealRepository) Save(ctx context.Context, meal *mealdomain.Meal) error 
 		return err
 	}
 
-	tx, err := r.dbmap.Begin()
-	if err != nil {
+	if _, err := q.Exec(upsertMealSQL, params...); err != nil {
 		return err
 	}
-	defer tx.Rollback()
-
-	txCtx := tx.WithContext(ctx)
-
-	if _, err := txCtx.Exec(upsertMealSQL, params...); err != nil {
-		return err
-	}
-	if _, err := txCtx.Exec("DELETE FROM meal_photos WHERE meal_id = ?", bytes); err != nil {
+	if _, err := q.Exec("DELETE FROM meal_photos WHERE meal_id = ?", bytes); err != nil {
 		return err
 	}
 	for _, photo := range meal.Photos() {
@@ -144,28 +140,29 @@ func (r *mealRepository) Save(ctx context.Context, meal *mealdomain.Meal) error 
 		if err != nil {
 			return err
 		}
-		if _, err := txCtx.Exec(
+		if _, err := q.Exec(
 			"INSERT INTO meal_photos (id, meal_id, image_path, display_order, created_at) VALUES (?, ?, ?, ?, ?)",
 			mealPhotoID, bytes, photo.ImagePath, int32(photo.DisplayOrder), time.Now(),
 		); err != nil {
 			return err
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (r *mealRepository) DeleteByID(ctx context.Context, id valueobject.MealID) error {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := id.Bytes()
 	if err != nil {
 		return err
 	}
-	_, err = r.dbmap.WithContext(ctx).Exec("DELETE FROM meals WHERE id = ?", bytes)
+	_, err = q.Exec("DELETE FROM meals WHERE id = ?", bytes)
 	return err
 }
 
 // selectPhotosByMealIDs は IN 句で複数の meal_id に紐づく photos を一括取得する。
 // プレースホルダ生成は shared/sqlquery を経由して同種重複を避ける。
-func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.DbMap, mealIDs [][]byte) ([]MealPhotoModel, error) {
+func (r *mealRepository) selectPhotosByMealIDs(q gorp.SqlExecutor, mealIDs [][]byte) ([]MealPhotoModel, error) {
 	if len(mealIDs) == 0 {
 		return nil, nil
 	}
@@ -175,7 +172,7 @@ func (r *mealRepository) selectPhotosByMealIDs(ctx context.Context, dbmap *gorp.
 		placeholders,
 	)
 	var photos []MealPhotoModel
-	_, err := dbmap.WithContext(ctx).Select(&photos, query, args...)
+	_, err := q.Select(&photos, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +227,7 @@ func toMeal(row MealModel, photos []MealPhotoModel) (*mealdomain.Meal, error) {
 	return mealdomain.NewMeal(*mealID, *userID, row.EatenAt, *mealType, *calories, proteinG, fatG, carbohydrateG, memoVO, row.CreatedAt, row.UpdatedAt, toPhotoSpec(photos)), nil
 }
 
-func buildUpsertMealParams(meal *mealdomain.Meal) ([]interface{}, error) {
+func buildUpsertMealParams(meal *mealdomain.Meal) ([]any, error) {
 	bytes, err := meal.ID().Bytes()
 	if err != nil {
 		return nil, err
@@ -255,7 +252,7 @@ func buildUpsertMealParams(meal *mealdomain.Meal) ([]interface{}, error) {
 	if meal.Memo() != nil {
 		memo = sqlconv.StringToNullString(meal.Memo().Value())
 	}
-	return []interface{}{
+	return []any{
 		bytes,
 		userIDBytes,
 		meal.EatenAt(),

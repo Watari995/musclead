@@ -6,6 +6,7 @@ import (
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	"github.com/Watari995/musclead/internal/myerror"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
@@ -26,17 +27,23 @@ type RecordMealOutput struct {
 }
 
 type RecordMeal struct {
-	mealRepo mealdomain.MealRepository
+	mealRepo  mealdomain.MealRepository
+	txManager dbtx.TransactionManager
 }
 
 func (uc *RecordMeal) Execute(ctx context.Context, input RecordMealInput) (*RecordMealOutput, error) {
 	meal := mealdomain.CreateMeal(input.UserID, input.EatenAt, input.MealType, input.Calories, input.ProteinG, input.FatG, input.CarbohydrateG, input.Memo, input.Photos)
-	if err := uc.mealRepo.Save(ctx, meal); err != nil {
-		return nil, myerror.NewInternalError().Wrap(err)
+	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
+		if err := uc.mealRepo.Save(txCtx, meal); err != nil {
+			return myerror.NewInternalError().Wrap(err)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 	return &RecordMealOutput{MealID: meal.ID()}, nil
 }
 
-func NewRecordMeal(mealRepo mealdomain.MealRepository) *RecordMeal {
-	return &RecordMeal{mealRepo: mealRepo}
+func NewRecordMeal(mealRepo mealdomain.MealRepository, txManager dbtx.TransactionManager) *RecordMeal {
+	return &RecordMeal{mealRepo: mealRepo, txManager: txManager}
 }

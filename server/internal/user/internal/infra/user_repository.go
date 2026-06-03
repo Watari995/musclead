@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -28,12 +29,13 @@ ON DUPLICATE KEY UPDATE
 `
 
 func (r *userRepository) FindByID(ctx context.Context, id valueobject.UserID) (*userdomain.User, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := id.Bytes()
 	if err != nil {
 		return nil, err
 	}
 	var row UserModel
-	err = r.dbmap.WithContext(ctx).SelectOne(&row,
+	err = q.SelectOne(&row,
 		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE id = ? AND deleted_at IS NULL",
 		bytes,
 	)
@@ -47,8 +49,9 @@ func (r *userRepository) FindByID(ctx context.Context, id valueobject.UserID) (*
 }
 
 func (r *userRepository) FindByEmail(ctx context.Context, email valueobject.Email) (*userdomain.User, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
 	var row UserModel
-	err := r.dbmap.WithContext(ctx).SelectOne(&row,
+	err := q.SelectOne(&row,
 		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE email = ? AND deleted_at IS NULL",
 		email.Value(),
 	)
@@ -62,11 +65,12 @@ func (r *userRepository) FindByEmail(ctx context.Context, email valueobject.Emai
 }
 
 func (r *userRepository) Save(ctx context.Context, user *userdomain.User) error {
+	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := user.ID().Bytes()
 	if err != nil {
 		return err
 	}
-	_, err = r.dbmap.WithContext(ctx).Exec(upsertUserSQL,
+	_, err = q.Exec(upsertUserSQL,
 		bytes,
 		user.Name().Value(),
 		user.Email().Value(),

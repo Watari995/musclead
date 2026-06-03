@@ -8,6 +8,7 @@ import (
 	mealhandler "github.com/Watari995/musclead/internal/meal/internal/handler"
 	mealinfra "github.com/Watari995/musclead/internal/meal/internal/infra"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/go-gorp/gorp/v3"
 )
 
@@ -22,10 +23,11 @@ func NewModule(dbmap *gorp.DbMap, cdnBaseURL string) *Module {
 	dbmap.AddTableWithName(mealinfra.MealModel{}, "meals").SetKeys(false, "ID")
 	dbmap.AddTableWithName(mealinfra.MealPhotoModel{}, "meal_photos").SetKeys(false, "ID")
 	repo := mealinfra.NewMealRepository(dbmap)
+	txManager := dbtx.NewTransactionManager(dbmap)
 
-	record := mealusecase.NewRecordMeal(repo)
+	record := mealusecase.NewRecordMeal(repo, txManager)
 	find := mealusecase.NewFindMealByID(repo)
-	update := mealusecase.NewUpdateMeal(repo)
+	update := mealusecase.NewUpdateMeal(repo, txManager)
 	delete := mealusecase.NewDeleteMealByID(repo)
 	list := mealusecase.NewListMeals(repo)
 
