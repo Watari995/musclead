@@ -89,6 +89,19 @@ export type UpsertExerciseRequest =
 export type UpsertExerciseResponse =
   Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseResponse"];
 
+export type RoutineDTO =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RoutineDTO"];
+export type RoutineExerciseDTO =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.RoutineExerciseDTO"];
+export type ListRoutinesResponse =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse"];
+export type UpsertRoutineRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest"];
+export type UpsertRoutineExerciseRequest =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineExerciseRequest"];
+export type UpsertRoutineResponse =
+  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse"];
+
 export type ErrorResponse =
   Schemas["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
 

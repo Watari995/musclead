@@ -724,6 +724,286 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ルーティン一覧 */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 1ページの件数 (default: 20, max: 100) */
+                    limit?: number;
+                    /** @description 開始位置 (default: 0) */
+                    offset?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** ルーティン作成 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description ルーティン作成 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description 同 user 内で名前重複 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/routines/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** ルーティン詳細取得 */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 対象 RoutineID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RoutineDTO"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        /** ルーティン更新 */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 対象 RoutineID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            /** @description ルーティン更新 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description 同 user 内で名前重複 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** ルーティン削除 */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 対象 RoutineID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/trainings": {
         parameters: {
             query?: never;
@@ -1271,6 +1551,10 @@ export interface components {
             exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ExerciseDTO"][];
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
         };
+        "github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse": {
+            pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
+            routines?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RoutineDTO"][];
+        };
         "github_com_Watari995_musclead_internal_training_dto.ListTrainingsResponse": {
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
             trainings?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.TrainingDTO"][];
@@ -1297,6 +1581,20 @@ export interface components {
             rest_seconds?: number;
             set_number?: number;
             weight_kg?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.RoutineDTO": {
+            created_at?: string;
+            id?: string;
+            name?: string;
+            routine_exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RoutineExerciseDTO"][];
+            updated_at?: string;
+            user_id?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.RoutineExerciseDTO": {
+            display_order?: number;
+            exercise_id?: string;
+            exercise_name?: string;
+            id?: string;
         };
         "github_com_Watari995_musclead_internal_training_dto.TrainingDTO": {
             created_at?: string;
@@ -1338,6 +1636,17 @@ export interface components {
             name?: string;
         };
         "github_com_Watari995_musclead_internal_training_dto.UpsertExerciseResponse": {
+            id?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.UpsertRoutineExerciseRequest": {
+            display_order?: number;
+            exercise_id?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest": {
+            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineExerciseRequest"][];
+            name?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse": {
             id?: string;
         };
         "github_com_Watari995_musclead_internal_user_dto.RegisterRequest": {
