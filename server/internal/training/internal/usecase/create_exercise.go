@@ -22,13 +22,6 @@ type CreateExercise struct {
 }
 
 func (uc *CreateExercise) Execute(ctx context.Context, input CreateExerciseInput) (*CreateExerciseOutput, error) {
-	found, err := uc.exerciseRepo.ExistsByName(ctx, input.UserID, input.Name)
-	if err != nil {
-		return nil, myerror.NewInternalError().Wrap(err)
-	}
-	if found {
-		return nil, myerror.NewExerciseNameAlreadyExistsError()
-	}
 	exercise := trainingdomain.CreateExercise(input.UserID, input.Name)
 	if err := uc.exerciseRepo.Save(ctx, exercise); err != nil {
 		if myerror.IsCode(err, myerror.ErrorCodes.Training.ExerciseNameAlreadyExistsError) {

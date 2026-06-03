@@ -86,19 +86,6 @@ func (r *exerciseRepository) FindAllByUserIDWithOffsetPagination(ctx context.Con
 	return exercises, paginator, nil
 }
 
-func (r *exerciseRepository) ExistsByName(ctx context.Context, userID valueobject.UserID, name valueobject.String50) (bool, error) {
-	q := dbtx.Querier(ctx, r.dbmap)
-	bytes, err := userID.Bytes()
-	if err != nil {
-		return false, err
-	}
-	count, err := q.SelectInt("SELECT COUNT(*) FROM exercises WHERE user_id = ? AND name = ?", bytes, name.Value())
-	if err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
 func (r *exerciseRepository) Save(ctx context.Context, exercise *trainingdomain.Exercise) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := exercise.ID().Bytes()

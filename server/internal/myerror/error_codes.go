@@ -26,6 +26,7 @@ type mealErrors struct {
 
 type trainingErrors struct {
 	NotFoundError                  ErrorCode
+	ExerciseNotFoundError          ErrorCode
 	ExerciseNameAlreadyExistsError ErrorCode
 }
 
@@ -61,6 +62,7 @@ var ErrorCodes = struct {
 	},
 	Training: trainingErrors{
 		NotFoundError:                  "training.not_found_error",
+		ExerciseNotFoundError:          "training.exercise_not_found_error",
 		ExerciseNameAlreadyExistsError: "training.exercise_name_already_exists_error",
 	},
 	Weight: weightErrors{

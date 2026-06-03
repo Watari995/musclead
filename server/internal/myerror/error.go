@@ -194,6 +194,14 @@ func NewTrainingNotFoundError() MyError {
 	}
 }
 
+func NewExerciseNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.Training.ExerciseNotFoundError,
+	}
+}
+
 func NewExerciseNameAlreadyExistsError() MyError {
 	return &myError{
 		status:      http.StatusConflict,
