@@ -9,7 +9,7 @@ import (
 type TrainingExercise struct {
 	id           valueobject.TrainingExerciseID
 	trainingID   valueobject.TrainingID
-	name         valueobject.String50
+	exerciseID   valueobject.ExerciseID
 	displayOrder valueobject.NonNegativeInt
 	restSeconds  *valueobject.NonNegativeInt
 	memo         *valueobject.String1000
@@ -27,8 +27,8 @@ func (e *TrainingExercise) TrainingID() valueobject.TrainingID {
 	return e.trainingID
 }
 
-func (e *TrainingExercise) Name() valueobject.String50 {
-	return e.name
+func (e *TrainingExercise) ExerciseID() valueobject.ExerciseID {
+	return e.exerciseID
 }
 
 func (e *TrainingExercise) DisplayOrder() valueobject.NonNegativeInt {
@@ -57,7 +57,7 @@ func (e *TrainingExercise) Sets() []*TrainingSet {
 
 func CreateTrainingExercise(
 	trainingID valueobject.TrainingID,
-	name valueobject.String50,
+	exerciseID valueobject.ExerciseID,
 	displayOrder valueobject.NonNegativeInt,
 	restSeconds *valueobject.NonNegativeInt,
 	memo *valueobject.String1000,
@@ -67,7 +67,7 @@ func CreateTrainingExercise(
 	return &TrainingExercise{
 		id:           valueobject.NewPrimaryID[valueobject.TrainingExerciseID](),
 		trainingID:   trainingID,
-		name:         name,
+		exerciseID:   exerciseID,
 		displayOrder: displayOrder,
 		restSeconds:  restSeconds,
 		memo:         memo,
@@ -80,7 +80,7 @@ func CreateTrainingExercise(
 func NewTrainingExercise(
 	id valueobject.TrainingExerciseID,
 	trainingID valueobject.TrainingID,
-	name valueobject.String50,
+	exerciseID valueobject.ExerciseID,
 	displayOrder valueobject.NonNegativeInt,
 	restSeconds *valueobject.NonNegativeInt,
 	memo *valueobject.String1000,
@@ -91,7 +91,7 @@ func NewTrainingExercise(
 	return &TrainingExercise{
 		id:           id,
 		trainingID:   trainingID,
-		name:         name,
+		exerciseID:   exerciseID,
 		displayOrder: displayOrder,
 		restSeconds:  restSeconds,
 		memo:         memo,

@@ -17,7 +17,7 @@ type TrainingSpec struct {
 	Exercises []TrainingExerciseSpec
 }
 type TrainingExerciseSpec struct {
-	Name         valueobject.String50
+	ExerciseID   valueobject.ExerciseID
 	DisplayOrder valueobject.NonNegativeInt
 	RestSeconds  *valueobject.NonNegativeInt
 	Memo         *valueobject.String1000
@@ -142,7 +142,7 @@ func rebuildTrainingExercises(trainingID valueobject.TrainingID, specs []Trainin
 		}
 		exerciseEntity := CreateTrainingExercise(
 			trainingID,
-			ex.Name,
+			ex.ExerciseID,
 			ex.DisplayOrder,
 			ex.RestSeconds,
 			ex.Memo,

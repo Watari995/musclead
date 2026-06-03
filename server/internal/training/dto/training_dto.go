@@ -60,17 +60,17 @@ func (r RecordTrainingSetRequest) ToSpec() (trainingdomain.TrainingSetSpec, erro
 }
 
 type RecordTrainingExerciseRequest struct {
-	Name         string             `json:"name"`
-	DisplayOrder int                `json:"display_order"`
-	RestSeconds  *int               `json:"rest_seconds,omitempty"`
-	Memo         *string            `json:"memo,omitempty"`
+	ExerciseID   string                     `json:"exercise_id"`
+	DisplayOrder int                        `json:"display_order"`
+	RestSeconds  *int                       `json:"rest_seconds,omitempty"`
+	Memo         *string                    `json:"memo,omitempty"`
 	Sets         []RecordTrainingSetRequest `json:"sets"`
 }
 
 func (r RecordTrainingExerciseRequest) ToSpec() (trainingdomain.TrainingExerciseSpec, error) {
-	name, err := valueobject.NewString50(r.Name)
+	exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](r.ExerciseID)
 	if err != nil {
-		return trainingdomain.TrainingExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid name")
+		return trainingdomain.TrainingExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid exercise_id")
 	}
 	displayOrder, err := valueobject.NewNonNegativeInt(r.DisplayOrder)
 	if err != nil {
@@ -100,7 +100,7 @@ func (r RecordTrainingExerciseRequest) ToSpec() (trainingdomain.TrainingExercise
 		return spec
 	})
 	return trainingdomain.TrainingExerciseSpec{
-		Name:         *name,
+		ExerciseID:   *exerciseID,
 		DisplayOrder: *displayOrder,
 		RestSeconds:  restSec,
 		Memo:         memo,
@@ -185,7 +185,7 @@ func NewTrainingSetDTO(s *trainingdomain.TrainingSet) TrainingSetDTO {
 
 type TrainingExerciseDTO struct {
 	ID           string           `json:"id"`
-	Name         string           `json:"name"`
+	ExerciseID   string           `json:"exercise_id"`
 	DisplayOrder int              `json:"display_order"`
 	RestSeconds  *int             `json:"rest_seconds,omitempty"`
 	Memo         *string          `json:"memo,omitempty"`
@@ -206,7 +206,7 @@ func NewTrainingExerciseDTO(e *trainingdomain.TrainingExercise) TrainingExercise
 
 	return TrainingExerciseDTO{
 		ID:           e.ID().Value(),
-		Name:         e.Name().Value(),
+		ExerciseID:   e.ExerciseID().Value(),
 		DisplayOrder: e.DisplayOrder().Value(),
 		RestSeconds:  restSecondsInt,
 		Memo:         memoToPtrStr(e.Memo()),

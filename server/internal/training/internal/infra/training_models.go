@@ -18,7 +18,7 @@ type TrainingModel struct {
 type TrainingExerciseModel struct {
 	ID           []byte         `db:"id"`
 	TrainingID   []byte         `db:"training_id"`
-	Name         string         `db:"name"`
+	ExerciseID   []byte         `db:"exercise_id"`
 	DisplayOrder int32          `db:"display_order"`
 	RestSeconds  sql.NullInt32  `db:"rest_seconds"`
 	Memo         sql.NullString `db:"memo"`

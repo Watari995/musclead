@@ -35,7 +35,7 @@ ON DUPLICATE KEY UPDATE
 `
 
 const upsertTrainingExerciseSQL = `
-INSERT INTO training_exercises (id, training_id, name, display_order, rest_seconds, memo, created_at, updated_at)
+INSERT INTO training_exercises (id, training_id, exercise_id, display_order, rest_seconds, memo, created_at, updated_at)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 
@@ -83,10 +83,14 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 		if err != nil {
 			return err
 		}
+		exerciseIDBytes, err := ex.ExerciseID().Bytes()
+		if err != nil {
+			return err
+		}
 		if _, err := q.Exec(upsertTrainingExerciseSQL,
 			exIDBytes,
 			idBytes,
-			ex.Name().Value(),
+			exerciseIDBytes,
 			int32(ex.DisplayOrder().Value()),
 			sqlconv.NonNegativeIntToNullInt32(ex.RestSeconds()),
 			sqlconv.String1000ToNullString(ex.Memo()),
@@ -231,7 +235,7 @@ func (r *trainingRepository) loadExercises(
 	placeholders, args := sqlquery.InPlaceholders(trainingIDs)
 	var rows []TrainingExerciseModel
 	_, err := q.Select(&rows,
-		"SELECT id, training_id, name, display_order, rest_seconds, memo, created_at, updated_at FROM training_exercises WHERE training_id IN ("+placeholders+") ORDER BY display_order ASC",
+		"SELECT id, training_id, exercise_id, display_order, rest_seconds, memo, created_at, updated_at FROM training_exercises WHERE training_id IN ("+placeholders+") ORDER BY display_order ASC",
 		args...,
 	)
 	if err != nil {
@@ -333,7 +337,7 @@ func toTraining(row TrainingModel, exercises []*trainingdomain.TrainingExercise)
 }
 
 func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.TrainingSet) (*trainingdomain.TrainingExercise, error) {
-	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingExerciseID](row.ID)
+	trainingExerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingExerciseID](row.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +345,7 @@ func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.Traini
 	if err != nil {
 		return nil, err
 	}
-	name, err := valueobject.NewString50(row.Name)
+	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.ExerciseID)
 	if err != nil {
 		return nil, err
 	}
@@ -361,9 +365,9 @@ func toTrainingExercise(row TrainingExerciseModel, sets []*trainingdomain.Traini
 		sets = []*trainingdomain.TrainingSet{}
 	}
 	return trainingdomain.NewTrainingExercise(
-		*exerciseID,
+		*trainingExerciseID,
 		*trainingID,
-		*name,
+		*exerciseID,
 		*displayOrder,
 		restSeconds,
 		memo,
