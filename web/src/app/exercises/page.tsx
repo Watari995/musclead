@@ -42,7 +42,7 @@ export default function ExercisesPage() {
       });
       if (error) {
         const code = error.error?.code;
-        if (code === "training.exercise_in_use_error") {
+        if (code === "training.exercise_used_in_training_error") {
           throw new Error(
             "この種目はトレーニング履歴で使われているため削除できません。",
           );

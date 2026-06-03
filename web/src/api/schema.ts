@@ -390,6 +390,15 @@ export interface paths {
                         "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
                     };
                 };
+                /** @description training_exercises から参照されている時 */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
             };
         };
         options?: never;
