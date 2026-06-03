@@ -28,4 +28,5 @@ type TrainingExerciseID struct{ PrimaryIDBase }
 type TrainingSetID struct{ PrimaryIDBase }
 type ExerciseID struct{ PrimaryIDBase }
 type RoutineID struct{ PrimaryIDBase }
+type RoutineExerciseID struct{ PrimaryIDBase }
 type WeightID struct{ PrimaryIDBase }
