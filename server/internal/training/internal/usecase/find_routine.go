@@ -14,7 +14,7 @@ type FindRoutineByIDInput struct {
 }
 
 type FindRoutineByIDOutput struct {
-	RoutineView *trainingdomain.RoutineView
+	Routine *trainingdomain.RoutineView
 }
 
 type FindRoutineByID struct {
@@ -29,7 +29,7 @@ func (uc *FindRoutineByID) Execute(ctx context.Context, input FindRoutineByIDInp
 	if routineView == nil {
 		return nil, myerror.NewRoutineNotFoundError()
 	}
-	return &FindRoutineByIDOutput{RoutineView: routineView}, nil
+	return &FindRoutineByIDOutput{Routine: routineView}, nil
 }
 
 func NewFindRoutineByID(routineQueryService trainingdomain.RoutineQueryService) *FindRoutineByID {
