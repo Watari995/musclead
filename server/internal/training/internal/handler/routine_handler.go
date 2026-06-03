@@ -45,6 +45,18 @@ func NewRoutineHandler(
 	return mux
 }
 
+// Find godoc
+//
+// @Summary ルーティン詳細取得
+// @Tags routines
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 RoutineID"
+// @Success 200 {object} trainingdto.RoutineDTO
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /routines/{id} [get]
 func (h *RoutineHandler) Find(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -64,6 +76,17 @@ func (h *RoutineHandler) Find(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, trainingdto.NewRoutineDTO(output.Routine))
 }
 
+// List godoc
+//
+// @Summary ルーティン一覧
+// @Tags routines
+// @Produce json
+// @Security BearerAuth
+// @Param limit query int false "1ページの件数 (default: 20, max: 100)"
+// @Param offset query int false "開始位置 (default: 0)"
+// @Success 200 {object} trainingdto.ListRoutinesResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /routines [get]
 func (h *RoutineHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -84,6 +107,19 @@ func (h *RoutineHandler) List(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Create godoc
+//
+// @Summary ルーティン作成
+// @Tags routines
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body trainingdto.UpsertRoutineRequest true "ルーティン作成"
+// @Success 201 {object} trainingdto.UpsertRoutineResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 409 {object} httpx.ErrorResponse "同 user 内で名前重複"
+// @Router /routines [post]
 func (h *RoutineHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -100,19 +136,10 @@ func (h *RoutineHandler) Create(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid name"))
 		return
 	}
-	specs := make([]trainingdomain.RoutineExerciseSpec, 0, len(input.Exercises))
-	for _, e := range input.Exercises {
-		exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](e.ExerciseID)
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exercise_id"))
-			return
-		}
-		displayOrder, err := valueobject.NewNonNegativeInt(e.DisplayOrder)
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid display_order"))
-			return
-		}
-		specs = append(specs, trainingdomain.RoutineExerciseSpec{ExerciseID: *exerciseID, DisplayOrder: *displayOrder})
+	specs, err := input.ToSpec()
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
 	}
 	output, err := h.create.Execute(r.Context(), trainingusecase.CreateRoutineInput{UserID: userID, RoutineSpec: trainingdomain.RoutineSpec{Name: *name, Exercises: specs}})
 	if err != nil {
@@ -122,6 +149,21 @@ func (h *RoutineHandler) Create(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated, trainingdto.UpsertRoutineResponse{ID: output.ID.Value()})
 }
 
+// Update godoc
+//
+// @Summary ルーティン更新
+// @Tags routines
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 RoutineID"
+// @Param request body trainingdto.UpsertRoutineRequest true "ルーティン更新"
+// @Success 200 {object} trainingdto.UpsertRoutineResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Failure 409 {object} httpx.ErrorResponse "同 user 内で名前重複"
+// @Router /routines/{id} [put]
 func (h *RoutineHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -143,19 +185,10 @@ func (h *RoutineHandler) Update(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid name"))
 		return
 	}
-	specs := make([]trainingdomain.RoutineExerciseSpec, 0, len(input.Exercises))
-	for _, e := range input.Exercises {
-		exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](e.ExerciseID)
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exercise_id"))
-			return
-		}
-		displayOrder, err := valueobject.NewNonNegativeInt(e.DisplayOrder)
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid display_order"))
-			return
-		}
-		specs = append(specs, trainingdomain.RoutineExerciseSpec{ExerciseID: *exerciseID, DisplayOrder: *displayOrder})
+	specs, err := input.ToSpec()
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
 	}
 	output, err := h.update.Execute(r.Context(), trainingusecase.UpdateRoutineInput{ID: *routineID, UserID: userID, RoutineSpec: trainingdomain.RoutineSpec{Name: *name, Exercises: specs}})
 	if err != nil {
@@ -165,6 +198,18 @@ func (h *RoutineHandler) Update(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, trainingdto.UpsertRoutineResponse{ID: output.ID.Value()})
 }
 
+// Delete godoc
+//
+// @Summary ルーティン削除
+// @Tags routines
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "対象 RoutineID"
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /routines/{id} [delete]
 func (h *RoutineHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {

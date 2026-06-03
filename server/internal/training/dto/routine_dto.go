@@ -3,8 +3,10 @@ package trainingdto
 import (
 	"time"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
+	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/samber/lo"
 )
 
@@ -19,10 +21,28 @@ type UpsertRoutineExerciseRequest struct {
 	ExerciseID   string `json:"exercise_id"`
 	DisplayOrder int    `json:"display_order"`
 }
+
 type UpsertRoutineRequest struct {
 	Name      string                         `json:"name"`
 	Exercises []UpsertRoutineExerciseRequest `json:"exercises"`
 }
+
+func (r UpsertRoutineRequest) ToSpec() ([]trainingdomain.RoutineExerciseSpec, error) {
+	specs := make([]trainingdomain.RoutineExerciseSpec, 0, len(r.Exercises))
+	for _, e := range r.Exercises {
+		exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](e.ExerciseID)
+		if err != nil {
+			return []trainingdomain.RoutineExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid exerciseID")
+		}
+		displayOrder, err := valueobject.NewNonNegativeInt(e.DisplayOrder)
+		if err != nil {
+			return []trainingdomain.RoutineExerciseSpec{}, myerror.NewBadRequestError().SetMessage("invalid display order")
+		}
+		specs = append(specs, trainingdomain.RoutineExerciseSpec{ExerciseID: *exerciseID, DisplayOrder: *displayOrder})
+	}
+	return specs, nil
+}
+
 type UpsertRoutineResponse struct {
 	ID string `json:"id"`
 }
