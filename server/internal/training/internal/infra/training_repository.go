@@ -120,13 +120,11 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 
 // FindByID は集約全体を取り出す。 親 + 子一括 + 孫一括の 3 クエリ。
 func (r *trainingRepository) FindByID(ctx context.Context, id valueobject.TrainingID) (*trainingdomain.Training, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := id.Bytes()
 	if err != nil {
 		return nil, err
 	}
-
-	q := dbtx.Querier(ctx, r.dbmap)
-
 	var row TrainingModel
 	err = q.SelectOne(&row,
 		"SELECT id, user_id, started_at, ended_at, memo, created_at, updated_at FROM trainings WHERE id = ?",
