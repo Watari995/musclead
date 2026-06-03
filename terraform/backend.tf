@@ -15,10 +15,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "musclead-tfstate-204340689570"
+    bucket         = "musclead-tfstate-204340689570-v2"
     key            = "terraform.tfstate"
     region         = "ap-northeast-1"
     dynamodb_table = "musclead-tfstate-lock"
     encrypt        = true
+    profile        = "musclead-admin"
   }
 }
