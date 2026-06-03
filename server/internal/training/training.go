@@ -21,15 +21,18 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	dbmap.AddTableWithName(traininginfra.TrainingModel{}, "trainings").SetKeys(false, "ID")
 	dbmap.AddTableWithName(traininginfra.TrainingExerciseModel{}, "training_exercises").SetKeys(false, "ID")
 	dbmap.AddTableWithName(traininginfra.TrainingSetModel{}, "training_sets").SetKeys(false, "ID")
+
+	dbmap.AddTableWithName(traininginfra.ExerciseModel{}, "exercises").SetKeys(false, "ID")
+
 	repo := traininginfra.NewTrainingRepository(dbmap)
 	txManager := dbtx.NewTransactionManager(dbmap)
 
 	// use-case
-	find := trainingusecase.NewFindTrainingByID(repo)
-	list := trainingusecase.NewListTraining(repo)
-	record := trainingusecase.NewRecordTraining(repo, txManager)
-	update := trainingusecase.NewUpdateTraining(repo, txManager)
-	delete := trainingusecase.NewDeleteTrainingByID(repo)
+	findTraining := trainingusecase.NewFindTrainingByID(repo)
+	listTrainings := trainingusecase.NewListTraining(repo)
+	recordTraining := trainingusecase.NewRecordTraining(repo, txManager)
+	updateTraining := trainingusecase.NewUpdateTraining(repo, txManager)
+	deleteTraining := trainingusecase.NewDeleteTrainingByID(repo)
 
-	return &Module{Handler: traininghandler.New(find, list, record, update, delete)}
+	return &Module{Handler: traininghandler.New(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining)}
 }
