@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import type { ExerciseDTO } from "@/api/client";
 import type { ExerciseDraft, SetDraft } from "@/lib/training-form";
 import { Button, Card, Label, TextInput } from "@/components/ui";
 import { SetField } from "./SetField";
@@ -7,6 +9,7 @@ import { SetField } from "./SetField";
 type Props = {
   exercise: ExerciseDraft;
   index: number;
+  exercises: ExerciseDTO[];
   onChange: (patch: Partial<Omit<ExerciseDraft, "key" | "sets" | "displayOrder">>) => void;
   onRemove: () => void;
   onMoveUp?: () => void;
@@ -23,6 +26,7 @@ type Props = {
 export function ExerciseField({
   exercise,
   index,
+  exercises,
   onChange,
   onRemove,
   onMoveUp,
@@ -34,19 +38,39 @@ export function ExerciseField({
 }: Props) {
   return (
     <Card className="p-4 space-y-3">
-      {/* header: 種目名 + 並び替え/削除 */}
+      {/* header: 種目選択 + 並び替え/削除 */}
       <div className="flex items-start gap-2">
         <div className="flex-1">
           <Label label={`種目 ${index + 1}`}>
-            <TextInput
-              placeholder="種目名(例: ベンチプレス)"
-              value={exercise.name}
-              onChange={(e) => onChange({ name: e.target.value })}
+            <select
+              value={exercise.exerciseID}
+              onChange={(e) => onChange({ exerciseID: e.target.value })}
               disabled={disabled}
               required
-              aria-label={`種目${index + 1}の名前`}
-            />
+              aria-label={`種目${index + 1}を選択`}
+              className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-white text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+            >
+              <option value="" disabled>
+                種目を選択…
+              </option>
+              {exercises.map((ex) => (
+                <option key={ex.id} value={ex.id}>
+                  {ex.name}
+                </option>
+              ))}
+            </select>
           </Label>
+          {exercises.length === 0 && (
+            <p className="text-xs text-[var(--color-ink-muted)] mt-1">
+              まだ種目が登録されていません。{" "}
+              <Link
+                href="/exercises/new"
+                className="underline hover:opacity-70"
+              >
+                先に作成
+              </Link>
+            </p>
+          )}
         </div>
         <div className="flex items-end gap-1 pb-px">
           <button

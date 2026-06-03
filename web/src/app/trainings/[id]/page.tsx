@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   apiClient,
+  type ExerciseDTO,
+  type ListExercisesResponse,
   type TrainingDTO,
   type TrainingExerciseDTO,
 } from "@/api/client";
@@ -38,6 +40,22 @@ export default function TrainingDetailPage() {
       return data as TrainingDTO;
     },
   });
+
+  const exercisesQuery = useQuery({
+    queryKey: ["exercises", "all"],
+    enabled: Boolean(token),
+    queryFn: async (): Promise<ExerciseDTO[]> => {
+      const { data, error, response } = await apiClient.GET("/exercises", {
+        params: { query: { limit: 100, offset: 0 } },
+      });
+      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      return (data as ListExercisesResponse).exercises ?? [];
+    },
+  });
+  const exerciseNameByID = new Map<string, string>();
+  for (const ex of exercisesQuery.data ?? []) {
+    if (ex.id && ex.name) exerciseNameByID.set(ex.id, ex.name);
+  }
 
   if (!ready || !token) return null;
 
@@ -77,18 +95,30 @@ export default function TrainingDetailPage() {
 
       <div className="space-y-3">
         {(training.exercises ?? []).map((ex) => (
-          <ExerciseSummary key={ex.id} exercise={ex} />
+          <ExerciseSummary
+            key={ex.id}
+            exercise={ex}
+            exerciseName={
+              ex.exercise_id ? exerciseNameByID.get(ex.exercise_id) ?? "(削除済み)" : "-"
+            }
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function ExerciseSummary({ exercise }: { exercise: TrainingExerciseDTO }) {
+function ExerciseSummary({
+  exercise,
+  exerciseName,
+}: {
+  exercise: TrainingExerciseDTO;
+  exerciseName: string;
+}) {
   return (
     <Card className="p-4 space-y-3">
       <div className="flex items-baseline justify-between">
-        <h3 className="text-sm font-bold tracking-tight">{exercise.name}</h3>
+        <h3 className="text-sm font-bold tracking-tight">{exerciseName}</h3>
         <span className="text-xs text-[var(--color-ink-muted)]">
           {(exercise.sets ?? []).length} セット
           {exercise.rest_seconds != null && ` / 既定休憩 ${exercise.rest_seconds}秒`}

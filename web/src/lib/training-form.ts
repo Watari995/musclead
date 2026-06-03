@@ -24,7 +24,7 @@ export type SetDraft = {
 
 export type ExerciseDraft = {
   key: string;
-  name: string;
+  exerciseID: string;
   displayOrder: number;
   restSeconds: number | null;
   memo: string;
@@ -64,7 +64,7 @@ export function createInitialSet(setNumber: number): SetDraft {
 export function createInitialExercise(displayOrder: number): ExerciseDraft {
   return {
     key: nextKey("ex"),
-    name: "",
+    exerciseID: "",
     displayOrder,
     restSeconds: null,
     memo: "",
@@ -207,7 +207,7 @@ export function toRecordRequest(
     ended_at: draft.endedAt ? localInputToISO(draft.endedAt) : undefined,
     memo: draft.memo ? draft.memo : undefined,
     exercises: draft.exercises.map((ex) => ({
-      name: ex.name,
+      exercise_id: ex.exerciseID,
       display_order: ex.displayOrder,
       rest_seconds: ex.restSeconds ?? undefined,
       memo: ex.memo ? ex.memo : undefined,
@@ -235,7 +235,7 @@ export function fromTrainingDTO(dto: TrainingDTO): TrainingDraft {
 function exerciseFromDTO(dto: TrainingExerciseDTO): ExerciseDraft {
   return {
     key: nextKey("ex"),
-    name: dto.name ?? "",
+    exerciseID: dto.exercise_id ?? "",
     displayOrder: dto.display_order ?? 1,
     restSeconds: dto.rest_seconds ?? null,
     memo: dto.memo ?? "",

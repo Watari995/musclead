@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   apiClient,
+  type ExerciseDTO,
+  type ListExercisesResponse,
   type ListTrainingsResponse,
   type TrainingDTO,
 } from "@/api/client";
@@ -19,6 +21,7 @@ import {
 } from "@/components/ui";
 
 const TRAININGS_QUERY_KEY = ["trainings"] as const;
+const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 
 export default function TrainingsPage() {
   const router = useRouter();
@@ -40,6 +43,22 @@ export default function TrainingsPage() {
       return data as ListTrainingsResponse;
     },
   });
+
+  const exercisesQuery = useQuery({
+    queryKey: EXERCISES_QUERY_KEY,
+    enabled: Boolean(token),
+    queryFn: async (): Promise<ExerciseDTO[]> => {
+      const { data, error, response } = await apiClient.GET("/exercises", {
+        params: { query: { limit: 100, offset: 0 } },
+      });
+      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      return (data as ListExercisesResponse).exercises ?? [];
+    },
+  });
+  const exerciseNameByID = new Map<string, string>();
+  for (const ex of exercisesQuery.data ?? []) {
+    if (ex.id && ex.name) exerciseNameByID.set(ex.id, ex.name);
+  }
 
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -82,6 +101,7 @@ export default function TrainingsPage() {
             <TrainingCard
               key={t.id}
               training={t}
+              exerciseNameByID={exerciseNameByID}
               onDelete={() => {
                 if (confirm("このトレーニングを削除しますか?")) {
                   del.mutate(t.id ?? "");
@@ -98,10 +118,12 @@ export default function TrainingsPage() {
 
 function TrainingCard({
   training,
+  exerciseNameByID,
   onDelete,
   deleting,
 }: {
   training: TrainingDTO;
+  exerciseNameByID: Map<string, string>;
   onDelete: () => void;
   deleting: boolean;
 }) {
@@ -110,8 +132,8 @@ function TrainingCard({
     0,
   );
   const exerciseNames = (training.exercises ?? [])
-    .map((ex) => ex.name)
-    .filter(Boolean)
+    .map((ex) => (ex.exercise_id ? exerciseNameByID.get(ex.exercise_id) : undefined))
+    .filter((n): n is string => Boolean(n))
     .slice(0, 3);
 
   return (

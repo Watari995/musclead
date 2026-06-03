@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   type TrainingDraft,
@@ -13,9 +14,16 @@ import {
   updateSet,
   updateTraining,
 } from "@/lib/training-form";
-import type { RecordTrainingRequest } from "@/api/client";
+import {
+  apiClient,
+  type ExerciseDTO,
+  type ListExercisesResponse,
+  type RecordTrainingRequest,
+} from "@/api/client";
 import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
 import { ExerciseField } from "./ExerciseField";
+
+const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 
 type Props = {
   initial: TrainingDraft;
@@ -37,6 +45,18 @@ export function TrainingForm({
   onCancel,
 }: Props) {
   const [draft, setDraft] = useState<TrainingDraft>(initial);
+
+  const exercisesQuery = useQuery({
+    queryKey: EXERCISES_QUERY_KEY,
+    queryFn: async (): Promise<ExerciseDTO[]> => {
+      const { data, error, response } = await apiClient.GET("/exercises", {
+        params: { query: { limit: 100, offset: 0 } },
+      });
+      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      return (data as ListExercisesResponse).exercises ?? [];
+    },
+  });
+  const exercises = exercisesQuery.data ?? [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,6 +113,7 @@ export function TrainingForm({
               key={exercise.key}
               exercise={exercise}
               index={index}
+              exercises={exercises}
               onChange={(patch) =>
                 setDraft((d) => updateExercise(d, index, patch))
               }

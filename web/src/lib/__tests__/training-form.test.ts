@@ -57,22 +57,22 @@ describe("exercise operations", () => {
 
   it("moveExercise rotates and re-numbers", () => {
     let draft = createInitialTraining();
-    draft = updateExercise(draft, 0, { name: "A" });
+    draft = updateExercise(draft, 0, { exerciseID: "A" });
     draft = addExercise(draft);
-    draft = updateExercise(draft, 1, { name: "B" });
+    draft = updateExercise(draft, 1, { exerciseID: "B" });
     draft = addExercise(draft);
-    draft = updateExercise(draft, 2, { name: "C" });
+    draft = updateExercise(draft, 2, { exerciseID: "C" });
 
     const moved = moveExercise(draft, 0, 2);
-    expect(moved.exercises.map((e) => e.name)).toEqual(["B", "C", "A"]);
+    expect(moved.exercises.map((e) => e.exerciseID)).toEqual(["B", "C", "A"]);
     expect(moved.exercises.map((e) => e.displayOrder)).toEqual([1, 2, 3]);
   });
 
   it("updateExercise patches only the targeted exercise", () => {
     const draft = addExercise(createInitialTraining());
-    const after = updateExercise(draft, 1, { name: "Squat" });
-    expect(after.exercises[0].name).toBe("");
-    expect(after.exercises[1].name).toBe("Squat");
+    const after = updateExercise(draft, 1, { exerciseID: "ex-uuid-squat" });
+    expect(after.exercises[0].exerciseID).toBe("");
+    expect(after.exercises[1].exerciseID).toBe("ex-uuid-squat");
   });
 });
 
@@ -140,7 +140,7 @@ describe("toRecordRequest", () => {
     let draft = createInitialTraining();
     draft = updateTraining(draft, { startedAt: "2026-06-02T18:00" });
     draft = updateExercise(draft, 0, {
-      name: "Bench Press",
+      exerciseID: "ex-uuid-bench",
       restSeconds: 90,
     });
     draft = updateSet(draft, 0, 0, {
@@ -154,7 +154,7 @@ describe("toRecordRequest", () => {
     expect(req.memo).toBeUndefined();
     expect(req.exercises).toHaveLength(1);
     expect(req.exercises![0]).toMatchObject({
-      name: "Bench Press",
+      exercise_id: "ex-uuid-bench",
       display_order: 1,
       rest_seconds: 90,
     });
@@ -194,7 +194,7 @@ describe("fromTrainingDTO", () => {
       exercises: [
         {
           id: "ex1",
-          name: "Squat",
+          exercise_id: "ex-uuid-squat",
           display_order: 1,
           rest_seconds: 120,
           memo: undefined,
@@ -214,7 +214,7 @@ describe("fromTrainingDTO", () => {
 
     expect(draft.memo).toBe("rest");
     expect(draft.exercises).toHaveLength(1);
-    expect(draft.exercises[0].name).toBe("Squat");
+    expect(draft.exercises[0].exerciseID).toBe("ex-uuid-squat");
     expect(draft.exercises[0].sets).toHaveLength(1);
     expect(draft.exercises[0].sets[0].weightKg).toBe("80.00");
   });
