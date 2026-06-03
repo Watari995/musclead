@@ -52,7 +52,11 @@ func NewExerciseHandler(
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "対象 ExerciseID"
-// @Success 200 {object} trainingdto.TrainingDTO
+// @Success 200 {object} trainingdto.ExerciseDTO
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /exercises/{id} [get]
 func (h *ExerciseHandler) Find(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -72,6 +76,17 @@ func (h *ExerciseHandler) Find(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, trainingdto.NewExerciseDTO(output.Exercise))
 }
 
+// List godoc
+//
+// @Summary エクササイズ一覧
+// @Tags exercises
+// @Produce json
+// @Security BearerAuth
+// @Param limit query int false "1ページの件数 (default: 20, max: 100)"
+// @Param offset query int false "開始位置 (default: 0)"
+// @Success 200 {object} trainingdto.ListExercisesResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises [get]
 func (h *ExerciseHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -93,6 +108,18 @@ func (h *ExerciseHandler) List(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
+// Create godoc
+//
+// @Summary エクササイズ作成
+// @Tags exercises
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body trainingdto.UpsertExerciseRequest true "エクササイズ作成"
+// @Success 201 {object} trainingdto.UpsertExerciseResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises [post]
 func (h *ExerciseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -117,6 +144,19 @@ func (h *ExerciseHandler) Create(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusCreated, trainingdto.UpsertExerciseResponse{ID: output.ID.Value()})
 }
 
+// Update godoc
+//
+// @Summary エクササイズ更新
+// @Tags exercises
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 ExerciseID"
+// @Param request body trainingdto.UpsertExerciseRequest true "エクササイズ更新"
+// @Success 200 {object} trainingdto.UpsertExerciseResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises/{id} [put]
 func (h *ExerciseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -146,6 +186,18 @@ func (h *ExerciseHandler) Update(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, http.StatusOK, trainingdto.UpsertExerciseResponse{ID: output.ID.Value()})
 }
 
+// Delete godoc
+//
+// @Summary エクササイズ削除
+// @Tags exercises
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "対象 ExerciseID"
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Failure 404 {object} httpx.ErrorResponse
+// @Router /exercises/{id} [delete]
 func (h *ExerciseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
