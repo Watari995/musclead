@@ -78,7 +78,7 @@ func (r *routineRepository) Save(ctx context.Context, routine *trainingdomain.Ro
 	if err != nil {
 		return err
 	}
-	// update first なければ insertにする
+	// update first if exists
 	result, err := q.Exec(updateRoutineSQL, routine.Name().Value(), routine.UpdatedAt(), idBytes)
 	if err != nil {
 		if sqlerr.IsDuplicateKey(err) {
@@ -90,7 +90,7 @@ func (r *routineRepository) Save(ctx context.Context, routine *trainingdomain.Ro
 	if err != nil {
 		return err
 	}
-	// if not updated, insert
+	// insert if not updated
 	if rowsAffected == 0 {
 		result, err = q.Exec(insertRoutineSQL, idBytes, userIDBytes, routine.Name().Value(), routine.CreatedAt(), routine.UpdatedAt())
 		if err != nil {
