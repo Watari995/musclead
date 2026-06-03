@@ -218,6 +218,22 @@ func NewExerciseUsedInTrainingError() MyError {
 	}
 }
 
+func NewRoutineNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.Training.RoutineNotFoundError,
+	}
+}
+
+func NewRoutineNameAlreadyExistsError() MyError {
+	return &myError{
+		status:      http.StatusConflict,
+		generalCode: ErrorCodes.General.BadRequestError,
+		code:        ErrorCodes.Training.RoutineNameAlreadyExistsError,
+	}
+}
+
 func NewWeightNotFoundError() MyError {
 	return &myError{
 		status:      http.StatusNotFound,
