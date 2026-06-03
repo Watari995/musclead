@@ -1,0 +1,1 @@
+DROP TABLE routine_exercises;
