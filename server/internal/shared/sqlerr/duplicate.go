@@ -19,9 +19,8 @@ const mysqlErrDupEntry uint16 = 1062
 // 用途: INSERT / UPDATE が UNIQUE 制約に当たった時に、 ドメインの sentinel error
 // (例: ErrExerciseNameDuplicated)へ変換する分岐に使う。
 func IsDuplicateKey(err error) bool {
-	var mysqlErr *mysql.MySQLError
-	if !errors.As(err, &mysqlErr) {
-		return false
+	if mysqlErr, ok := errors.AsType[*mysql.MySQLError](err); ok {
+		return mysqlErr.Number == mysqlErrDupEntry
 	}
-	return mysqlErr.Number == mysqlErrDupEntry
+	return false
 }
