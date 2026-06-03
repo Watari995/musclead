@@ -54,6 +54,12 @@ export function Header() {
               トレーニング
             </Link>
             <Link
+              href="/exercises"
+              className="hover:opacity-60 transition-opacity"
+            >
+              種目
+            </Link>
+            <Link
               href="/meals"
               className="hover:opacity-60 transition-opacity text-[var(--color-ink-muted)]"
             >
