@@ -23,17 +23,13 @@ type UpdateExercise struct {
 }
 
 func (uc *UpdateExercise) Execute(ctx context.Context, input UpdateExerciseInput) (*UpdateExerciseOutput, error) {
-	found, err := uc.exerciseRepo.FindByID(ctx, input.ID)
+	found, err := uc.exerciseRepo.FindByIDAndUserID(ctx, input.ID, input.UserID)
 	if err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
 	if found == nil {
 		return nil, myerror.NewExerciseNotFoundError()
 	}
-	if found.UserID() != input.UserID {
-		return nil, myerror.NewPermissionError().SetMessage("exercise does not belong to the user")
-	}
-
 	found.SetName(input.Name)
 	if err := uc.exerciseRepo.Save(ctx, found); err != nil {
 		if myerror.IsCode(err, myerror.ErrorCodes.Training.ExerciseNameAlreadyExistsError) {

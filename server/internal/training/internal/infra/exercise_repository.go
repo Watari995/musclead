@@ -34,16 +34,20 @@ SET name = ?, updated_at = ?
 WHERE id = ?
 `
 
-func (r *exerciseRepository) FindByID(ctx context.Context, id valueobject.ExerciseID) (*trainingdomain.Exercise, error) {
+func (r *exerciseRepository) FindByIDAndUserID(ctx context.Context, id valueobject.ExerciseID, userID valueobject.UserID) (*trainingdomain.Exercise, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
-	bytes, err := id.Bytes()
+	idBytes, err := id.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	userIDBytes, err := userID.Bytes()
 	if err != nil {
 		return nil, err
 	}
 	var row ExerciseModel
 	err = q.SelectOne(&row,
-		"SELECT id, user_id, name, created_at, updated_at FROM exercises WHERE id = ?",
-		bytes,
+		"SELECT id, user_id, name, created_at, updated_at FROM exercises WHERE id = ? and user_id = ?",
+		idBytes, userIDBytes,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
