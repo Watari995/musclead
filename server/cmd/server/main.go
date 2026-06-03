@@ -152,6 +152,9 @@ func newMux(dbmap *gorp.DbMap) http.Handler {
 	// exercises
 	mux.Handle("/exercises", authModule.Middleware(trainingModule.ExerciseHandler))
 	mux.Handle("/exercises/", authModule.Middleware(trainingModule.ExerciseHandler))
+	// routines
+	mux.Handle("/routines", authModule.Middleware(trainingModule.RoutineHandler))
+	mux.Handle("/routines/", authModule.Middleware(trainingModule.RoutineHandler))
 
 	return httpx.CORSMiddleware(mux)
 }
