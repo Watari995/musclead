@@ -49,3 +49,10 @@ variable "db_port" {
   description = "RDS MySQL の接続ポート"
   type        = number
 }
+
+# ── Route 53 / ACM ─────────────
+
+variable "hosted_zone_id" {
+  description = "Route 53 hosted zone ID(musclead.com の zone)"
+  type        = string
+}

@@ -48,3 +48,8 @@ variable "be_sg_id" {
   description = "BE Fargate用SGのID(network moduleのbe_fargate_sg_id)"
   type        = string
 }
+
+variable "target_group_arn" {
+  description = "ALB Target Group の ARN(alb moduleの output)"
+  type        = string
+}

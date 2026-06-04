@@ -36,6 +36,20 @@ module "secrets" {
   db_host     = module.rds.endpoint
 }
 
+module "acm" {
+  source         = "./modules/acm"
+  domain_name    = var.domain_name
+  hosted_zone_id = var.hosted_zone_id
+}
+
+module "alb" {
+  source              = "./modules/alb"
+  vpc_id              = module.network.vpc_id
+  subnet_ids          = module.network.public_subnet_ids
+  alb_sg_id           = module.network.alb_sg_id
+  acm_certificate_arn = module.acm.certificate_arn
+}
+
 module "ecs" {
   source       = "./modules/ecs"
   be_image_url = "${module.ecr.be_repository_url}:latest"
@@ -45,25 +59,22 @@ module "ecs" {
     module.secrets.db_password_arn,
     module.secrets.db_host_arn,
   ]
-  jwt_secret_arn  = module.secrets.jwt_secret_arn
-  db_user_arn     = module.secrets.db_user_arn
-  db_password_arn = module.secrets.db_password_arn
-  db_host_arn     = module.secrets.db_host_arn
-  db_name         = var.db_name
-  db_port         = var.db_port
-  subnet_ids      = module.network.public_subnet_ids
-  be_sg_id        = module.network.be_fargate_sg_id
+  jwt_secret_arn   = module.secrets.jwt_secret_arn
+  db_user_arn      = module.secrets.db_user_arn
+  db_password_arn  = module.secrets.db_password_arn
+  db_host_arn      = module.secrets.db_host_arn
+  db_name          = var.db_name
+  db_port          = var.db_port
+  subnet_ids       = module.network.public_subnet_ids
+  be_sg_id         = module.network.be_fargate_sg_id
+  target_group_arn = module.alb.be_target_group_arn
 }
 
 
-# module "alb" {
-#   source = "./modules/alb"
-#   ...
-# }
-
-# module "dns" {
-#   source      = "./modules/dns"
-#   domain_name = var.domain_name
-#   alb_dns     = module.alb.alb_dns_name
-#   alb_zone_id = module.alb.alb_zone_id
-# }
+module "dns" {
+  source         = "./modules/dns"
+  hosted_zone_id = var.hosted_zone_id
+  domain_name    = var.domain_name
+  alb_dns_name   = module.alb.alb_dns_name
+  alb_zone_id    = module.alb.alb_zone_id
+}

@@ -9,3 +9,6 @@ db_user     = "musclead_admin"
 db_password = "REPLACE_ME_openssl_rand_base64_24"
 db_name     = "musclead"
 db_port     = 3306
+
+# Route 53 hosted zone ID(AWS Console で確認 / aws route53 list-hosted-zones)
+hosted_zone_id = "REPLACE_WITH_HOSTED_ZONE_ID"

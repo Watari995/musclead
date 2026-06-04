@@ -164,6 +164,14 @@ resource "aws_ecs_service" "be" {
     assign_public_ip = true
   }
 
+  # ALB Target Group に Task の IP を自動登録
+  # Service が起動した Task の IP を Target Group に登録 → ALB が振り分け対象に
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = "be" # Task Definition 内の container 名と一致
+    container_port   = 8080
+  }
+
   # IAM Roleのpolicy attach 完了を待ってからServiceを作る(race condition対策)
   depends_on = [aws_iam_role_policy_attachment.be_task_execution_basic, aws_iam_role_policy.be_task_execution_ssm]
 
