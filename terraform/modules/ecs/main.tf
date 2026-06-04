@@ -108,6 +108,7 @@ resource "aws_ecs_task_definition" "be" {
       { name = "ADDR", value = ":8080" },
       { name = "DB_PORT", value = tostring(var.db_port) },
       { name = "DB_NAME", value = var.db_name },
+      { name = "ALLOWED_ORIGIN", value = var.allowed_origin },
     ]
 
     # SSM 由来 secrets(IAM Role 経由で復号化)

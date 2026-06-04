@@ -68,6 +68,7 @@ module "ecs" {
   subnet_ids       = module.network.public_subnet_ids
   be_sg_id         = module.network.be_fargate_sg_id
   target_group_arn = module.alb.be_target_group_arn
+  allowed_origin   = var.allowed_origin
 }
 
 

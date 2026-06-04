@@ -56,3 +56,11 @@ variable "hosted_zone_id" {
   description = "Route 53 hosted zone ID(musclead.com の zone)"
   type        = string
 }
+
+# ── CORS ─────────────
+
+variable "allowed_origin" {
+  description = "BE が CORS 許可するオリジン(FE の URL)"
+  type        = string
+  default     = "https://app.musclead.com"
+}

@@ -39,6 +39,11 @@ variable "db_port" {
   type = number
 }
 
+variable "allowed_origin" {
+  description = "CORS 許可オリジン(FE の URL)"
+  type        = string
+}
+
 variable "subnet_ids" {
   description = "Taskを配置するSubnet IDリスト(network moduleのpublic_subnet_ids)"
   type        = list(string)
