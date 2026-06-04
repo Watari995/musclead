@@ -17,3 +17,15 @@ resource "aws_route53_record" "api" {
     evaluate_target_health = true             # ALB が unhealthy なら DNS 解決失敗(無駄リクエスト減らす)
   }
 }
+
+# app.musclead.com → Vercel 用 A レコード
+#
+# Vercel は anycast IP (76.76.21.21) で全プロジェクトを受け、 SNI ヘッダで振り分け。
+# CNAME (cname.vercel-dns.com) も動くが、 Vercel 公式は A レコード推奨。
+resource "aws_route53_record" "app" {
+  zone_id = var.hosted_zone_id
+  name    = "app.${var.domain_name}" # app.musclead.com
+  type    = "A"
+  ttl     = 60
+  records = ["76.76.21.21"] # Vercel anycast IP
+}
