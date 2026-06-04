@@ -17,5 +17,35 @@ variable "domain_name" {
 }
 
 # サブドメイン:
-# - app.<domain_name>: FE
-# - api.<domain_name>: BE
+# - app.<domain_name>: FE (Vercel CNAME)
+# - api.<domain_name>: BE (ALB Alias)
+
+# ── Secrets / 環境ごとに変わる値(全て terraform.tfvars で投入) ─────────────
+
+variable "jwt_secret" {
+  description = "JWT 署名鍵(SSM Parameter Store の SecureString に保管)"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_user" {
+  description = "RDS MySQL マスターユーザー名"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_password" {
+  description = "RDS MySQL マスターパスワード"
+  type        = string
+  sensitive   = true
+}
+
+variable "db_name" {
+  description = "RDS MySQL のスキーマ名"
+  type        = string
+}
+
+variable "db_port" {
+  description = "RDS MySQL の接続ポート"
+  type        = number
+}

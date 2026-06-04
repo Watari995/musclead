@@ -25,6 +25,14 @@ module "ecr" {
   source = "./modules/ecr"
 }
 
+module "secrets" {
+  source      = "./modules/secrets"
+  env         = var.env
+  jwt_secret  = var.jwt_secret
+  db_user     = var.db_user
+  db_password = var.db_password
+}
+
 # module "ecs" {
 #   source = "./modules/ecs"
 #   ...

@@ -1,0 +1,11 @@
+# terraform.tfvars テンプレート
+# 実値は `terraform.tfvars` にコピーして入れる(Git 管理外)
+
+# JWT 署名鍵: openssl rand -base64 32 で生成
+jwt_secret = "REPLACE_ME_openssl_rand_base64_32"
+
+# RDS MySQL
+db_user     = "musclead_admin"
+db_password = "REPLACE_ME_openssl_rand_base64_24"
+db_name     = "musclead"
+db_port     = 3306
