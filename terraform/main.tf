@@ -9,10 +9,9 @@
 #
 # 初期は network のみ apply して動作確認、 順次他を有効化していく。
 
-# module "network" {
-#   source = "./modules/network"
-#   env    = var.env
-# }
+module "network" {
+  source = "./modules/network"
+}
 
 # module "rds" {
 #   source           = "./modules/rds"

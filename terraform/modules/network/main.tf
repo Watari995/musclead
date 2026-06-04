@@ -137,3 +137,21 @@ resource "aws_security_group" "fe_fargate" {
   }
 }
 
+resource "aws_security_group" "rds" {
+  name        = "musclead-rds-sg"
+  description = "RDS: allow :3306 from BE Fargate SG only"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "MySQL from BE Fargate SG"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [aws_security_group.be_fargate.id]
+  }
+  #egressはなし
+
+  tags = {
+    Name = "musclead-rds-sg"
+  }
+}
