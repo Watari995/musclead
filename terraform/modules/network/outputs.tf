@@ -18,11 +18,6 @@ output "be_fargate_sg_id" {
   value       = aws_security_group.be_fargate.id
 }
 
-output "fe_fargate_sg_id" {
-  description = "FE Fargate用SGのID"
-  value       = aws_security_group.fe_fargate.id
-}
-
 output "rds_sg_id" {
   description = "RDS用SGのID"
   value       = aws_security_group.rds.id

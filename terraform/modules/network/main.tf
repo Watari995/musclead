@@ -112,31 +112,6 @@ resource "aws_security_group" "be_fargate" {
   }
 }
 
-# FE Fargate用 SG: ALB SGからのみ :3000受信
-resource "aws_security_group" "fe_fargate" {
-  name        = "musclead-fe-fargate-sg"
-  description = "FE Fargate: allow :3000 from ALB SG only"
-  vpc_id      = aws_vpc.main.id
-
-  ingress {
-    description     = "App port from ALB SG"
-    from_port       = 3000
-    to_port         = 3000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
-  egress {
-    description = "All outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "musclead-fe-fargate-sg"
-  }
-}
-
 resource "aws_security_group" "rds" {
   name        = "musclead-rds-sg"
   description = "RDS: allow :3306 from BE Fargate SG only"
