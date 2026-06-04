@@ -21,10 +21,9 @@ module "network" {
 #   db_sg_id         = module.network.db_sg_id
 # }
 
-# module "ecr" {
-#   source = "./modules/ecr"
-#   env    = var.env
-# }
+module "ecr" {
+  source = "./modules/ecr"
+}
 
 # module "ecs" {
 #   source = "./modules/ecs"
