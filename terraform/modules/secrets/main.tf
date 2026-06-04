@@ -36,4 +36,14 @@ resource "aws_ssm_parameter" "db_password" {
   }
 }
 
-# db_host は RDS module 完成後に追加(RDS.endpoint output を value に渡す)
+# db_host は RDS module の output (endpoint) を受け取って投入
+resource "aws_ssm_parameter" "db_host" {
+  name        = "/musclead/${var.env}/db_host"
+  description = "RDS endpoint(host)"
+  type        = "SecureString"
+  value       = var.db_host
+
+  tags = {
+    Name = "musclead-db-host"
+  }
+}

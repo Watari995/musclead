@@ -14,3 +14,8 @@ output "db_password_arn" {
   description = "DB パスワード Parameter の ARN"
   value       = aws_ssm_parameter.db_password.arn
 }
+
+output "db_host_arn" {
+  description = "DB host Parameter の ARN"
+  value       = aws_ssm_parameter.db_host.arn
+}

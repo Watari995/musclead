@@ -13,13 +13,15 @@ module "network" {
   source = "./modules/network"
 }
 
-# module "rds" {
-#   source           = "./modules/rds"
-#   env              = var.env
-#   vpc_id           = module.network.vpc_id
-#   subnet_ids       = module.network.public_subnet_ids
-#   db_sg_id         = module.network.db_sg_id
-# }
+module "rds" {
+  source      = "./modules/rds"
+  subnet_ids  = module.network.public_subnet_ids
+  rds_sg_id   = module.network.rds_sg_id
+  db_name     = var.db_name
+  db_user     = var.db_user
+  db_password = var.db_password
+  db_port     = var.db_port
+}
 
 module "ecr" {
   source = "./modules/ecr"
@@ -31,6 +33,7 @@ module "secrets" {
   jwt_secret  = var.jwt_secret
   db_user     = var.db_user
   db_password = var.db_password
+  db_host     = module.rds.endpoint
 }
 
 # module "ecs" {

@@ -20,3 +20,8 @@ variable "db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "db_host" {
+  description = "RDS endpoint(rds module の output から受け取る)"
+  type        = string
+}
