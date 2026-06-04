@@ -1,0 +1,33 @@
+# Git / VCS
+.git
+.gitignore
+.github
+
+# ローカルビルド成果物
+tmp/
+bin/
+*.exe
+*.test
+*.out
+
+# ローカル env / secrets
+.env
+.env.local
+*.pem
+*.key
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ドキュメント類(image に不要)
+*.md
+# docs/ は swag が生成する Go パッケージ(import される)ので除外しない
+
+# Generated(必要なら build 前に再生成する想定)
+internal/**/gen/
+
+# Logs
+*.log
