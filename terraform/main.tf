@@ -36,10 +36,23 @@ module "secrets" {
   db_host     = module.rds.endpoint
 }
 
-# module "ecs" {
-#   source = "./modules/ecs"
-#   ...
-# }
+module "ecs" {
+  source       = "./modules/ecs"
+  be_image_url = "${module.ecr.be_repository_url}:latest"
+  ssm_parameter_arns = [
+    module.secrets.jwt_secret_arn,
+    module.secrets.db_user_arn,
+    module.secrets.db_password_arn,
+    module.secrets.db_host_arn,
+  ]
+  jwt_secret_arn  = module.secrets.jwt_secret_arn
+  db_user_arn     = module.secrets.db_user_arn
+  db_password_arn = module.secrets.db_password_arn
+  db_host_arn     = module.secrets.db_host_arn
+  db_name         = var.db_name
+  db_port         = var.db_port
+}
+
 
 # module "alb" {
 #   source = "./modules/alb"
