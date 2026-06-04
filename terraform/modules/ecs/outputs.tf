@@ -17,3 +17,8 @@ output "be_task_definition_arn" {
   description = "BE Task DefinitionのARN"
   value       = aws_ecs_task_definition.be.arn
 }
+
+output "be_service_name" {
+  description = "BE ECS Service の名前(将来 ALB Target Group attach や CLI 操作で使う)"
+  value       = aws_ecs_service.be.name
+}

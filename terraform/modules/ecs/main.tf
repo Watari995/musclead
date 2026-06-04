@@ -86,6 +86,11 @@ resource "aws_ecs_task_definition" "be" {
 
   execution_role_arn = aws_iam_role.be_task_execution.arn
 
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
+
   # Container 定義: 1 Task に 1 つの Container
   # environment / secrets / logConfiguration は全て JSON の中に入れる
   container_definitions = jsonencode([{
@@ -126,5 +131,43 @@ resource "aws_ecs_task_definition" "be" {
 
   tags = {
     Name = "musclead-be-task-definition"
+  }
+}
+
+# ECS Service: Taskを起動するためのサービスを作る
+resource "aws_ecs_service" "be" {
+  name = "musclead-be-service"
+  # どのClusterで動かすか
+  cluster = aws_ecs_cluster.main.id
+  # どのTask Definitionを使うか
+  task_definition = aws_ecs_task_definition.be.arn
+  # 常に1つのTaskを起動する
+  desired_count = 1
+
+  # 計算リソース: Fargate Spot 100%で起動する
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 100
+    base              = 0
+  }
+
+  # Taskの置き場所 + ネットワーク設定
+  network_configuration {
+    # どの Subnet にTaskをおくか
+    subnets = var.subnet_ids
+
+    # taskのセキュリティグループを指定
+    security_groups = [var.be_sg_id]
+
+    # Public IPを付与
+    # ECR pull / SSM読み / Logの書き込みが外部API呼び出しなので
+    assign_public_ip = true
+  }
+
+  # IAM Roleのpolicy attach 完了を待ってからServiceを作る(race condition対策)
+  depends_on = [aws_iam_role_policy_attachment.be_task_execution_basic, aws_iam_role_policy.be_task_execution_ssm]
+
+  tags = {
+    Name = "musclead-be-service"
   }
 }

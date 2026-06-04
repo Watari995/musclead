@@ -51,6 +51,8 @@ module "ecs" {
   db_host_arn     = module.secrets.db_host_arn
   db_name         = var.db_name
   db_port         = var.db_port
+  subnet_ids      = module.network.public_subnet_ids
+  be_sg_id        = module.network.be_fargate_sg_id
 }
 
 

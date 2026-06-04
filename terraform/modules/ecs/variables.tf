@@ -38,3 +38,13 @@ variable "db_name" {
 variable "db_port" {
   type = number
 }
+
+variable "subnet_ids" {
+  description = "Taskを配置するSubnet IDリスト(network moduleのpublic_subnet_ids)"
+  type        = list(string)
+}
+
+variable "be_sg_id" {
+  description = "BE Fargate用SGのID(network moduleのbe_fargate_sg_id)"
+  type        = string
+}
