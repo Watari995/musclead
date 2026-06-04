@@ -1,0 +1,34 @@
+# Build context (repo root) で server image をビルドする際の除外設定
+# Dockerfile: server/Dockerfile
+
+# 他言語のソース(BE image に不要)
+web/
+mobile/
+docs/
+icon/
+
+# インフラ・ローカル開発
+terraform/
+.cursor/
+.github/
+.vscode/
+.git/
+.gitignore
+
+# 各種一時 / 成果物
+**/node_modules/
+**/.next/
+**/tmp/
+**/bin/
+**/dist/
+**/build/
+*.log
+
+# ローカル env / secrets
+**/.env
+**/.env.local
+**/*.pem
+**/*.key
+
+# Mac
+**/.DS_Store
