@@ -32,12 +32,6 @@ You can't tell whether the scale moved because of muscle or because of yesterday
 - **Fast and minimal.** No ads, no nags, no streak shame, no premium upsell.
 - **Built for trainees who are sick of bloat.** If you've ever closed an app because it asked you to rate it mid-set, you're the target user.
 
-## Get started
-
-> 🚧 musclead is in active development. Self-hosting instructions and a hosted demo are coming soon.
-
----
-
 <details>
 <summary>👩‍💻 For developers</summary>
 
