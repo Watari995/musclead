@@ -10,18 +10,11 @@ import {
   useExercisesQuery,
 } from "@/features/training/api/exercises";
 import type { Exercise } from "@/features/training/model/exercise";
-import {
-  Button,
-  Card,
-  ErrorText,
-  SectionTitle,
-  useConfirm,
-} from "@/shared/ui";
+import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function ExercisesPage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
-  const confirm = useConfirm();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -67,14 +60,10 @@ export default function ExercisesPage() {
             <ExerciseRow
               key={ex.id}
               exercise={ex}
-              onDelete={async () => {
-                const ok = await confirm({
-                  title: "種目を削除しますか?",
-                  description: `「${ex.name}」 を削除します。 この操作は取り消せません。`,
-                  confirmLabel: "削除する",
-                  destructive: true,
-                });
-                if (ok) del.mutate(ex.id);
+              onDelete={() => {
+                if (confirm(`「${ex.name}」 を削除しますか?`)) {
+                  del.mutate(ex.id);
+                }
               }}
               deleting={del.isPending}
             />

@@ -11,18 +11,11 @@ import {
   useTrainingsQuery,
 } from "@/features/training/api/trainings";
 import { formatDateTime } from "@/features/training/model/training-draft";
-import {
-  Button,
-  Card,
-  ErrorText,
-  SectionTitle,
-  useConfirm,
-} from "@/shared/ui";
+import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function TrainingsPage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
-  const confirm = useConfirm();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -68,14 +61,10 @@ export default function TrainingsPage() {
               key={t.id}
               training={t}
               exerciseNameByID={exerciseNameByID}
-              onDelete={async () => {
-                const ok = await confirm({
-                  title: "トレーニングを削除しますか?",
-                  description: `${formatDateTime(t.started_at)} のトレーニング記録を削除します。 この操作は取り消せません。`,
-                  confirmLabel: "削除する",
-                  destructive: true,
-                });
-                if (ok) del.mutate(t.id ?? "");
+              onDelete={() => {
+                if (confirm("このトレーニングを削除しますか?")) {
+                  del.mutate(t.id ?? "");
+                }
               }}
               deleting={del.isPending}
             />
