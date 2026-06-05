@@ -13,6 +13,11 @@ RUN go mod download
 
 COPY server/ ./
 
+# Swagger docs を build 前に生成(server/docs/ は .gitignore で git 管理外)
+# main.go が `_ "github.com/Watari995/musclead/docs"` を import してるため必須
+RUN go install github.com/swaggo/swag/cmd/swag@latest \
+    && /go/bin/swag init -g cmd/server/main.go -o docs
+
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app/server ./cmd/server
 
 # -- Stage 2: migrate CLI ---------

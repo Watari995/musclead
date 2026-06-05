@@ -1,19 +1,20 @@
 # Build context (repo root) で server image をビルドする際の除外設定
 # Dockerfile: server/Dockerfile
 
-# 他言語のソース(BE image に不要)
-web/
-mobile/
-docs/
-icon/
+# 他言語のソース(server image に不要)
+# 先頭の "/" で repo root 直下のみマッチ(server/docs 等は除外しない)
+/web/
+/mobile/
+/docs/
+/icon/
 
 # インフラ・ローカル開発
-terraform/
-.cursor/
-.github/
-.vscode/
-.git/
-.gitignore
+/terraform/
+/.cursor/
+/.github/
+/.vscode/
+/.git/
+/.gitignore
 
 # 各種一時 / 成果物
 **/node_modules/

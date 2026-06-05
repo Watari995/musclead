@@ -1,58 +1,52 @@
+<div align="center">
+
 # 💪 musclead
 
-> 筋トレ・食事・体重を一元管理する個人向けSaaS
+**Training. Meals. Weight. One app.**
 
-## 🏗️ 構成(Monorepo)
+Stop juggling three apps to track one body.
 
-```
-musclead/
-├── server/      # Go バックエンド(net/http + gorp + MySQL)
-├── web/         # React フロントエンド
-├── mobile/      # Flutter(将来)
-├── sql/         # マイグレーション (golang-migrate)
-├── terraform/   # IaC(AWS)
-├── docs/        # ドメインモデル / ADR
-└── .github/workflows/  # GitHub Actions(vet / build / test)
-```
+</div>
 
-## 🛠️ 技術スタック
+---
 
-| 領域 | 技術 |
-|---|---|
-| 言語 (Backend) | Go 1.26+ |
-| HTTP | net/http(Go 1.22 ServeMux)|
-| ORM | gorp |
-| DB | MySQL 8.0 / Aurora Serverless v2 |
-| マイグレーション | golang-migrate |
-| API ドキュメント | swag(OpenAPI 自動生成)|
-| Architecture | DDD + Modular Monolith(strict) |
-| Infra | AWS(ECS Fargate / ALB / S3 / CloudFront) |
-| IaC | Terraform |
-| 監視 | Sentry + CloudWatch |
-| FE | React + TypeScript |
-| CI/CD | GitHub Actions |
-| テスト | testify(assert / mock) |
+## Why musclead?
 
-## 🚀 開発
+You lift, you eat, you weigh in. Every serious trainee already does all three —
+but the data lives in three different apps that don't talk to each other.
+You can't see how last week's calorie deficit hit your bench numbers.
+You can't tell whether the scale moved because of muscle or because of yesterday's ramen.
+
+**musclead puts all three on one timeline, so the story of your body actually adds up.**
+
+## What you can do
+
+- 🏋️ **Log workouts** — sets, reps, weight. Build it once as a routine, reuse it forever.
+- ⚖️ **Track your weight** — daily check-ins, trend over time, no drama.
+- 🍱 **Log meals** — what you actually ate, not what an algorithm guessed.
+- 🔐 **Your account, your data** — personal, private, no social feed.
+
+## Why you'll actually use it
+
+- **All-in-one.** No more "log workout in Strong, weight in Health, food in MyFitnessPal."
+- **Fast and minimal.** No ads, no nags, no streak shame, no premium upsell.
+- **Built for trainees who are sick of bloat.** If you've ever closed an app because it asked you to rate it mid-set, you're the target user.
+
+## Get started
+
+> 🚧 musclead is in active development. Self-hosting instructions and a hosted demo are coming soon.
+
+---
+
+<details>
+<summary>👩‍💻 For developers</summary>
+
+Go backend (DDD + modular monolith) + Next.js frontend, typed end-to-end via OpenAPI.
+See [`CLAUDE.md`](CLAUDE.md), [`docs/domain-model.md`](docs/domain-model.md), and the [ADRs](docs/adr/) for the full picture.
 
 ```bash
-# DB 起動
-make db-up
-
-# マイグレーション
-make migrate-up
-
-# サーバー起動(ホットリロード、 air)
-make dev
-
-# テスト
-cd server && go test ./...
-
-# ヘルスチェック
-curl http://localhost:8080/health
+make db-up && make migrate-up && make dev   # backend → :8080
+cd web && npm install && npm run dev        # frontend → :3000
 ```
 
-## 📚 ドキュメント
-
-- [ドメインモデル](docs/domain-model.md)
-- [ADR](docs/adr/)
+</details>
