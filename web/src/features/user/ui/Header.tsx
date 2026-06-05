@@ -35,7 +35,7 @@ export function Header() {
             className="rounded-full"
             priority
           />
-          Musclead
+          musclead
         </Link>
         {ready && loggedIn && (
           <nav className="hidden sm:flex items-center gap-6 text-sm text-[var(--color-ink)]">
