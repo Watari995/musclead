@@ -86,3 +86,11 @@ module "bastion" {
   subnet_id = module.network.public_subnet_ids[0]
   rds_sg_id = module.network.rds_sg_id
 }
+
+module "github_oidc" {
+  source                  = "./modules/github_oidc"
+  github_repo             = "Watari995/musclead"
+  allowed_branch          = "main"
+  ecr_repository_arn      = module.ecr.be_repository_arn
+  task_execution_role_arn = module.ecs.be_task_execution_role_arn
+}

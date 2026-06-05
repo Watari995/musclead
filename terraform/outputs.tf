@@ -1,9 +1,19 @@
-# 各 module で実装が進むに従って、 ここに公開すべき出力を追加していく。
-# 例:
-# output "app_url" {
-#   value = "https://app.${var.domain_name}"
-# }
-#
-# output "api_url" {
-#   value = "https://api.${var.domain_name}"
-# }
+output "github_actions_role_arn" {
+  description = "GitHub Actions が assume する Role の ARN(workflow に貼り付ける)"
+  value       = module.github_oidc.role_arn
+}
+
+output "ecr_repository_url" {
+  description = "BE ECR Repository URL(workflow の docker push 先)"
+  value       = module.ecr.be_repository_url
+}
+
+output "ecs_cluster_name" {
+  description = "ECS Cluster 名(workflow の deploy 対象)"
+  value       = module.ecs.cluster_name
+}
+
+output "ecs_service_name" {
+  description = "ECS Service 名(workflow の deploy 対象)"
+  value       = module.ecs.be_service_name
+}
