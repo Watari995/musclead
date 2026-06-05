@@ -48,3 +48,4 @@ server/docs/
 
 # Logs
 *.log
+.vercel
