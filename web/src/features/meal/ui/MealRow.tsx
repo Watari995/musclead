@@ -7,9 +7,11 @@ import {
   mealTypeLabel,
   type Meal,
 } from "@/features/meal/model/meal";
+import { useConfirm } from "@/shared/ui";
 
 export function MealRow({ meal }: { meal: Meal }) {
   const del = useDeleteMealMutation();
+  const confirm = useConfirm();
 
   return (
     <li className="p-4 flex items-start gap-4">
@@ -41,7 +43,15 @@ export function MealRow({ meal }: { meal: Meal }) {
       </div>
       <button
         type="button"
-        onClick={() => del.mutate(meal.id)}
+        onClick={async () => {
+          const ok = await confirm({
+            title: "食事記録を削除しますか?",
+            description: `${mealTypeLabel(meal.type)} (${formatMealDateTime(meal.eatenAt)}) を削除します。`,
+            confirmLabel: "削除する",
+            destructive: true,
+          });
+          if (ok) del.mutate(meal.id);
+        }}
         disabled={del.isPending}
         className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0"
       >

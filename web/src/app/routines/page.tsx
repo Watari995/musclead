@@ -9,11 +9,18 @@ import {
   useDeleteRoutineMutation,
   useRoutinesQuery,
 } from "@/features/training/api/routines";
-import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
+import {
+  Button,
+  Card,
+  ErrorText,
+  SectionTitle,
+  useConfirm,
+} from "@/shared/ui";
 
 export default function RoutinesPage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -53,10 +60,14 @@ export default function RoutinesPage() {
             <RoutineCard
               key={r.id}
               routine={r}
-              onDelete={() => {
-                if (confirm(`「${r.name}」 を削除しますか?`)) {
-                  del.mutate(r.id ?? "");
-                }
+              onDelete={async () => {
+                const ok = await confirm({
+                  title: "ルーティンを削除しますか?",
+                  description: `「${r.name}」 を削除します。 この操作は取り消せません。`,
+                  confirmLabel: "削除する",
+                  destructive: true,
+                });
+                if (ok) del.mutate(r.id ?? "");
               }}
               deleting={del.isPending}
             />
