@@ -3,9 +3,9 @@ variable "ssm_parameter_arns" {
   type        = list(string)
 }
 
-# BE Containerのimage URL
-variable "be_image_url" {
-  description = "BE Containerのimage URL (ex: 1234567890.dkr.ecr.ap-northeast-1.amazonaws.com/musclead-be:latest)"
+# Server Containerのimage URL
+variable "server_image_url" {
+  description = "Server Containerのimage URL (ex: 1234567890.dkr.ecr.ap-northeast-1.amazonaws.com/musclead-server:latest)"
   type        = string
 }
 
@@ -49,8 +49,8 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "be_sg_id" {
-  description = "BE Fargate用SGのID(network moduleのbe_fargate_sg_id)"
+variable "server_sg_id" {
+  description = "Server Fargate用SGのID(network moduleのserver_fargate_sg_id)"
   type        = string
 }
 

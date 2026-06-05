@@ -24,8 +24,8 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
   }
 }
 
-resource "aws_iam_role" "be_task_execution" {
-  name = "musclead-be-task-execution-role"
+resource "aws_iam_role" "server_task_execution" {
+  name = "musclead-server-task-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -37,22 +37,22 @@ resource "aws_iam_role" "be_task_execution" {
   })
 
   tags = {
-    Name = "musclead-be-task-execution-role"
+    Name = "musclead-server-task-execution-role"
   }
 }
 
 # AWS 標準セット: ECR pull + CloudWatch Logs 書き込みを許可
 # (これは定番、 AWS が用意してる「ECS Task 起動の標準権限」)
-resource "aws_iam_role_policy_attachment" "be_task_execution_basic" {
-  role       = aws_iam_role.be_task_execution.name
+resource "aws_iam_role_policy_attachment" "server_task_execution_basic" {
+  role       = aws_iam_role.server_task_execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 # 独自追加: SSM Parameter Store の特定 ARN だけ読める権限
 # (Task Definition の secrets 参照に必要、 最小権限で絞る)
-resource "aws_iam_role_policy" "be_task_execution_ssm" {
-  name = "musclead-be-ssm-read"
-  role = aws_iam_role.be_task_execution.id
+resource "aws_iam_role_policy" "server_task_execution_ssm" {
+  name = "musclead-server-ssm-read"
+  role = aws_iam_role.server_task_execution.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -65,26 +65,26 @@ resource "aws_iam_role_policy" "be_task_execution_ssm" {
 }
 
 # CloudWatch Log Group: BE containerのログ集約先
-resource "aws_cloudwatch_log_group" "be" {
-  name              = "/musclead/ecs/be"
+resource "aws_cloudwatch_log_group" "server" {
+  name              = "/musclead/ecs/server"
   retention_in_days = 7
 
   tags = {
-    Name = "musclead-be-log"
+    Name = "musclead-server-log"
   }
 }
 
 
 # Task Definition [containerを1つ起動する仕様書]をFargate用に作る
-resource "aws_ecs_task_definition" "be" {
-  family                   = "musclead-be"
+resource "aws_ecs_task_definition" "server" {
+  family                   = "musclead-server"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
 
   cpu    = "256"
   memory = "512"
 
-  execution_role_arn = aws_iam_role.be_task_execution.arn
+  execution_role_arn = aws_iam_role.server_task_execution.arn
 
   runtime_platform {
     cpu_architecture        = "ARM64"
@@ -94,8 +94,8 @@ resource "aws_ecs_task_definition" "be" {
   # Container 定義: 1 Task に 1 つの Container
   # environment / secrets / logConfiguration は全て JSON の中に入れる
   container_definitions = jsonencode([{
-    name      = "be"
-    image     = var.be_image_url
+    name      = "server"
+    image     = var.server_image_url
     essential = true
 
     portMappings = [{
@@ -123,25 +123,25 @@ resource "aws_ecs_task_definition" "be" {
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        awslogs-group         = aws_cloudwatch_log_group.be.name
+        awslogs-group         = aws_cloudwatch_log_group.server.name
         awslogs-region        = "ap-northeast-1"
-        awslogs-stream-prefix = "be"
+        awslogs-stream-prefix = "server"
       }
     }
   }])
 
   tags = {
-    Name = "musclead-be-task-definition"
+    Name = "musclead-server-task-definition"
   }
 }
 
 # ECS Service: Taskを起動するためのサービスを作る
-resource "aws_ecs_service" "be" {
-  name = "musclead-be-service"
+resource "aws_ecs_service" "server" {
+  name = "musclead-server-service"
   # どのClusterで動かすか
   cluster = aws_ecs_cluster.main.id
   # どのTask Definitionを使うか
-  task_definition = aws_ecs_task_definition.be.arn
+  task_definition = aws_ecs_task_definition.server.arn
   # 常に1つのTaskを起動する
   desired_count = 1
 
@@ -158,7 +158,7 @@ resource "aws_ecs_service" "be" {
     subnets = var.subnet_ids
 
     # taskのセキュリティグループを指定
-    security_groups = [var.be_sg_id]
+    security_groups = [var.server_sg_id]
 
     # Public IPを付与
     # ECR pull / SSM読み / Logの書き込みが外部API呼び出しなので
@@ -169,14 +169,14 @@ resource "aws_ecs_service" "be" {
   # Service が起動した Task の IP を Target Group に登録 → ALB が振り分け対象に
   load_balancer {
     target_group_arn = var.target_group_arn
-    container_name   = "be" # Task Definition 内の container 名と一致
+    container_name   = "server" # Task Definition 内の container 名と一致
     container_port   = 8080
   }
 
   # IAM Roleのpolicy attach 完了を待ってからServiceを作る(race condition対策)
-  depends_on = [aws_iam_role_policy_attachment.be_task_execution_basic, aws_iam_role_policy.be_task_execution_ssm]
+  depends_on = [aws_iam_role_policy_attachment.server_task_execution_basic, aws_iam_role_policy.server_task_execution_ssm]
 
   tags = {
-    Name = "musclead-be-service"
+    Name = "musclead-server-service"
   }
 }

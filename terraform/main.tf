@@ -52,7 +52,7 @@ module "alb" {
 
 module "ecs" {
   source       = "./modules/ecs"
-  be_image_url = "${module.ecr.be_repository_url}:latest"
+  server_image_url = "${module.ecr.server_repository_url}:latest"
   ssm_parameter_arns = [
     module.secrets.jwt_secret_arn,
     module.secrets.db_user_arn,
@@ -66,8 +66,8 @@ module "ecs" {
   db_name          = var.db_name
   db_port          = var.db_port
   subnet_ids       = module.network.public_subnet_ids
-  be_sg_id         = module.network.be_fargate_sg_id
-  target_group_arn = module.alb.be_target_group_arn
+  server_sg_id         = module.network.server_fargate_sg_id
+  target_group_arn = module.alb.server_target_group_arn
   allowed_origin   = var.allowed_origin
 }
 
@@ -91,6 +91,6 @@ module "github_oidc" {
   source                  = "./modules/github_oidc"
   github_repo             = "Watari995/musclead"
   allowed_branch          = "main"
-  ecr_repository_arn      = module.ecr.be_repository_arn
-  task_execution_role_arn = module.ecs.be_task_execution_role_arn
+  ecr_repository_arn      = module.ecr.server_repository_arn
+  task_execution_role_arn = module.ecs.server_task_execution_role_arn
 }

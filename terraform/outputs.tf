@@ -4,8 +4,8 @@ output "github_actions_role_arn" {
 }
 
 output "ecr_repository_url" {
-  description = "BE ECR Repository URL(workflow の docker push 先)"
-  value       = module.ecr.be_repository_url
+  description = "Server ECR Repository URL(workflow の docker push 先)"
+  value       = module.ecr.server_repository_url
 }
 
 output "ecs_cluster_name" {
@@ -15,5 +15,5 @@ output "ecs_cluster_name" {
 
 output "ecs_service_name" {
   description = "ECS Service 名(workflow の deploy 対象)"
-  value       = module.ecs.be_service_name
+  value       = module.ecs.server_service_name
 }

@@ -95,7 +95,7 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = "*"
       },
 
-      # ── (2) ECR push(musclead-be repo のみ) ─────────────────
+      # ── (2) ECR push(musclead-server repo のみ) ─────────────────
       # docker push でレイヤーをアップロードする一連の API
       # Resource を ECR repo の ARN に絞ることで、 他 repo への push は不可
       {

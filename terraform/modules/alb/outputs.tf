@@ -3,9 +3,9 @@ output "alb_dns_name" {
   value       = aws_lb.main.dns_name
 }
 
-output "be_target_group_arn" {
-  description = "BE Target GroupのARN"
-  value       = aws_lb_target_group.be.arn
+output "server_target_group_arn" {
+  description = "Server Target GroupのARN"
+  value       = aws_lb_target_group.server.arn
 }
 
 output "alb_zone_id" {

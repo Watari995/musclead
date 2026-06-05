@@ -13,9 +13,9 @@ output "alb_sg_id" {
   value       = aws_security_group.alb.id
 }
 
-output "be_fargate_sg_id" {
-  description = "BE Fargate用SGのID"
-  value       = aws_security_group.be_fargate.id
+output "server_fargate_sg_id" {
+  description = "Server Fargate用SGのID"
+  value       = aws_security_group.server_fargate.id
 }
 
 output "rds_sg_id" {

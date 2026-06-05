@@ -87,10 +87,10 @@ resource "aws_security_group" "alb" {
   }
 }
 
-#BE Fargate用 SG: ALB SGからのみ :8080を受け付ける
-resource "aws_security_group" "be_fargate" {
-  name        = "musclead-be-fargate-sg"
-  description = "BE Fargate: allow :8080 from ALB SG only"
+#Server Fargate用 SG: ALB SGからのみ :8080を受け付ける
+resource "aws_security_group" "server_fargate" {
+  name        = "musclead-server-fargate-sg"
+  description = "Server Fargate: allow :8080 from ALB SG only"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -108,7 +108,7 @@ resource "aws_security_group" "be_fargate" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "musclead-be-fargate-sg"
+    Name = "musclead-server-fargate-sg"
   }
 }
 
@@ -122,7 +122,7 @@ resource "aws_security_group" "rds" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.be_fargate.id]
+    security_groups = [aws_security_group.server_fargate.id]
   }
   #egressはなし
 

@@ -22,6 +22,7 @@
 | [02-value-object.mdc](.cursor/rules/02-value-object.mdc) | 値オブジェクト実装パターン |
 | [03-coding-style.mdc](.cursor/rules/03-coding-style.mdc) | コーディング規約 |
 | [05-shared-first.mdc](.cursor/rules/05-shared-first.mdc) | shared/ 優先、 局所ヘルパー重複定義の禁止 |
+| [06-industry-standard.mdc](.cursor/rules/06-industry-standard.mdc) | 業界標準・SODA 流儀を踏襲、 略語/独自手法を避ける |
 | [10-web-design-system.mdc](.cursor/rules/10-web-design-system.mdc) | Web UI デザインシステム(snkrdunk テイスト)、 web/ 編集時必読 |
 
 ---
