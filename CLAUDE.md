@@ -24,6 +24,7 @@
 | [05-shared-first.mdc](.cursor/rules/05-shared-first.mdc) | shared/ 優先、 局所ヘルパー重複定義の禁止 |
 | [06-industry-standard.mdc](.cursor/rules/06-industry-standard.mdc) | 業界標準・SODA 流儀を踏襲、 略語/独自手法を避ける |
 | [10-web-design-system.mdc](.cursor/rules/10-web-design-system.mdc) | Web UI デザインシステム(snkrdunk テイスト)、 web/ 編集時必読 |
+| [11-mobile-responsive.mdc](.cursor/rules/11-mobile-responsive.mdc) | モバイル対応(iPhone SE 基準、 ハンバーガー必須)、 web/ 編集時必読 |
 
 ---
 

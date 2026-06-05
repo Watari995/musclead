@@ -2,78 +2,90 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useLogoutMutation, useMeQuery } from "@/features/user/api/user";
 
+const NAV_ITEMS = [
+  { href: "/meals", label: "食事" },
+  { href: "/trainings", label: "トレーニング" },
+  { href: "/exercises", label: "種目" },
+  { href: "/routines", label: "ルーティン" },
+] as const;
+
 export function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { token, ready } = useAccessToken();
   const loggedIn = Boolean(token);
 
   const meQuery = useMeQuery(loggedIn);
   const logout = useLogoutMutation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // ルート遷移で自動的にメニューを閉じる (React 19: prop 変化で派生状態をリセットする公式パターン)
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    if (menuOpen) setMenuOpen(false);
+  }
+
+  // メニュー展開中は背景スクロールをロック
+  useEffect(() => {
+    if (!menuOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [menuOpen]);
 
   const handleLogout = () => {
+    setMenuOpen(false);
     logout.mutate(undefined, {
       onSettled: () => router.replace("/login"),
     });
   };
 
   return (
-    <header className="border-b border-[var(--color-line)] bg-white sticky top-0 z-10">
-      <div className="w-full max-w-5xl mx-auto px-5 sm:px-6 h-14 flex items-center justify-between">
+    <header className="border-b border-[var(--color-line)] bg-white sticky top-0 z-30">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold text-lg tracking-tight text-[var(--color-ink)] hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 font-bold text-lg tracking-tight text-[var(--color-ink)] hover:opacity-80 transition-opacity min-w-0"
         >
           <Image
             src="/icon.png"
             alt=""
             width={28}
             height={28}
-            className="rounded-full"
+            className="rounded-full shrink-0"
             priority
           />
-          musclead
+          <span className="truncate">musclead</span>
         </Link>
+
         {ready && loggedIn && (
           <nav className="hidden sm:flex items-center gap-6 text-sm text-[var(--color-ink)]">
-            <Link href="/meals" className="hover:opacity-60 transition-opacity">
-              食事
-            </Link>
-            <Link
-              href="/trainings"
-              className="hover:opacity-60 transition-opacity"
-            >
-              トレーニング
-            </Link>
-            <Link
-              href="/exercises"
-              className="hover:opacity-60 transition-opacity"
-            >
-              種目
-            </Link>
-            <Link
-              href="/routines"
-              className="hover:opacity-60 transition-opacity"
-            >
-              ルーティン
-            </Link>
-            <Link
-              href="/meals"
-              className="hover:opacity-60 transition-opacity text-[var(--color-ink-muted)]"
-            >
-              体重
-            </Link>
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="hover:opacity-60 transition-opacity"
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
         )}
+
         {ready && (
           <div className="flex items-center gap-3 text-sm">
             {loggedIn ? (
               <>
                 {meQuery.data?.name && (
-                  <span className="hidden sm:inline text-[var(--color-ink-muted)]">
+                  <span className="hidden sm:inline text-[var(--color-ink-muted)] truncate max-w-[12rem]">
                     {meQuery.data.name}
                   </span>
                 )}
@@ -81,9 +93,19 @@ export function Header() {
                   type="button"
                   onClick={handleLogout}
                   disabled={logout.isPending}
-                  className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-50"
+                  className="hidden sm:inline text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-50"
                 >
                   ログアウト
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(true)}
+                  aria-label="メニューを開く"
+                  aria-expanded={menuOpen}
+                  aria-controls="mobile-nav"
+                  className="sm:hidden inline-flex items-center justify-center w-10 h-10 -mr-2 rounded-md text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
+                >
+                  <HamburgerIcon />
                 </button>
               </>
             ) : (
@@ -96,7 +118,7 @@ export function Header() {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-[var(--color-ink)] text-white px-4 h-9 inline-flex items-center rounded-md text-sm font-medium hover:opacity-90"
+                  className="bg-[var(--color-ink)] text-white px-4 h-9 inline-flex items-center rounded-md text-sm font-medium hover:opacity-90 whitespace-nowrap"
                 >
                   新規登録
                 </Link>
@@ -105,6 +127,137 @@ export function Header() {
           </div>
         )}
       </div>
+
+      {ready && loggedIn && (
+        <MobileMenu
+          open={menuOpen}
+          userName={meQuery.data?.name ?? ""}
+          pathname={pathname}
+          onClose={() => setMenuOpen(false)}
+          onLogout={handleLogout}
+          logoutPending={logout.isPending}
+        />
+      )}
     </header>
+  );
+}
+
+function MobileMenu({
+  open,
+  userName,
+  pathname,
+  onClose,
+  onLogout,
+  logoutPending,
+}: {
+  open: boolean;
+  userName: string;
+  pathname: string;
+  onClose: () => void;
+  onLogout: () => void;
+  logoutPending: boolean;
+}) {
+  return (
+    <div
+      id="mobile-nav"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden={!open}
+      className={`sm:hidden fixed inset-0 z-40 ${open ? "" : "pointer-events-none"}`}
+    >
+      <button
+        type="button"
+        aria-label="メニューを閉じる"
+        onClick={onClose}
+        className={`absolute inset-0 bg-black/40 transition-opacity ${
+          open ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <div
+        className={`absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-white shadow-xl flex flex-col transition-transform duration-200 ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="h-14 px-5 flex items-center justify-between border-b border-[var(--color-line)]">
+          <span className="text-sm font-bold tracking-tight truncate">
+            {userName || "メニュー"}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="閉じる"
+            className="inline-flex items-center justify-center w-10 h-10 -mr-2 rounded-md text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+        <nav className="flex-1 overflow-y-auto py-2">
+          {NAV_ITEMS.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClose}
+                className={`block px-5 py-3 text-base border-l-2 ${
+                  active
+                    ? "border-[var(--color-ink)] font-bold bg-[var(--color-surface-alt)]"
+                    : "border-transparent text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="border-t border-[var(--color-line)] p-4">
+          <button
+            type="button"
+            onClick={onLogout}
+            disabled={logoutPending}
+            className="w-full h-11 inline-flex items-center justify-center rounded-md border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)] disabled:opacity-50"
+          >
+            {logoutPending ? "ログアウト中…" : "ログアウト"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HamburgerIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
+    </svg>
   );
 }

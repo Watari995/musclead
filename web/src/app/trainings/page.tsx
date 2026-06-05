@@ -7,11 +7,15 @@ import type { TrainingDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useExercisesQuery } from "@/features/training/api/exercises";
 import {
+  useRoutinesQuery,
+  useStartTrainingFromRoutineMutation,
+} from "@/features/training/api/routines";
+import {
   useDeleteTrainingMutation,
   useTrainingsQuery,
 } from "@/features/training/api/trainings";
 import { formatDateTime } from "@/features/training/model/training-draft";
-import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
+import { Button, Card, ErrorText, Popover, SectionTitle } from "@/shared/ui";
 
 export default function TrainingsPage() {
   const router = useRouter();
@@ -23,6 +27,8 @@ export default function TrainingsPage() {
 
   const query = useTrainingsQuery(Boolean(token));
   const exercisesQuery = useExercisesQuery(Boolean(token));
+  const routinesQuery = useRoutinesQuery(Boolean(token));
+  const startFromRoutine = useStartTrainingFromRoutineMutation();
   const exerciseNameByID = new Map<string, string>();
   for (const ex of exercisesQuery.data ?? []) {
     exerciseNameByID.set(ex.id, ex.name);
@@ -32,14 +38,71 @@ export default function TrainingsPage() {
 
   if (!ready || !token) return null;
 
+  const routines = routinesQuery.data ?? [];
+  const hasRoutines = routines.length > 0;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SectionTitle>トレーニング履歴</SectionTitle>
-        <Link href="/trainings/new">
-          <Button>+ 新規記録</Button>
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Popover
+            align="end"
+            trigger={({
+              onClick,
+              "aria-expanded": ariaExpanded,
+              "aria-controls": ariaControls,
+            }) => (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClick}
+                disabled={!hasRoutines || startFromRoutine.isPending}
+                title={
+                  hasRoutines ? undefined : "ルーティンを登録してください"
+                }
+                aria-expanded={ariaExpanded}
+                aria-controls={ariaControls}
+              >
+                {startFromRoutine.isPending
+                  ? "開始中…"
+                  : "ルーティンから始める ▾"}
+              </Button>
+            )}
+          >
+            <ul className="py-1 min-w-[14rem] max-h-72 overflow-auto">
+              {routines.map((r) => (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startFromRoutine.mutate(r, {
+                        onSuccess: (data) => {
+                          const id = data.training_id ?? "";
+                          if (id) router.push(`/trainings/${id}/edit`);
+                        },
+                      })
+                    }
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-[var(--color-surface-alt)]"
+                  >
+                    <div className="font-medium truncate">{r.name}</div>
+                    <div className="text-xs text-[var(--color-ink-muted)]">
+                      {(r.routine_exercises ?? []).length} 種目
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Popover>
+          <Link href="/trainings/new">
+            <Button>+ 新規記録</Button>
+          </Link>
+        </div>
       </div>
+
+      {startFromRoutine.isError && (
+        <ErrorText>{(startFromRoutine.error as Error).message}</ErrorText>
+      )}
 
       {query.isLoading && (
         <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
