@@ -35,6 +35,13 @@ jobs:
       - name: Download deps
         run: go mod download
 
+      # Swagger docs を生成(server/docs/ は .gitignore で git 管理外)
+      # main.go の `_ "github.com/Watari995/musclead/docs"` import 解決に必要
+      - name: Generate swagger docs
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@latest
+          swag init -g cmd/server/main.go -o docs
+
       - name: go vet
         run: go vet ./...
 
