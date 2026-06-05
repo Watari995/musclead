@@ -1,52 +1,26 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  apiClient,
-  type ListRoutinesResponse,
-  type RoutineDTO,
-} from "@/shared/api/client";
+import type { RoutineDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
+import {
+  useDeleteRoutineMutation,
+  useRoutinesQuery,
+} from "@/features/training/api/routines";
 import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
-
-const ROUTINES_QUERY_KEY = ["routines"] as const;
 
 export default function RoutinesPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: ROUTINES_QUERY_KEY,
-    enabled: Boolean(token),
-    queryFn: async (): Promise<ListRoutinesResponse> => {
-      const { data, error, response } = await apiClient.GET("/routines", {
-        params: { query: { limit: 50, offset: 0 } },
-      });
-      if (error)
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as ListRoutinesResponse;
-    },
-  });
-
-  const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error, response } = await apiClient.DELETE("/routines/{id}", {
-        params: { path: { id } },
-      });
-      if (error)
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ROUTINES_QUERY_KEY }),
-  });
+  const query = useRoutinesQuery(Boolean(token));
+  const del = useDeleteRoutineMutation();
 
   if (!ready || !token) return null;
 
@@ -67,15 +41,15 @@ export default function RoutinesPage() {
       )}
       {del.isError && <ErrorText>{(del.error as Error).message}</ErrorText>}
 
-      {query.data && (query.data.routines ?? []).length === 0 && (
+      {query.data && query.data.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
           まだルーティンが登録されていません。 「+ 新しいルーティン」 から作成してください。
         </Card>
       )}
 
-      {query.data && (query.data.routines ?? []).length > 0 && (
+      {query.data && query.data.length > 0 && (
         <ul className="space-y-3">
-          {(query.data.routines ?? []).map((r) => (
+          {query.data.map((r) => (
             <RoutineCard
               key={r.id}
               routine={r}

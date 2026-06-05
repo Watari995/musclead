@@ -1,78 +1,26 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  apiClient,
-  type RecordTrainingRequest,
-  type RecordTrainingResponse,
-  type RoutineDTO,
-} from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
-  Button,
-  Card,
-  ErrorText,
-  SectionTitle,
-} from "@/shared/ui";
+  useRoutineQuery,
+  useStartTrainingFromRoutineMutation,
+} from "@/features/training/api/routines";
+import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function RoutineDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: ["routine", params.id],
-    enabled: Boolean(token && params.id),
-    queryFn: async (): Promise<RoutineDTO> => {
-      const { data, error, response } = await apiClient.GET(
-        "/routines/{id}",
-        { params: { path: { id: params.id } } },
-      );
-      if (error)
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as RoutineDTO;
-    },
-  });
-
-  // Routine → 空 Training を作って /trainings/{id}/edit に遷移する。
-  // ADR 0006 §4: copy on use(その日に決めたセット数値で確定したい)。
-  const startTraining = useMutation({
-    mutationFn: async (routine: RoutineDTO): Promise<RecordTrainingResponse> => {
-      const body: RecordTrainingRequest = {
-        started_at: new Date().toISOString(),
-        exercises: (routine.routine_exercises ?? []).map((re) => ({
-          exercise_id: re.exercise_id ?? "",
-          display_order: re.display_order ?? 1,
-          sets: [
-            {
-              set_number: 1,
-              weight_kg: "0",
-              reps: 0,
-            },
-          ],
-        })),
-      };
-      const { data, error, response } = await apiClient.POST("/trainings", {
-        body,
-      });
-      if (error)
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as RecordTrainingResponse;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["trainings"] });
-      const id = data.training_id ?? "";
-      if (id) router.push(`/trainings/${id}/edit`);
-    },
-  });
+  const query = useRoutineQuery(params.id, Boolean(token));
+  const startTraining = useStartTrainingFromRoutineMutation();
 
   if (!ready || !token) return null;
 
@@ -131,7 +79,14 @@ export default function RoutineDetailPage() {
 
       <Button
         type="button"
-        onClick={() => startTraining.mutate(routine)}
+        onClick={() =>
+          startTraining.mutate(routine, {
+            onSuccess: (data) => {
+              const id = data.training_id ?? "";
+              if (id) router.push(`/trainings/${id}/edit`);
+            },
+          })
+        }
         disabled={exercises.length === 0 || startTraining.isPending}
         fullWidth
       >
@@ -142,4 +97,3 @@ export default function RoutineDetailPage() {
     </div>
   );
 }
-

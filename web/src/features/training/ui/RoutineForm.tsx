@@ -11,8 +11,8 @@ import {
   setName,
   toUpsertRequest,
   type RoutineDraft,
-} from "@/lib/routine-form";
-import { useExercisesQuery } from "@/lib/queries/exercises";
+} from "@/features/training/model/routine-draft";
+import { useExercisesQuery } from "@/features/training/api/exercises";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 
 type Props = {

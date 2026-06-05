@@ -1,17 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  apiClient,
-  type TrainingDTO,
-  type TrainingExerciseDTO,
-} from "@/shared/api/client";
+import type { TrainingExerciseDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { useExercisesQuery } from "@/lib/queries/exercises";
-import { formatDateTime, resolveRestSeconds } from "@/lib/training-form";
+import { useExercisesQuery } from "@/features/training/api/exercises";
+import { useTrainingQuery } from "@/features/training/api/trainings";
+import { formatDateTime, resolveRestSeconds } from "@/features/training/model/training-draft";
 import {
   Button,
   Card,
@@ -28,22 +24,12 @@ export default function TrainingDetailPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: ["training", params.id],
-    enabled: Boolean(token && params.id),
-    queryFn: async (): Promise<TrainingDTO> => {
-      const { data, error, response } = await apiClient.GET("/trainings/{id}", {
-        params: { path: { id: params.id } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as TrainingDTO;
-    },
-  });
+  const query = useTrainingQuery(params.id, Boolean(token));
 
   const exercisesQuery = useExercisesQuery(Boolean(token));
   const exerciseNameByID = new Map<string, string>();
   for (const ex of exercisesQuery.data ?? []) {
-    if (ex.id && ex.name) exerciseNameByID.set(ex.id, ex.name);
+    exerciseNameByID.set(ex.id, ex.name);
   }
 
   if (!ready || !token) return null;

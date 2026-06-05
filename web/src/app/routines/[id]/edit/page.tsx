@@ -1,26 +1,22 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import {
-  apiClient,
-  type RoutineDTO,
-  type UpsertRoutineRequest,
-} from "@/shared/api/client";
+import { useEffect, useState } from "react";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
-  createInitialRoutine,
+  useRoutineQuery,
+  useUpdateRoutineMutation,
+} from "@/features/training/api/routines";
+import {
   fromRoutineDTO,
   type RoutineDraft,
-} from "@/lib/routine-form";
+} from "@/features/training/model/routine-draft";
 import { ErrorText, SectionTitle } from "@/shared/ui";
-import { RoutineForm } from "@/components/routine/RoutineForm";
+import { RoutineForm } from "@/features/training/ui/RoutineForm";
 
 export default function EditRoutinePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
   const [initial, setInitial] = useState<RoutineDraft | null>(null);
 
@@ -28,49 +24,17 @@ export default function EditRoutinePage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: ["routine", params.id],
-    enabled: Boolean(token && params.id),
-    queryFn: async (): Promise<RoutineDTO> => {
-      const { data, error, response } = await apiClient.GET(
-        "/routines/{id}",
-        { params: { path: { id: params.id } } },
-      );
-      if (error)
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as RoutineDTO;
-    },
-  });
+  const query = useRoutineQuery(params.id, Boolean(token));
 
-  // 初期データが取れたら 1 度だけ initial draft を確定
+  // 初期データが取れたら 1 度だけ initial draft を確定。
+  // フォーム編集中に query が再フェッチされても初期値を上書きしないため。
   useEffect(() => {
     if (query.data && !initial) {
       setInitial(fromRoutineDTO(query.data));
     }
   }, [query.data, initial]);
 
-  const fallbackInitial = useMemo(() => createInitialRoutine(), []);
-
-  const mutation = useMutation({
-    mutationFn: async (body: UpsertRoutineRequest) => {
-      const { error, response } = await apiClient.PUT("/routines/{id}", {
-        params: { path: { id: params.id } },
-        body,
-      });
-      if (error) {
-        const code = error.error?.code;
-        if (code === "training.routine_name_already_exists_error") {
-          throw new Error("同じ名前のルーティンが既に登録されています。");
-        }
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["routines"] });
-      queryClient.invalidateQueries({ queryKey: ["routine", params.id] });
-      router.replace("/routines");
-    },
-  });
+  const mutation = useUpdateRoutineMutation(params.id);
 
   if (!ready || !token) return null;
 
@@ -87,14 +51,18 @@ export default function EditRoutinePage() {
     <div className="space-y-6">
       <SectionTitle>ルーティンを編集</SectionTitle>
       <RoutineForm
-        initial={initial ?? fallbackInitial}
+        initial={initial}
         submitLabel="更新する"
         submittingLabel="更新中…"
         submitting={mutation.isPending}
         errorMessage={
           mutation.isError ? (mutation.error as Error).message : null
         }
-        onSubmit={(payload) => mutation.mutate(payload)}
+        onSubmit={(payload) =>
+          mutation.mutate(payload, {
+            onSuccess: () => router.replace("/routines"),
+          })
+        }
         onCancel={() => router.back()}
       />
     </div>

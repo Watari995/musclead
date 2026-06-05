@@ -16,7 +16,7 @@ import {
   updateExercise,
   updateSet,
   updateTraining,
-} from "../training-form";
+} from "../training-draft";
 
 describe("createInitialTraining", () => {
   it("starts with a single exercise that has a single set", () => {

@@ -1,59 +1,33 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import {
-  apiClient,
-  type RecordTrainingRequest,
-  type TrainingDTO,
-} from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { fromTrainingDTO } from "@/lib/training-form";
+import {
+  useTrainingQuery,
+  useUpdateTrainingMutation,
+} from "@/features/training/api/trainings";
+import { fromTrainingDTO } from "@/features/training/model/training-draft";
 import { ErrorText, SectionTitle } from "@/shared/ui";
-import { TrainingForm } from "@/components/training/TrainingForm";
+import { TrainingForm } from "@/features/training/ui/TrainingForm";
 
 export default function EditTrainingPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: ["training", params.id],
-    enabled: Boolean(token && params.id),
-    queryFn: async (): Promise<TrainingDTO> => {
-      const { data, error, response } = await apiClient.GET("/trainings/{id}", {
-        params: { path: { id: params.id } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as TrainingDTO;
-    },
-  });
+  const query = useTrainingQuery(params.id, Boolean(token));
 
   const initial = useMemo(
     () => (query.data ? fromTrainingDTO(query.data) : null),
     [query.data],
   );
 
-  const mutation = useMutation({
-    mutationFn: async (body: RecordTrainingRequest) => {
-      const { error, response } = await apiClient.PUT("/trainings/{id}", {
-        params: { path: { id: params.id } },
-        body,
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trainings"] });
-      queryClient.invalidateQueries({ queryKey: ["training", params.id] });
-      router.replace(`/trainings/${params.id}`);
-    },
-  });
+  const mutation = useUpdateTrainingMutation(params.id);
 
   if (!ready || !token) return null;
   if (query.isLoading) {
@@ -75,7 +49,11 @@ export default function EditTrainingPage() {
         errorMessage={
           mutation.isError ? (mutation.error as Error).message : null
         }
-        onSubmit={(payload) => mutation.mutate(payload)}
+        onSubmit={(payload) =>
+          mutation.mutate(payload, {
+            onSuccess: () => router.replace(`/trainings/${params.id}`),
+          })
+        }
         onCancel={() => router.back()}
       />
     </div>

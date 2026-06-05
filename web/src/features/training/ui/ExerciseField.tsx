@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import type { ExerciseDTO } from "@/shared/api/client";
-import type { ExerciseDraft, SetDraft } from "@/lib/training-form";
+import type { Exercise } from "@/features/training/model/exercise";
+import type { ExerciseDraft, SetDraft } from "@/features/training/model/training-draft";
 import { Button, Card, Label, TextInput } from "@/shared/ui";
 import { SetField } from "./SetField";
 
 type Props = {
   exercise: ExerciseDraft;
   index: number;
-  exercises: ExerciseDTO[];
+  exercises: Exercise[];
   onChange: (patch: Partial<Omit<ExerciseDraft, "key" | "sets" | "displayOrder">>) => void;
   onRemove: () => void;
   onMoveUp?: () => void;

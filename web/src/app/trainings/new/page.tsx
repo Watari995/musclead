@@ -1,21 +1,15 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import {
-  apiClient,
-  type RecordTrainingRequest,
-  type RecordTrainingResponse,
-} from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { createInitialTraining } from "@/lib/training-form";
+import { useRecordTrainingMutation } from "@/features/training/api/trainings";
+import { createInitialTraining } from "@/features/training/model/training-draft";
 import { SectionTitle } from "@/shared/ui";
-import { TrainingForm } from "@/components/training/TrainingForm";
+import { TrainingForm } from "@/features/training/ui/TrainingForm";
 
 export default function NewTrainingPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
@@ -23,20 +17,7 @@ export default function NewTrainingPage() {
   }, [ready, token, router]);
 
   const initial = useMemo(() => createInitialTraining(), []);
-
-  const mutation = useMutation({
-    mutationFn: async (body: RecordTrainingRequest) => {
-      const { data, error, response } = await apiClient.POST("/trainings", {
-        body,
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as RecordTrainingResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["trainings"] });
-      router.replace("/trainings");
-    },
-  });
+  const mutation = useRecordTrainingMutation();
 
   if (!ready || !token) return null;
 
@@ -51,7 +32,11 @@ export default function NewTrainingPage() {
         errorMessage={
           mutation.isError ? (mutation.error as Error).message : null
         }
-        onSubmit={(payload) => mutation.mutate(payload)}
+        onSubmit={(payload) =>
+          mutation.mutate(payload, {
+            onSuccess: () => router.replace("/trainings"),
+          })
+        }
         onCancel={() => router.back()}
       />
     </div>

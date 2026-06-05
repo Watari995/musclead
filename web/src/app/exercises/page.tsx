@@ -1,20 +1,19 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { apiClient, type ExerciseDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
-  EXERCISES_QUERY_KEY,
+  ExerciseInUseError,
+  useDeleteExerciseMutation,
   useExercisesQuery,
-} from "@/lib/queries/exercises";
+} from "@/features/training/api/exercises";
+import type { Exercise } from "@/features/training/model/exercise";
 import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function ExercisesPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
@@ -22,25 +21,7 @@ export default function ExercisesPage() {
   }, [ready, token, router]);
 
   const query = useExercisesQuery(Boolean(token));
-
-  const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error, response } = await apiClient.DELETE("/exercises/{id}", {
-        params: { path: { id } },
-      });
-      if (error) {
-        const code = error.error?.code;
-        if (code === "training.exercise_used_in_training_error") {
-          throw new Error(
-            "この種目はトレーニング履歴で使われているため削除できません。",
-          );
-        }
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      }
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY }),
-  });
+  const del = useDeleteExerciseMutation();
 
   if (!ready || !token) return null;
 
@@ -59,7 +40,13 @@ export default function ExercisesPage() {
       {query.isError && (
         <ErrorText>{(query.error as Error).message}</ErrorText>
       )}
-      {del.isError && <ErrorText>{(del.error as Error).message}</ErrorText>}
+      {del.isError && (
+        <ErrorText>
+          {del.error instanceof ExerciseInUseError
+            ? del.error.message
+            : (del.error as Error).message}
+        </ErrorText>
+      )}
 
       {query.data && query.data.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
@@ -75,7 +62,7 @@ export default function ExercisesPage() {
               exercise={ex}
               onDelete={() => {
                 if (confirm(`「${ex.name}」を削除しますか?`)) {
-                  del.mutate(ex.id ?? "");
+                  del.mutate(ex.id);
                 }
               }}
               deleting={del.isPending}
@@ -92,7 +79,7 @@ function ExerciseRow({
   onDelete,
   deleting,
 }: {
-  exercise: ExerciseDTO;
+  exercise: Exercise;
   onDelete: () => void;
   deleting: boolean;
 }) {
@@ -104,7 +91,7 @@ function ExerciseRow({
       >
         <p className="text-sm font-bold tracking-tight">{exercise.name}</p>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          登録: {new Date(exercise.created_at ?? "").toLocaleDateString("ja-JP")}
+          登録: {new Date(exercise.createdAt).toLocaleDateString("ja-JP")}
         </p>
       </Link>
       <div className="flex gap-1 shrink-0">

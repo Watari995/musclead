@@ -1,21 +1,15 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import {
-  apiClient,
-  type UpsertRoutineRequest,
-  type UpsertRoutineResponse,
-} from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { createInitialRoutine } from "@/lib/routine-form";
+import { useCreateRoutineMutation } from "@/features/training/api/routines";
+import { createInitialRoutine } from "@/features/training/model/routine-draft";
 import { SectionTitle } from "@/shared/ui";
-import { RoutineForm } from "@/components/routine/RoutineForm";
+import { RoutineForm } from "@/features/training/ui/RoutineForm";
 
 export default function NewRoutinePage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
@@ -23,26 +17,7 @@ export default function NewRoutinePage() {
   }, [ready, token, router]);
 
   const initial = useMemo(() => createInitialRoutine(), []);
-
-  const mutation = useMutation({
-    mutationFn: async (body: UpsertRoutineRequest) => {
-      const { data, error, response } = await apiClient.POST("/routines", {
-        body,
-      });
-      if (error) {
-        const code = error.error?.code;
-        if (code === "training.routine_name_already_exists_error") {
-          throw new Error("同じ名前のルーティンが既に登録されています。");
-        }
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      }
-      return data as UpsertRoutineResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["routines"] });
-      router.replace("/routines");
-    },
-  });
+  const mutation = useCreateRoutineMutation();
 
   if (!ready || !token) return null;
 
@@ -57,7 +32,11 @@ export default function NewRoutinePage() {
         errorMessage={
           mutation.isError ? (mutation.error as Error).message : null
         }
-        onSubmit={(payload) => mutation.mutate(payload)}
+        onSubmit={(payload) =>
+          mutation.mutate(payload, {
+            onSuccess: () => router.replace("/routines"),
+          })
+        }
         onCancel={() => router.back()}
       />
     </div>

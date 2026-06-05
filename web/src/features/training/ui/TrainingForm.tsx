@@ -12,9 +12,9 @@ import {
   updateExercise,
   updateSet,
   updateTraining,
-} from "@/lib/training-form";
+} from "@/features/training/model/training-draft";
 import { type RecordTrainingRequest } from "@/shared/api/client";
-import { useExercisesQuery } from "@/lib/queries/exercises";
+import { useExercisesQuery } from "@/features/training/api/exercises";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 import { ExerciseField } from "./ExerciseField";
 

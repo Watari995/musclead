@@ -1,15 +1,12 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  apiClient,
-  type ExerciseDTO,
-  type UpsertExerciseRequest,
-} from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { EXERCISES_QUERY_KEY } from "@/lib/queries/exercises";
+import {
+  useExerciseQuery,
+  useUpdateExerciseMutation,
+} from "@/features/training/api/exercises";
 import {
   Button,
   Card,
@@ -22,7 +19,6 @@ import {
 export default function EditExercisePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
   const [name, setName] = useState("");
   const [initialized, setInitialized] = useState(false);
@@ -31,45 +27,16 @@ export default function EditExercisePage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: ["exercise", params.id],
-    enabled: Boolean(token && params.id),
-    queryFn: async (): Promise<ExerciseDTO> => {
-      const { data, error, response } = await apiClient.GET("/exercises/{id}", {
-        params: { path: { id: params.id } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as ExerciseDTO;
-    },
-  });
+  const query = useExerciseQuery(params.id, Boolean(token));
 
   useEffect(() => {
     if (query.data && !initialized) {
-      setName(query.data.name ?? "");
+      setName(query.data.name);
       setInitialized(true);
     }
   }, [query.data, initialized]);
 
-  const mutation = useMutation({
-    mutationFn: async (body: UpsertExerciseRequest) => {
-      const { error, response } = await apiClient.PUT("/exercises/{id}", {
-        params: { path: { id: params.id } },
-        body,
-      });
-      if (error) {
-        const code = error.error?.code;
-        if (code === "training.exercise_name_already_exists_error") {
-          throw new Error("同じ名前の種目が既に登録されています。");
-        }
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["exercise", params.id] });
-      router.replace("/exercises");
-    },
-  });
+  const mutation = useUpdateExerciseMutation(params.id);
 
   if (!ready || !token) return null;
 
@@ -87,7 +54,10 @@ export default function EditExercisePage() {
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          mutation.mutate({ name });
+          mutation.mutate(
+            { name },
+            { onSuccess: () => router.replace("/exercises") },
+          );
         }}
       >
         <Card className="p-5 space-y-4">

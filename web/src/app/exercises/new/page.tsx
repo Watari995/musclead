@@ -1,15 +1,9 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  apiClient,
-  type UpsertExerciseRequest,
-  type UpsertExerciseResponse,
-} from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { EXERCISES_QUERY_KEY } from "@/lib/queries/exercises";
+import { useCreateExerciseMutation } from "@/features/training/api/exercises";
 import {
   Button,
   Card,
@@ -21,7 +15,6 @@ import {
 
 export default function NewExercisePage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
   const [name, setName] = useState("");
 
@@ -29,25 +22,7 @@ export default function NewExercisePage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const mutation = useMutation({
-    mutationFn: async (body: UpsertExerciseRequest) => {
-      const { data, error, response } = await apiClient.POST("/exercises", {
-        body,
-      });
-      if (error) {
-        const code = error.error?.code;
-        if (code === "training.exercise_name_already_exists_error") {
-          throw new Error("同じ名前の種目が既に登録されています。");
-        }
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      }
-      return data as UpsertExerciseResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY });
-      router.replace("/exercises");
-    },
-  });
+  const mutation = useCreateExerciseMutation();
 
   if (!ready || !token) return null;
 
@@ -58,7 +33,10 @@ export default function NewExercisePage() {
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          mutation.mutate({ name });
+          mutation.mutate(
+            { name },
+            { onSuccess: () => router.replace("/exercises") },
+          );
         }}
       >
         <Card className="p-5 space-y-4">

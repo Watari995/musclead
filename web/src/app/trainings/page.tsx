@@ -1,63 +1,34 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  apiClient,
-  type ListTrainingsResponse,
-  type TrainingDTO,
-} from "@/shared/api/client";
+import type { TrainingDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { useExercisesQuery } from "@/lib/queries/exercises";
-import { formatDateTime } from "@/lib/training-form";
+import { useExercisesQuery } from "@/features/training/api/exercises";
 import {
-  Button,
-  Card,
-  ErrorText,
-  SectionTitle,
-} from "@/shared/ui";
-
-const TRAININGS_QUERY_KEY = ["trainings"] as const;
+  useDeleteTrainingMutation,
+  useTrainingsQuery,
+} from "@/features/training/api/trainings";
+import { formatDateTime } from "@/features/training/model/training-draft";
+import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function TrainingsPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: TRAININGS_QUERY_KEY,
-    enabled: Boolean(token),
-    queryFn: async (): Promise<ListTrainingsResponse> => {
-      const { data, error, response } = await apiClient.GET("/trainings", {
-        params: { query: { limit: 50, offset: 0 } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as ListTrainingsResponse;
-    },
-  });
-
+  const query = useTrainingsQuery(Boolean(token));
   const exercisesQuery = useExercisesQuery(Boolean(token));
   const exerciseNameByID = new Map<string, string>();
   for (const ex of exercisesQuery.data ?? []) {
-    if (ex.id && ex.name) exerciseNameByID.set(ex.id, ex.name);
+    exerciseNameByID.set(ex.id, ex.name);
   }
 
-  const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error, response } = await apiClient.DELETE("/trainings/{id}", {
-        params: { path: { id } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: TRAININGS_QUERY_KEY }),
-  });
+  const del = useDeleteTrainingMutation();
 
   if (!ready || !token) return null;
 
@@ -77,15 +48,15 @@ export default function TrainingsPage() {
         <ErrorText>{(query.error as Error).message}</ErrorText>
       )}
 
-      {query.data && query.data.trainings && query.data.trainings.length === 0 && (
+      {query.data && query.data.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
           まだトレーニングが記録されていません。
         </Card>
       )}
 
-      {query.data && query.data.trainings && query.data.trainings.length > 0 && (
+      {query.data && query.data.length > 0 && (
         <ul className="space-y-3">
-          {query.data.trainings.map((t) => (
+          {query.data.map((t) => (
             <TrainingCard
               key={t.id}
               training={t}
