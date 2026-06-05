@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { RegisterRequest } from "@/shared/api/client";
 import { useRegisterMutation } from "@/features/user/api/user";
+import { BirthdayInput } from "@/features/user/ui/BirthdayInput";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 
 export default function RegisterPage() {
@@ -57,11 +58,11 @@ export default function RegisterPage() {
             />
           </Label>
           <Label label="誕生日">
-            <TextInput
-              type="date"
+            <BirthdayInput
               value={form.birthday ?? ""}
-              onChange={(e) => setForm({ ...form, birthday: e.target.value })}
+              onChange={(v) => setForm({ ...form, birthday: v })}
               required
+              disabled={mutation.isPending}
             />
           </Label>
           {mutation.isError && <ErrorText>{mutation.error.message}</ErrorText>}
