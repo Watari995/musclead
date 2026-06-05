@@ -1,25 +1,15 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { loginRequest } from "@/shared/api/auth";
-import { setAccessToken } from "@/shared/auth/access-token";
+import { useLoginMutation } from "@/features/user/api/user";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 
 export default function LoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
-
-  const mutation = useMutation({
-    mutationFn: async (input: { email: string; password: string }) =>
-      loginRequest(input.email, input.password),
-    onSuccess: (tokens) => {
-      setAccessToken(tokens.access_token);
-      router.replace("/meals");
-    },
-  });
+  const mutation = useLoginMutation();
 
   return (
     <div className="max-w-md mx-auto">
@@ -29,7 +19,9 @@ export default function LoginPage() {
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate(form);
+            mutation.mutate(form, {
+              onSuccess: () => router.replace("/meals"),
+            });
           }}
         >
           <Label label="メールアドレス">

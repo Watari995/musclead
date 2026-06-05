@@ -1,12 +1,10 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { loginRequest } from "@/shared/api/auth";
-import { apiClient, type RegisterRequest } from "@/shared/api/client";
-import { setAccessToken } from "@/shared/auth/access-token";
+import type { RegisterRequest } from "@/shared/api/client";
+import { useRegisterMutation } from "@/features/user/api/user";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 
 export default function RegisterPage() {
@@ -17,18 +15,7 @@ export default function RegisterPage() {
     password: "",
     birthday: "",
   });
-
-  const mutation = useMutation({
-    mutationFn: async (body: RegisterRequest) => {
-      const { error, response } = await apiClient.POST("/users", { body });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return loginRequest(body.email ?? "", body.password ?? "");
-    },
-    onSuccess: (tokens) => {
-      setAccessToken(tokens.access_token);
-      router.replace("/meals");
-    },
-  });
+  const mutation = useRegisterMutation();
 
   return (
     <div className="max-w-md mx-auto">
@@ -38,7 +25,9 @@ export default function RegisterPage() {
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate(form);
+            mutation.mutate(form, {
+              onSuccess: () => router.replace("/meals"),
+            });
           }}
         >
           <Label label="名前">
