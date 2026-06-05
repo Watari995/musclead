@@ -108,7 +108,9 @@ function ConfirmDialog({
     <dialog
       ref={dialogRef}
       onClick={onBackdropClick}
-      className="rounded-lg border border-[var(--color-line)] bg-white p-0 w-[min(420px,calc(100vw-2rem))] backdrop:bg-black/40"
+      // Tailwind v4 の preflight が <dialog> の margin auto を潰すので、
+      // m-auto + fixed inset-0 でブラウザデフォルトの中央配置を復元する。
+      className="fixed inset-0 m-auto rounded-lg border border-[var(--color-line)] bg-white p-0 w-[min(420px,calc(100vw-2rem))] backdrop:bg-black/40"
     >
       <div className="p-6 space-y-4">
         <h2 className="text-base font-bold tracking-tight text-[var(--color-ink)]">
