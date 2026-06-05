@@ -20,8 +20,6 @@ export default function EditExercisePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { token, ready } = useAccessToken();
-  const [name, setName] = useState("");
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -29,23 +27,38 @@ export default function EditExercisePage() {
 
   const query = useExerciseQuery(params.id, Boolean(token));
 
-  useEffect(() => {
-    if (query.data && !initialized) {
-      setName(query.data.name);
-      setInitialized(true);
-    }
-  }, [query.data, initialized]);
-
-  const mutation = useUpdateExerciseMutation(params.id);
-
   if (!ready || !token) return null;
-
-  if (query.isLoading || !initialized) {
+  if (query.isLoading) {
     return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
   }
   if (query.isError) {
     return <ErrorText>{(query.error as Error).message}</ErrorText>;
   }
+  if (!query.data) return null;
+
+  return (
+    <EditExerciseForm
+      id={params.id}
+      initialName={query.data.name}
+      onDone={() => router.replace("/exercises")}
+      onCancel={() => router.back()}
+    />
+  );
+}
+
+function EditExerciseForm({
+  id,
+  initialName,
+  onDone,
+  onCancel,
+}: {
+  id: string;
+  initialName: string;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState(initialName);
+  const mutation = useUpdateExerciseMutation(id);
 
   return (
     <div className="space-y-6">
@@ -54,10 +67,7 @@ export default function EditExercisePage() {
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          mutation.mutate(
-            { name },
-            { onSuccess: () => router.replace("/exercises") },
-          );
+          mutation.mutate({ name }, { onSuccess: onDone });
         }}
       >
         <Card className="p-5 space-y-4">
@@ -78,7 +88,7 @@ export default function EditExercisePage() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.back()}
+            onClick={onCancel}
             disabled={mutation.isPending}
           >
             キャンセル
