@@ -3,7 +3,7 @@ import {
   clearAccessToken,
   getAccessToken,
   setAccessToken,
-} from "@/lib/access-token";
+} from "@/shared/auth/access-token";
 import { refreshRequest } from "./auth";
 import type { components, paths } from "./schema";
 

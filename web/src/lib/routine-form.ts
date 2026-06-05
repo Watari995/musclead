@@ -4,7 +4,7 @@ import type {
   RoutineDTO,
   RoutineExerciseDTO,
   UpsertRoutineRequest,
-} from "@/api/client";
+} from "@/shared/api/client";
 
 export type RoutineExerciseDraft = {
   /** React key 用のローカル ID(永続化されない) */

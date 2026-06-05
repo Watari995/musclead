@@ -20,7 +20,7 @@ export default defineConfig({
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.d.ts",
-        "src/api/schema.ts",
+        "src/shared/api/schema.ts",
         "src/app/**/layout.tsx",
         "src/app/**/page.tsx",
       ],

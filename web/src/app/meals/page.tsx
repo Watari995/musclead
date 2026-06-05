@@ -3,8 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { apiClient, type MealDTO, type RecordMealRequest } from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+import { apiClient, type MealDTO, type RecordMealRequest } from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import {
   Button,
   Card,
@@ -12,7 +12,7 @@ import {
   Label,
   SectionTitle,
   TextInput,
-} from "@/components/ui";
+} from "@/shared/ui";
 
 const MEALS_QUERY_KEY = ["meals"] as const;
 

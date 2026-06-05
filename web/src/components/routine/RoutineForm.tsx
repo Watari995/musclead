@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { type UpsertRoutineRequest } from "@/api/client";
+import { type UpsertRoutineRequest } from "@/shared/api/client";
 import {
   addExercise,
   moveExercise,
@@ -13,7 +13,7 @@ import {
   type RoutineDraft,
 } from "@/lib/routine-form";
 import { useExercisesQuery } from "@/lib/queries/exercises";
-import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
+import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 
 type Props = {
   initial: RoutineDraft;

@@ -8,8 +8,8 @@ import {
   apiClient,
   type ListTrainingsResponse,
   type TrainingDTO,
-} from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+} from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import { useExercisesQuery } from "@/lib/queries/exercises";
 import { formatDateTime } from "@/lib/training-form";
 import {
@@ -17,7 +17,7 @@ import {
   Card,
   ErrorText,
   SectionTitle,
-} from "@/components/ui";
+} from "@/shared/ui";
 
 const TRAININGS_QUERY_KEY = ["trainings"] as const;
 

@@ -7,8 +7,8 @@ import {
   apiClient,
   type UpsertExerciseRequest,
   type UpsertExerciseResponse,
-} from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+} from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import { EXERCISES_QUERY_KEY } from "@/lib/queries/exercises";
 import {
   Button,
@@ -17,7 +17,7 @@ import {
   Label,
   SectionTitle,
   TextInput,
-} from "@/components/ui";
+} from "@/shared/ui";
 
 export default function NewExercisePage() {
   const router = useRouter();

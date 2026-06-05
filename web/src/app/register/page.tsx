@@ -4,10 +4,10 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { loginRequest } from "@/api/auth";
-import { apiClient, type RegisterRequest } from "@/api/client";
-import { setAccessToken } from "@/lib/access-token";
-import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
+import { loginRequest } from "@/shared/api/auth";
+import { apiClient, type RegisterRequest } from "@/shared/api/client";
+import { setAccessToken } from "@/shared/auth/access-token";
+import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 
 export default function RegisterPage() {
   const router = useRouter();

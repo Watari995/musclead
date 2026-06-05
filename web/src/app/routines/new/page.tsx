@@ -7,10 +7,10 @@ import {
   apiClient,
   type UpsertRoutineRequest,
   type UpsertRoutineResponse,
-} from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+} from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import { createInitialRoutine } from "@/lib/routine-form";
-import { SectionTitle } from "@/components/ui";
+import { SectionTitle } from "@/shared/ui";
 import { RoutineForm } from "@/components/routine/RoutineForm";
 
 export default function NewRoutinePage() {

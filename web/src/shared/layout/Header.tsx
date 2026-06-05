@@ -3,9 +3,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { logoutRequest } from "@/api/auth";
-import { apiClient, type UserDTO } from "@/api/client";
-import { clearAccessToken, useAccessToken } from "@/lib/access-token";
+import { logoutRequest } from "@/shared/api/auth";
+import { apiClient, type UserDTO } from "@/shared/api/client";
+import { clearAccessToken, useAccessToken } from "@/shared/auth/access-token";
 
 const ME_QUERY_KEY = ["me"] as const;
 

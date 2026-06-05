@@ -1,7 +1,7 @@
 "use client";
 
 import type { SetDraft } from "@/lib/training-form";
-import { TextInput } from "@/components/ui";
+import { TextInput } from "@/shared/ui";
 
 type Props = {
   set: SetDraft;

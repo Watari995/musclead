@@ -9,14 +9,14 @@ import {
   type RecordTrainingRequest,
   type RecordTrainingResponse,
   type RoutineDTO,
-} from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+} from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import {
   Button,
   Card,
   ErrorText,
   SectionTitle,
-} from "@/components/ui";
+} from "@/shared/ui";
 
 export default function RoutineDetailPage() {
   const params = useParams<{ id: string }>();
@@ -142,3 +142,4 @@ export default function RoutineDetailPage() {
     </div>
   );
 }
+

@@ -4,13 +4,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { apiClient, type ExerciseDTO } from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+import { apiClient, type ExerciseDTO } from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import {
   EXERCISES_QUERY_KEY,
   useExercisesQuery,
 } from "@/lib/queries/exercises";
-import { Button, Card, ErrorText, SectionTitle } from "@/components/ui";
+import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function ExercisesPage() {
   const router = useRouter();

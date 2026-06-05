@@ -7,7 +7,7 @@ import type {
   TrainingDTO,
   TrainingExerciseDTO,
   TrainingSetDTO,
-} from "@/api/client";
+} from "@/shared/api/client";
 
 // ─── Draft 型(フォーム保持用) ─────────────────────────
 

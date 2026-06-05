@@ -13,9 +13,9 @@ import {
   updateSet,
   updateTraining,
 } from "@/lib/training-form";
-import { type RecordTrainingRequest } from "@/api/client";
+import { type RecordTrainingRequest } from "@/shared/api/client";
 import { useExercisesQuery } from "@/lib/queries/exercises";
-import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
+import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 import { ExerciseField } from "./ExerciseField";
 
 type Props = {

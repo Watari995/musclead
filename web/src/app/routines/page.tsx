@@ -8,9 +8,9 @@ import {
   apiClient,
   type ListRoutinesResponse,
   type RoutineDTO,
-} from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
-import { Button, Card, ErrorText, SectionTitle } from "@/components/ui";
+} from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
+import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 const ROUTINES_QUERY_KEY = ["routines"] as const;
 

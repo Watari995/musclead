@@ -7,10 +7,10 @@ import {
   apiClient,
   type RecordTrainingRequest,
   type TrainingDTO,
-} from "@/api/client";
-import { useAccessToken } from "@/lib/access-token";
+} from "@/shared/api/client";
+import { useAccessToken } from "@/shared/auth/access-token";
 import { fromTrainingDTO } from "@/lib/training-form";
-import { ErrorText, SectionTitle } from "@/components/ui";
+import { ErrorText, SectionTitle } from "@/shared/ui";
 import { TrainingForm } from "@/components/training/TrainingForm";
 
 export default function EditTrainingPage() {

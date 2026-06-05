@@ -15,7 +15,7 @@ import converter from "swagger2openapi";
 
 const SWAGGER_URL =
   process.env.SWAGGER_URL ?? "http://localhost:8080/swagger/doc.json";
-const OUT = "src/api/schema.ts";
+const OUT = "src/shared/api/schema.ts";
 
 const res = await fetch(SWAGGER_URL);
 if (!res.ok) throw new Error(`fetch ${SWAGGER_URL}: HTTP ${res.status}`);

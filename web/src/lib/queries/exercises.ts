@@ -5,7 +5,7 @@ import {
   apiClient,
   type ExerciseDTO,
   type ListExercisesResponse,
-} from "@/api/client";
+} from "@/shared/api/client";
 
 export const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import type { ExerciseDTO } from "@/api/client";
+import type { ExerciseDTO } from "@/shared/api/client";
 import type { ExerciseDraft, SetDraft } from "@/lib/training-form";
-import { Button, Card, Label, TextInput } from "@/components/ui";
+import { Button, Card, Label, TextInput } from "@/shared/ui";
 import { SetField } from "./SetField";
 
 type Props = {

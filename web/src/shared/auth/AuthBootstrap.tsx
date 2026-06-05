@@ -2,12 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { refreshRequest } from "@/api/auth";
+import { refreshRequest } from "@/shared/api/auth";
 import {
   isInitialized,
   markInitialized,
   setAccessToken,
-} from "@/lib/access-token";
+} from "@/shared/auth/access-token";
 
 const AUTH_EXPIRED_EVENT = "musclead:auth-expired";
 
