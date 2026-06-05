@@ -79,3 +79,10 @@ module "dns" {
   alb_dns_name   = module.alb.alb_dns_name
   alb_zone_id    = module.alb.alb_zone_id
 }
+
+module "bastion" {
+  source    = "./modules/bastion"
+  vpc_id    = module.network.vpc_id
+  subnet_id = module.network.public_subnet_ids[0]
+  rds_sg_id = module.network.rds_sg_id
+}
