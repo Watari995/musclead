@@ -1,14 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  apiClient,
-  type ExerciseDTO,
-  type ListExercisesResponse,
-  type UpsertRoutineRequest,
-} from "@/api/client";
+import { type UpsertRoutineRequest } from "@/api/client";
 import {
   addExercise,
   moveExercise,
@@ -18,9 +12,8 @@ import {
   toUpsertRequest,
   type RoutineDraft,
 } from "@/lib/routine-form";
+import { useExercisesQuery } from "@/lib/queries/exercises";
 import { Button, Card, ErrorText, Label, TextInput } from "@/components/ui";
-
-const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 
 type Props = {
   initial: RoutineDraft;
@@ -43,17 +36,7 @@ export function RoutineForm({
 }: Props) {
   const [draft, setDraft] = useState<RoutineDraft>(initial);
 
-  const exercisesQuery = useQuery({
-    queryKey: EXERCISES_QUERY_KEY,
-    queryFn: async (): Promise<ExerciseDTO[]> => {
-      const { data, error, response } = await apiClient.GET("/exercises", {
-        params: { query: { limit: 100, offset: 0 } },
-      });
-      if (error)
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return (data as ListExercisesResponse).exercises ?? [];
-    },
-  });
+  const exercisesQuery = useExercisesQuery();
   const exercises = exercisesQuery.data ?? [];
 
   const handleSubmit = (e: React.FormEvent) => {

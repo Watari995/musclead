@@ -9,6 +9,7 @@ import {
   type UpsertExerciseRequest,
 } from "@/api/client";
 import { useAccessToken } from "@/lib/access-token";
+import { EXERCISES_QUERY_KEY } from "@/lib/queries/exercises";
 import {
   Button,
   Card,
@@ -64,7 +65,7 @@ export default function EditExercisePage() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["exercises", "all"] });
+      queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["exercise", params.id] });
       router.replace("/exercises");
     },

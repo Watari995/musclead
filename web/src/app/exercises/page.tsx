@@ -1,18 +1,16 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import {
-  apiClient,
-  type ExerciseDTO,
-  type ListExercisesResponse,
-} from "@/api/client";
+import { apiClient, type ExerciseDTO } from "@/api/client";
 import { useAccessToken } from "@/lib/access-token";
+import {
+  EXERCISES_QUERY_KEY,
+  useExercisesQuery,
+} from "@/lib/queries/exercises";
 import { Button, Card, ErrorText, SectionTitle } from "@/components/ui";
-
-const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 
 export default function ExercisesPage() {
   const router = useRouter();
@@ -23,17 +21,7 @@ export default function ExercisesPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
-  const query = useQuery({
-    queryKey: EXERCISES_QUERY_KEY,
-    enabled: Boolean(token),
-    queryFn: async (): Promise<ListExercisesResponse> => {
-      const { data, error, response } = await apiClient.GET("/exercises", {
-        params: { query: { limit: 100, offset: 0 } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return data as ListExercisesResponse;
-    },
-  });
+  const query = useExercisesQuery(Boolean(token));
 
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -73,15 +61,15 @@ export default function ExercisesPage() {
       )}
       {del.isError && <ErrorText>{(del.error as Error).message}</ErrorText>}
 
-      {query.data && (query.data.exercises ?? []).length === 0 && (
+      {query.data && query.data.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
           まだ種目が登録されていません。 「+ 新しい種目」 から作成してください。
         </Card>
       )}
 
-      {query.data && (query.data.exercises ?? []).length > 0 && (
+      {query.data && query.data.length > 0 && (
         <ul className="space-y-2">
-          {(query.data.exercises ?? []).map((ex) => (
+          {query.data.map((ex) => (
             <ExerciseRow
               key={ex.id}
               exercise={ex}

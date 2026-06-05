@@ -6,12 +6,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   apiClient,
-  type ExerciseDTO,
-  type ListExercisesResponse,
   type TrainingDTO,
   type TrainingExerciseDTO,
 } from "@/api/client";
 import { useAccessToken } from "@/lib/access-token";
+import { useExercisesQuery } from "@/lib/queries/exercises";
 import { formatDateTime, resolveRestSeconds } from "@/lib/training-form";
 import {
   Button,
@@ -41,17 +40,7 @@ export default function TrainingDetailPage() {
     },
   });
 
-  const exercisesQuery = useQuery({
-    queryKey: ["exercises", "all"],
-    enabled: Boolean(token),
-    queryFn: async (): Promise<ExerciseDTO[]> => {
-      const { data, error, response } = await apiClient.GET("/exercises", {
-        params: { query: { limit: 100, offset: 0 } },
-      });
-      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      return (data as ListExercisesResponse).exercises ?? [];
-    },
-  });
+  const exercisesQuery = useExercisesQuery(Boolean(token));
   const exerciseNameByID = new Map<string, string>();
   for (const ex of exercisesQuery.data ?? []) {
     if (ex.id && ex.name) exerciseNameByID.set(ex.id, ex.name);
