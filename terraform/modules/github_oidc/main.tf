@@ -95,9 +95,9 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = "*"
       },
 
-      # ── (2) ECR push(musclead-server repo のみ) ─────────────────
-      # docker push でレイヤーをアップロードする一連の API
-      # Resource を ECR repo の ARN に絞ることで、 他 repo への push は不可
+      # ── (2) ECR push / read(musclead-server repo のみ) ─────────────────
+      # docker push でレイヤー + マニフェストをアップロード、
+      # Buildx のマルチアーキビルドでは既存マニフェスト確認(HEAD)も発生する
       {
         Effect = "Allow"
         Action = [
@@ -106,6 +106,8 @@ resource "aws_iam_role_policy" "github_actions" {
           "ecr:UploadLayerPart",             # チャンク送信
           "ecr:CompleteLayerUpload",         # 完了通知
           "ecr:PutImage",                    # マニフェスト登録
+          "ecr:BatchGetImage",               # マニフェスト HEAD / pull(Buildx に必須)
+          "ecr:DescribeImages",              # image 情報取得
         ]
         Resource = var.ecr_repository_arn
       },
