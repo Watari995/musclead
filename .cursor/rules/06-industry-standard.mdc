@@ -36,7 +36,7 @@ alwaysApply: true
 SODA で採用してそうな技術選択を優先(理由: 入社後の認知コスト最小化)。
 
 例:
-- BE: Go + REST(gRPC ではない)
+- Backend: Go + REST(gRPC ではない)
 - DB アクセス: gorp(sqlc/GORM ではない、 SODA 流儀)
 - インフラ: AWS(GCP/Azure ではない)
 - リソース名: `<project>-server` / `<project>-web` パターン

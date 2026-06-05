@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * BE の /swagger/doc.json (Swagger 2.0) を取得し、
+ * Backend の /swagger/doc.json (Swagger 2.0) を取得し、
  * OpenAPI 3 に変換 → X-User-ID ヘッダ params を除去 → TS 型を生成。
  *
  * X-User-ID は openapi-fetch のミドルウェアで自動付与するため、

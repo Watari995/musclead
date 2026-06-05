@@ -64,7 +64,7 @@ resource "aws_iam_role_policy" "server_task_execution_ssm" {
   })
 }
 
-# CloudWatch Log Group: BE containerのログ集約先
+# CloudWatch Log Group: Server containerのログ集約先
 resource "aws_cloudwatch_log_group" "server" {
   name              = "/musclead/ecs/server"
   retention_in_days = 7

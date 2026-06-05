@@ -10,7 +10,7 @@ musclead を AWS にデプロイするための Terraform プロジェクト。 
 | ネットワーク | VPC / Subnet / SG | `modules/network/` |
 | データベース | RDS MySQL Single-AZ | `modules/rds/` |
 | コンテナレジストリ | ECR Private | `modules/ecr/` |
-| 実行環境 | ECS Fargate Spot (BE / FE) | `modules/ecs/` |
+| 実行環境 | ECS Fargate Spot (Backend / FE) | `modules/ecs/` |
 | ロードバランサー | ALB + ACM | `modules/alb/` |
 | DNS | Route 53 record | `modules/dns/` |
 | シークレット | SSM Parameter Store | `modules/secrets/` |

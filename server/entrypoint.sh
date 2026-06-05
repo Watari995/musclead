@@ -1,5 +1,5 @@
 #!/bin/sh
-# BE container entrypoint:
+# Backend container entrypoint:
 #   1. DB マイグレーションを最新まで適用
 #   2. server 起動
 #

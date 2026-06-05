@@ -9,7 +9,7 @@ alwaysApply: true
 
 | 領域 | 採用 |
 |---|---|
-| 言語 (BE) | Go 1.24+ |
+| 言語 (Backend) | Go 1.24+ |
 | API | Connect-RPC |
 | ORM | sqlc |
 | Migration | goose |

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>musclead — Icon Proposals</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --border: #232323;
+    --text: #f5f5f5;
+    --muted: #8a8a8a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header { padding: 48px 32px 16px; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0 0 8px; font-size: 22px; letter-spacing: 0.02em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+  section h2 {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em; margin: 24px 0 12px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .frame {
+    width: 100%; aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+    background: #000; border-radius: 8px;
+  }
+  .frame svg { width: 75%; height: 75%; }
+  .meta { text-align: center; }
+  .name { font-size: 13px; font-weight: 600; }
+  .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .sizes {
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+    padding: 20px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+  }
+  .sizes .item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .sizes .item span { font-size: 10px; color: var(--muted); }
+  .sizes .box { background: #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 6px; }
+
+  footer { padding: 16px 32px 48px; color: var(--muted); font-size: 11px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>musclead — Icon Proposals</h1>
+  <div class="sub">ベース: Lucide Icons "biceps-flexed" (MIT) — モノクロ、 黒背景</div>
+</header>
+<main>
+
+<section>
+  <h2>案 (黒背景)</h2>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section>
+  <h2>サイズ確認 (案A)</h2>
+  <div class="sizes" id="size-row"></div>
+</section>
+
+</main>
+<footer>Icons based on Lucide (https://lucide.dev) — ISC License</footer>
+
+<script>
+/* ベース: Lucide biceps-flexed (viewBox 0 0 24 24) */
+const armOutline = `
+  <path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/>
+  <path d="M15 14a5 5 0 0 0-7.584 2"/>
+  <path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/>
+`;
+
+/* 追加: 指の節 (拳の表面に3本) — 反転後の左上拳部分 */
+const fingers = `
+  <path d="M9 3.3 L9 5"/>
+  <path d="M10.6 3.3 L10.6 5.5"/>
+  <path d="M12 4.2 L12.2 6.2"/>
+`;
+
+/* 追加: 筋肉の陰影ライン (力こぶ・前腕・上腕) */
+const muscleLines = `
+  <path d="M18.5 17 Q17 19.5 13.5 19.8"/>
+  <path d="M5 18 Q7 17.5 9 18"/>
+  <path d="M11 9.5 C10 11 10.6 12.5 9.5 13.5"/>
+`;
+
+/* 左右反転して原画像の向き(拳=左上、 肘=右下)に揃える */
+const arm = (opts = {}) => {
+  const stroke = opts.stroke ?? '#fff';
+  const width  = opts.width  ?? 1.6;
+  const detailW = opts.detailW ?? width * 0.85;
+  const showFingers = opts.fingers ?? true;
+  const showMuscles = opts.muscles ?? true;
+  return `
+    <g transform="translate(24 0) scale(-1 1)"
+       fill="none" stroke="${stroke}"
+       stroke-linecap="round" stroke-linejoin="round">
+      <g stroke-width="${width}">${armOutline}</g>
+      ${showFingers ? `<g stroke-width="${detailW}">${fingers}</g>` : ''}
+      ${showMuscles ? `<g stroke-width="${detailW}">${muscleLines}</g>` : ''}
+    </g>
+  `;
+};
+
+/* Lucide dumbbell (簡易) */
+const dumbbell = (color = '#fff') => `
+  <g fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 6l12 12"/>
+    <path d="M3 9l3-3 3 3-3 3z"/>
+    <path d="M15 15l3-3 3 3-3 3z"/>
+    <path d="M1.5 7.5l1.5 1.5"/>
+    <path d="M21 15l1.5 1.5"/>
+  </g>
+`;
+
+const icons = [
+  {
+    name: "A. 指 + 筋肉ライン (標準)",
+    desc: "指 3 本 + 筋肉陰影 3 本、 ゴツめ",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${arm()}</svg>`
+  },
+  {
+    name: "B. 指のみ",
+    desc: "指は描くが余分な筋肉ラインなし",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${arm({ muscles: false })}</svg>`
+  },
+  {
+    name: "C. 指 + 筋肉 (極細)",
+    desc: "繊細さ重視、ディテール多",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${arm({ width: 1.1 })}</svg>`
+  },
+  {
+    name: "D. 指 + 筋肉 (やや太)",
+    desc: "視認性とディテールのバランス",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${arm({ width: 2.0 })}</svg>`
+  },
+  {
+    name: "E. 円フレーム (反転)",
+    desc: "白丸の中に黒い腕、 アプリ向き",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="11.5" fill="#fff"/>
+            <g transform="translate(2 2) scale(0.83)">
+              ${arm({ stroke: '#000', width: 1.6 })}
+            </g>
+          </svg>`
+  },
+  {
+    name: "F. 角丸スクエア (反転)",
+    desc: "iOS/macOS app icon 形式",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0.25" y="0.25" width="23.5" height="23.5" rx="5.5" fill="#fff"/>
+            <g transform="translate(2 2) scale(0.83)">
+              ${arm({ stroke: '#000', width: 1.6 })}
+            </g>
+          </svg>`
+  },
+  {
+    name: "G. 円フレーム (枠線)",
+    desc: "白い枠線の円に白い腕",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="11.2" fill="none" stroke="#fff" stroke-width="0.8"/>
+            <g transform="translate(2 2) scale(0.83)">
+              ${arm({ width: 1.6 })}
+            </g>
+          </svg>`
+  },
+  {
+    name: "H. 腕 + ダンベル",
+    desc: "腕の隣にダンベルを配置",
+    svg: `<svg viewBox="0 0 48 24" xmlns="http://www.w3.org/2000/svg">
+            <g>${arm()}</g>
+            <g transform="translate(24 0)">${dumbbell()}</g>
+          </svg>`
+  },
+  {
+    name: "I. 腕 + M モノグラム",
+    desc: "頭文字 M を併記したロゴ用",
+    svg: `<svg viewBox="0 0 48 24" xmlns="http://www.w3.org/2000/svg">
+            <g>${arm()}</g>
+            <text x="36" y="18" fill="#fff" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="18" text-anchor="middle">M</text>
+          </svg>`
+  },
+];
+
+const grid = document.getElementById('grid');
+for (const ic of icons) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="frame">${ic.svg}</div>
+    <div class="meta">
+      <div class="name">${ic.name}</div>
+      <div class="desc">${ic.desc}</div>
+    </div>
+  `;
+  grid.appendChild(card);
+}
+
+const sizes = [128, 64, 32, 16];
+const row = document.getElementById('size-row');
+for (const s of sizes) {
+  const item = document.createElement('div');
+  item.className = 'item';
+  item.innerHTML = `
+    <div class="box" style="width:${s + 12}px;height:${s + 12}px">
+      <div style="width:${s}px;height:${s}px;display:flex;align-items:center;justify-content:center">
+        ${icons[0].svg}
+      </div>
+    </div>
+    <span>${s}px</span>
+  `;
+  row.appendChild(item);
+}
+</script>
+</body>
+</html>

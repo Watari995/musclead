@@ -121,10 +121,10 @@
 | Step | 内容 | 担当 |
 |---|---|---|
 | 1 | 既存 `Exercise` → `TrainingExercise`、 `Set` → `TrainingSet` 全箇所 rename(挙動変更なし) | AI |
-| 2 | Exercise マスタ実装: migration / domain / infra / usecase / handler / dto | 人間(BE)+ AI(FE 管理画面) |
-| 3 | TrainingExercise の `name` → `exercise_id` 移行: migration / domain / infra / dto / FE select 化 | 人間(BE)+ AI(FE) |
-| 4 | Routine 実装: migration / domain / infra / usecase / handler / dto / FE | 人間(BE)+ AI(FE) |
-| 5 | 前回値 API(`GET /trainings/exercises/{exercise_id}/latest`)+ Routine 使用時の前回値表示 | 人間(BE)+ AI(FE) |
+| 2 | Exercise マスタ実装: migration / domain / infra / usecase / handler / dto | 人間(Backend)+ AI(FE 管理画面) |
+| 3 | TrainingExercise の `name` → `exercise_id` 移行: migration / domain / infra / dto / FE select 化 | 人間(Backend)+ AI(FE) |
+| 4 | Routine 実装: migration / domain / infra / usecase / handler / dto / FE | 人間(Backend)+ AI(FE) |
+| 5 | 前回値 API(`GET /trainings/exercises/{exercise_id}/latest`)+ Routine 使用時の前回値表示 | 人間(Backend)+ AI(FE) |
 
 各 Step ごとに commit + push、 Step 間で破壊的変更を分離する。
 

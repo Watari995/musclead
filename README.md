@@ -19,7 +19,7 @@ musclead/
 
 | 領域 | 技術 |
 |---|---|
-| 言語 (BE) | Go 1.26+ |
+| 言語 (Backend) | Go 1.26+ |
 | HTTP | net/http(Go 1.22 ServeMux)|
 | ORM | gorp |
 | DB | MySQL 8.0 / Aurora Serverless v2 |

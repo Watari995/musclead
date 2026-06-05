@@ -16,10 +16,6 @@ variable "domain_name" {
   default     = "musclead.com"
 }
 
-# サブドメイン:
-# - app.<domain_name>: FE (Vercel CNAME)
-# - api.<domain_name>: BE (ALB Alias)
-
 # ── Secrets / 環境ごとに変わる値(全て terraform.tfvars で投入) ─────────────
 
 variable "jwt_secret" {
