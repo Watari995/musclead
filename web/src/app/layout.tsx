@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -20,6 +20,12 @@ export const metadata: Metadata = {
   description: "筋トレ・食事・体重 一元管理 SaaS",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,15 +36,15 @@ export default function RootLayout({
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col overflow-x-hidden">
         <Providers>
           <AuthBootstrap />
           <Header />
-          <main className="flex-1 w-full max-w-5xl mx-auto px-5 sm:px-6 py-8">
+          <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             {children}
           </main>
           <footer className="border-t border-[var(--color-line)] mt-12">
-            <div className="w-full max-w-5xl mx-auto px-5 sm:px-6 py-6 text-xs text-[var(--color-ink-muted)] flex justify-between">
+            <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 text-xs text-[var(--color-ink-muted)] flex justify-between">
               <span>© musclead</span>
               <span>Beta</span>
             </div>

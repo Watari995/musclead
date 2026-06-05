@@ -11,7 +11,7 @@ export function RecordMealForm() {
   const mutation = useRecordMealMutation();
 
   return (
-    <Card className="p-5">
+    <Card className="p-4 sm:p-5">
       <form
         className="space-y-4"
         onSubmit={(e) => {

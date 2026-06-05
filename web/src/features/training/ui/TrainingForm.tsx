@@ -50,8 +50,8 @@ export function TrainingForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       {/* メタ情報 */}
-      <Card className="p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+      <Card className="p-4 sm:p-5 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Label label="開始時刻">
             <TextInput
               type="datetime-local"

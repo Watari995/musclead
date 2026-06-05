@@ -37,9 +37,9 @@ export function ExerciseField({
   disabled,
 }: Props) {
   return (
-    <Card className="p-4 space-y-3">
+    <Card className="p-3 sm:p-4 space-y-3">
       {/* header: 種目選択 + 並び替え/削除 */}
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-1 sm:gap-2">
         <div className="flex-1">
           <Label label={`種目 ${index + 1}`}>
             <select
@@ -104,7 +104,7 @@ export function ExerciseField({
       </div>
 
       {/* exercise メタ: 既定の休憩 + メモ */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Label label="既定の休憩(秒)">
           <TextInput
             type="number"
@@ -132,7 +132,7 @@ export function ExerciseField({
 
       {/* sets */}
       <div className="space-y-2">
-        <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 text-xs font-medium text-[var(--color-ink-muted)]">
+        <div className="hidden sm:grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 text-xs font-medium text-[var(--color-ink-muted)]">
           <span className="w-8" />
           <span>重量(kg)</span>
           <span>レップ</span>

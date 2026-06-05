@@ -25,6 +25,17 @@ body {
   background: var(--color-surface);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
+  /* mobile: 横スクロール厳禁。 子要素の overflow は個別に許可する */
+  overflow-x: hidden;
+}
+
+/* iOS Safari で <16px の入力欄は zoom-in されるため最低 16px を担保 */
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem);
+  /* iOS で width:100% を貫通させるため box-sizing は border-box (Tailwind 既定) */
+  max-width: 100%;
 }
 
 /* react-day-picker theming — snkrdunk テイスト (monochrome, sharp) に寄せる */
