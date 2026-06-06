@@ -27,6 +27,15 @@ type UpdateUserResponse struct {
 	UserID string `json:"user_id"`
 }
 
+type GenerateProfileImagePresignedURLRequest struct {
+	ContentType string `json:"content_type"`
+}
+
+type GenerateProfileImagePresignedURLResponse struct {
+	URL  string `json:"url"`
+	Path string `json:"path"`
+}
+
 type UserDTO struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`

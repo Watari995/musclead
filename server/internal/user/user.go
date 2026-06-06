@@ -5,6 +5,7 @@ package user
 import (
 	"net/http"
 
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/user/interface/publicfunctions"
 	userhandler "github.com/Watari995/musclead/internal/user/internal/handler"
 	userinfra "github.com/Watari995/musclead/internal/user/internal/infra"
@@ -20,7 +21,7 @@ type Module struct {
 	userCommand   publicfunctions.UserCommand
 }
 
-func NewModule(dbmap *gorp.DbMap) *Module {
+func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient) *Module {
 	// repositoryを作成
 	dbmap.AddTableWithName(userinfra.UserModel{}, "users").SetKeys(false, "ID")
 	repo := userinfra.NewUserRepository(dbmap)
@@ -30,13 +31,14 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	find := userusecase.NewFindUser(repo)
 	updateUser := userusecase.NewUpdateUser(repo)
 	delete := userusecase.NewDeleteUser(repo)
+	generateProfileImagePresignedURL := userusecase.NewGenerateProfileImagePresignedURL(storageClient)
 	me := userusecase.NewMe(repo)
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
 
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
-		Handler:       userhandler.NewAuthenticated(me, find, updateUser, delete),
+		Handler:       userhandler.NewAuthenticated(me, find, updateUser, delete, generateProfileImagePresignedURL),
 		userCommand:   authenticate,
 	}
 }

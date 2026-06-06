@@ -14,11 +14,12 @@ import (
 )
 
 type UserHandler struct {
-	me         *userusecase.Me
-	register   *userusecase.RegisterUser
-	find       *userusecase.FindUser
-	updateUser *userusecase.UpdateUser
-	delete     *userusecase.DeleteUser
+	me                               *userusecase.Me
+	register                         *userusecase.RegisterUser
+	find                             *userusecase.FindUser
+	updateUser                       *userusecase.UpdateUser
+	delete                           *userusecase.DeleteUser
+	generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL
 }
 
 func NewPublic(register *userusecase.RegisterUser) http.Handler {
@@ -30,19 +31,21 @@ func NewPublic(register *userusecase.RegisterUser) http.Handler {
 	return mux
 }
 
-func NewAuthenticated(me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser) http.Handler {
+func NewAuthenticated(me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) http.Handler {
 	// ServeHTTP interfaceを満たしている必要がある
 	h := &UserHandler{
-		me:         me,
-		find:       find,
-		updateUser: updateUser,
-		delete:     delete,
+		me:                               me,
+		find:                             find,
+		updateUser:                       updateUser,
+		delete:                           delete,
+		generateProfileImagePresignedURL: generateProfileImagePresignedURL,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /users/me", h.Me)
 	mux.HandleFunc("GET /users/{id}", h.Find)
 	mux.HandleFunc("PATCH /users/me", h.UpdateUser)
 	mux.HandleFunc("DELETE /users/{id}", h.Delete)
+	mux.HandleFunc("POST /users/me/profile-image/presigned-url", h.GenerateProfileImagePresignedURL)
 	return mux
 }
 
@@ -235,4 +238,46 @@ func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteNoContent(w)
+}
+
+// GenerateProfileImagePresignedURL godoc
+//
+// @Summary プロフィール画像のPresigned URL生成
+// @Tags users
+// @Security BearerAuth
+// @Produce json
+// @Param request body userdto.GenerateProfileImagePresignedURLRequest true "プロフィール画像のPresigned URL生成情報"
+// @Success 200 {object} userdto.GenerateProfileImagePresignedURLResponse "プロフィール画像のPresigned URL生成成功"
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /users/me/profile-image/presigned-url [post]
+func (h *UserHandler) GenerateProfileImagePresignedURL(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	var req userdto.GenerateProfileImagePresignedURLRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	contentType, err := valueobject.NewImageContentType(req.ContentType)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid content type"))
+		return
+	}
+	params := userusecase.GenerateProfileImagePresignedURLInput{
+		UserID:      userID,
+		ContentType: *contentType,
+	}
+	output, err := h.generateProfileImagePresignedURL.Execute(r.Context(), params)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, userdto.GenerateProfileImagePresignedURLResponse{
+		URL:  output.URL.Value(),
+		Path: output.Path,
+	})
 }
