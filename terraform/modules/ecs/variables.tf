@@ -58,3 +58,20 @@ variable "target_group_arn" {
   description = "ALB Target Group の ARN(alb moduleの output)"
   type        = string
 }
+
+# ── Storage(S3 image bucket)─────────────
+
+variable "storage_bucket_name" {
+  description = "S3 bucket 名(storage module の output、 BE の env として渡す)"
+  type        = string
+}
+
+variable "storage_bucket_arn" {
+  description = "S3 bucket ARN(Task Role の S3 policy で参照)"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region(BE が AWS SDK 初期化で使用)"
+  type        = string
+}

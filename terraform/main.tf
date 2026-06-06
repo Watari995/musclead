@@ -9,8 +9,17 @@
 #
 # 初期は network のみ apply して動作確認、 順次他を有効化していく。
 
+# AWS Account ID を動的取得(S3 bucket 名の衝突回避用)
+data "aws_caller_identity" "current" {}
+
 module "network" {
   source = "./modules/network"
+}
+
+module "storage" {
+  source          = "./modules/storage"
+  account_id      = data.aws_caller_identity.current.account_id
+  allowed_origins = ["https://app.${var.domain_name}"]
 }
 
 module "rds" {
@@ -51,7 +60,7 @@ module "alb" {
 }
 
 module "ecs" {
-  source       = "./modules/ecs"
+  source           = "./modules/ecs"
   server_image_url = "${module.ecr.server_repository_url}:latest"
   ssm_parameter_arns = [
     module.secrets.jwt_secret_arn,
@@ -59,16 +68,19 @@ module "ecs" {
     module.secrets.db_password_arn,
     module.secrets.db_host_arn,
   ]
-  jwt_secret_arn   = module.secrets.jwt_secret_arn
-  db_user_arn      = module.secrets.db_user_arn
-  db_password_arn  = module.secrets.db_password_arn
-  db_host_arn      = module.secrets.db_host_arn
-  db_name          = var.db_name
-  db_port          = var.db_port
-  subnet_ids       = module.network.public_subnet_ids
-  server_sg_id         = module.network.server_fargate_sg_id
-  target_group_arn = module.alb.server_target_group_arn
-  allowed_origin   = var.allowed_origin
+  jwt_secret_arn      = module.secrets.jwt_secret_arn
+  db_user_arn         = module.secrets.db_user_arn
+  db_password_arn     = module.secrets.db_password_arn
+  db_host_arn         = module.secrets.db_host_arn
+  db_name             = var.db_name
+  db_port             = var.db_port
+  subnet_ids          = module.network.public_subnet_ids
+  server_sg_id        = module.network.server_fargate_sg_id
+  target_group_arn    = module.alb.server_target_group_arn
+  allowed_origin      = var.allowed_origin
+  storage_bucket_name = module.storage.bucket_name
+  storage_bucket_arn  = module.storage.bucket_arn
+  aws_region          = var.aws_region
 }
 
 
