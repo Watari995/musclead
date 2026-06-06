@@ -14,6 +14,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     css: false,
+    // e2e/ は Playwright 専用。 vitest で読むと @playwright/test と衝突する
+    exclude: ["**/node_modules/**", "**/dist/**", "e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

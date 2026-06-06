@@ -92,6 +92,21 @@ musclead では PWA アイコンが **Next.js ファイル規約系統** と **m
 - 水平スクロールが出ていないこと、 ボタンがタップしやすいことを目視確認
 - 不明な点があればユーザーに「モバイルでの見え方どうしますか?」 を必ず確認
 
+### 自動ガード (CI 必須)
+
+目視確認の漏れを防ぐため、 GitHub Actions の **`E2E (web mobile UI)` ワークフローが PR の必須チェック**。 以下を iPhone SE viewport (375 × 667) で自動検査する:
+
+| 検査 | 落ちる条件 |
+|---|---|
+| 水平スクロール | `document.documentElement.scrollWidth > clientWidth` |
+| 要素の viewport はみ出し | 各要素の `getBoundingClientRect()` が viewport の左右からはみ出している(`position: fixed` は除外) |
+| a11y (axe-core) | `critical` / `serious` の WCAG 2.1 AA 違反(タップ領域・コントラスト・alt 等) |
+
+- 検査対象は `web/e2e/helpers/pages.ts` の `TARGET_PAGES`。 **新ページ追加時は必ずここに 1 行追加**
+- Popover やドロワーなど「開かないと崩れない UI」 は `interact:` で開く操作を書く(`/trainings` の例を参照)
+- ローカル実行: `cd web && npm run e2e` (事前に MySQL + server + web をローカル起動しておく)
+- 詳細は [web/e2e/README.md](mdc:../web/e2e/README.md) 参照
+
 ## 10. 違反例(してはいけない)
 
 - 「PC で動いたので OK」 として完了報告する
