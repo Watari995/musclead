@@ -28,14 +28,15 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 
 	register := userusecase.NewRegisterUser(repo, hasher)
 	find := userusecase.NewFindUser(repo)
-	deleteUser := userusecase.NewDeleteUser(repo)
+	updateUser := userusecase.NewUpdateUser(repo)
+	delete := userusecase.NewDeleteUser(repo)
 	me := userusecase.NewMe(repo)
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
 
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
-		Handler:       userhandler.NewAuthenticated(me, find, deleteUser),
+		Handler:       userhandler.NewAuthenticated(me, find, updateUser, delete),
 		userCommand:   authenticate,
 	}
 }

@@ -59,11 +59,32 @@ musclead はスマホ利用が主用途(トレ中・食事中に記録)。 **全
 - データテーブルはモバイルでスクロール可能にするか、 カード型に再構成する
 - 親に `overflow-x-auto` を付ける場合は **その親が画面幅で止まる**ことを確認(`max-w-full` 等)
 
-## 8. PWA
+## 8. PWA アイコン(重要: 4 ファイル同時更新)
 
-- ホーム画面追加時のアイコンは **角丸正方形**(`web/public/icon-*.png` / `web/src/app/apple-icon.png`)
-- 円形アイコンは PWA インストール時に切れて見えるため使わない
-- `manifest.ts` の icons には `purpose: "any"` と `"maskable"` の両方を含める
+### アイコン配信元は 2 系統ある
+
+musclead では PWA アイコンが **Next.js ファイル規約系統** と **manifest 系統** の 2 経路で配信されている。**iOS Safari は `<link rel="apple-touch-icon">` を PWA manifest より優先する**ため、 manifest 側だけ直してもホーム画面のアイコンは更新されない。
+
+| ファイル | サイズ | 用途 | 注入経路 |
+|---|---|---|---|
+| `web/src/app/icon.png` | 512×512 | favicon / `<link rel="icon">` | Next.js ファイル規約で自動注入 |
+| `web/src/app/apple-icon.png` | 180×180 | **iOS ホーム画面** / `<link rel="apple-touch-icon">` | Next.js ファイル規約で自動注入 |
+| `web/public/icon-192.png` | 192×192 | Android Chrome PWA | `manifest.ts` の `icons` 配列 |
+| `web/public/icon-512.png` | 512×512 | Android Chrome PWA / スプラッシュ | `manifest.ts` の `icons` 配列 |
+
+**アイコンを変更する時は必ず 4 ファイル全部を同じソースから再生成すること**。 片方だけ直して「変わらない」と詰むのは過去の事故 (PR #7 → #9)。
+
+### デザイン要件
+
+- **フルブリード**: 端まで背景色を塗る。 アイコン画像内に角丸や枠線を描き込まない(OS が自前で角丸マスクをかぶせるので二重縁取りになる)
+- **safe zone**: 主要モチーフは中央 **80%** 以内に収める(maskable で OS が角丸クリップしても欠けないように)
+- **円形アイコン禁止**: PWA インストール時に端が切れて見える
+- `manifest.ts` の `icons` には `purpose: "any"` と `"maskable"` の両方を含める
+
+### 検証時の注意
+
+- iOS Safari は `apple-touch-icon` を **強烈にキャッシュ**する。 検証時はホーム画面の PWA 削除 + Safari → 設定 → 履歴とWebサイトデータを消去、 までやらないと旧アイコンが残る
+- ファイル名 (`icon-192.png` 等) を維持したまま中身だけ更新する場合も同様
 
 ## 9. 検証
 
