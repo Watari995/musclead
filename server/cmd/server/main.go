@@ -17,6 +17,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -28,9 +29,13 @@ import (
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/meal"
 	_ "github.com/Watari995/musclead/internal/shared"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/training"
 	"github.com/Watari995/musclead/internal/user"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -66,8 +71,15 @@ func run() error {
 		Db:      db,
 		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
 	}
+	// S3 Clientを作成
+	awsCfg, err := awsconfig.LoadDefaultConfig(context.Background())
+	if err != nil {
+		log.Fatalf("aws config: %v", err)
+	}
+	s3RawClient := s3.NewFromConfig(awsCfg)
+	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
 
-	mux := newMux(dbmap)
+	mux := newMux(dbmap, storageClient)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -124,7 +136,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap) http.Handler {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient) http.Handler {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -133,7 +145,7 @@ func newMux(dbmap *gorp.DbMap) http.Handler {
 	// 各モジュールを組み立て、 そのハンドラをマウント
 	// swaggerのマウント
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
-	userModule := user.NewModule(dbmap)
+	userModule := user.NewModule(dbmap, storageClient)
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
 	mealModule := meal.NewModule(dbmap, cdnBaseURL)
