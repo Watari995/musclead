@@ -25,6 +25,11 @@ func (u *User) Name() valueobject.String50 {
 	return u.name
 }
 
+func (u *User) SetName(n valueobject.String50) {
+	u.name = n
+	u.updatedAt = time.Now()
+}
+
 func (u *User) Email() valueobject.Email {
 	return u.email
 }
@@ -35,6 +40,11 @@ func (u *User) PasswordHash() valueobject.HashedPassword {
 
 func (u *User) Birthday() *time.Time {
 	return u.birthday
+}
+
+func (u *User) SetBirthday(b *time.Time) {
+	u.birthday = b
+	u.updatedAt = time.Now()
 }
 
 func (u *User) DeletedAt() *time.Time {
