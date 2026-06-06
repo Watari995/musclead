@@ -3,6 +3,7 @@ package userdto
 import (
 	"time"
 
+	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
@@ -14,6 +15,15 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
+	UserID string `json:"user_id"`
+}
+
+type UpdateUserRequest struct {
+	Name     shareddto.Patch[string] `json:"name"`
+	Birthday shareddto.Patch[string] `json:"birthday"`
+}
+
+type UpdateUserResponse struct {
 	UserID string `json:"user_id"`
 }
 
