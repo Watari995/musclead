@@ -85,9 +85,12 @@ export function Header() {
             {loggedIn ? (
               <>
                 {meQuery.data?.name && (
-                  <span className="hidden sm:inline text-[var(--color-ink-muted)] truncate max-w-[12rem]">
+                  <Link
+                    href="/profile"
+                    className="hidden sm:inline text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] truncate max-w-[12rem]"
+                  >
                     {meQuery.data.name}
-                  </span>
+                  </Link>
                 )}
                 <button
                   type="button"
@@ -179,9 +182,19 @@ function MobileMenu({
         }`}
       >
         <div className="h-14 px-5 flex items-center justify-between border-b border-[var(--color-line)]">
-          <span className="text-sm font-bold tracking-tight truncate">
-            {userName || "メニュー"}
-          </span>
+          {userName ? (
+            <Link
+              href="/profile"
+              onClick={onClose}
+              className="text-sm font-bold tracking-tight truncate hover:opacity-60"
+            >
+              {userName}
+            </Link>
+          ) : (
+            <span className="text-sm font-bold tracking-tight truncate">
+              メニュー
+            </span>
+          )}
           <button
             type="button"
             onClick={onClose}
