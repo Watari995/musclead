@@ -50,7 +50,7 @@ export function Header() {
   };
 
   return (
-    <header className="border-b border-[var(--color-line)] bg-white sticky top-0 z-30">
+    <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)] sticky top-0 z-30">
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
         <Link
           href="/"
@@ -100,6 +100,12 @@ export function Header() {
                     <span className="truncate">{meQuery.data.name}</span>
                   </Link>
                 )}
+                <Link
+                  href="/settings"
+                  className="hidden sm:inline text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                >
+                  設定
+                </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -199,7 +205,7 @@ function MobileMenu({
         }`}
       />
       <div
-        className={`absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-white shadow-xl flex flex-col transition-transform duration-200 ${
+        className={`absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-[var(--color-surface)] shadow-xl flex flex-col transition-transform duration-200 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -245,6 +251,19 @@ function MobileMenu({
             );
           })}
         </nav>
+        <div className="border-t border-[var(--color-line)]">
+          <Link
+            href="/settings"
+            onClick={onClose}
+            className={`block px-5 py-3 text-base border-l-2 ${
+              pathname === "/settings" || pathname.startsWith("/settings/")
+                ? "border-[var(--color-ink)] font-bold bg-[var(--color-surface-alt)]"
+                : "border-transparent text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
+            }`}
+          >
+            設定
+          </Link>
+        </div>
         <div className="border-t border-[var(--color-line)] p-4">
           <button
             type="button"

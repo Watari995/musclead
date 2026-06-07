@@ -1,16 +1,42 @@
 @import "tailwindcss";
 @import "react-day-picker/style.css";
 
+/* `.dark` を親に持つ要素全てに dark variant を適用する。 next-themes は html
+   要素に `dark` クラスを付けるので、 そこから派生して全子要素が対象になる。 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-ink: #111111;
-  --color-ink-muted: #6b7280;
-  --color-line: #e5e7eb;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f6f6f6;
-  --color-accent: #ef3a3a;
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-accent: var(--accent);
+}
+
+/* light mode (default) — 現状の snkrdunk テイストを維持 */
+:root {
+  --ink: #111111;
+  --ink-muted: #6b7280;
+  --line: #e5e7eb;
+  --surface: #ffffff;
+  --surface-alt: #f6f6f6;
+  --accent: #ef3a3a;
+  color-scheme: light;
+}
+
+/* dark mode — GitHub Dark のパレットを採用。 */
+.dark {
+  --ink: #c9d1d9;
+  --ink-muted: #8b949e;
+  --line: #30363d;
+  --surface: #0d1117;
+  --surface-alt: #161b22;
+  --accent: #f85149;
+  color-scheme: dark;
 }
 
 html,
@@ -50,7 +76,7 @@ textarea {
 }
 .rdp-selected .rdp-day_button {
   background-color: var(--color-ink);
-  color: #fff;
+  color: var(--color-surface);
 }
 .rdp-today:not(.rdp-selected) .rdp-day_button {
   font-weight: 700;
@@ -59,7 +85,7 @@ textarea {
   fill: var(--color-ink);
 }
 .rdp-dropdown {
-  background-color: #fff;
+  background-color: var(--color-surface);
   color: var(--color-ink);
   border: 1px solid var(--color-line);
   border-radius: 6px;

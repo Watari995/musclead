@@ -107,7 +107,7 @@ export function RecordMealForm() {
           <select
             value={form.meal_type}
             onChange={(e) => setForm({ ...form, meal_type: e.target.value })}
-            className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-white focus:outline-none focus:border-[var(--color-ink)]"
+            className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
           >
             <option value="breakfast">朝食</option>
             <option value="lunch">昼食</option>
@@ -153,7 +153,7 @@ export function RecordMealForm() {
             value={form.memo ?? ""}
             onChange={(e) => setForm({ ...form, memo: e.target.value })}
             rows={2}
-            className="block w-full px-3 py-2 rounded-md border border-[var(--color-line)] bg-white focus:outline-none focus:border-[var(--color-ink)]"
+            className="block w-full px-3 py-2 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
           />
         </Label>
 

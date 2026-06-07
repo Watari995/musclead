@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { AuthBootstrap } from "@/shared/auth/AuthBootstrap";
 import { Header } from "@/features/user/ui/Header";
+import { ThemePreferenceSync } from "@/features/user/ui/ThemePreferenceSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,10 +36,12 @@ export default function RootLayout({
     <html
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden">
         <Providers>
           <AuthBootstrap />
+          <ThemePreferenceSync />
           <Header />
           <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             {children}

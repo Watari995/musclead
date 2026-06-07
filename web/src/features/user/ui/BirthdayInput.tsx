@@ -42,7 +42,7 @@ export function BirthdayInput({
             aria-expanded={p["aria-expanded"]}
             aria-controls={p["aria-controls"]}
             aria-haspopup="dialog"
-            className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-white text-left text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between"
+            className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-left text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between"
           >
             <span
               className={

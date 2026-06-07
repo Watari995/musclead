@@ -49,61 +49,68 @@ export const apiClient = createClient<paths>({
 });
 apiClient.use(authMiddleware);
 
+// swag v1.16.5+ は schema 名に fully qualified Go path を出すようになったため、
+// 各 package ごとに短い alias を定義しておく(呼び出し側のコードを変えなくていいように)
 type Schemas = components["schemas"];
-export type UserDTO =
-  Schemas["userdto.UserDTO"];
-export type MealDTO =
-  Schemas["mealdto.MealDTO"];
-export type RegisterRequest =
-  Schemas["userdto.RegisterRequest"];
-export type RegisterResponse =
-  Schemas["userdto.RegisterResponse"];
-export type RecordMealRequest =
-  Schemas["mealdto.RecordMealRequest"];
-export type ListMealsResponse =
-  Schemas["mealdto.ListMealsResponse"];
+type UserDto<K extends string> =
+  `github_com_Watari995_musclead_internal_user_dto.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
+type MealDto<K extends string> =
+  `github_com_Watari995_musclead_internal_meal_dto.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
+type TrainingDto<K extends string> =
+  `github_com_Watari995_musclead_internal_training_dto.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
+type Httpx<K extends string> =
+  `github_com_Watari995_musclead_internal_shared_httpx.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
 
-export type TrainingDTO =
-  Schemas["trainingdto.TrainingDTO"];
-export type TrainingExerciseDTO =
-  Schemas["trainingdto.TrainingExerciseDTO"];
-export type TrainingSetDTO =
-  Schemas["trainingdto.TrainingSetDTO"];
-export type RecordTrainingRequest =
-  Schemas["trainingdto.RecordTrainingRequest"];
-export type RecordTrainingExerciseRequest =
-  Schemas["trainingdto.RecordTrainingExerciseRequest"];
-export type RecordTrainingSetRequest =
-  Schemas["trainingdto.RecordTrainingSetRequest"];
-export type RecordTrainingResponse =
-  Schemas["trainingdto.RecordTrainingResponse"];
-export type ListTrainingsResponse =
-  Schemas["trainingdto.ListTrainingsResponse"];
+export type UserDTO = UserDto<"UserDTO">;
+export type PreferencesDTO = UserDto<"PreferencesDTO">;
+export type MeResponse = UserDto<"MeResponse">;
+export type RegisterRequest = UserDto<"RegisterRequest">;
+export type RegisterResponse = UserDto<"RegisterResponse">;
+export type UpdatePreferencesRequest = UserDto<"UpdatePreferencesRequest">;
+export type UpdatePreferencesResponse = UserDto<"UpdatePreferencesResponse">;
 
-export type ExerciseDTO =
-  Schemas["trainingdto.ExerciseDTO"];
-export type ListExercisesResponse =
-  Schemas["trainingdto.ListExercisesResponse"];
-export type UpsertExerciseRequest =
-  Schemas["trainingdto.UpsertExerciseRequest"];
-export type UpsertExerciseResponse =
-  Schemas["trainingdto.UpsertExerciseResponse"];
+export type MealDTO = MealDto<"MealDTO">;
+export type RecordMealRequest = MealDto<"RecordMealRequest">;
+export type ListMealsResponse = MealDto<"ListMealsResponse">;
 
-export type RoutineDTO =
-  Schemas["trainingdto.RoutineDTO"];
-export type RoutineExerciseDTO =
-  Schemas["trainingdto.RoutineExerciseDTO"];
-export type ListRoutinesResponse =
-  Schemas["trainingdto.ListRoutinesResponse"];
-export type UpsertRoutineRequest =
-  Schemas["trainingdto.UpsertRoutineRequest"];
-export type UpsertRoutineExerciseRequest =
-  Schemas["trainingdto.UpsertRoutineExerciseRequest"];
-export type UpsertRoutineResponse =
-  Schemas["trainingdto.UpsertRoutineResponse"];
+export type TrainingDTO = TrainingDto<"TrainingDTO">;
+export type TrainingExerciseDTO = TrainingDto<"TrainingExerciseDTO">;
+export type TrainingSetDTO = TrainingDto<"TrainingSetDTO">;
+export type RecordTrainingRequest = TrainingDto<"RecordTrainingRequest">;
+export type RecordTrainingExerciseRequest = TrainingDto<"RecordTrainingExerciseRequest">;
+export type RecordTrainingSetRequest = TrainingDto<"RecordTrainingSetRequest">;
+export type RecordTrainingResponse = TrainingDto<"RecordTrainingResponse">;
+export type ListTrainingsResponse = TrainingDto<"ListTrainingsResponse">;
 
-export type ErrorResponse =
-  Schemas["httpx.ErrorResponse"];
+export type ExerciseDTO = TrainingDto<"ExerciseDTO">;
+export type ListExercisesResponse = TrainingDto<"ListExercisesResponse">;
+export type UpsertExerciseRequest = TrainingDto<"UpsertExerciseRequest">;
+export type UpsertExerciseResponse = TrainingDto<"UpsertExerciseResponse">;
+
+export type RoutineDTO = TrainingDto<"RoutineDTO">;
+export type RoutineExerciseDTO = TrainingDto<"RoutineExerciseDTO">;
+export type ListRoutinesResponse = TrainingDto<"ListRoutinesResponse">;
+export type UpsertRoutineRequest = TrainingDto<"UpsertRoutineRequest">;
+export type UpsertRoutineExerciseRequest = TrainingDto<"UpsertRoutineExerciseRequest">;
+export type UpsertRoutineResponse = TrainingDto<"UpsertRoutineResponse">;
+
+export type ErrorResponse = Httpx<"ErrorResponse">;
 
 export class APIError extends Error {
   constructor(

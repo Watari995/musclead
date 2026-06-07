@@ -79,7 +79,7 @@ export function RoutineForm({
                       disabled={submitting}
                       required
                       aria-label={`種目${index + 1}を選択`}
-                      className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-white text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+                      className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
                     >
                       <option value="" disabled>
                         種目を選択…

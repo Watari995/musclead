@@ -32,6 +32,7 @@ export const TARGET_PAGES: readonly TargetPage[] = [
   { path: "/routines" },
   { path: "/exercises" },
   { path: "/profile" },
+  { path: "/settings" },
   { path: "/trainings/new" },
   { path: "/routines/new" },
   { path: "/exercises/new" },

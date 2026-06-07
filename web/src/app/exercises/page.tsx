@@ -84,7 +84,7 @@ function ExerciseRow({
   deleting: boolean;
 }) {
   return (
-    <li className="bg-white border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-4">
+    <li className="bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-4">
       <Link
         href={`/exercises/${exercise.id}/edit`}
         className="flex-1 min-w-0 hover:opacity-70 transition-opacity"
