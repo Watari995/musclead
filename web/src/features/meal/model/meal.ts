@@ -2,6 +2,11 @@ import type { MealDTO } from "@/shared/api/client";
 
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
+export type MealPhoto = {
+  imageURL: string;
+  displayOrder: number;
+};
+
 export type Meal = {
   id: string;
   type: MealType;
@@ -11,6 +16,7 @@ export type Meal = {
   fatG: string;
   carbohydrateG: string;
   memo: string;
+  photos: MealPhoto[];
 };
 
 export function toMeal(dto: MealDTO): Meal {
@@ -23,6 +29,12 @@ export function toMeal(dto: MealDTO): Meal {
     fatG: dto.fat_g ?? "0",
     carbohydrateG: dto.carbohydrate_g ?? "0",
     memo: dto.memo ?? "",
+    photos: (dto.photos ?? [])
+      .map((p) => ({
+        imageURL: p.image_url ?? "",
+        displayOrder: p.display_order ?? 0,
+      }))
+      .sort((a, b) => a.displayOrder - b.displayOrder),
   };
 }
 
