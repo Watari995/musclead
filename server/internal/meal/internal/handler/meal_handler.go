@@ -109,6 +109,13 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// 各 photo path が自分のディレクトリ配下か & traversal 含まないか検証
+	for _, p := range req.Photos {
+		if err := sharedstorage.ValidateUserOwnedImagePath(sharedstorage.ImageKindMeal, userID.Value(), p.ImagePath); err != nil {
+			httpx.WriteError(w, err)
+			return
+		}
+	}
 	photos := lo.Map(req.Photos, func(p mealdto.MealPhotoInput, _ int) mealdomain.PhotoSpec {
 		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
