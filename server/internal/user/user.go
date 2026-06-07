@@ -29,7 +29,7 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 
 	register := userusecase.NewRegisterUser(repo, hasher)
 	find := userusecase.NewFindUser(repo)
-	updateUser := userusecase.NewUpdateUser(repo)
+	updateUser := userusecase.NewUpdateUser(repo, storageClient)
 	delete := userusecase.NewDeleteUser(repo)
 	generateProfileImagePresignedURL := userusecase.NewGenerateProfileImagePresignedURL(storageClient)
 	me := userusecase.NewMe(repo)

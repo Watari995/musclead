@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -22,7 +23,8 @@ type UpdateUserOutput struct {
 }
 
 type UpdateUser struct {
-	userRepo userdomain.UserRepository
+	userRepo      userdomain.UserRepository
+	storageClient shareddomain.StorageClient
 }
 
 func (uc *UpdateUser) Execute(ctx context.Context, input UpdateUserInput) (*UpdateUserOutput, error) {
@@ -44,17 +46,31 @@ func (uc *UpdateUser) Execute(ctx context.Context, input UpdateUserInput) (*Upda
 		}
 		user.SetBirthday(b)
 	}
-
+	var newPath string
+	var oldPath string
 	if input.ProfileImagePath.Set {
-		user.SetProfileImagePath(input.ProfileImagePath.Value)
+		if user.ProfileImagePath() != input.ProfileImagePath.Value {
+			oldPath = user.ProfileImagePath()
+		}
+		if input.ProfileImagePath.Null {
+			newPath = userdomain.DefaultProfileImagePath
+		} else {
+			newPath = input.ProfileImagePath.Value
+		}
+		user.SetProfileImagePath(newPath)
 	}
 
 	if err := uc.userRepo.Save(ctx, user); err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
+	// if old path is not null nor default path, delete old path
+	if oldPath != "" && oldPath != userdomain.DefaultProfileImagePath && oldPath != newPath {
+		uc.storageClient.DeleteObject(ctx, oldPath)
+	}
+
 	return &UpdateUserOutput{UserID: user.ID()}, nil
 }
 
-func NewUpdateUser(userRepo userdomain.UserRepository) *UpdateUser {
-	return &UpdateUser{userRepo: userRepo}
+func NewUpdateUser(userRepo userdomain.UserRepository, storageClient shareddomain.StorageClient) *UpdateUser {
+	return &UpdateUser{userRepo: userRepo, storageClient: storageClient}
 }

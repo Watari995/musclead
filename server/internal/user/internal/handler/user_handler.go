@@ -1,7 +1,9 @@
 package userhandler
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"time"
 
@@ -198,10 +200,19 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 			birthdayPatch.Value = birthdayTime
 		}
 	}
+	// path security check
+	if req.ProfileImagePath.Set && !req.ProfileImagePath.Null {
+		prefix := fmt.Sprintf("profiles/%s/", userID.Value())
+		if !strings.HasPrefix(req.ProfileImagePath.Value, prefix) || strings.Contains(req.ProfileImagePath.Value, "..") {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("profile image path is not allowed"))
+			return
+		}
+	}
 	output, err := h.updateUser.Execute(r.Context(), userusecase.UpdateUserInput{
-		UserID:   userID,
-		Name:     namePatch,
-		Birthday: birthdayPatch,
+		UserID:           userID,
+		Name:             namePatch,
+		Birthday:         birthdayPatch,
+		ProfileImagePath: req.ProfileImagePath,
 	})
 	if err != nil {
 		httpx.WriteError(w, err)
