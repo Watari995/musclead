@@ -9,6 +9,7 @@ import (
 	mealinfra "github.com/Watari995/musclead/internal/meal/internal/infra"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/go-gorp/gorp/v3"
 )
 
@@ -18,7 +19,7 @@ type Module struct {
 	Handler http.Handler
 }
 
-func NewModule(dbmap *gorp.DbMap, cdnBaseURL string) *Module {
+func NewModule(dbmap *gorp.DbMap, urlBuilder shareddomain.URLBuilder) *Module {
 	// repositoryを作成する
 	dbmap.AddTableWithName(mealinfra.MealModel{}, "meals").SetKeys(false, "ID")
 	dbmap.AddTableWithName(mealinfra.MealPhotoModel{}, "meal_photos").SetKeys(false, "ID")
@@ -32,6 +33,6 @@ func NewModule(dbmap *gorp.DbMap, cdnBaseURL string) *Module {
 	list := mealusecase.NewListMeals(repo)
 
 	return &Module{
-		Handler: mealhandler.New(record, find, update, delete, list, cdnBaseURL),
+		Handler: mealhandler.New(record, find, update, delete, list, urlBuilder),
 	}
 }
