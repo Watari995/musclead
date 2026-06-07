@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	presignedURLTTL = 5 * time.Minute
+	presignedURLTTL = 3 * time.Minute
 )
 
 type GenerateProfileImagePresignedURLInput struct {

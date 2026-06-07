@@ -147,7 +147,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	userModule := user.NewModule(dbmap, storageClient, urlBuilder)
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
-	mealModule := meal.NewModule(dbmap, urlBuilder)
+	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
 	trainingModule := training.NewModule(dbmap)
 	// users
 	mux.Handle("/users", userModule.PublicHandler)

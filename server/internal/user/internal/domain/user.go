@@ -3,10 +3,11 @@ package userdomain
 import (
 	"time"
 
+	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
-const DefaultProfileImagePath = "profiles/default.png"
+const DefaultProfileImagePath = string(sharedstorage.ImageKindProfile) + "/default.png"
 
 type User struct {
 	id               valueobject.UserID

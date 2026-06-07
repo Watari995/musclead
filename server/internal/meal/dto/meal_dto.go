@@ -51,6 +51,15 @@ type ListMealsResponse struct {
 	Pagination shareddto.PaginationDTO `json:"pagination"`
 }
 
+type GenerateMealPhotoImagePresignedURLRequest struct {
+	ContentType string `json:"content_type"`
+}
+
+type GenerateMealPhotoImagePresignedURLResponse struct {
+	URL  string `json:"url"`
+	Path string `json:"path"`
+}
+
 // ─── Entity view ────────────────────────────────────────
 
 type PhotoDTO struct {
