@@ -36,9 +36,19 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
 
+	// preferences
+	dbmap.AddTableWithName(userinfra.UserPreferencesModel{}, "user_preferences").SetKeys(false, "ID")
+	prefsRepo := userinfra.NewUserPreferencesRepository(dbmap)
+	updatePreferences := userusecase.NewUpdatePreferences(prefsRepo)
+
+	// 認証済みルートをひとつの mux にまとめる
+	authedMux := http.NewServeMux()
+	userhandler.RegisterAuthenticatedHandlers(authedMux, urlBuilder, me, find, updateUser, delete, generateProfileImagePresignedURL)
+	userhandler.RegisterAuthenticatedPreferencesHandlers(authedMux, updatePreferences)
+
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
-		Handler:       userhandler.NewAuthenticated(urlBuilder, me, find, updateUser, delete, generateProfileImagePresignedURL),
+		Handler:       authedMux,
 		userCommand:   authenticate,
 	}
 }

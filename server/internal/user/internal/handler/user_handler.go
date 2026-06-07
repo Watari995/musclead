@@ -34,8 +34,7 @@ func NewPublic(register *userusecase.RegisterUser) http.Handler {
 	return mux
 }
 
-func NewAuthenticated(urlBuilder shareddomain.URLBuilder, me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) http.Handler {
-	// ServeHTTP interfaceを満たしている必要がある
+func RegisterAuthenticatedHandlers(mux *http.ServeMux, urlBuilder shareddomain.URLBuilder, me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) {
 	h := &UserHandler{
 		urlBuilder:                       urlBuilder,
 		me:                               me,
@@ -44,13 +43,11 @@ func NewAuthenticated(urlBuilder shareddomain.URLBuilder, me *userusecase.Me, fi
 		delete:                           delete,
 		generateProfileImagePresignedURL: generateProfileImagePresignedURL,
 	}
-	mux := http.NewServeMux()
 	mux.HandleFunc("GET /users/me", h.Me)
 	mux.HandleFunc("GET /users/{id}", h.Find)
 	mux.HandleFunc("PATCH /users/me", h.UpdateUser)
 	mux.HandleFunc("DELETE /users/{id}", h.Delete)
 	mux.HandleFunc("POST /users/me/profile-image/presigned-url", h.GenerateProfileImagePresignedURL)
-	return mux
 }
 
 // Me godoc
