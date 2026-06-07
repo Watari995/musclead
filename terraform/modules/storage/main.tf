@@ -48,11 +48,15 @@ resource "aws_s3_bucket_policy" "images_public_profiles" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Sid       = "PublicReadProfiles"
+      Sid       = "PublicReadImages"
       Effect    = "Allow"
       Principal = "*"
       Action    = "s3:GetObject"
-      Resource  = "${aws_s3_bucket.images.arn}/profiles/*"
+      # アバター(profiles/) + 食事写真(meals/) の public 配信を許可
+      Resource = [
+        "${aws_s3_bucket.images.arn}/profiles/*",
+        "${aws_s3_bucket.images.arn}/meals/*",
+      ]
     }]
   })
 

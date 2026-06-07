@@ -78,10 +78,13 @@ export function RecordMealForm() {
       }
     }
 
+    // 空文字のメモは BE で String1000 validation NG になるので、 undefined にして送らない
+    const trimmedMemo = (form.memo ?? "").trim();
     recordMutation.mutate(
       {
         ...form,
         eaten_at: new Date(form.eaten_at!).toISOString(),
+        memo: trimmedMemo === "" ? undefined : trimmedMemo,
         photos: imagePaths.map((path, i) => ({
           image_path: path,
           display_order: i,
