@@ -19,7 +19,7 @@ type Module struct {
 	Handler http.Handler
 }
 
-func NewModule(dbmap *gorp.DbMap, urlBuilder shareddomain.URLBuilder) *Module {
+func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) *Module {
 	// repositoryを作成する
 	dbmap.AddTableWithName(mealinfra.MealModel{}, "meals").SetKeys(false, "ID")
 	dbmap.AddTableWithName(mealinfra.MealPhotoModel{}, "meal_photos").SetKeys(false, "ID")
@@ -28,11 +28,11 @@ func NewModule(dbmap *gorp.DbMap, urlBuilder shareddomain.URLBuilder) *Module {
 
 	record := mealusecase.NewRecordMeal(repo, txManager)
 	find := mealusecase.NewFindMealByID(repo)
-	update := mealusecase.NewUpdateMeal(repo, txManager)
-	delete := mealusecase.NewDeleteMealByID(repo)
+	update := mealusecase.NewUpdateMeal(repo, txManager, storageClient)
+	delete := mealusecase.NewDeleteMealByID(repo, storageClient)
 	list := mealusecase.NewListMeals(repo)
-
+	generateMealPhotoImagePresignedURL := mealusecase.NewGenerateMealPhotoImagePresignedURL(storageClient)
 	return &Module{
-		Handler: mealhandler.New(record, find, update, delete, list, urlBuilder),
+		Handler: mealhandler.New(urlBuilder, record, find, update, delete, list, generateMealPhotoImagePresignedURL),
 	}
 }

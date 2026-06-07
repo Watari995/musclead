@@ -10,34 +10,38 @@ import (
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/samber/lo"
 )
 
 type MealHandler struct {
-	record     *mealusecase.RecordMeal
-	find       *mealusecase.FindMealByID
-	update     *mealusecase.UpdateMeal
-	delete     *mealusecase.DeleteMealByID
-	list       *mealusecase.ListMeals
-	urlBuilder shareddomain.URLBuilder
+	urlBuilder                         shareddomain.URLBuilder
+	record                             *mealusecase.RecordMeal
+	find                               *mealusecase.FindMealByID
+	update                             *mealusecase.UpdateMeal
+	delete                             *mealusecase.DeleteMealByID
+	list                               *mealusecase.ListMeals
+	generateMealPhotoImagePresignedURL *mealusecase.GenerateMealPhotoImagePresignedURL
 }
 
 func New(
+	urlBuilder shareddomain.URLBuilder,
 	record *mealusecase.RecordMeal,
 	find *mealusecase.FindMealByID,
 	update *mealusecase.UpdateMeal,
 	delete *mealusecase.DeleteMealByID,
 	list *mealusecase.ListMeals,
-	urlBuilder shareddomain.URLBuilder,
+	generateMealPhotoImagePresignedURL *mealusecase.GenerateMealPhotoImagePresignedURL,
 ) http.Handler {
 	h := &MealHandler{
-		record:     record,
-		find:       find,
-		update:     update,
-		delete:     delete,
-		list:       list,
-		urlBuilder: urlBuilder,
+		urlBuilder:                         urlBuilder,
+		record:                             record,
+		find:                               find,
+		update:                             update,
+		delete:                             delete,
+		list:                               list,
+		generateMealPhotoImagePresignedURL: generateMealPhotoImagePresignedURL,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /meals", h.Record)
@@ -45,6 +49,7 @@ func New(
 	mux.HandleFunc("PUT /meals/{id}", h.Update)
 	mux.HandleFunc("DELETE /meals/{id}", h.Delete)
 	mux.HandleFunc("GET /meals", h.List)
+	mux.HandleFunc("POST /meals/photos/presigned-url", h.GenerateMealPhotoImagePresignedURL)
 	return mux
 }
 
@@ -240,6 +245,12 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 			DisplayOrder: p.DisplayOrder,
 		}
 	})
+	for _, p := range photos {
+		if err := sharedstorage.ValidateUserOwnedImagePath(sharedstorage.ImageKindMeal, userID.Value(), p.ImagePath); err != nil {
+			httpx.WriteError(w, err)
+			return
+		}
+	}
 	input := mealusecase.UpdateMealInput{
 		MealID:        *mealID,
 		UserID:        userID,
@@ -332,4 +343,46 @@ func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 		Pagination: shareddto.NewPaginationDTO(output.Pagination),
 	}
 	httpx.WriteJSON(w, http.StatusOK, response)
+}
+
+// GenerateMealPhotoImagePresignedURL godoc
+//
+// @Summary 食事写真のPresigned URL生成
+// @Tags meals
+// @Security BearerAuth
+// @Produce json
+// @Param request body mealdto.GenerateMealPhotoImagePresignedURLRequest true "食事写真のPresigned URL生成情報"
+// @Success 200 {object} mealdto.GenerateMealPhotoImagePresignedURLResponse "食事写真のPresigned URL生成成功"
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /meals/photos/presigned-url [post]
+func (h *MealHandler) GenerateMealPhotoImagePresignedURL(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	var req mealdto.GenerateMealPhotoImagePresignedURLRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	contentType, err := valueobject.NewImageContentType(req.ContentType)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid content type"))
+		return
+	}
+	params := mealusecase.GenerateMealPhotoImagePresignedURLInput{
+		UserID:      userID,
+		ContentType: *contentType,
+	}
+	output, err := h.generateMealPhotoImagePresignedURL.Execute(r.Context(), params)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, mealdto.GenerateMealPhotoImagePresignedURLResponse{
+		URL:  output.URL.Value(),
+		Path: output.Path,
+	})
 }
