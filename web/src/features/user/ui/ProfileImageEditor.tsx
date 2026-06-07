@@ -31,6 +31,8 @@ export function ProfileImageEditor({
   const updateMutation = useUpdateUserMutation();
 
   const isPending = uploadMutation.isPending || updateMutation.isPending;
+  // default 画像の時は削除ボタンを出さない(削除して default に戻す対象が無い)
+  const isDefault = imageURL.endsWith("/profiles/default.png");
 
   const handlePickClick = () => {
     setError(null);
@@ -124,15 +126,17 @@ export function ProfileImageEditor({
         onChange={handleFileChange}
       />
 
-      {/* 削除ボタン */}
-      <button
-        type="button"
-        onClick={handleRemove}
-        disabled={isPending}
-        className="text-xs text-[var(--color-ink-muted)] hover:text-red-600 disabled:opacity-50"
-      >
-        プロフィール画像を削除
-      </button>
+      {/* 削除ボタン(default 画像の時は隠す)*/}
+      {!isDefault && (
+        <button
+          type="button"
+          onClick={handleRemove}
+          disabled={isPending}
+          className="text-xs text-[var(--color-ink-muted)] hover:text-red-600 disabled:opacity-50"
+        >
+          プロフィール画像を削除
+        </button>
+      )}
 
       {/* エラー表示 */}
       {error && (
