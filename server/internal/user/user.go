@@ -21,7 +21,7 @@ type Module struct {
 	userCommand   publicfunctions.UserCommand
 }
 
-func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient) *Module {
+func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) *Module {
 	// repositoryを作成
 	dbmap.AddTableWithName(userinfra.UserModel{}, "users").SetKeys(false, "ID")
 	repo := userinfra.NewUserRepository(dbmap)
@@ -38,7 +38,7 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient) *Mod
 
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
-		Handler:       userhandler.NewAuthenticated(me, find, updateUser, delete, generateProfileImagePresignedURL),
+		Handler:       userhandler.NewAuthenticated(urlBuilder, me, find, updateUser, delete, generateProfileImagePresignedURL),
 		userCommand:   authenticate,
 	}
 }

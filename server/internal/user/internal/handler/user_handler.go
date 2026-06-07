@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/shared/httpx"
 	userdto "github.com/Watari995/musclead/internal/user/dto"
@@ -14,6 +15,7 @@ import (
 )
 
 type UserHandler struct {
+	urlBuilder                       shareddomain.URLBuilder
 	me                               *userusecase.Me
 	register                         *userusecase.RegisterUser
 	find                             *userusecase.FindUser
@@ -31,9 +33,10 @@ func NewPublic(register *userusecase.RegisterUser) http.Handler {
 	return mux
 }
 
-func NewAuthenticated(me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) http.Handler {
+func NewAuthenticated(urlBuilder shareddomain.URLBuilder, me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) http.Handler {
 	// ServeHTTP interfaceを満たしている必要がある
 	h := &UserHandler{
+		urlBuilder:                       urlBuilder,
 		me:                               me,
 		find:                             find,
 		updateUser:                       updateUser,
@@ -72,7 +75,7 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := userdto.NewUserDTO(output.User.ID(), output.User.Name(), output.User.Email(), output.User.Birthday(), output.User.CreatedAt(), output.User.UpdatedAt())
+	resp := userdto.FromEntity(&output.User, h.urlBuilder)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
@@ -105,20 +108,10 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid email"))
 		return
 	}
-	var birthday *time.Time
-	if req.Birthday != nil {
-		t, err := time.Parse("2006-01-02", *req.Birthday)
-		if err != nil {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid birthday"))
-			return
-		}
-		birthday = &t
-	}
 
 	params := userusecase.RegisterUserInput{
 		Name:     *name,
 		Email:    *email,
-		Birthday: birthday,
 		Password: req.Password,
 	}
 
@@ -160,7 +153,7 @@ func (h *UserHandler) Find(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := userdto.NewUserDTO(output.UserID, output.Name, output.Email, output.Birthday, output.CreatedAt, output.UpdatedAt)
+	resp := userdto.FromEntity(output.User, h.urlBuilder)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 

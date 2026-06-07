@@ -22,8 +22,9 @@ func newDummyUser(t *testing.T) *userdomain.User {
 	email, _ := valueobject.NewEmail("dummy@example.com")
 	rawHash, _ := bcrypt.GenerateFromPassword([]byte("secret123"), bcrypt.MinCost)
 	hashed, _ := valueobject.NewHashedPassword(string(rawHash))
+	profileImagePath := "dummy/profile.png"
 	now := time.Now()
-	return userdomain.NewUser(id, *name, *email, *hashed, nil, now, now)
+	return userdomain.NewUser(id, *name, *email, *hashed, nil, profileImagePath, now, now)
 }
 
 func TestFindUser_Success(t *testing.T) {
@@ -38,7 +39,7 @@ func TestFindUser_Success(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotNil(t, output)
-	assert.Equal(t, user.ID().Value(), output.UserID.Value())
+	assert.Equal(t, user.ID().Value(), output.User.ID().Value())
 	repo.AssertExpectations(t)
 }
 

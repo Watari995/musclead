@@ -6,15 +6,18 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
+const DefaultProfileImagePath = "profiles/default.png"
+
 type User struct {
-	id           valueobject.UserID
-	name         valueobject.String50
-	email        valueobject.Email
-	passwordHash valueobject.HashedPassword
-	birthday     *time.Time
-	deletedAt    *time.Time
-	createdAt    time.Time
-	updatedAt    time.Time
+	id               valueobject.UserID
+	name             valueobject.String50
+	email            valueobject.Email
+	passwordHash     valueobject.HashedPassword
+	birthday         *time.Time
+	profileImagePath string
+	deletedAt        *time.Time
+	createdAt        time.Time
+	updatedAt        time.Time
 }
 
 func (u *User) ID() valueobject.UserID {
@@ -47,6 +50,15 @@ func (u *User) SetBirthday(b *time.Time) {
 	u.updatedAt = time.Now()
 }
 
+func (u *User) ProfileImagePath() string {
+	return u.profileImagePath
+}
+
+func (u *User) SetProfileImagePath(p string) {
+	u.profileImagePath = p
+	u.updatedAt = time.Now()
+}
+
 func (u *User) DeletedAt() *time.Time {
 	return u.deletedAt
 }
@@ -70,26 +82,46 @@ func CreateUser(
 	email valueobject.Email,
 	passwordHash valueobject.HashedPassword,
 	birthday *time.Time,
+	profileImagePath string,
 ) *User {
 	return &User{
-		id:           valueobject.NewPrimaryID[valueobject.UserID](),
-		name:         name,
-		email:        email,
-		passwordHash: passwordHash,
-		birthday:     birthday,
-		createdAt:    time.Now(),
-		updatedAt:    time.Now(),
+		id:               valueobject.NewPrimaryID[valueobject.UserID](),
+		name:             name,
+		email:            email,
+		passwordHash:     passwordHash,
+		birthday:         birthday,
+		profileImagePath: profileImagePath,
+		createdAt:        time.Now(),
+		updatedAt:        time.Now(),
 	}
 }
 
-func NewUser(id valueobject.UserID, name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time, createdAt time.Time, updatedAt time.Time) *User {
+func CreateOnboardingUser(
+	name valueobject.String50,
+	email valueobject.Email,
+	passwordHash valueobject.HashedPassword,
+) *User {
+	return NewUser(
+		valueobject.NewPrimaryID[valueobject.UserID](),
+		name,
+		email,
+		passwordHash,
+		nil,
+		DefaultProfileImagePath, // 最初はデフォルト画像で作成する
+		time.Now(),
+		time.Now(),
+	)
+}
+
+func NewUser(id valueobject.UserID, name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time, profileImagePath string, createdAt time.Time, updatedAt time.Time) *User {
 	return &User{
-		id:           id,
-		name:         name,
-		email:        email,
-		passwordHash: passwordHash,
-		birthday:     birthday,
-		createdAt:    createdAt,
-		updatedAt:    updatedAt,
+		id:               id,
+		name:             name,
+		email:            email,
+		passwordHash:     passwordHash,
+		birthday:         birthday,
+		profileImagePath: profileImagePath,
+		createdAt:        createdAt,
+		updatedAt:        updatedAt,
 	}
 }
