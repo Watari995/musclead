@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccessToken } from "@/shared/auth/access-token";
-import { useLogoutMutation, useMeQuery } from "@/features/user/api/user";
+import { useMeQuery } from "@/features/user/api/user";
 import { Avatar } from "@/features/user/ui/Avatar";
 
 const NAV_ITEMS = [
@@ -13,16 +13,15 @@ const NAV_ITEMS = [
   { href: "/trainings", label: "トレーニング" },
   { href: "/exercises", label: "種目" },
   { href: "/routines", label: "ルーティン" },
+  { href: "/settings", label: "設定" },
 ] as const;
 
 export function Header() {
-  const router = useRouter();
   const pathname = usePathname();
   const { token, ready } = useAccessToken();
   const loggedIn = Boolean(token);
 
   const meQuery = useMeQuery(loggedIn);
-  const logout = useLogoutMutation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // ルート遷移で自動的にメニューを閉じる (React 19: prop 変化で派生状態をリセットする公式パターン)
@@ -41,13 +40,6 @@ export function Header() {
       document.body.style.overflow = original;
     };
   }, [menuOpen]);
-
-  const handleLogout = () => {
-    setMenuOpen(false);
-    logout.mutate(undefined, {
-      onSettled: () => router.replace("/login"),
-    });
-  };
 
   return (
     <header className="border-b border-[var(--color-line)] bg-[var(--color-surface)] sticky top-0 z-30">
@@ -100,20 +92,6 @@ export function Header() {
                     <span className="truncate">{meQuery.data.name}</span>
                   </Link>
                 )}
-                <Link
-                  href="/settings"
-                  className="hidden sm:inline text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-                >
-                  設定
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={logout.isPending}
-                  className="hidden sm:inline text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-50"
-                >
-                  ログアウト
-                </button>
                 {/* mobile: ハンバーガーの左にアバターのみ表示(name はドロワー内) */}
                 {meQuery.data?.profile_image_url && (
                   <Link
@@ -149,7 +127,7 @@ export function Header() {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-[var(--color-ink)] text-white px-4 h-9 inline-flex items-center rounded-md text-sm font-medium hover:opacity-90 whitespace-nowrap"
+                  className="bg-[var(--color-ink)] text-[var(--color-surface)] px-4 h-9 inline-flex items-center rounded-md text-sm font-medium hover:opacity-90 whitespace-nowrap"
                 >
                   新規登録
                 </Link>
@@ -165,8 +143,6 @@ export function Header() {
           userName={meQuery.data?.name ?? ""}
           pathname={pathname}
           onClose={() => setMenuOpen(false)}
-          onLogout={handleLogout}
-          logoutPending={logout.isPending}
         />
       )}
     </header>
@@ -178,15 +154,11 @@ function MobileMenu({
   userName,
   pathname,
   onClose,
-  onLogout,
-  logoutPending,
 }: {
   open: boolean;
   userName: string;
   pathname: string;
   onClose: () => void;
-  onLogout: () => void;
-  logoutPending: boolean;
 }) {
   return (
     <div
@@ -251,29 +223,6 @@ function MobileMenu({
             );
           })}
         </nav>
-        <div className="border-t border-[var(--color-line)]">
-          <Link
-            href="/settings"
-            onClick={onClose}
-            className={`block px-5 py-3 text-base border-l-2 ${
-              pathname === "/settings" || pathname.startsWith("/settings/")
-                ? "border-[var(--color-ink)] font-bold bg-[var(--color-surface-alt)]"
-                : "border-transparent text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
-            }`}
-          >
-            設定
-          </Link>
-        </div>
-        <div className="border-t border-[var(--color-line)] p-4">
-          <button
-            type="button"
-            onClick={onLogout}
-            disabled={logoutPending}
-            className="w-full h-11 inline-flex items-center justify-center rounded-md border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)] disabled:opacity-50"
-          >
-            {logoutPending ? "ログアウト中…" : "ログアウト"}
-          </button>
-        </div>
       </div>
     </div>
   );
