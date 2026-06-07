@@ -34,7 +34,7 @@ func TestUpdateMeal_Success(t *testing.T) {
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(nil)
 
-	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
+	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{}, fakeStorageClient{})
 	output, err := uc.Execute(context.Background(), updateInput(meal.ID(), userID))
 
 	assert.NoError(t, err)
@@ -48,7 +48,7 @@ func TestUpdateMeal_NotFound(t *testing.T) {
 
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
-	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
+	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{}, fakeStorageClient{})
 	output, err := uc.Execute(context.Background(), updateInput(
 		valueobject.NewPrimaryID[valueobject.MealID](),
 		valueobject.NewPrimaryID[valueobject.UserID](),
@@ -71,7 +71,7 @@ func TestUpdateMeal_OtherUserTreatedAsNotFound(t *testing.T) {
 
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
-	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
+	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{}, fakeStorageClient{})
 	output, err := uc.Execute(context.Background(), updateInput(meal.ID(), otherID))
 
 	assert.Error(t, err)
@@ -88,7 +88,7 @@ func TestUpdateMeal_SaveError(t *testing.T) {
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("Save", mock.Anything, mock.AnythingOfType("*mealdomain.Meal")).Return(errors.New("save failed"))
 
-	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{})
+	uc := mealusecase.NewUpdateMeal(repo, fakeTxManager{}, fakeStorageClient{})
 	output, err := uc.Execute(context.Background(), updateInput(meal.ID(), userID))
 
 	assert.Error(t, err)

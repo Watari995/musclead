@@ -2,6 +2,7 @@ package mealusecase_test
 
 import (
 	"context"
+	"time"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	"github.com/Watari995/musclead/internal/pagination"
@@ -48,4 +49,20 @@ type fakeTxManager struct{}
 
 func (fakeTxManager) Processing(ctx context.Context, f func(ctx context.Context) error) error {
 	return f(ctx)
+}
+
+// fakeStorageClient は shareddomain.StorageClient の偽実装(テスト用)。
+// 副作用なし、 全メソッド no-op。
+type fakeStorageClient struct{}
+
+func (fakeStorageClient) GeneratePutURL(_ context.Context, _, _ string, _ time.Duration) (valueobject.URL, error) {
+	return valueobject.URL{}, nil
+}
+
+func (fakeStorageClient) GenerateGetURL(_ context.Context, _ string, _ time.Duration) (valueobject.URL, error) {
+	return valueobject.URL{}, nil
+}
+
+func (fakeStorageClient) DeleteObject(_ context.Context, _ string) error {
+	return nil
 }

@@ -21,7 +21,7 @@ func TestDeleteMealByID_Success(t *testing.T) {
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("DeleteByID", mock.Anything, mock.Anything).Return(nil)
 
-	uc := mealusecase.NewDeleteMealByID(repo)
+	uc := mealusecase.NewDeleteMealByID(repo, fakeStorageClient{})
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
 		MealID: meal.ID(),
 		UserID: userID,
@@ -37,7 +37,7 @@ func TestDeleteMealByID_NotFound(t *testing.T) {
 
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
-	uc := mealusecase.NewDeleteMealByID(repo)
+	uc := mealusecase.NewDeleteMealByID(repo, fakeStorageClient{})
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
 		MealID: valueobject.NewPrimaryID[valueobject.MealID](),
 		UserID: valueobject.NewPrimaryID[valueobject.UserID](),
@@ -59,7 +59,7 @@ func TestDeleteMealByID_OtherUserTreatedAsNotFound(t *testing.T) {
 
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
-	uc := mealusecase.NewDeleteMealByID(repo)
+	uc := mealusecase.NewDeleteMealByID(repo, fakeStorageClient{})
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
 		MealID: meal.ID(),
 		UserID: otherID,
@@ -78,7 +78,7 @@ func TestDeleteMealByID_DeleteError(t *testing.T) {
 	repo.On("FindByIDAndUserID", mock.Anything, mock.Anything, mock.Anything).Return(meal, nil)
 	repo.On("DeleteByID", mock.Anything, mock.Anything).Return(errors.New("db down"))
 
-	uc := mealusecase.NewDeleteMealByID(repo)
+	uc := mealusecase.NewDeleteMealByID(repo, fakeStorageClient{})
 	err := uc.Execute(context.Background(), mealusecase.DeleteMealByIDInput{
 		MealID: meal.ID(),
 		UserID: userID,
