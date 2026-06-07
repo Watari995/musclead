@@ -82,7 +82,7 @@ function RoutineCard({
     .slice(0, 3);
 
   return (
-    <li className="bg-white border border-[var(--color-line)] rounded-lg p-4 flex items-start justify-between gap-4">
+    <li className="bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-start justify-between gap-4">
       <Link
         href={`/routines/${routine.id}`}
         className="flex-1 min-w-0 space-y-1 hover:opacity-70 transition-opacity"

@@ -4,10 +4,14 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 type Schemas = components["schemas"];
-export type LoginRequest =
-  Schemas["authdto.LoginRequest"];
-export type AccessTokenResponse =
-  Schemas["authdto.AccessTokenResponse"];
+type AuthDto<K extends string> =
+  `github_com_Watari995_musclead_internal_auth_dto.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
+export type LoginRequest = AuthDto<"LoginRequest">;
+export type AccessTokenResponse = AuthDto<"AccessTokenResponse">;
 
 export async function loginRequest(
   email: string,

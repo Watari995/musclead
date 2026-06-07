@@ -8,7 +8,7 @@ export const TextInput = forwardRef<
     <input
       ref={ref}
       {...props}
-      className={`block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-white text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-ink)] transition-colors ${className}`}
+      className={`block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-ink)] transition-colors ${className}`}
     />
   );
 });
