@@ -11,9 +11,10 @@ import (
 )
 
 type UpdateUserInput struct {
-	UserID   valueobject.UserID
-	Name     shareddto.Patch[valueobject.String50]
-	Birthday shareddto.Patch[time.Time]
+	UserID           valueobject.UserID
+	Name             shareddto.Patch[valueobject.String50]
+	Birthday         shareddto.Patch[time.Time]
+	ProfileImagePath shareddto.Patch[string]
 }
 
 type UpdateUserOutput struct {
@@ -42,6 +43,10 @@ func (uc *UpdateUser) Execute(ctx context.Context, input UpdateUserInput) (*Upda
 			b = &input.Birthday.Value
 		}
 		user.SetBirthday(b)
+	}
+
+	if input.ProfileImagePath.Set {
+		user.SetProfileImagePath(input.ProfileImagePath.Value)
 	}
 
 	if err := uc.userRepo.Save(ctx, user); err != nil {

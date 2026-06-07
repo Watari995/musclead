@@ -7,6 +7,7 @@ import (
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
 	"github.com/Watari995/musclead/internal/myerror"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/shared/httpx"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -19,7 +20,7 @@ type MealHandler struct {
 	update     *mealusecase.UpdateMeal
 	delete     *mealusecase.DeleteMealByID
 	list       *mealusecase.ListMeals
-	cdnBaseURL string
+	urlBuilder shareddomain.URLBuilder
 }
 
 func New(
@@ -28,7 +29,7 @@ func New(
 	update *mealusecase.UpdateMeal,
 	delete *mealusecase.DeleteMealByID,
 	list *mealusecase.ListMeals,
-	cdnBaseURL string,
+	urlBuilder shareddomain.URLBuilder,
 ) http.Handler {
 	h := &MealHandler{
 		record:     record,
@@ -36,7 +37,7 @@ func New(
 		update:     update,
 		delete:     delete,
 		list:       list,
-		cdnBaseURL: cdnBaseURL,
+		urlBuilder: urlBuilder,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /meals", h.Record)
@@ -165,7 +166,7 @@ func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := mealdto.NewMealDTO(output.Meal, h.cdnBaseURL)
+	resp := mealdto.NewMealDTO(output.Meal, h.urlBuilder)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
@@ -326,7 +327,7 @@ func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	response := mealdto.ListMealsResponse{
 		Meals: lo.Map(output.Meals, func(m *mealdomain.Meal, _ int) mealdto.MealDTO {
-			return mealdto.NewMealDTO(m, h.cdnBaseURL)
+			return mealdto.NewMealDTO(m, h.urlBuilder)
 		}),
 		Pagination: shareddto.NewPaginationDTO(output.Pagination),
 	}

@@ -3,8 +3,9 @@ package userdto
 import (
 	"time"
 
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
-	"github.com/Watari995/musclead/internal/valueobject"
+	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
 )
 
 type RegisterRequest struct {
@@ -27,34 +28,41 @@ type UpdateUserResponse struct {
 	UserID string `json:"user_id"`
 }
 
-type UserDTO struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Birthday  *string   `json:"birthday,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+type GenerateProfileImagePresignedURLRequest struct {
+	ContentType string `json:"content_type"`
 }
 
-func NewUserDTO(
-	id valueobject.UserID,
-	name valueobject.String50,
-	email valueobject.Email,
-	birthday *time.Time,
-	createdAt,
-	updatedAt time.Time,
+type GenerateProfileImagePresignedURLResponse struct {
+	URL  string `json:"url"`
+	Path string `json:"path"`
+}
+
+type UserDTO struct {
+	ID              string    `json:"id"`
+	Name            string    `json:"name"`
+	Email           string    `json:"email"`
+	Birthday        *string   `json:"birthday,omitempty"`
+	ProfileImageURL string    `json:"profile_image_url,omitempty"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+func FromEntity(
+	user *userdomain.User,
+	urlBuilder shareddomain.URLBuilder,
 ) UserDTO {
 	var birthdayStr *string
-	if birthday != nil {
-		s := birthday.Format("2006-01-02")
+	if user.Birthday() != nil {
+		s := user.Birthday().Format("2006-01-02")
 		birthdayStr = &s
 	}
 	return UserDTO{
-		ID:        id.Value(),
-		Name:      name.Value(),
-		Email:     email.Value(),
-		Birthday:  birthdayStr,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		ID:              user.ID().Value(),
+		Name:            user.Name().Value(),
+		Email:           user.Email().Value(),
+		Birthday:        birthdayStr,
+		ProfileImageURL: urlBuilder.BuildPublicURL(user.ProfileImagePath()),
+		CreatedAt:       user.CreatedAt(),
+		UpdatedAt:       user.UpdatedAt(),
 	}
 }
