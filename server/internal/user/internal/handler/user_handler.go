@@ -1,9 +1,7 @@
 package userhandler
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 
 	"time"
 
@@ -11,6 +9,7 @@ import (
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	userdto "github.com/Watari995/musclead/internal/user/dto"
 	userusecase "github.com/Watari995/musclead/internal/user/internal/usecase"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -202,9 +201,8 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	// path security check
 	if req.ProfileImagePath.Set && !req.ProfileImagePath.Null {
-		prefix := fmt.Sprintf("profiles/%s/", userID.Value())
-		if !strings.HasPrefix(req.ProfileImagePath.Value, prefix) || strings.Contains(req.ProfileImagePath.Value, "..") {
-			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("profile image path is not allowed"))
+		if err := sharedstorage.ValidateUserOwnedImagePath(sharedstorage.ImageKindProfile, userID.Value(), req.ProfileImagePath.Value); err != nil {
+			httpx.WriteError(w, err)
 			return
 		}
 	}
