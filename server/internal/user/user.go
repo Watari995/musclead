@@ -24,7 +24,9 @@ type Module struct {
 func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) *Module {
 	// repositoryを作成
 	dbmap.AddTableWithName(userinfra.UserModel{}, "users").SetKeys(false, "ID")
+	dbmap.AddTableWithName(userinfra.UserPreferencesModel{}, "user_preferences").SetKeys(false, "ID")
 	repo := userinfra.NewUserRepository(dbmap)
+	prefsRepo := userinfra.NewUserPreferencesRepository(dbmap)
 	hasher := userinfra.NewBcryptPasswordHasher()
 
 	register := userusecase.NewRegisterUser(repo, hasher)
@@ -32,14 +34,10 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	updateUser := userusecase.NewUpdateUser(repo, storageClient)
 	delete := userusecase.NewDeleteUser(repo)
 	generateProfileImagePresignedURL := userusecase.NewGenerateProfileImagePresignedURL(storageClient)
-	me := userusecase.NewMe(repo)
+	me := userusecase.NewMe(repo, prefsRepo)
+	updatePreferences := userusecase.NewUpdatePreferences(prefsRepo)
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
-
-	// preferences
-	dbmap.AddTableWithName(userinfra.UserPreferencesModel{}, "user_preferences").SetKeys(false, "ID")
-	prefsRepo := userinfra.NewUserPreferencesRepository(dbmap)
-	updatePreferences := userusecase.NewUpdatePreferences(prefsRepo)
 
 	// 認証済みルートをひとつの mux にまとめる
 	authedMux := http.NewServeMux()

@@ -56,7 +56,7 @@ func RegisterAuthenticatedHandlers(mux *http.ServeMux, urlBuilder shareddomain.U
 // @Tags users
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} userdto.UserDTO
+// @Success 200 {object} userdto.MeResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /users/me [get]
 func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +73,7 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := userdto.FromEntity(&output.User, h.urlBuilder)
+	resp := userdto.MeResponseFromEntities(&output.User, &output.Preferences, h.urlBuilder)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 

@@ -13,11 +13,13 @@ type MeInput struct {
 }
 
 type MeOutput struct {
-	User userdomain.User
+	User        userdomain.User
+	Preferences userdomain.UserPreferences
 }
 
 type Me struct {
-	userRepo userdomain.UserRepository
+	userRepo  userdomain.UserRepository
+	prefsRepo userdomain.UserPreferencesRepository
 }
 
 func (uc *Me) Execute(ctx context.Context, input MeInput) (*MeOutput, error) {
@@ -25,13 +27,19 @@ func (uc *Me) Execute(ctx context.Context, input MeInput) (*MeOutput, error) {
 	if err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
-
 	if user == nil {
 		return nil, myerror.NewUserNotFoundError()
 	}
-	return &MeOutput{User: *user}, nil
+	preferences, err := uc.prefsRepo.FindByUserID(ctx, input.UserID)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	if preferences == nil {
+		preferences = userdomain.CreateDefaultUserPreferences(input.UserID)
+	}
+	return &MeOutput{User: *user, Preferences: *preferences}, nil
 }
 
-func NewMe(userRepo userdomain.UserRepository) *Me {
-	return &Me{userRepo: userRepo}
+func NewMe(userRepo userdomain.UserRepository, prefsRepo userdomain.UserPreferencesRepository) *Me {
+	return &Me{userRepo: userRepo, prefsRepo: prefsRepo}
 }
