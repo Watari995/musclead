@@ -8,6 +8,8 @@ import {
 } from "@/shared/api/auth";
 import {
   apiClient,
+  type MeResponse,
+  type PreferencesDTO,
   type RegisterRequest,
   type UserDTO,
 } from "@/shared/api/client";
@@ -19,17 +21,32 @@ import {
 
 export const ME_QUERY_KEY = ["me"] as const;
 
+async function fetchMe(): Promise<MeResponse> {
+  const { data, error, response } = await apiClient.GET("/users/me");
+  if (error) {
+    throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+  }
+  return data as MeResponse;
+}
+
+// 既存 caller との互換のため UserDTO を返す。 内部は MeResponse を fetch し
+// select で user 部分だけ取り出す。 PreferencesDTO は usePreferencesQuery が同じ
+// queryKey + queryFn で別の select を持つ形で共存する。
 export function useMeQuery(enabled: boolean) {
   return useQuery({
     queryKey: ME_QUERY_KEY,
     enabled,
-    queryFn: async (): Promise<UserDTO> => {
-      const { data, error, response } = await apiClient.GET("/users/me");
-      if (error) {
-        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
-      }
-      return data as UserDTO;
-    },
+    queryFn: fetchMe,
+    select: (data) => data.user as UserDTO,
+  });
+}
+
+export function usePreferencesQuery(enabled: boolean) {
+  return useQuery({
+    queryKey: ME_QUERY_KEY,
+    enabled,
+    queryFn: fetchMe,
+    select: (data) => data.preferences as PreferencesDTO,
   });
 }
 
@@ -94,6 +111,48 @@ export function useUpdateUserMutation() {
       const baseUrl =
         process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
       const res = await fetch(`${baseUrl}/users/me`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        let message = `HTTP ${res.status}`;
+        try {
+          const json = (await res.json()) as { error?: { message?: string } };
+          if (json.error?.message) message = json.error.message;
+        } catch {
+          // fall through
+        }
+        throw new Error(message);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+    },
+  });
+}
+
+// PATCH /users/me/preferences: theme を更新。
+// 受け取った theme は light / dark / system のいずれか。
+// 楽観的 UI(next-themes 即時反映)とは別レイヤーで永続化を担う。
+export type Theme = "light" | "dark" | "system";
+
+export type UpdatePreferencesBody = {
+  theme?: Theme;
+};
+
+export function useUpdatePreferencesMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: UpdatePreferencesBody): Promise<void> => {
+      const token = getAccessToken();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+      const res = await fetch(`${baseUrl}/users/me/preferences`, {
         method: "PATCH",
         credentials: "include",
         headers: {

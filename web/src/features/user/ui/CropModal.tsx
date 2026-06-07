@@ -84,7 +84,7 @@ export function CropModal({
         onClick={onCancel}
         className="absolute inset-0 bg-black/50"
       />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-[var(--color-surface)] rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
         <div className="px-5 py-4 border-b border-[var(--color-line)]">
           <h2 className="text-base font-bold tracking-tight">
             プロフィール画像を編集
