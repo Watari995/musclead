@@ -5,6 +5,7 @@ import {
   apiClient,
   type RecordMealRequest,
 } from "@/shared/api/client";
+import { getAccessToken } from "@/shared/auth/access-token";
 import { toMeal, type Meal } from "../model/meal";
 
 export const MEALS_QUERY_KEY = ["meals"] as const;
@@ -39,6 +40,57 @@ export function useRecordMealMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: MEALS_QUERY_KEY });
+    },
+  });
+}
+
+// 食事写真アップロード:
+//   1) POST /meals/photos/presigned-url で {url, path} 取得
+//   2) その url に PUT で blob を S3 へ直接アップロード
+//   3) 戻り値 path を呼び出し側が POST /meals の photos[].image_path に使う
+export function useUploadMealPhotoMutation() {
+  return useMutation({
+    mutationFn: async ({
+      file,
+    }: {
+      file: File;
+    }): Promise<{ path: string }> => {
+      const token = getAccessToken();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+
+      const presignedRes = await fetch(
+        `${baseUrl}/meals/photos/presigned-url`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ content_type: file.type }),
+        },
+      );
+      if (!presignedRes.ok) {
+        throw new Error(
+          `failed to get presigned URL (HTTP ${presignedRes.status})`,
+        );
+      }
+      const { url, path } = (await presignedRes.json()) as {
+        url: string;
+        path: string;
+      };
+
+      const putRes = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!putRes.ok) {
+        throw new Error(`failed to upload to S3 (HTTP ${putRes.status})`);
+      }
+
+      return { path };
     },
   });
 }

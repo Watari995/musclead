@@ -11,11 +11,22 @@ import {
 export function MealRow({ meal }: { meal: Meal }) {
   const del = useDeleteMealMutation();
 
+  const firstPhoto = meal.photos[0];
+
   return (
     <li className="p-4 flex items-start gap-4">
-      <div className="w-14 h-14 shrink-0 rounded-md bg-[var(--color-surface-alt)] flex items-center justify-center text-xl">
-        {mealTypeEmoji(meal.type)}
-      </div>
+      {firstPhoto ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={firstPhoto.imageURL}
+          alt=""
+          className="w-14 h-14 shrink-0 rounded-md object-cover border border-[var(--color-line)]"
+        />
+      ) : (
+        <div className="w-14 h-14 shrink-0 rounded-md bg-[var(--color-surface-alt)] flex items-center justify-center text-xl">
+          {mealTypeEmoji(meal.type)}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <span className="text-sm font-bold tracking-tight">
@@ -38,6 +49,24 @@ export function MealRow({ meal }: { meal: Meal }) {
           <span>F {meal.fatG}g</span>
           <span>C {meal.carbohydrateG}g</span>
         </div>
+        {meal.photos.length > 1 && (
+          <div className="mt-2 flex gap-1">
+            {meal.photos.slice(1, 4).map((p) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={p.imageURL}
+                src={p.imageURL}
+                alt=""
+                className="w-10 h-10 rounded object-cover border border-[var(--color-line)]"
+              />
+            ))}
+            {meal.photos.length > 4 && (
+              <div className="w-10 h-10 rounded bg-[var(--color-surface-alt)] flex items-center justify-center text-xs text-[var(--color-ink-muted)]">
+                +{meal.photos.length - 4}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <button
         type="button"
