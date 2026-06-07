@@ -1,1 +1,1 @@
-ALTER TABLE users ADD COLUMN profile_image_path VARCHAR(255) NULL DEFAULT NULL AFTER birthday;
+ALTER TABLE users ADD COLUMN profile_image_path VARCHAR(255) NOT NULL DEFAULT 'profiles/default.png' AFTER birthday;
