@@ -2,7 +2,6 @@ package userusecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
@@ -14,12 +13,7 @@ type FindUserInput struct {
 }
 
 type FindUserOutput struct {
-	UserID    valueobject.UserID
-	Name      valueobject.String50
-	Email     valueobject.Email
-	Birthday  *time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	User *userdomain.User
 }
 
 type FindUser struct {
@@ -36,12 +30,7 @@ func (uc *FindUser) Execute(ctx context.Context, input FindUserInput) (*FindUser
 	}
 
 	return &FindUserOutput{
-		UserID:    user.ID(),
-		Name:      user.Name(),
-		Email:     user.Email(),
-		Birthday:  user.Birthday(),
-		CreatedAt: user.CreatedAt(),
-		UpdatedAt: user.UpdatedAt(),
+		User: user,
 	}, nil
 }
 

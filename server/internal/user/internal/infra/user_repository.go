@@ -17,13 +17,14 @@ type userRepository struct {
 }
 
 const upsertUserSQL = `
-INSERT INTO users (id, name, email, password_hash, birthday, deleted_at, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO users (id, name, email, password_hash, birthday, profile_image_path, deleted_at, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     name = VALUES(name),
     email = VALUES(email),
     password_hash = VALUES(password_hash),
     birthday = VALUES(birthday),
+    profile_image_path = VALUES(profile_image_path),
     deleted_at = VALUES(deleted_at),
     updated_at = VALUES(updated_at)
 `
@@ -36,7 +37,7 @@ func (r *userRepository) FindByID(ctx context.Context, id valueobject.UserID) (*
 	}
 	var row UserModel
 	err = q.SelectOne(&row,
-		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE id = ? AND deleted_at IS NULL",
+		"SELECT id, name, email, password_hash, birthday, profile_image_path, deleted_at, created_at, updated_at FROM users WHERE id = ? AND deleted_at IS NULL",
 		bytes,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -52,7 +53,7 @@ func (r *userRepository) FindByEmail(ctx context.Context, email valueobject.Emai
 	q := dbtx.Querier(ctx, r.dbmap)
 	var row UserModel
 	err := q.SelectOne(&row,
-		"SELECT id, name, email, password_hash, birthday, deleted_at, created_at, updated_at FROM users WHERE email = ? AND deleted_at IS NULL",
+		"SELECT id, name, email, password_hash, birthday, profile_image_path, deleted_at, created_at, updated_at FROM users WHERE email = ? AND deleted_at IS NULL",
 		email.Value(),
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -76,6 +77,7 @@ func (r *userRepository) Save(ctx context.Context, user *userdomain.User) error 
 		user.Email().Value(),
 		user.PasswordHash().Value(),
 		sqlconv.ToNullTime(user.Birthday()),
+		user.ProfileImagePath(),
 		sqlconv.ToNullTime(user.DeletedAt()),
 		user.CreatedAt(),
 		user.UpdatedAt(),
@@ -101,7 +103,7 @@ func toUser(row UserModel) (*userdomain.User, error) {
 		return nil, err
 	}
 	birthday := sqlconv.FromNullTime(row.Birthday)
-	return userdomain.NewUser(*userID, *name, *email, *passwordHash, birthday, row.CreatedAt, row.UpdatedAt), nil
+	return userdomain.NewUser(*userID, *name, *email, *passwordHash, birthday, row.ProfileImagePath, row.CreatedAt, row.UpdatedAt), nil
 }
 
 func NewUserRepository(dbmap *gorp.DbMap) userdomain.UserRepository {

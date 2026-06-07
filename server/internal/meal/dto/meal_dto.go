@@ -4,8 +4,8 @@ import (
 	"time"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
-	"github.com/Watari995/musclead/internal/shared/storage"
 	"github.com/samber/lo"
 )
 
@@ -58,9 +58,9 @@ type PhotoDTO struct {
 	DisplayOrder int    `json:"display_order"`
 }
 
-func NewPhotoDTO(p mealdomain.PhotoSpec, cdnBaseURL string) PhotoDTO {
+func NewPhotoDTO(p mealdomain.PhotoSpec, urlBuilder shareddomain.URLBuilder) PhotoDTO {
 	return PhotoDTO{
-		ImageURL:     storage.BuildImageURL(cdnBaseURL, p.ImagePath),
+		ImageURL:     urlBuilder.BuildPublicURL(p.ImagePath),
 		DisplayOrder: p.DisplayOrder,
 	}
 }
@@ -80,7 +80,7 @@ type MealDTO struct {
 	Photos        []PhotoDTO `json:"photos"`
 }
 
-func NewMealDTO(m *mealdomain.Meal, cdnBaseURL string) MealDTO {
+func NewMealDTO(m *mealdomain.Meal, urlBuilder shareddomain.URLBuilder) MealDTO {
 	// nullable な voをstringに変換する
 	var proteinGStr *string
 	if m.ProteinG() != nil {
@@ -104,7 +104,7 @@ func NewMealDTO(m *mealdomain.Meal, cdnBaseURL string) MealDTO {
 	}
 
 	photos := lo.Map(m.Photos(), func(p mealdomain.PhotoSpec, idx int) PhotoDTO {
-		return NewPhotoDTO(p, cdnBaseURL)
+		return NewPhotoDTO(p, urlBuilder)
 	})
 
 	return MealDTO{

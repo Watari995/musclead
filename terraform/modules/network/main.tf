@@ -113,8 +113,10 @@ resource "aws_security_group" "server_fargate" {
 }
 
 resource "aws_security_group" "rds" {
-  name        = "musclead-rds-sg"
-  description = "RDS: allow :3306 from Server Fargate SG only"
+  name = "musclead-rds-sg"
+  # SG description は作成時しか設定できない(変更すると SG 再作成 → ENI cleanup で失敗)
+  # BE 命名で作成済のため、 機能変更なら別 SG 新設、 ここは旧文字列維持
+  description = "RDS: allow :3306 from BE Fargate SG only"
   vpc_id      = aws_vpc.main.id
 
   ingress {

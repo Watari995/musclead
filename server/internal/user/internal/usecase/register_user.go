@@ -2,7 +2,6 @@ package userusecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
@@ -12,7 +11,6 @@ import (
 type RegisterUserInput struct {
 	Name     valueobject.String50
 	Email    valueobject.Email
-	Birthday *time.Time
 	Password string
 }
 
@@ -42,7 +40,7 @@ func (uc *RegisterUser) Execute(ctx context.Context, input RegisterUserInput) (*
 	}
 
 	// create user
-	newUser := userdomain.CreateUser(input.Name, input.Email, *hash, input.Birthday)
+	newUser := userdomain.CreateOnboardingUser(input.Name, input.Email, *hash)
 	if err := uc.userRepo.Save(ctx, newUser); err != nil {
 		if myerror.IsCode(err, myerror.ErrorCodes.User.EmailAlreadyExistsError) {
 			return nil, myerror.NewEmailAlreadyExistsError()
