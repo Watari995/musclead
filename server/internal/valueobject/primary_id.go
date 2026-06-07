@@ -21,6 +21,7 @@ func NewPrimaryIDFromString[T PrimaryID](s string) (*T, error) {
 type SessionID struct{ PrimaryIDBase }
 
 type UserID struct{ PrimaryIDBase }
+type UserPreferencesID struct{ PrimaryIDBase }
 type MealID struct{ PrimaryIDBase }
 type MealPhotoID struct{ PrimaryIDBase }
 type TrainingID struct{ PrimaryIDBase }

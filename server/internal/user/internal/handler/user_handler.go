@@ -34,8 +34,7 @@ func NewPublic(register *userusecase.RegisterUser) http.Handler {
 	return mux
 }
 
-func NewAuthenticated(urlBuilder shareddomain.URLBuilder, me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) http.Handler {
-	// ServeHTTP interfaceを満たしている必要がある
+func RegisterAuthenticatedHandlers(mux *http.ServeMux, urlBuilder shareddomain.URLBuilder, me *userusecase.Me, find *userusecase.FindUser, updateUser *userusecase.UpdateUser, delete *userusecase.DeleteUser, generateProfileImagePresignedURL *userusecase.GenerateProfileImagePresignedURL) {
 	h := &UserHandler{
 		urlBuilder:                       urlBuilder,
 		me:                               me,
@@ -44,13 +43,11 @@ func NewAuthenticated(urlBuilder shareddomain.URLBuilder, me *userusecase.Me, fi
 		delete:                           delete,
 		generateProfileImagePresignedURL: generateProfileImagePresignedURL,
 	}
-	mux := http.NewServeMux()
 	mux.HandleFunc("GET /users/me", h.Me)
 	mux.HandleFunc("GET /users/{id}", h.Find)
 	mux.HandleFunc("PATCH /users/me", h.UpdateUser)
 	mux.HandleFunc("DELETE /users/{id}", h.Delete)
 	mux.HandleFunc("POST /users/me/profile-image/presigned-url", h.GenerateProfileImagePresignedURL)
-	return mux
 }
 
 // Me godoc
@@ -59,7 +56,7 @@ func NewAuthenticated(urlBuilder shareddomain.URLBuilder, me *userusecase.Me, fi
 // @Tags users
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} userdto.UserDTO
+// @Success 200 {object} userdto.MeResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /users/me [get]
 func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +73,7 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := userdto.FromEntity(&output.User, h.urlBuilder)
+	resp := userdto.MeResponseFromEntities(&output.User, &output.Preferences, h.urlBuilder)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 

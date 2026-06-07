@@ -8,6 +8,18 @@ import (
 	userdomain "github.com/Watari995/musclead/internal/user/internal/domain"
 )
 
+type MeResponse struct {
+	User        UserDTO        `json:"user"`
+	Preferences PreferencesDTO `json:"preferences"`
+}
+
+func MeResponseFromEntities(user *userdomain.User, preferences *userdomain.UserPreferences, urlBuilder shareddomain.URLBuilder) MeResponse {
+	return MeResponse{
+		User:        FromEntity(user, urlBuilder),
+		Preferences: PreferencesFromEntity(preferences),
+	}
+}
+
 type RegisterRequest struct {
 	Name     string  `json:"name"`
 	Email    string  `json:"email"`
