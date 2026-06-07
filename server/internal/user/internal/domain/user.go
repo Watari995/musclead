@@ -78,25 +78,6 @@ func (u *User) UpdatedAt() time.Time {
 	return u.updatedAt
 }
 
-func CreateUser(
-	name valueobject.String50,
-	email valueobject.Email,
-	passwordHash valueobject.HashedPassword,
-	birthday *time.Time,
-	profileImagePath string,
-) *User {
-	return &User{
-		id:               valueobject.NewPrimaryID[valueobject.UserID](),
-		name:             name,
-		email:            email,
-		passwordHash:     passwordHash,
-		birthday:         birthday,
-		profileImagePath: profileImagePath,
-		createdAt:        time.Now(),
-		updatedAt:        time.Now(),
-	}
-}
-
 func CreateOnboardingUser(
 	name valueobject.String50,
 	email valueobject.Email,
@@ -114,7 +95,16 @@ func CreateOnboardingUser(
 	)
 }
 
-func NewUser(id valueobject.UserID, name valueobject.String50, email valueobject.Email, passwordHash valueobject.HashedPassword, birthday *time.Time, profileImagePath string, createdAt time.Time, updatedAt time.Time) *User {
+func NewUser(
+	id valueobject.UserID,
+	name valueobject.String50,
+	email valueobject.Email,
+	passwordHash valueobject.HashedPassword,
+	birthday *time.Time,
+	profileImagePath string,
+	createdAt time.Time,
+	updatedAt time.Time,
+) *User {
 	return &User{
 		id:               id,
 		name:             name,
