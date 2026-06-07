@@ -108,6 +108,20 @@ export function Header() {
                 >
                   ログアウト
                 </button>
+                {/* mobile: ハンバーガーの左にアバターのみ表示(name はドロワー内) */}
+                {meQuery.data?.profile_image_url && (
+                  <Link
+                    href="/profile"
+                    aria-label="プロフィール"
+                    className="sm:hidden inline-flex items-center"
+                  >
+                    <Avatar
+                      src={meQuery.data.profile_image_url}
+                      alt={meQuery.data.name ?? ""}
+                      size="w-8 h-8"
+                    />
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
