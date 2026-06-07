@@ -12,3 +12,7 @@ type StorageClient interface {
 	GenerateGetURL(ctx context.Context, key string, ttl time.Duration) (valueobject.URL, error)
 	DeleteObject(ctx context.Context, key string) error
 }
+
+type URLBuilder interface {
+	BuildPublicURL(path string) string
+}

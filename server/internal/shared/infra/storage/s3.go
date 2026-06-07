@@ -2,6 +2,7 @@ package sharedstorage
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
@@ -16,12 +17,21 @@ type s3Client struct {
 	bucket        string
 }
 
+type s3URLBuilder struct {
+	region string
+	bucket string
+}
+
 func NewS3Client(client *s3.Client, bucket string) shareddomain.StorageClient {
 	return &s3Client{
 		client:        client,
 		presignClient: s3.NewPresignClient(client),
 		bucket:        bucket,
 	}
+}
+
+func NewS3URLBuilder(region, bucket string) shareddomain.URLBuilder {
+	return &s3URLBuilder{region: region, bucket: bucket}
 }
 
 func (c *s3Client) GeneratePutURL(ctx context.Context,
@@ -34,7 +44,7 @@ func (c *s3Client) GeneratePutURL(ctx context.Context,
 	if err != nil {
 		return valueobject.URL{}, err
 	}
-	url, err := c.buildURL(req.URL)
+	url, err := valueobject.NewURL(req.URL)
 	if err != nil {
 		return valueobject.URL{}, err
 	}
@@ -49,7 +59,7 @@ func (c *s3Client) GenerateGetURL(ctx context.Context, key string, ttl time.Dura
 	if err != nil {
 		return valueobject.URL{}, err
 	}
-	url, err := c.buildURL(req.URL)
+	url, err := valueobject.NewURL(req.URL)
 	if err != nil {
 		return valueobject.URL{}, err
 	}
@@ -67,11 +77,6 @@ func (c *s3Client) DeleteObject(ctx context.Context, key string) error {
 	return nil
 }
 
-// buildURLはURLをvalueobject.URLに変換する
-func (c *s3Client) buildURL(urlValue string) (*valueobject.URL, error) {
-	url, err := valueobject.NewURL(urlValue)
-	if err != nil {
-		return nil, err
-	}
-	return url, nil
+func (b *s3URLBuilder) BuildPublicURL(path string) string {
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", b.bucket, b.region, path)
 }

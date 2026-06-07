@@ -78,8 +78,8 @@ func run() error {
 	}
 	s3RawClient := s3.NewFromConfig(awsCfg)
 	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
-
-	mux := newMux(dbmap, storageClient)
+	urlBuilder := sharedstorage.NewS3URLBuilder(os.Getenv("AWS_REGION"), os.Getenv("STORAGE_BUCKET"))
+	mux := newMux(dbmap, storageClient, urlBuilder)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -136,7 +136,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient) http.Handler {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) http.Handler {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -145,10 +145,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient) http.Ha
 	// 各モジュールを組み立て、 そのハンドラをマウント
 	// swaggerのマウント
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
-	userModule := user.NewModule(dbmap, storageClient)
+	userModule := user.NewModule(dbmap, storageClient, urlBuilder)
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
-	cdnBaseURL := getenv("CDN_BASE_URL", "http://localhost:9000/musclead")
-	mealModule := meal.NewModule(dbmap, cdnBaseURL)
+	mealModule := meal.NewModule(dbmap, urlBuilder)
 	trainingModule := training.NewModule(dbmap)
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
