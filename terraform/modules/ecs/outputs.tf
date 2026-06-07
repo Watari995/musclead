@@ -13,6 +13,11 @@ output "server_task_execution_role_arn" {
   value       = aws_iam_role.server_task_execution.arn
 }
 
+output "server_task_role_arn" {
+  description = "Server Task Role の ARN(アプリ実行時の AWS API 権限)"
+  value       = aws_iam_role.server_task.arn
+}
+
 output "server_task_definition_arn" {
   description = "Server Task DefinitionのARN"
   value       = aws_ecs_task_definition.server.arn

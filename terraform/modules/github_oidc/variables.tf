@@ -18,3 +18,8 @@ variable "task_execution_role_arn" {
   description = "ECS Task Execution Role の ARN(PassRole 対象)"
   type        = string
 }
+
+variable "task_role_arn" {
+  description = "ECS Task Role の ARN(PassRole 対象、 アプリが AWS API を呼ぶための role)"
+  type        = string
+}

@@ -127,13 +127,16 @@ resource "aws_iam_role_policy" "github_actions" {
       },
 
       # ── (4) PassRole ─────────────────
-      # ECS Task Def を登録する時、 「この Task は <execution role> を使います」
+      # ECS Task Def を登録する時、 「この Task は <execution role / task role> を使います」
       # と宣言する。 そのために「この role を pass(渡す) する権限」 が必要
       # → 該当 role 以外を pass できないよう ARN を絞る
       {
-        Effect   = "Allow"
-        Action   = "iam:PassRole"
-        Resource = var.task_execution_role_arn
+        Effect = "Allow"
+        Action = "iam:PassRole"
+        Resource = [
+          var.task_execution_role_arn,
+          var.task_role_arn,
+        ]
       },
     ]
   })

@@ -105,4 +105,5 @@ module "github_oidc" {
   allowed_branch          = "main"
   ecr_repository_arn      = module.ecr.server_repository_arn
   task_execution_role_arn = module.ecs.server_task_execution_role_arn
+  task_role_arn           = module.ecs.server_task_role_arn
 }

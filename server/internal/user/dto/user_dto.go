@@ -20,8 +20,9 @@ type RegisterResponse struct {
 }
 
 type UpdateUserRequest struct {
-	Name     shareddto.Patch[string] `json:"name"`
-	Birthday shareddto.Patch[string] `json:"birthday"`
+	Name             shareddto.Patch[string] `json:"name"`
+	Birthday         shareddto.Patch[string] `json:"birthday"`
+	ProfileImagePath shareddto.Patch[string] `json:"profile_image_path"`
 }
 
 type UpdateUserResponse struct {
