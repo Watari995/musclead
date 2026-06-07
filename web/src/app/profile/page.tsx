@@ -7,6 +7,7 @@ import {
   useUpdateUserMutation,
   type UpdateUserBody,
 } from "@/features/user/api/user";
+import { ProfileImageEditor } from "@/features/user/ui/ProfileImageEditor";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   Button,
@@ -37,12 +38,23 @@ export default function ProfilePage() {
   if (!meQuery.data) return null;
 
   return (
-    <ProfileForm
-      initialName={meQuery.data.name ?? ""}
-      initialBirthday={meQuery.data.birthday ?? ""}
-      email={meQuery.data.email ?? ""}
-      onCancel={() => router.back()}
-    />
+    <div className="space-y-6">
+      <SectionTitle>プロフィール</SectionTitle>
+
+      <Card className="p-5">
+        <ProfileImageEditor
+          imageURL={meQuery.data.profile_image_url ?? ""}
+          displayName={meQuery.data.name ?? ""}
+        />
+      </Card>
+
+      <ProfileForm
+        initialName={meQuery.data.name ?? ""}
+        initialBirthday={meQuery.data.birthday ?? ""}
+        email={meQuery.data.email ?? ""}
+        onCancel={() => router.back()}
+      />
+    </div>
   );
 }
 
@@ -68,9 +80,7 @@ function ProfileForm({
   const nameInvalid = name.trim().length === 0;
 
   return (
-    <div className="space-y-6">
-      <SectionTitle>プロフィール</SectionTitle>
-
+    <div className="space-y-4">
       <form
         className="space-y-4"
         onSubmit={(e) => {

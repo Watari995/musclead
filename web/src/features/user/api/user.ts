@@ -74,14 +74,16 @@ export function useLogoutMutation() {
   });
 }
 
-// PATCH /users/me: 部分更新(name と birthday のみ)
+// PATCH /users/me: 部分更新(name, birthday, profile_image_path)
 // schema.ts に PATCH 未反映のため direct fetch で実装
 //   - undefined キー → JSON.stringify が省略 → サーバーは「未送信(更新しない)」 と判定
-//   - null            → サーバーは「明示的にクリア」 と判定(birthday のみ許可)
+//   - null            → サーバーは「明示的にクリア」 と判定
+//                        (birthday: クリア、 profile_image_path: default 復帰)
 //   - 値              → 更新
 export type UpdateUserBody = {
   name?: string;
   birthday?: string | null;
+  profile_image_path?: string | null;
 };
 
 export function useUpdateUserMutation() {
@@ -113,6 +115,60 @@ export function useUpdateUserMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+    },
+  });
+}
+
+// プロフィール画像アップロード:
+//   1) POST /users/me/profile-image/presigned-url で {url, path} を取得
+//   2) その url に PUT で画像 blob を直接 S3 アップロード
+//   3) 戻り値の path を呼び出し側が PATCH /users/me に渡す
+export type UploadProfileImageInput = { blob: Blob; contentType: string };
+
+export function useUploadProfileImageMutation() {
+  return useMutation({
+    mutationFn: async ({
+      blob,
+      contentType,
+    }: UploadProfileImageInput): Promise<{ path: string }> => {
+      const token = getAccessToken();
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+
+      // 1) presigned URL を取得
+      const presignedRes = await fetch(
+        `${baseUrl}/users/me/profile-image/presigned-url`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ content_type: contentType }),
+        },
+      );
+      if (!presignedRes.ok) {
+        throw new Error(
+          `failed to get presigned URL (HTTP ${presignedRes.status})`,
+        );
+      }
+      const { url, path } = (await presignedRes.json()) as {
+        url: string;
+        path: string;
+      };
+
+      // 2) S3 に直接 PUT(認証不要、 署名済 URL)
+      const putRes = await fetch(url, {
+        method: "PUT",
+        headers: { "Content-Type": contentType },
+        body: blob,
+      });
+      if (!putRes.ok) {
+        throw new Error(`failed to upload to S3 (HTTP ${putRes.status})`);
+      }
+
+      return { path };
     },
   });
 }
