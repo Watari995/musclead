@@ -51,59 +51,59 @@ apiClient.use(authMiddleware);
 
 type Schemas = components["schemas"];
 export type UserDTO =
-  Schemas["github_com_Watari995_musclead_internal_user_dto.UserDTO"];
+  Schemas["userdto.UserDTO"];
 export type MealDTO =
-  Schemas["github_com_Watari995_musclead_internal_meal_dto.MealDTO"];
+  Schemas["mealdto.MealDTO"];
 export type RegisterRequest =
-  Schemas["github_com_Watari995_musclead_internal_user_dto.RegisterRequest"];
+  Schemas["userdto.RegisterRequest"];
 export type RegisterResponse =
-  Schemas["github_com_Watari995_musclead_internal_user_dto.RegisterResponse"];
+  Schemas["userdto.RegisterResponse"];
 export type RecordMealRequest =
-  Schemas["github_com_Watari995_musclead_internal_meal_dto.RecordMealRequest"];
+  Schemas["mealdto.RecordMealRequest"];
 export type ListMealsResponse =
-  Schemas["github_com_Watari995_musclead_internal_meal_dto.ListMealsResponse"];
+  Schemas["mealdto.ListMealsResponse"];
 
 export type TrainingDTO =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingDTO"];
+  Schemas["trainingdto.TrainingDTO"];
 export type TrainingExerciseDTO =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingExerciseDTO"];
+  Schemas["trainingdto.TrainingExerciseDTO"];
 export type TrainingSetDTO =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.TrainingSetDTO"];
+  Schemas["trainingdto.TrainingSetDTO"];
 export type RecordTrainingRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingRequest"];
+  Schemas["trainingdto.RecordTrainingRequest"];
 export type RecordTrainingExerciseRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest"];
+  Schemas["trainingdto.RecordTrainingExerciseRequest"];
 export type RecordTrainingSetRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingSetRequest"];
+  Schemas["trainingdto.RecordTrainingSetRequest"];
 export type RecordTrainingResponse =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RecordTrainingResponse"];
+  Schemas["trainingdto.RecordTrainingResponse"];
 export type ListTrainingsResponse =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.ListTrainingsResponse"];
+  Schemas["trainingdto.ListTrainingsResponse"];
 
 export type ExerciseDTO =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.ExerciseDTO"];
+  Schemas["trainingdto.ExerciseDTO"];
 export type ListExercisesResponse =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.ListExercisesResponse"];
+  Schemas["trainingdto.ListExercisesResponse"];
 export type UpsertExerciseRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseRequest"];
+  Schemas["trainingdto.UpsertExerciseRequest"];
 export type UpsertExerciseResponse =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseResponse"];
+  Schemas["trainingdto.UpsertExerciseResponse"];
 
 export type RoutineDTO =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RoutineDTO"];
+  Schemas["trainingdto.RoutineDTO"];
 export type RoutineExerciseDTO =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.RoutineExerciseDTO"];
+  Schemas["trainingdto.RoutineExerciseDTO"];
 export type ListRoutinesResponse =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse"];
+  Schemas["trainingdto.ListRoutinesResponse"];
 export type UpsertRoutineRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest"];
+  Schemas["trainingdto.UpsertRoutineRequest"];
 export type UpsertRoutineExerciseRequest =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineExerciseRequest"];
+  Schemas["trainingdto.UpsertRoutineExerciseRequest"];
 export type UpsertRoutineResponse =
-  Schemas["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse"];
+  Schemas["trainingdto.UpsertRoutineResponse"];
 
 export type ErrorResponse =
-  Schemas["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+  Schemas["httpx.ErrorResponse"];
 
 export class APIError extends Error {
   constructor(

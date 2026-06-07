@@ -24,7 +24,7 @@ export interface paths {
             /** @description ログイン情報 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_auth_dto.LoginRequest"];
+                    "application/json": components["schemas"]["authdto.LoginRequest"];
                 };
             };
             responses: {
@@ -34,7 +34,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_auth_dto.AccessTokenResponse"];
+                        "application/json": components["schemas"]["authdto.AccessTokenResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -43,7 +43,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -79,7 +79,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_auth_dto.AccessTokenResponse"];
+                        "application/json": components["schemas"]["authdto.AccessTokenResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -88,7 +88,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -124,7 +124,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_auth_dto.AccessTokenResponse"];
+                        "application/json": components["schemas"]["authdto.AccessTokenResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -133,7 +133,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -172,7 +172,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ListExercisesResponse"];
+                        "application/json": components["schemas"]["trainingdto.ListExercisesResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -181,7 +181,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -198,7 +198,7 @@ export interface paths {
             /** @description エクササイズ作成 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseRequest"];
+                    "application/json": components["schemas"]["trainingdto.UpsertExerciseRequest"];
                 };
             };
             responses: {
@@ -208,7 +208,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseResponse"];
+                        "application/json": components["schemas"]["trainingdto.UpsertExerciseResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -217,7 +217,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -226,7 +226,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -263,7 +263,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ExerciseDTO"];
+                        "application/json": components["schemas"]["trainingdto.ExerciseDTO"];
                     };
                 };
                 /** @description Bad Request */
@@ -272,7 +272,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -281,7 +281,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -290,7 +290,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -309,7 +309,7 @@ export interface paths {
             /** @description エクササイズ更新 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseRequest"];
+                    "application/json": components["schemas"]["trainingdto.UpsertExerciseRequest"];
                 };
             };
             responses: {
@@ -319,7 +319,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertExerciseResponse"];
+                        "application/json": components["schemas"]["trainingdto.UpsertExerciseResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -328,7 +328,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -337,7 +337,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -369,7 +369,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -378,7 +378,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -387,7 +387,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description training_exercises から参照されている時 */
@@ -396,7 +396,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -472,7 +472,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.ListMealsResponse"];
+                        "application/json": components["schemas"]["mealdto.ListMealsResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -481,7 +481,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -498,7 +498,7 @@ export interface paths {
             /** @description 食事記録 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.RecordMealRequest"];
+                    "application/json": components["schemas"]["mealdto.RecordMealRequest"];
                 };
             };
             responses: {
@@ -508,7 +508,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.RecordMealResponse"];
+                        "application/json": components["schemas"]["mealdto.RecordMealResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -517,7 +517,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -554,7 +554,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealDTO"];
+                        "application/json": components["schemas"]["mealdto.MealDTO"];
                     };
                 };
                 /** @description Bad Request */
@@ -563,7 +563,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -572,7 +572,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Forbidden */
@@ -581,7 +581,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -590,7 +590,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -609,7 +609,7 @@ export interface paths {
             /** @description 更新内容 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.UpdateMealRequest"];
+                    "application/json": components["schemas"]["mealdto.UpdateMealRequest"];
                 };
             };
             responses: {
@@ -619,7 +619,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.UpdateMealResponse"];
+                        "application/json": components["schemas"]["mealdto.UpdateMealResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -628,7 +628,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -637,7 +637,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Forbidden */
@@ -646,7 +646,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -655,7 +655,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -687,7 +687,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "*/*": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -696,7 +696,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "*/*": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Forbidden */
@@ -705,7 +705,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "*/*": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -714,7 +714,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "*/*": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -752,7 +752,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse"];
+                        "application/json": components["schemas"]["trainingdto.ListRoutinesResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -761,7 +761,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -778,7 +778,7 @@ export interface paths {
             /** @description ルーティン作成 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest"];
+                    "application/json": components["schemas"]["trainingdto.UpsertRoutineRequest"];
                 };
             };
             responses: {
@@ -788,7 +788,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse"];
+                        "application/json": components["schemas"]["trainingdto.UpsertRoutineResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -797,7 +797,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -806,7 +806,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description 同 user 内で名前重複 */
@@ -815,7 +815,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -852,7 +852,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RoutineDTO"];
+                        "application/json": components["schemas"]["trainingdto.RoutineDTO"];
                     };
                 };
                 /** @description Bad Request */
@@ -861,7 +861,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -870,7 +870,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -879,7 +879,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -898,7 +898,7 @@ export interface paths {
             /** @description ルーティン更新 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest"];
+                    "application/json": components["schemas"]["trainingdto.UpsertRoutineRequest"];
                 };
             };
             responses: {
@@ -908,7 +908,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse"];
+                        "application/json": components["schemas"]["trainingdto.UpsertRoutineResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -917,7 +917,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -926,7 +926,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -935,7 +935,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description 同 user 内で名前重複 */
@@ -944,7 +944,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -976,7 +976,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -985,7 +985,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -994,7 +994,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1032,7 +1032,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ListTrainingsResponse"];
+                        "application/json": components["schemas"]["trainingdto.ListTrainingsResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1041,7 +1041,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1058,7 +1058,7 @@ export interface paths {
             /** @description トレーニング記録 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingRequest"];
+                    "application/json": components["schemas"]["trainingdto.RecordTrainingRequest"];
                 };
             };
             responses: {
@@ -1068,7 +1068,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingResponse"];
+                        "application/json": components["schemas"]["trainingdto.RecordTrainingResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -1077,7 +1077,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1114,7 +1114,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.TrainingDTO"];
+                        "application/json": components["schemas"]["trainingdto.TrainingDTO"];
                     };
                 };
                 /** @description Bad Request */
@@ -1123,7 +1123,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1132,7 +1132,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Forbidden */
@@ -1141,7 +1141,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -1150,7 +1150,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1169,7 +1169,7 @@ export interface paths {
             /** @description 更新用トレーニング記録 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpdateTrainingRequest"];
+                    "application/json": components["schemas"]["trainingdto.UpdateTrainingRequest"];
                 };
             };
             responses: {
@@ -1179,7 +1179,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpdateTrainingResponse"];
+                        "application/json": components["schemas"]["trainingdto.UpdateTrainingResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -1188,7 +1188,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1220,7 +1220,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1229,7 +1229,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Forbidden */
@@ -1238,7 +1238,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -1247,7 +1247,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1280,7 +1280,7 @@ export interface paths {
             /** @description ユーザー登録情報 */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_user_dto.RegisterRequest"];
+                    "application/json": components["schemas"]["userdto.RegisterRequest"];
                 };
             };
             responses: {
@@ -1290,7 +1290,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_user_dto.RegisterResponse"];
+                        "application/json": components["schemas"]["userdto.RegisterResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -1299,7 +1299,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Conflict */
@@ -1308,7 +1308,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1342,7 +1342,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_user_dto.UserDTO"];
+                        "application/json": components["schemas"]["userdto.UserDTO"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1351,13 +1351,72 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me/profile-image/presigned-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** プロフィール画像のPresigned URL生成 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description プロフィール画像のPresigned URL生成情報 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["userdto.GenerateProfileImagePresignedURLRequest"];
+                };
+            };
+            responses: {
+                /** @description プロフィール画像のPresigned URL生成成功 */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["userdto.GenerateProfileImagePresignedURLResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1390,7 +1449,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_user_dto.UserDTO"];
+                        "application/json": components["schemas"]["userdto.UserDTO"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1399,7 +1458,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -1408,7 +1467,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "application/json": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1441,7 +1500,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "*/*": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -1450,7 +1509,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                        "*/*": components["schemas"]["httpx.ErrorResponse"];
                     };
                 };
             };
@@ -1464,19 +1523,29 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        "github_com_Watari995_musclead_internal_auth_dto.AccessTokenResponse": {
+        "authdto.AccessTokenResponse": {
             access_token?: string;
             access_token_expires_at?: string;
         };
-        "github_com_Watari995_musclead_internal_auth_dto.LoginRequest": {
+        "authdto.LoginRequest": {
             email?: string;
             password?: string;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.ListMealsResponse": {
-            meals?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealDTO"][];
-            pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
+        "httpx.ErrorDetail": {
+            code?: string;
+            data?: {
+                [key: string]: unknown;
+            };
+            message?: string;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.MealDTO": {
+        "httpx.ErrorResponse": {
+            error?: components["schemas"]["httpx.ErrorDetail"];
+        };
+        "mealdto.ListMealsResponse": {
+            meals?: components["schemas"]["mealdto.MealDTO"][];
+            pagination?: components["schemas"]["shareddto.PaginationDTO"];
+        };
+        "mealdto.MealDTO": {
             calories?: number;
             carbohydrate_g?: string;
             created_at?: string;
@@ -1485,136 +1554,126 @@ export interface components {
             id?: string;
             meal_type?: string;
             memo?: string;
-            photos?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.PhotoDTO"][];
+            photos?: components["schemas"]["mealdto.PhotoDTO"][];
             protein_g?: string;
             updated_at?: string;
             user_id?: string;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.MealPhotoInput": {
+        "mealdto.MealPhotoInput": {
             display_order?: number;
             image_path?: string;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.PhotoDTO": {
+        "mealdto.PhotoDTO": {
             display_order?: number;
             image_url?: string;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.RecordMealRequest": {
+        "mealdto.RecordMealRequest": {
             calories?: number;
             carbohydrate_g?: number;
             eaten_at?: string;
             fat_g?: number;
             meal_type?: string;
             memo?: string;
-            photos?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealPhotoInput"][];
+            photos?: components["schemas"]["mealdto.MealPhotoInput"][];
             protein_g?: number;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.RecordMealResponse": {
+        "mealdto.RecordMealResponse": {
             meal_id?: string;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.UpdateMealRequest": {
+        "mealdto.UpdateMealRequest": {
             calories?: number;
             carbohydrate_g?: number;
             eaten_at?: string;
             fat_g?: number;
             meal_type?: string;
             memo?: string;
-            photos?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealPhotoInput"][];
+            photos?: components["schemas"]["mealdto.MealPhotoInput"][];
             protein_g?: number;
         };
-        "github_com_Watari995_musclead_internal_meal_dto.UpdateMealResponse": {
+        "mealdto.UpdateMealResponse": {
             meal_id?: string;
         };
-        "github_com_Watari995_musclead_internal_shared_dto.PaginationDTO": {
+        "shareddto.PaginationDTO": {
             current_page?: number;
             items_per_page?: number;
             total_items?: number;
             total_pages?: number;
         };
-        "github_com_Watari995_musclead_internal_shared_httpx.ErrorDetail": {
-            code?: string;
-            data?: {
-                [key: string]: unknown;
-            };
-            message?: string;
-        };
-        "github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse": {
-            error?: components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorDetail"];
-        };
-        "github_com_Watari995_musclead_internal_training_dto.ExerciseDTO": {
+        "trainingdto.ExerciseDTO": {
             created_at?: string;
             id?: string;
             name?: string;
             updated_at?: string;
             user_id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.ListExercisesResponse": {
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ExerciseDTO"][];
-            pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
+        "trainingdto.ListExercisesResponse": {
+            exercises?: components["schemas"]["trainingdto.ExerciseDTO"][];
+            pagination?: components["schemas"]["shareddto.PaginationDTO"];
         };
-        "github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse": {
-            pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
-            routines?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RoutineDTO"][];
+        "trainingdto.ListRoutinesResponse": {
+            pagination?: components["schemas"]["shareddto.PaginationDTO"];
+            routines?: components["schemas"]["trainingdto.RoutineDTO"][];
         };
-        "github_com_Watari995_musclead_internal_training_dto.ListTrainingsResponse": {
-            pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
-            trainings?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.TrainingDTO"][];
+        "trainingdto.ListTrainingsResponse": {
+            pagination?: components["schemas"]["shareddto.PaginationDTO"];
+            trainings?: components["schemas"]["trainingdto.TrainingDTO"][];
         };
-        "github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest": {
+        "trainingdto.RecordTrainingExerciseRequest": {
             display_order?: number;
             exercise_id?: string;
             memo?: string;
             rest_seconds?: number;
-            sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingSetRequest"][];
+            sets?: components["schemas"]["trainingdto.RecordTrainingSetRequest"][];
         };
-        "github_com_Watari995_musclead_internal_training_dto.RecordTrainingRequest": {
+        "trainingdto.RecordTrainingRequest": {
             ended_at?: string;
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest"][];
+            exercises?: components["schemas"]["trainingdto.RecordTrainingExerciseRequest"][];
             memo?: string;
             started_at?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.RecordTrainingResponse": {
+        "trainingdto.RecordTrainingResponse": {
             training_id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.RecordTrainingSetRequest": {
+        "trainingdto.RecordTrainingSetRequest": {
             memo?: string;
             reps?: number;
             rest_seconds?: number;
             set_number?: number;
             weight_kg?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.RoutineDTO": {
+        "trainingdto.RoutineDTO": {
             created_at?: string;
             id?: string;
             name?: string;
-            routine_exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RoutineExerciseDTO"][];
+            routine_exercises?: components["schemas"]["trainingdto.RoutineExerciseDTO"][];
             updated_at?: string;
             user_id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.RoutineExerciseDTO": {
+        "trainingdto.RoutineExerciseDTO": {
             display_order?: number;
             exercise_id?: string;
             exercise_name?: string;
             id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.TrainingDTO": {
+        "trainingdto.TrainingDTO": {
             created_at?: string;
             ended_at?: string;
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.TrainingExerciseDTO"][];
+            exercises?: components["schemas"]["trainingdto.TrainingExerciseDTO"][];
             id?: string;
             memo?: string;
             started_at?: string;
             updated_at?: string;
             user_id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.TrainingExerciseDTO": {
+        "trainingdto.TrainingExerciseDTO": {
             display_order?: number;
             exercise_id?: string;
             id?: string;
             memo?: string;
             rest_seconds?: number;
-            sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.TrainingSetDTO"][];
+            sets?: components["schemas"]["trainingdto.TrainingSetDTO"][];
         };
-        "github_com_Watari995_musclead_internal_training_dto.TrainingSetDTO": {
+        "trainingdto.TrainingSetDTO": {
             id?: string;
             memo?: string;
             reps?: number;
@@ -1623,47 +1682,55 @@ export interface components {
             /** @description weightは精度のためstringとして持つ */
             weight_kg?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpdateTrainingRequest": {
+        "trainingdto.UpdateTrainingRequest": {
             ended_at?: string;
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.RecordTrainingExerciseRequest"][];
+            exercises?: components["schemas"]["trainingdto.RecordTrainingExerciseRequest"][];
             memo?: string;
             started_at?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpdateTrainingResponse": {
+        "trainingdto.UpdateTrainingResponse": {
             training_id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpsertExerciseRequest": {
+        "trainingdto.UpsertExerciseRequest": {
             name?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpsertExerciseResponse": {
+        "trainingdto.UpsertExerciseResponse": {
             id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpsertRoutineExerciseRequest": {
+        "trainingdto.UpsertRoutineExerciseRequest": {
             display_order?: number;
             exercise_id?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpsertRoutineRequest": {
-            exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.UpsertRoutineExerciseRequest"][];
+        "trainingdto.UpsertRoutineRequest": {
+            exercises?: components["schemas"]["trainingdto.UpsertRoutineExerciseRequest"][];
             name?: string;
         };
-        "github_com_Watari995_musclead_internal_training_dto.UpsertRoutineResponse": {
+        "trainingdto.UpsertRoutineResponse": {
             id?: string;
         };
-        "github_com_Watari995_musclead_internal_user_dto.RegisterRequest": {
+        "userdto.GenerateProfileImagePresignedURLRequest": {
+            content_type?: string;
+        };
+        "userdto.GenerateProfileImagePresignedURLResponse": {
+            path?: string;
+            url?: string;
+        };
+        "userdto.RegisterRequest": {
             birthday?: string;
             email?: string;
             name?: string;
             password?: string;
         };
-        "github_com_Watari995_musclead_internal_user_dto.RegisterResponse": {
+        "userdto.RegisterResponse": {
             user_id?: string;
         };
-        "github_com_Watari995_musclead_internal_user_dto.UserDTO": {
+        "userdto.UserDTO": {
             birthday?: string;
             created_at?: string;
             email?: string;
             id?: string;
             name?: string;
+            profile_image_url?: string;
             updated_at?: string;
         };
     };

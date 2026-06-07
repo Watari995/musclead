@@ -5,9 +5,9 @@ const BASE_URL =
 
 type Schemas = components["schemas"];
 export type LoginRequest =
-  Schemas["github_com_Watari995_musclead_internal_auth_dto.LoginRequest"];
+  Schemas["authdto.LoginRequest"];
 export type AccessTokenResponse =
-  Schemas["github_com_Watari995_musclead_internal_auth_dto.AccessTokenResponse"];
+  Schemas["authdto.AccessTokenResponse"];
 
 export async function loginRequest(
   email: string,

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useLogoutMutation, useMeQuery } from "@/features/user/api/user";
+import { Avatar } from "@/features/user/ui/Avatar";
 
 const NAV_ITEMS = [
   { href: "/meals", label: "食事" },
@@ -87,9 +88,16 @@ export function Header() {
                 {meQuery.data?.name && (
                   <Link
                     href="/profile"
-                    className="hidden sm:inline text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] truncate max-w-[12rem]"
+                    className="hidden sm:flex items-center gap-2 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] max-w-[14rem]"
                   >
-                    {meQuery.data.name}
+                    {meQuery.data.profile_image_url && (
+                      <Avatar
+                        src={meQuery.data.profile_image_url}
+                        alt={meQuery.data.name}
+                        size="w-7 h-7"
+                      />
+                    )}
+                    <span className="truncate">{meQuery.data.name}</span>
                   </Link>
                 )}
                 <button
