@@ -158,6 +158,8 @@ resource "aws_ecs_task_definition" "server" {
       { name = "ALLOWED_ORIGIN", value = var.allowed_origin },
       { name = "AWS_REGION", value = var.aws_region },
       { name = "STORAGE_BUCKET", value = var.storage_bucket_name },
+      { name = "REDIS_HOST", value = var.cache_endpoint },
+      { name = "REDIS_PORT", value = "6379" }
     ]
 
     # SSM 由来 secrets(IAM Role 経由で復号化)

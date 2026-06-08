@@ -60,3 +60,10 @@ variable "allowed_origin" {
   type        = string
   default     = "https://app.musclead.com"
 }
+
+# ── Cache ─────────────
+variable "enable_cache" {
+  description = "value_cacheを有効にするかどうか"
+  type        = bool
+  default     = false
+}
