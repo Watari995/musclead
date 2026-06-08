@@ -73,7 +73,7 @@ func (h *ExerciseHandler) Find(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, trainingdto.NewExerciseDTO(output.Exercise))
+	httpx.WriteJSON(w, http.StatusOK, trainingdto.ExerciseFromEntity(output.Exercise))
 }
 
 // List godoc
@@ -101,7 +101,7 @@ func (h *ExerciseHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := trainingdto.ListExercisesResponse{
 		Exercises: lo.Map(output.Exercises, func(e *trainingdomain.Exercise, _ int) trainingdto.ExerciseDTO {
-			return trainingdto.NewExerciseDTO(e)
+			return trainingdto.ExerciseFromEntity(e)
 		}),
 		Pagination: shareddto.PaginationDTO(output.Pagination),
 	}

@@ -73,7 +73,7 @@ func (h *RoutineHandler) Find(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, trainingdto.NewRoutineDTO(output.Routine))
+	httpx.WriteJSON(w, http.StatusOK, trainingdto.RoutineFromEntity(output.Routine))
 }
 
 // List godoc
@@ -101,7 +101,7 @@ func (h *RoutineHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	httpx.WriteJSON(w, http.StatusOK, trainingdto.ListRoutinesResponse{
 		Routines: lo.Map(output.Routines, func(r *trainingdomain.RoutineView, _ int) trainingdto.RoutineDTO {
-			return trainingdto.NewRoutineDTO(r)
+			return trainingdto.RoutineFromEntity(r)
 		}),
 		Pagination: shareddto.PaginationDTO(output.Pagination),
 	})

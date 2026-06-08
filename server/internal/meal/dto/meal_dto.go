@@ -67,7 +67,7 @@ type PhotoDTO struct {
 	DisplayOrder int    `json:"display_order"`
 }
 
-func NewPhotoDTO(p mealdomain.PhotoSpec, urlBuilder shareddomain.URLBuilder) PhotoDTO {
+func PhotoFromEntity(p mealdomain.PhotoSpec, urlBuilder shareddomain.URLBuilder) PhotoDTO {
 	return PhotoDTO{
 		ImageURL:     urlBuilder.BuildPublicURL(p.ImagePath),
 		DisplayOrder: p.DisplayOrder,
@@ -89,7 +89,7 @@ type MealDTO struct {
 	Photos        []PhotoDTO `json:"photos"`
 }
 
-func NewMealDTO(m *mealdomain.Meal, urlBuilder shareddomain.URLBuilder) MealDTO {
+func FromEntity(m *mealdomain.Meal, urlBuilder shareddomain.URLBuilder) MealDTO {
 	// nullable な voをstringに変換する
 	var proteinGStr *string
 	if m.ProteinG() != nil {
@@ -113,7 +113,7 @@ func NewMealDTO(m *mealdomain.Meal, urlBuilder shareddomain.URLBuilder) MealDTO 
 	}
 
 	photos := lo.Map(m.Photos(), func(p mealdomain.PhotoSpec, idx int) PhotoDTO {
-		return NewPhotoDTO(p, urlBuilder)
+		return PhotoFromEntity(p, urlBuilder)
 	})
 
 	return MealDTO{
