@@ -15,7 +15,7 @@ type ExerciseDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func NewExerciseDTO(e *trainingdomain.Exercise) ExerciseDTO {
+func ExerciseFromEntity(e *trainingdomain.Exercise) ExerciseDTO {
 	return ExerciseDTO{
 		ID:        e.ID().Value(),
 		UserID:    e.UserID().Value(),

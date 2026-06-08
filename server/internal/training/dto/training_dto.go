@@ -166,7 +166,7 @@ type TrainingSetDTO struct {
 	Memo        *string `json:"memo,omitempty"`
 }
 
-func NewTrainingSetDTO(s *trainingdomain.TrainingSet) TrainingSetDTO {
+func TrainingSetFromEntity(s *trainingdomain.TrainingSet) TrainingSetDTO {
 	// nullableなvoをintに変換
 	var restSecondsInt *int
 	if s.RestSeconds() != nil {
@@ -192,7 +192,7 @@ type TrainingExerciseDTO struct {
 	Sets         []TrainingSetDTO `json:"sets"`
 }
 
-func NewTrainingExerciseDTO(e *trainingdomain.TrainingExercise) TrainingExerciseDTO {
+func TrainingExerciseFromEntity(e *trainingdomain.TrainingExercise) TrainingExerciseDTO {
 	// nullableなvoをintに変換
 	var restSecondsInt *int
 	if e.RestSeconds() != nil {
@@ -201,7 +201,7 @@ func NewTrainingExerciseDTO(e *trainingdomain.TrainingExercise) TrainingExercise
 	}
 
 	sets := lo.Map(e.Sets(), func(s *trainingdomain.TrainingSet, _ int) TrainingSetDTO {
-		return NewTrainingSetDTO(s)
+		return TrainingSetFromEntity(s)
 	})
 
 	return TrainingExerciseDTO{
@@ -225,9 +225,9 @@ type TrainingDTO struct {
 	Exercises []TrainingExerciseDTO `json:"exercises"`
 }
 
-func NewTrainingDTO(t *trainingdomain.Training) TrainingDTO {
+func TrainingFromEntity(t *trainingdomain.Training) TrainingDTO {
 	exercises := lo.Map(t.Exercises(), func(e *trainingdomain.TrainingExercise, _ int) TrainingExerciseDTO {
-		return NewTrainingExerciseDTO(e)
+		return TrainingExerciseFromEntity(e)
 	})
 
 	return TrainingDTO{
