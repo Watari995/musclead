@@ -31,6 +31,7 @@ import (
 	_ "github.com/Watari995/musclead/internal/shared"
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	cacheinfra "github.com/Watari995/musclead/internal/shared/infra/cache"
 	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/training"
 	"github.com/Watari995/musclead/internal/user"
@@ -81,6 +82,10 @@ func run() error {
 	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
 	urlBuilder := sharedstorage.NewS3URLBuilder(os.Getenv("AWS_REGION"), os.Getenv("STORAGE_BUCKET"))
 	mux := newMux(dbmap, storageClient, urlBuilder)
+
+	cacheClient := newCache(context.Background())
+	slog.Info("cache initialized", "type", fmt.Sprintf("%T", cacheClient))
+	_ = cacheClient
 
 	server := &http.Server{
 		Addr:              addr,
@@ -192,4 +197,21 @@ func getenv(key, def string) string {
 		return v
 	}
 	return def
+}
+
+func newCache(ctx context.Context) shareddomain.Cache {
+	host := os.Getenv("REDIS_HOST")
+	if host == "" {
+		slog.Info("REDIS_HOST not set, using NoOpCache")
+		return cacheinfra.NewNoOpCache()
+	}
+	port := getenv("REDIS_PORT", "6379")
+	addr := host + ":" + port
+	c, err := cacheinfra.NewRedisCache(ctx, addr)
+	if err != nil {
+		// fall back
+		slog.Warn("redis ping failed, falling back to NoOpCache", "err", err, "addr", addr)
+		return cacheinfra.NewNoOpCache()
+	}
+	return c
 }
