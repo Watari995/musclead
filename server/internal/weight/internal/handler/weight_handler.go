@@ -51,8 +51,8 @@ func New(
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body weightdto.RecordWeightRequest true "体重記録"
-// @Success 201 {object} weightdto.RecordWeightResponse
+// @Param request body weightdto.UpsertWeightRequest true "体重記録"
+// @Success 201 {object} weightdto.UpsertWeightResponse
 // @Failure 400 {object} httpx.ErrorResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /weights [post]
