@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/trainings", label: "トレーニング" },
   { href: "/exercises", label: "種目" },
   { href: "/routines", label: "ルーティン" },
+  { href: "/weights", label: "体重" },
   { href: "/settings", label: "設定" },
 ] as const;
 
