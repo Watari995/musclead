@@ -6,6 +6,7 @@
 #   ecs     → alb (target group attachment)
 #   alb     → dns (Alias record target)
 #   secrets → ecs (Task Definition で参照)
+#   cache   → ecs (Cache endpoint を渡す)
 #
 # 初期は network のみ apply して動作確認、 順次他を有効化していく。
 
@@ -81,6 +82,7 @@ module "ecs" {
   storage_bucket_name = module.storage.bucket_name
   storage_bucket_arn  = module.storage.bucket_arn
   aws_region          = var.aws_region
+  cache_endpoint      = var.enable_cache ? module.cache[0].endpoint : ""
 }
 
 
@@ -106,4 +108,11 @@ module "github_oidc" {
   ecr_repository_arn      = module.ecr.server_repository_arn
   task_execution_role_arn = module.ecs.server_task_execution_role_arn
   task_role_arn           = module.ecs.server_task_role_arn
+}
+
+module "cache" {
+  source      = "./modules/cache"
+  count       = var.enable_cache ? 1 : 0
+  subnet_ids  = module.network.public_subnet_ids
+  cache_sg_id = module.network.cache_sg_id
 }
