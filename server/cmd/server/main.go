@@ -34,6 +34,7 @@ import (
 	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/training"
 	"github.com/Watari995/musclead/internal/user"
+	"github.com/Watari995/musclead/internal/weight"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-gorp/gorp/v3"
@@ -149,6 +150,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
 	trainingModule := training.NewModule(dbmap)
+	weightModule := weight.NewModule(dbmap)
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))
@@ -166,7 +168,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// routines
 	mux.Handle("/routines", authModule.Middleware(trainingModule.RoutineHandler))
 	mux.Handle("/routines/", authModule.Middleware(trainingModule.RoutineHandler))
-
+	// weights
+	mux.Handle("/weights", authModule.Middleware(weightModule.Handler))
+	mux.Handle("/weights/", authModule.Middleware(weightModule.Handler))
 	return httpx.CORSMiddleware(mux)
 }
 
