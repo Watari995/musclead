@@ -20,7 +20,6 @@ resource "aws_elasticache_parameter_group" "main" {
   }
 }
 
-
 # Cluster: 単一ノードRedis
 resource "aws_elasticache_replication_group" "main" {
   replication_group_id = "musclead-cache"
