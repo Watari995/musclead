@@ -78,7 +78,6 @@ func DecimalToNullString(d decimal.Decimal) sql.NullString {
 	return sql.NullString{String: d.String(), Valid: true}
 }
 
-
 func NewNonNegativeDecimalFromNullString(s sql.NullString) (*valueobject.NonNegativeDecimal, error) {
 	d, err := DecimalFromNullString(s)
 	if err != nil {
@@ -109,6 +108,45 @@ func NewNonNegativeIntFromNullInt32(v sql.NullInt32) (*valueobject.NonNegativeIn
 	}
 	return valueobject.NewNonNegativeInt(int(v.Int32))
 }
+
+// ─── percentage / Percentage ─────────────────────────────
+
+func NewPercentageFromNullString(s sql.NullString) (*valueobject.Percentage, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	d, err := decimal.NewFromString(s.String)
+	if err != nil {
+		return nil, err
+	}
+	return valueobject.NewPercentage(d)
+}
+
+func PercentageToNullString(p valueobject.Percentage) sql.NullString {
+	return sql.NullString{String: p.Value().String(), Valid: true}
+}
+
+// ─── weight_kg / WeightKg ───────────────────────────────
+
+func NewWeightKgFromString(s string) (*valueobject.WeightKg, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	return valueobject.NewWeightKg(d)
+}
+
+func WeightKgToNullString(w valueobject.WeightKg) sql.NullString {
+	return sql.NullString{String: w.Value().String(), Valid: true}
+}
+
+func NewWeightKgFromNullString(s sql.NullString) (*valueobject.WeightKg, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	return NewWeightKgFromString(s.String)
+}
+
 
 // ─── UUID ───────────────────────────────────────────────
 

@@ -1,0 +1,109 @@
+---
+description: AI がコードレビューする時の振る舞い規定。 PR 進行中の push、 慣習整合、 Go コミュニティ標準、 修正案提示の作法。
+globs: "**/*"
+alwaysApply: true
+---
+
+# レビュー振る舞いルール (AI 用)
+
+> user がコードを書いた後、 AI(私) がレビューする時の標準フロー。
+> このルールは **既存 commit-workflow を補完する**ものであり、 衝突した場合は
+> どちらも同時に守る。
+
+---
+
+## 1. PR 作成済みなら、 レビュー OK 後は即 push
+
+- 該当ブランチで PR が既に存在する場合、 「問題なし」 判断を出した瞬間に **同じターン内で commit + push** まで完了させる
+- user に「push して」 と言わせない
+- 例外: ビルド NG が レビュー対象差分に起因する場合のみ止める
+
+> 関連: `~/.claude/memory/feedback_commit_workflow.md`(同種ルール、 こちらが本則)
+
+---
+
+## 2. 既存パターンとの整合性を必ずチェックする
+
+レビュー時、 **「他のファイルではどう書いているか」 を見ずに OK 判定しない**。
+
+### 必須チェック項目
+- 命名規則 (snake_case / PascalCase / camelCase の使い分け)
+- import 順序 (標準 → 外部 → 内部)
+- パッケージ分割境界 (domain / infra / usecase / handler)
+- エラーハンドリング (`myerror` ラップの有無、 `errors.Is` 使用)
+- 関数シグネチャの順序 (entity の Create / New と repository の引数順)
+- 構造体タグの記法 (`db:"..."`, `json:"..."`)
+
+### 違反していたら
+- **必ず指摘する**(「他では X、 ここでは Y、 揃えるべき」)
+- 指摘漏れは信頼を損なう
+
+---
+
+## 3. Go コミュニティの慣習を最優先
+
+独自記法・略式パターンは入れない。 参考にすべき出典の優先順位:
+
+1. **Effective Go / Go Code Review Comments** (Go 公式)
+2. **gofmt / golangci-lint のデフォルト**(`govet`, `staticcheck`, `errcheck` 等)
+3. **標準ライブラリのソース** (例: `database/sql`, `net/http`)
+4. **業界で広く採用されているライブラリのソース** (gorilla, chi, samber/lo 等)
+
+### Go 流儀の例
+
+| OK | NG |
+|---|---|
+| `if err != nil { return ..., err }` 早期 return | else でネスト |
+| `func (r *xxxRepository)` レシーバ名は型の頭文字 | `func (this *xxxRepository)` |
+| エクスポート対象は PascalCase、 内部は camelCase | 全部 camelCase / snake_case 混在 |
+| `interface` は使う側 (consumer) が定義 | 提供側で太い interface を定義 |
+| `context.Context` は第 1 引数 | 後ろや構造体メンバ |
+| `error` は最後の戻り値 | 最初や途中 |
+
+独自手法を見たら指摘し、 **Go 標準にリファクタを提案**する。
+
+---
+
+## 4. より良い選択肢があれば積極的に提示
+
+「動いている」 で終わらせない。 同じ目的を達成する **より Go らしい / シンプル / 安全な書き方** が見つかったら必ず提示する。
+
+### 提示の型
+
+```
+現状: <短いコード片 or 説明>
+提案: <代替案 + 理由 1 行>
+インパクト: 動作変化 / 可読性 / 性能 / 安全性 のどれか明示
+```
+
+### 例
+
+- 「`for i := 0; i < len(xs); i++` → `for i, x := range xs`、 idiomatic」
+- 「`if x == nil { return nil, errors.New(...) }` → `myerror.NewBadRequestError()` 既存ヘルパーあり」
+- 「`map[string]bool` → `map[string]struct{}`、 set 用途で値サイズ 0」
+
+---
+
+## 5. 修正箇所の提示は簡潔に
+
+- **修正箇所を 1 行ずつ箇条書き** (file:line + 何をどう直す)
+- ファイル丸ごと書き直し提案はしない
+- 影響範囲が広い時は「該当 N 箇所」 とまとめて、 個別は省略可
+- 修正後の全文を貼るのは user が明示要求した時のみ
+
+### NG パターン
+- 長文で背景を語る
+- 「全体的に」 と曖昧に言う
+- 修正案を出さずに「直しましょう」 だけ
+
+---
+
+## 6. 自分のレビュー判定に責任を持つ
+
+「問題なし」 と言ったら、 直後の commit にバグが残っていた場合は AI の判定ミス。
+レビュー前に必ず:
+- 該当ファイルを **その時点で** Read (過去 Read の記憶で語らない)
+- 関連 (同モジュール内) も 必要に応じて Read
+- 「未確認のまま OK」 は出さない
+
+> 関連: `~/.claude/memory/feedback_verify_state_first.md`

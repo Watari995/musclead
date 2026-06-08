@@ -38,3 +38,11 @@ func NewWeightKg(v decimal.Decimal) (*WeightKg, error) {
 	}
 	return &w, nil
 }
+
+func NewWeightKgFromString(s string) (*WeightKg, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	return NewWeightKg(d)
+}
