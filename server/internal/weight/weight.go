@@ -22,7 +22,11 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 
 	// use-case
 	record := weightusecase.NewRecordWeight(repo)
+	find := weightusecase.NewFindWeightByID(repo)
+	list := weightusecase.NewListWeights(repo)
+	update := weightusecase.NewUpdateWeight(repo)
+	delete := weightusecase.NewDeleteWeightByID(repo)
 	return &Module{
-		Handler: weighthandler.New(record),
+		Handler: weighthandler.New(record, find, list, update, delete),
 	}
 }

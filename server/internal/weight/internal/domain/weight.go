@@ -6,6 +6,13 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
+type WeightSpec struct {
+	WeightKg          valueobject.WeightKg
+	BodyFatPercentage *valueobject.Percentage
+	SkeletalMuscleKg  *valueobject.WeightKg
+	MeasuredAt        time.Time
+}
+
 type Weight struct {
 	id                valueobject.WeightID
 	userID            valueobject.UserID
@@ -49,38 +56,26 @@ func (w *Weight) UpdatedAt() time.Time {
 	return w.updatedAt
 }
 
-type UpdateWeightParams struct {
-	WeightKg          valueobject.WeightKg
-	BodyFatPercentage *valueobject.Percentage
-	SkeletalMuscleKg  *valueobject.WeightKg
-	MeasuredAt        time.Time
-}
-
-func (w *Weight) Update(
-	params UpdateWeightParams,
-) {
-	w.weightKg = params.WeightKg
-	w.bodyFatPercentage = params.BodyFatPercentage
-	w.skeletalMuscleKg = params.SkeletalMuscleKg
-	w.measuredAt = params.MeasuredAt
+func (w *Weight) Update(spec WeightSpec) {
+	w.weightKg = spec.WeightKg
+	w.bodyFatPercentage = spec.BodyFatPercentage
+	w.skeletalMuscleKg = spec.SkeletalMuscleKg
+	w.measuredAt = spec.MeasuredAt
 	w.updatedAt = time.Now()
 }
 
 func CreateWeight(
 	userID valueobject.UserID,
-	weightKg valueobject.WeightKg,
-	bodyFatPercentage *valueobject.Percentage,
-	skeletalMuscleKg *valueobject.WeightKg,
-	measuredAt time.Time,
+	spec WeightSpec,
 ) *Weight {
 	now := time.Now()
 	return &Weight{
 		id:                valueobject.NewPrimaryID[valueobject.WeightID](),
 		userID:            userID,
-		weightKg:          weightKg,
-		bodyFatPercentage: bodyFatPercentage,
-		skeletalMuscleKg:  skeletalMuscleKg,
-		measuredAt:        measuredAt,
+		weightKg:          spec.WeightKg,
+		bodyFatPercentage: spec.BodyFatPercentage,
+		skeletalMuscleKg:  spec.SkeletalMuscleKg,
+		measuredAt:        spec.MeasuredAt,
 		createdAt:         now,
 		updatedAt:         now,
 	}
