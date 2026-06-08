@@ -56,7 +56,7 @@ type RoutineExerciseDTO struct {
 	DisplayOrder int    `json:"display_order"`
 }
 
-func NewRoutineExerciseDTO(e *trainingdomain.RoutineExerciseView) RoutineExerciseDTO {
+func RoutineExerciseFromEntity(e *trainingdomain.RoutineExerciseView) RoutineExerciseDTO {
 	return RoutineExerciseDTO{
 		ID:           e.ID.Value(),
 		ExerciseID:   e.ExerciseID.Value(),
@@ -74,7 +74,7 @@ type RoutineDTO struct {
 	RoutineExercises []RoutineExerciseDTO `json:"routine_exercises"`
 }
 
-func NewRoutineDTO(r *trainingdomain.RoutineView) RoutineDTO {
+func RoutineFromEntity(r *trainingdomain.RoutineView) RoutineDTO {
 	return RoutineDTO{
 		ID:        r.ID.Value(),
 		UserID:    r.UserID.Value(),
@@ -82,7 +82,7 @@ func NewRoutineDTO(r *trainingdomain.RoutineView) RoutineDTO {
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,
 		RoutineExercises: lo.Map(r.RoutineExercises, func(e trainingdomain.RoutineExerciseView, _ int) RoutineExerciseDTO {
-			return NewRoutineExerciseDTO(&e)
+			return RoutineExerciseFromEntity(&e)
 		}),
 	}
 }

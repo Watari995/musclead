@@ -178,7 +178,7 @@ func (h *MealHandler) Find(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, err)
 		return
 	}
-	resp := mealdto.NewMealDTO(output.Meal, h.urlBuilder)
+	resp := mealdto.FromEntity(output.Meal, h.urlBuilder)
 	httpx.WriteJSON(w, http.StatusOK, resp)
 }
 
@@ -345,7 +345,7 @@ func (h *MealHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	response := mealdto.ListMealsResponse{
 		Meals: lo.Map(output.Meals, func(m *mealdomain.Meal, _ int) mealdto.MealDTO {
-			return mealdto.NewMealDTO(m, h.urlBuilder)
+			return mealdto.FromEntity(m, h.urlBuilder)
 		}),
 		Pagination: shareddto.NewPaginationDTO(output.Pagination),
 	}
