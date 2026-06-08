@@ -36,3 +36,11 @@ func NewPercentage(v decimal.Decimal) (*Percentage, error) {
 	}
 	return &p, nil
 }
+
+func NewPercentageFromString(s string) (*Percentage, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	return NewPercentage(d)
+}
