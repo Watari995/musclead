@@ -132,3 +132,27 @@ resource "aws_security_group" "rds" {
     Name = "musclead-rds-sg"
   }
 }
+
+resource "aws_security_group" "cache" {
+  name        = "musclead-cache-sg"
+  description = "Cache: allow :6379 from BE Fargate SG only"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "Redis from BE Fargate SG"
+    from_port       = 6379
+    to_port         = 6379
+    protocol        = "tcp"
+    security_groups = [aws_security_group.server_fargate.id]
+  }
+  egress {
+    description = "All outbound (ECR pull, RDS, etc.)"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "musclead-cache-sg"
+  }
+}
