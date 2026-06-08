@@ -75,3 +75,10 @@ variable "aws_region" {
   description = "AWS region(BE が AWS SDK 初期化で使用)"
   type        = string
 }
+
+
+# ── Cache ─────────────
+variable "cache_endpoint" {
+  description = "Cacheのエンドポイント"
+  type        = string
+}
