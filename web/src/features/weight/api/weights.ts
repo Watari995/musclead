@@ -9,6 +9,14 @@ import { getAccessToken } from "@/shared/auth/access-token";
 import { toWeight, type Weight, type WeightDTO } from "../model/weight";
 
 export const WEIGHTS_QUERY_KEY = ["weights"] as const;
+export const WEIGHT_TIMESERIES_QUERY_KEY = ["weights", "timeseries"] as const;
+
+export type WeightTimeseriesPeriod =
+  | "1week"
+  | "1month"
+  | "3months"
+  | "halfyear"
+  | "1year";
 
 export type UpsertWeightRequest = {
   weight_kg: string;
@@ -98,6 +106,33 @@ export function useUpdateWeightMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WEIGHTS_QUERY_KEY });
+    },
+  });
+}
+
+export function useWeightTimeseriesQuery(
+  period: WeightTimeseriesPeriod,
+  enabled: boolean = true,
+) {
+  return useQuery({
+    queryKey: [...WEIGHT_TIMESERIES_QUERY_KEY, period],
+    enabled,
+    queryFn: async (): Promise<Weight[]> => {
+      const params = new URLSearchParams({ period });
+      const res = await fetch(
+        `${baseUrl()}/weights/timeseries?${params.toString()}`,
+        {
+          credentials: "include",
+          headers: { ...authHeaders() },
+        },
+      );
+      if (!res.ok) {
+        throw new Error(
+          `failed to fetch timeseries (HTTP ${res.status})`,
+        );
+      }
+      const data = (await res.json()) as { weights?: WeightDTO[] };
+      return (data.weights ?? []).map(toWeight);
     },
   });
 }
