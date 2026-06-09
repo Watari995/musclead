@@ -52,6 +52,11 @@ type ListWeightsResponse struct {
 	Pagination shareddto.PaginationDTO `json:"pagination"`
 }
 
+type TimeseriesWeightsResponse struct {
+	Period  string      `json:"period"`
+	Weights []WeightDTO `json:"weights"`
+}
+
 type WeightDTO struct {
 	ID                string    `json:"id"`
 	WeightKg          string    `json:"weight_kg"`

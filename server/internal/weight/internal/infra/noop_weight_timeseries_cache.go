@@ -10,7 +10,7 @@ import (
 
 type NoOpWeightTimeseriesCache struct{}
 
-func NewNoOpWeightTimeseriesCache() *NoOpWeightTimeseriesCache {
+func NewNoOpWeightTimeseriesCache() weightdomain.WeightTimeseriesCache {
 	return &NoOpWeightTimeseriesCache{}
 }
 
@@ -18,11 +18,7 @@ func (c *NoOpWeightTimeseriesCache) FindByPeriod(_ context.Context, _ valueobjec
 	return nil, false, nil
 }
 
-func (c *NoOpWeightTimeseriesCache) Add(_ context.Context, _ *weightdomain.Weight) error {
-	return nil
-}
-
-func (c *NoOpWeightTimeseriesCache) Update(_ context.Context, _ *weightdomain.Weight) error {
+func (c *NoOpWeightTimeseriesCache) Save(_ context.Context, _ *weightdomain.Weight) error {
 	return nil
 }
 

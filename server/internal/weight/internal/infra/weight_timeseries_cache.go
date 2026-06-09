@@ -84,7 +84,7 @@ func (c *RedisWeightTimeseriesCache) Save(ctx context.Context, weight *weightdom
 	idx := c.idxKey(weight.UserID())
 	data := c.dataKey(weight.UserID())
 
-	// MULTI/EXECでZADDとHSETをatomicに実行する
+	// MULTI/EXEC でZADDとHSETをatomicに実行する
 	_, err = c.client.TxPipelined(ctx, func(p redis.Pipeliner) error {
 		p.ZAdd(ctx, idx, redis.Z{Score: float64(weight.MeasuredAt().Unix()), Member: weight.ID().Value()})
 		p.HSet(ctx, data, weight.ID().Value(), jsonStr)

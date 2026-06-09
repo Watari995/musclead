@@ -2,6 +2,7 @@ package weightusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -14,7 +15,8 @@ type DeleteWeightByIDInput struct {
 }
 
 type DeleteWeightByID struct {
-	weightRepo weightdomain.WeightRepository
+	weightRepo  weightdomain.WeightRepository
+	weightCache weightdomain.WeightTimeseriesCache
 }
 
 func (uc *DeleteWeightByID) Execute(ctx context.Context, input DeleteWeightByIDInput) error {
@@ -28,9 +30,12 @@ func (uc *DeleteWeightByID) Execute(ctx context.Context, input DeleteWeightByIDI
 	if err := uc.weightRepo.DeleteByID(ctx, input.ID); err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
+	if err := uc.weightCache.Delete(ctx, input.UserID, input.ID); err != nil {
+		slog.Warn("cache delete failed", "err", err, "weight", input.ID.Value())
+	}
 	return nil
 }
 
-func NewDeleteWeightByID(weightRepo weightdomain.WeightRepository) *DeleteWeightByID {
-	return &DeleteWeightByID{weightRepo: weightRepo}
+func NewDeleteWeightByID(weightRepo weightdomain.WeightRepository, weightCache weightdomain.WeightTimeseriesCache) *DeleteWeightByID {
+	return &DeleteWeightByID{weightRepo: weightRepo, weightCache: weightCache}
 }

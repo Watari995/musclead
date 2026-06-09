@@ -4,29 +4,40 @@ package weight
 
 import (
 	"net/http"
+	"time"
 
+	weightdomain "github.com/Watari995/musclead/internal/weight/internal/domain"
 	weighthandler "github.com/Watari995/musclead/internal/weight/internal/handler"
 	weightinfra "github.com/Watari995/musclead/internal/weight/internal/infra"
 	weightusecase "github.com/Watari995/musclead/internal/weight/internal/usecase"
 	"github.com/go-gorp/gorp/v3"
+	"github.com/redis/go-redis/v9"
 )
 
 type Module struct {
 	Handler http.Handler
 }
 
-func NewModule(dbmap *gorp.DbMap) *Module {
+func NewModule(dbmap *gorp.DbMap, redisClient *redis.Client) *Module {
 	// repository
 	dbmap.AddTableWithName(weightinfra.WeightModel{}, "weights").SetKeys(false, "ID")
 	repo := weightinfra.NewWeightRepository(dbmap)
+	var cache weightdomain.WeightTimeseriesCache
+	if redisClient != nil {
+		cache = weightinfra.NewRedisWeightTimeseriesCache(redisClient, 24*time.Hour)
+	} else {
+		cache = weightinfra.NewNoOpWeightTimeseriesCache()
+	}
 
 	// use-case
-	record := weightusecase.NewRecordWeight(repo)
+	record := weightusecase.NewRecordWeight(repo, cache)
 	find := weightusecase.NewFindWeightByID(repo)
 	list := weightusecase.NewListWeights(repo)
-	update := weightusecase.NewUpdateWeight(repo)
-	delete := weightusecase.NewDeleteWeightByID(repo)
+	update := weightusecase.NewUpdateWeight(repo, cache)
+	delete := weightusecase.NewDeleteWeightByID(repo, cache)
+	getTimeseries := weightusecase.NewGetWeightTimeseries(repo, cache)
+
 	return &Module{
-		Handler: weighthandler.New(record, find, list, update, delete),
+		Handler: weighthandler.New(record, find, list, update, delete, getTimeseries),
 	}
 }
