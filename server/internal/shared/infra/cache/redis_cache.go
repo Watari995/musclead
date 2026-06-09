@@ -13,19 +13,8 @@ type RedisCache struct {
 	client *redis.Client
 }
 
-func NewRedisCache(ctx context.Context, addr string) (*RedisCache, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr:         addr,
-		DialTimeout:  500 * time.Millisecond,
-		ReadTimeout:  100 * time.Millisecond,
-		WriteTimeout: 100 * time.Millisecond,
-	})
-	// Pingで帰ってこなかったらerrorを返す (mainでnoopを使用するようにfallback)
-	if err := client.Ping(ctx).Err(); err != nil {
-		_ = client.Close()
-		return nil, err
-	}
-	return &RedisCache{client: client}, nil
+func NewRedisCache(client *redis.Client) *RedisCache {
+	return &RedisCache{client: client}
 }
 
 func (c *RedisCache) Get(ctx context.Context, key string) (string, error) {

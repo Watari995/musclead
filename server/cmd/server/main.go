@@ -41,6 +41,7 @@ import (
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -81,11 +82,9 @@ func run() error {
 	s3RawClient := s3.NewFromConfig(awsCfg)
 	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
 	urlBuilder := sharedstorage.NewS3URLBuilder(os.Getenv("AWS_REGION"), os.Getenv("STORAGE_BUCKET"))
-	mux := newMux(dbmap, storageClient, urlBuilder)
-
-	cacheClient := newCache(context.Background())
-	slog.Info("cache initialized", "type", fmt.Sprintf("%T", cacheClient))
-	_ = cacheClient
+	redisClient := newRedisClient(context.Background())
+	slog.Info("redis client initialized", "type", fmt.Sprintf("%T", redisClient))
+	mux := newMux(dbmap, storageClient, urlBuilder, redisClient)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -142,7 +141,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) http.Handler {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client) http.Handler {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -155,7 +154,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
 	trainingModule := training.NewModule(dbmap)
-	weightModule := weight.NewModule(dbmap)
+	weightModule := weight.NewModule(dbmap, redisClient)
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))
@@ -199,19 +198,31 @@ func getenv(key, def string) string {
 	return def
 }
 
-func newCache(ctx context.Context) shareddomain.Cache {
+func newRedisClient(ctx context.Context) *redis.Client {
 	host := os.Getenv("REDIS_HOST")
 	if host == "" {
-		slog.Info("REDIS_HOST not set, using NoOpCache")
-		return cacheinfra.NewNoOpCache()
+		slog.Info("REDIS_HOST not set, using nil redis client")
+		return nil
 	}
 	port := getenv("REDIS_PORT", "6379")
 	addr := host + ":" + port
-	c, err := cacheinfra.NewRedisCache(ctx, addr)
-	if err != nil {
-		// fall back
-		slog.Warn("redis ping failed, falling back to NoOpCache", "err", err, "addr", addr)
+	client := redis.NewClient(&redis.Options{
+		Addr:         addr,
+		DialTimeout:  500 * time.Millisecond,
+		ReadTimeout:  100 * time.Millisecond,
+		WriteTimeout: 100 * time.Millisecond,
+	})
+	if err := client.Ping(ctx).Err(); err != nil {
+		slog.Warn("redis ping failed", "err", err, "addr", addr)
+		_ = client.Close()
+		return nil
+	}
+	return client
+}
+
+func newCache(client *redis.Client) shareddomain.Cache {
+	if client == nil {
 		return cacheinfra.NewNoOpCache()
 	}
-	return c
+	return cacheinfra.NewRedisCache(client)
 }
