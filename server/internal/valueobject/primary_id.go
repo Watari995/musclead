@@ -31,3 +31,7 @@ type ExerciseID struct{ PrimaryIDBase }
 type RoutineID struct{ PrimaryIDBase }
 type RoutineExerciseID struct{ PrimaryIDBase }
 type WeightID struct{ PrimaryIDBase }
+type PaymentID struct{ PrimaryIDBase }
+type PaymentEventID struct{ PrimaryIDBase }
+type StripeEventID struct{ PrimaryIDBase }
+type OutboxEventID struct{ PrimaryIDBase }
