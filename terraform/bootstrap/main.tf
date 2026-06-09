@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-northeast-1"
+  region  = "ap-northeast-1"
   profile = "musclead-admin"
 }
 

@@ -2,6 +2,7 @@ package weightusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -19,7 +20,8 @@ type UpdateWeightOutput struct {
 }
 
 type UpdateWeight struct {
-	weightRepo weightdomain.WeightRepository
+	weightRepo  weightdomain.WeightRepository
+	weightCache weightdomain.WeightTimeseriesCache
 }
 
 func (uc *UpdateWeight) Execute(ctx context.Context, input UpdateWeightInput) (*UpdateWeightOutput, error) {
@@ -34,9 +36,14 @@ func (uc *UpdateWeight) Execute(ctx context.Context, input UpdateWeightInput) (*
 	if err := uc.weightRepo.Save(ctx, weight); err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
+
+	// cache save
+	if err := uc.weightCache.Save(ctx, weight); err != nil {
+		slog.Warn("cache save failed", "err", err, "weight", weight.ID().Value())
+	}
 	return &UpdateWeightOutput{WeightID: weight.ID()}, nil
 }
 
-func NewUpdateWeight(weightRepo weightdomain.WeightRepository) *UpdateWeight {
-	return &UpdateWeight{weightRepo: weightRepo}
+func NewUpdateWeight(weightRepo weightdomain.WeightRepository, weightCache weightdomain.WeightTimeseriesCache) *UpdateWeight {
+	return &UpdateWeight{weightRepo: weightRepo, weightCache: weightCache}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/Watari995/musclead/internal/pagination"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -89,6 +90,28 @@ func (r *weightRepository) FindAllByUserIDWithOffsetPagination(ctx context.Conte
 		result[i] = weight
 	}
 	return result, paginator, nil
+}
+
+func (r *weightRepository) FindAllByUserIDAndPeriod(ctx context.Context, userID valueobject.UserID, from, to time.Time) ([]*weightdomain.Weight, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var rows []WeightModel
+	_, err = q.Select(&rows, "SELECT id, user_id, weight_kg, body_fat_percentage, skeletal_muscle_kg, measured_at, created_at, updated_at FROM weights WHERE user_id = ? AND measured_at BETWEEN ? AND ? ORDER BY measured_at ASC", userIDBytes, from, to)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*weightdomain.Weight, len(rows))
+	for i, row := range rows {
+		weight, err := toEntity(row)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = weight
+	}
+	return result, nil
 }
 
 func (r *weightRepository) Save(ctx context.Context, weight *weightdomain.Weight) error {

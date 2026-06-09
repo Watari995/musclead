@@ -31,6 +31,7 @@ import (
 	_ "github.com/Watari995/musclead/internal/shared"
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	cacheinfra "github.com/Watari995/musclead/internal/shared/infra/cache"
 	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/training"
 	"github.com/Watari995/musclead/internal/user"
@@ -40,6 +41,7 @@ import (
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -80,7 +82,9 @@ func run() error {
 	s3RawClient := s3.NewFromConfig(awsCfg)
 	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
 	urlBuilder := sharedstorage.NewS3URLBuilder(os.Getenv("AWS_REGION"), os.Getenv("STORAGE_BUCKET"))
-	mux := newMux(dbmap, storageClient, urlBuilder)
+	redisClient := newRedisClient(context.Background())
+	slog.Info("redis client initialized", "type", fmt.Sprintf("%T", redisClient))
+	mux := newMux(dbmap, storageClient, urlBuilder, redisClient)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -137,7 +141,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) http.Handler {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client) http.Handler {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -150,7 +154,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
 	trainingModule := training.NewModule(dbmap)
-	weightModule := weight.NewModule(dbmap)
+	weightModule := weight.NewModule(dbmap, redisClient)
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))
@@ -192,4 +196,33 @@ func getenv(key, def string) string {
 		return v
 	}
 	return def
+}
+
+func newRedisClient(ctx context.Context) *redis.Client {
+	host := os.Getenv("REDIS_HOST")
+	if host == "" {
+		slog.Info("REDIS_HOST not set, using nil redis client")
+		return nil
+	}
+	port := getenv("REDIS_PORT", "6379")
+	addr := host + ":" + port
+	client := redis.NewClient(&redis.Options{
+		Addr:         addr,
+		DialTimeout:  500 * time.Millisecond,
+		ReadTimeout:  100 * time.Millisecond,
+		WriteTimeout: 100 * time.Millisecond,
+	})
+	if err := client.Ping(ctx).Err(); err != nil {
+		slog.Warn("redis ping failed", "err", err, "addr", addr)
+		_ = client.Close()
+		return nil
+	}
+	return client
+}
+
+func newCache(client *redis.Client) shareddomain.Cache {
+	if client == nil {
+		return cacheinfra.NewNoOpCache()
+	}
+	return cacheinfra.NewRedisCache(client)
 }

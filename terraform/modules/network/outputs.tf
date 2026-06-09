@@ -22,3 +22,8 @@ output "rds_sg_id" {
   description = "RDS用SGのID"
   value       = aws_security_group.rds.id
 }
+
+output "cache_sg_id" {
+  description = "Cache用SGのID"
+  value       = aws_security_group.cache.id
+}
