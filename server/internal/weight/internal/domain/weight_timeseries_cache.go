@@ -9,7 +9,6 @@ import (
 
 type WeightTimeseriesCache interface {
 	FindByPeriod(ctx context.Context, userID valueobject.UserID, from, to time.Time) (weights []*Weight, hit bool, err error)
-	Add(ctx context.Context, weight *Weight) error
-	Update(ctx context.Context, weight *Weight) error
+	Save(ctx context.Context, weight *Weight) error
 	Delete(ctx context.Context, userID valueobject.UserID, weightID valueobject.WeightID) error
 }
