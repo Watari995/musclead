@@ -20,3 +20,7 @@ func (c *NoOpCache) Get(_ context.Context, _ string) (string, error) {
 func (c *NoOpCache) Set(_ context.Context, _ string, _ string, _ time.Duration) error {
 	return nil
 }
+
+func (c *NoOpCache) DeleteByPattern(ctx context.Context, pattern string) error {
+	return nil
+}
