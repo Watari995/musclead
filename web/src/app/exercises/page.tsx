@@ -3,6 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   ExerciseInUseError,
@@ -25,16 +42,23 @@ export default function ExercisesPage() {
   const del = useDeleteExerciseMutation();
   const reorder = useReorderExercisesMutation();
 
+  const sensors = useSensors(
+    // ハンドルから 6px 以上動かして初めてドラッグ開始。 タップ(編集/削除)と誤検知しないため。
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
   if (!ready || !token) return null;
 
   const exercises = query.data ?? [];
 
-  const move = (index: number, direction: -1 | 1) => {
-    const to = index + direction;
-    if (to < 0 || to >= exercises.length) return;
-    const next = [...exercises];
-    [next[index], next[to]] = [next[to], next[index]];
-    reorder.mutate(next);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = exercises.findIndex((e) => e.id === active.id);
+    const to = exercises.findIndex((e) => e.id === over.id);
+    if (from === -1 || to === -1) return;
+    reorder.mutate(arrayMove(exercises, from, to));
   };
 
   return (
@@ -70,67 +94,76 @@ export default function ExercisesPage() {
       )}
 
       {exercises.length > 0 && (
-        <ul className="space-y-2">
-          {exercises.map((ex, index) => (
-            <ExerciseRow
-              key={ex.id}
-              exercise={ex}
-              onMoveUp={index > 0 ? () => move(index, -1) : undefined}
-              onMoveDown={
-                index < exercises.length - 1 ? () => move(index, 1) : undefined
-              }
-              reordering={reorder.isPending}
-              onDelete={() => {
-                if (confirm(`「${ex.name}」 を削除しますか?`)) {
-                  del.mutate(ex.id);
-                }
-              }}
-              deleting={del.isPending}
-            />
-          ))}
-        </ul>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={exercises.map((e) => e.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul className="space-y-2">
+              {exercises.map((ex) => (
+                <SortableExerciseRow
+                  key={ex.id}
+                  exercise={ex}
+                  onDelete={() => {
+                    if (confirm(`「${ex.name}」 を削除しますか?`)) {
+                      del.mutate(ex.id);
+                    }
+                  }}
+                  deleting={del.isPending}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );
 }
 
-function ExerciseRow({
+function SortableExerciseRow({
   exercise,
-  onMoveUp,
-  onMoveDown,
-  reordering,
   onDelete,
   deleting,
 }: {
   exercise: Exercise;
-  onMoveUp?: () => void;
-  onMoveDown?: () => void;
-  reordering: boolean;
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: exercise.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <li className="bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-2">
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          type="button"
-          onClick={onMoveUp}
-          disabled={reordering || !onMoveUp}
-          className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 px-2 h-8"
-          aria-label="上へ"
-        >
-          ↑
-        </button>
-        <button
-          type="button"
-          onClick={onMoveDown}
-          disabled={reordering || !onMoveDown}
-          className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 px-2 h-8"
-          aria-label="下へ"
-        >
-          ↓
-        </button>
-      </div>
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-2 ${
+        isDragging ? "z-10 shadow-lg opacity-90" : ""
+      }`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="ドラッグして並び替え"
+        className="shrink-0 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] touch-none cursor-grab active:cursor-grabbing px-1 h-8 inline-flex items-center"
+      >
+        <GripIcon />
+      </button>
       <Link
         href={`/exercises/${exercise.id}/edit`}
         className="flex-1 min-w-0 hover:opacity-70 transition-opacity"
@@ -154,5 +187,18 @@ function ExerciseRow({
         </button>
       </div>
     </li>
+  );
+}
+
+function GripIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <circle cx="5" cy="3" r="1.4" />
+      <circle cx="11" cy="3" r="1.4" />
+      <circle cx="5" cy="8" r="1.4" />
+      <circle cx="11" cy="8" r="1.4" />
+      <circle cx="5" cy="13" r="1.4" />
+      <circle cx="11" cy="13" r="1.4" />
+    </svg>
   );
 }
