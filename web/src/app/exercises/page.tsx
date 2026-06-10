@@ -3,11 +3,29 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   ExerciseInUseError,
   useDeleteExerciseMutation,
   useExercisesQuery,
+  useReorderExercisesMutation,
 } from "@/features/training/api/exercises";
 import type { Exercise } from "@/features/training/model/exercise";
 import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
@@ -22,8 +40,26 @@ export default function ExercisesPage() {
 
   const query = useExercisesQuery(Boolean(token));
   const del = useDeleteExerciseMutation();
+  const reorder = useReorderExercisesMutation();
+
+  const sensors = useSensors(
+    // ハンドルから 6px 以上動かして初めてドラッグ開始。 タップ(編集/削除)と誤検知しないため。
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   if (!ready || !token) return null;
+
+  const exercises = query.data ?? [];
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = exercises.findIndex((e) => e.id === active.id);
+    const to = exercises.findIndex((e) => e.id === over.id);
+    if (from === -1 || to === -1) return;
+    reorder.mutate(arrayMove(exercises, from, to));
+  };
 
   return (
     <div className="space-y-6">
@@ -47,34 +83,48 @@ export default function ExercisesPage() {
             : (del.error as Error).message}
         </ErrorText>
       )}
+      {reorder.isError && (
+        <ErrorText>並び替えに失敗しました。 時間をおいて再度お試しください。</ErrorText>
+      )}
 
-      {query.data && query.data.length === 0 && (
+      {query.data && exercises.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
           まだ種目が登録されていません。 「+ 新しい種目」 から作成してください。
         </Card>
       )}
 
-      {query.data && query.data.length > 0 && (
-        <ul className="space-y-2">
-          {query.data.map((ex) => (
-            <ExerciseRow
-              key={ex.id}
-              exercise={ex}
-              onDelete={() => {
-                if (confirm(`「${ex.name}」 を削除しますか?`)) {
-                  del.mutate(ex.id);
-                }
-              }}
-              deleting={del.isPending}
-            />
-          ))}
-        </ul>
+      {exercises.length > 0 && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={exercises.map((e) => e.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul className="space-y-2">
+              {exercises.map((ex) => (
+                <SortableExerciseRow
+                  key={ex.id}
+                  exercise={ex}
+                  onDelete={() => {
+                    if (confirm(`「${ex.name}」 を削除しますか?`)) {
+                      del.mutate(ex.id);
+                    }
+                  }}
+                  deleting={del.isPending}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );
 }
 
-function ExerciseRow({
+function SortableExerciseRow({
   exercise,
   onDelete,
   deleting,
@@ -83,16 +133,42 @@ function ExerciseRow({
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: exercise.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <li className="bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-4">
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-2 ${
+        isDragging ? "z-10 shadow-lg opacity-90" : ""
+      }`}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        aria-label="ドラッグして並び替え"
+        className="shrink-0 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] touch-none cursor-grab active:cursor-grabbing px-1 h-8 inline-flex items-center"
+      >
+        <GripIcon />
+      </button>
       <Link
         href={`/exercises/${exercise.id}/edit`}
         className="flex-1 min-w-0 hover:opacity-70 transition-opacity"
       >
         <p className="text-sm font-bold tracking-tight">{exercise.name}</p>
-        <p className="text-xs text-[var(--color-ink-muted)]">
-          登録: {new Date(exercise.createdAt).toLocaleDateString("ja-JP")}
-        </p>
       </Link>
       <div className="flex gap-1 shrink-0">
         <Link
@@ -111,5 +187,18 @@ function ExerciseRow({
         </button>
       </div>
     </li>
+  );
+}
+
+function GripIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <circle cx="5" cy="3" r="1.4" />
+      <circle cx="11" cy="3" r="1.4" />
+      <circle cx="5" cy="8" r="1.4" />
+      <circle cx="11" cy="8" r="1.4" />
+      <circle cx="5" cy="13" r="1.4" />
+      <circle cx="11" cy="13" r="1.4" />
+    </svg>
   );
 }

@@ -22,7 +22,15 @@ type CreateExercise struct {
 }
 
 func (uc *CreateExercise) Execute(ctx context.Context, input CreateExerciseInput) (*CreateExerciseOutput, error) {
-	exercise := trainingdomain.CreateExercise(input.UserID, input.Name)
+	next, err := uc.exerciseRepo.NextDisplayOrder(ctx, input.UserID)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	displayOrder, err := valueobject.NewNonNegativeInt(next)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	exercise := trainingdomain.CreateExercise(input.UserID, input.Name, *displayOrder)
 	if err := uc.exerciseRepo.Save(ctx, exercise); err != nil {
 		if myerror.IsCode(err, myerror.ErrorCodes.Training.ExerciseNameAlreadyExistsError) {
 			return nil, err

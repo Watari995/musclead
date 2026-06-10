@@ -237,6 +237,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/exercises/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * エクササイズ並び替え
+         * @description 種目マスタ全件を、 渡された exercise_ids の順序どおりに並び替える。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description 並び替え後の ExerciseID 一覧(全件) */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ReorderExercisesRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/exercises/{id}": {
         parameters: {
             query?: never;
@@ -1731,6 +1791,7 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_training_dto.ExerciseDTO": {
             created_at?: string;
+            display_order?: number;
             id?: string;
             name?: string;
             updated_at?: string;
@@ -1770,6 +1831,9 @@ export interface components {
             rest_seconds?: number;
             set_number?: number;
             weight_kg?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.ReorderExercisesRequest": {
+            exercise_ids?: string[];
         };
         "github_com_Watari995_musclead_internal_training_dto.RoutineDTO": {
             created_at?: string;

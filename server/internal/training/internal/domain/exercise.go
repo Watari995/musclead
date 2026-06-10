@@ -7,11 +7,12 @@ import (
 )
 
 type Exercise struct {
-	id        valueobject.ExerciseID
-	userID    valueobject.UserID
-	name      valueobject.String50
-	createdAt time.Time
-	updatedAt time.Time
+	id           valueobject.ExerciseID
+	userID       valueobject.UserID
+	name         valueobject.String50
+	displayOrder valueobject.NonNegativeInt
+	createdAt    time.Time
+	updatedAt    time.Time
 }
 
 func (e *Exercise) ID() valueobject.ExerciseID {
@@ -31,6 +32,15 @@ func (e *Exercise) SetName(name valueobject.String50) {
 	e.updatedAt = time.Now()
 }
 
+func (e *Exercise) DisplayOrder() valueobject.NonNegativeInt {
+	return e.displayOrder
+}
+
+func (e *Exercise) SetDisplayOrder(displayOrder valueobject.NonNegativeInt) {
+	e.displayOrder = displayOrder
+	e.updatedAt = time.Now()
+}
+
 func (e *Exercise) CreatedAt() time.Time {
 	return e.createdAt
 }
@@ -42,14 +52,16 @@ func (e *Exercise) UpdatedAt() time.Time {
 func CreateExercise(
 	userID valueobject.UserID,
 	name valueobject.String50,
+	displayOrder valueobject.NonNegativeInt,
 ) *Exercise {
 	now := time.Now()
 	return &Exercise{
-		id:        valueobject.NewPrimaryID[valueobject.ExerciseID](),
-		userID:    userID,
-		name:      name,
-		createdAt: now,
-		updatedAt: now,
+		id:           valueobject.NewPrimaryID[valueobject.ExerciseID](),
+		userID:       userID,
+		name:         name,
+		displayOrder: displayOrder,
+		createdAt:    now,
+		updatedAt:    now,
 	}
 }
 
@@ -57,14 +69,16 @@ func NewExercise(
 	id valueobject.ExerciseID,
 	userID valueobject.UserID,
 	name valueobject.String50,
+	displayOrder valueobject.NonNegativeInt,
 	createdAt time.Time,
 	updatedAt time.Time,
 ) *Exercise {
 	return &Exercise{
-		id:        id,
-		userID:    userID,
-		name:      name,
-		createdAt: createdAt,
-		updatedAt: updatedAt,
+		id:           id,
+		userID:       userID,
+		name:         name,
+		displayOrder: displayOrder,
+		createdAt:    createdAt,
+		updatedAt:    updatedAt,
 	}
 }
