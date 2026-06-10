@@ -26,11 +26,6 @@ func NewHandleFailure(retryStrategy paymentdomain.RetryStrategy) *HandleFailure 
 	return &HandleFailure{retryStrategy: retryStrategy}
 }
 
-// Execute は失敗時の挙動を RetryStrategy に委譲する。
-//
-// TODO (User 実装):
-//
-//	return uc.retryStrategy.OnFailure(ctx, input.StripeEvent, input.Cause)
 func (uc *HandleFailure) Execute(ctx context.Context, input HandleFailureInput) error {
-	return errNotImplemented
+	return uc.retryStrategy.OnFailure(ctx, input.StripeEvent, input.Cause)
 }

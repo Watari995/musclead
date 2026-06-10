@@ -4,7 +4,19 @@ import (
 	"context"
 
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
+	"github.com/Watari995/musclead/internal/valueobject"
 )
+
+type ParseWebhookEventInput struct {
+	Payload         []byte // HTTP body 全文 (改ざん検証のため []byte で保持、 文字列化しない)
+	SignatureHeader string // Stripe-Signature ヘッダの値
+}
+
+type ParseWebhookEventOutput struct {
+	StripeEventID string               // Stripe 発行の一意 ID (evt_xxx)、 stripe_events.stripe_event_id に保存
+	EventType     string               // 'checkout.session.completed' 等、 usecase 分岐に使う
+	Payload       valueobject.Metadata // event の data 部分、 stripe_events.payload に保存
+}
 
 // ParseWebhookEvent は Stripe Webhook の署名検証 + event 取り出しを行う薄い wrapper usecase。
 //
@@ -20,11 +32,18 @@ func NewParseWebhookEvent(stripeClient paymentdomain.StripeClient) *ParseWebhook
 	return &ParseWebhookEvent{stripeClient: stripeClient}
 }
 
-// Execute は payload + signature を受け取り、 検証済み event 情報を返す。
-//
-// TODO (User 実装):
-//
-//	return uc.stripeClient.ParseWebhookEvent(ctx, input)
-func (uc *ParseWebhookEvent) Execute(ctx context.Context, input paymentdomain.ParseWebhookEventInput) (paymentdomain.ParseWebhookEventOutput, error) {
-	return paymentdomain.ParseWebhookEventOutput{}, errNotImplemented
+// return uc.stripeClient.ParseWebhookEvent(ctx, input)
+func (uc *ParseWebhookEvent) Execute(ctx context.Context, input ParseWebhookEventInput) (ParseWebhookEventOutput, error) {
+	output, err := uc.stripeClient.ParseWebhookEvent(ctx, paymentdomain.ParseWebhookEventInput{
+		Payload:         input.Payload,
+		SignatureHeader: input.SignatureHeader,
+	})
+	if err != nil {
+		return ParseWebhookEventOutput{}, err
+	}
+	return ParseWebhookEventOutput{
+		StripeEventID: output.StripeEventID,
+		EventType:     output.EventType,
+		Payload:       output.Payload,
+	}, nil
 }
