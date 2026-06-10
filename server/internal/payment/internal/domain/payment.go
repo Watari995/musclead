@@ -6,6 +6,8 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
+// Payment は payments テーブルに対応する集約。
+// field 順は migration (sql/migrations/000015_create_payments.up.sql) の column 順に揃える。
 type Payment struct {
 	id                      valueobject.PaymentID
 	userID                  valueobject.UserID
@@ -13,8 +15,8 @@ type Payment struct {
 	currency                valueobject.Currency
 	status                  valueobject.PaymentStatus
 	stripeCustomerID        *string
-	stripeCheckoutSessionID *string
 	stripeSubscriptionID    *string
+	stripeCheckoutSessionID *string
 	checkoutURL             *valueobject.URL
 	currentPeriodEnd        *time.Time
 	succeededAt             *time.Time
@@ -48,12 +50,12 @@ func (p *Payment) StripeCustomerID() *string {
 	return p.stripeCustomerID
 }
 
-func (p *Payment) StripeCheckoutSessionID() *string {
-	return p.stripeCheckoutSessionID
-}
-
 func (p *Payment) StripeSubscriptionID() *string {
 	return p.stripeSubscriptionID
+}
+
+func (p *Payment) StripeCheckoutSessionID() *string {
+	return p.stripeCheckoutSessionID
 }
 
 func (p *Payment) CheckoutURL() *valueobject.URL {
@@ -107,8 +109,8 @@ func CreatePayment(
 		currency:                currency,
 		status:                  valueobject.NewPaymentStatusFromCode(valueobject.PaymentStatusPending),
 		stripeCustomerID:        stripeCustomerID,
-		stripeCheckoutSessionID: stripeCheckoutSessionID,
 		stripeSubscriptionID:    nil,
+		stripeCheckoutSessionID: stripeCheckoutSessionID,
 		checkoutURL:             checkoutURL,
 		currentPeriodEnd:        currentPeriodEnd,
 		createdAt:               now,
@@ -123,8 +125,8 @@ func NewPayment(
 	currency valueobject.Currency,
 	status valueobject.PaymentStatus,
 	stripeCustomerID *string,
-	stripeCheckoutSessionID *string,
 	stripeSubscriptionID *string,
+	stripeCheckoutSessionID *string,
 	checkoutURL *valueobject.URL,
 	currentPeriodEnd *time.Time,
 	succeededAt *time.Time,
@@ -140,8 +142,8 @@ func NewPayment(
 		currency:                currency,
 		status:                  status,
 		stripeCustomerID:        stripeCustomerID,
-		stripeCheckoutSessionID: stripeCheckoutSessionID,
 		stripeSubscriptionID:    stripeSubscriptionID,
+		stripeCheckoutSessionID: stripeCheckoutSessionID,
 		checkoutURL:             checkoutURL,
 		currentPeriodEnd:        currentPeriodEnd,
 		succeededAt:             succeededAt,

@@ -43,6 +43,20 @@ func StringToNullString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: true}
 }
 
+func StringPtrToNullString(s *string) sql.NullString {
+	if s == nil {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: *s, Valid: true}
+}
+
+func NewStringFromNullString(s sql.NullString) *string {
+	if !s.Valid {
+		return nil
+	}
+	return &s.String
+}
+
 // String1000ToNullString は *String1000 を sql.NullString に詰める。
 // nil の時は Valid:false(= DB NULL) を返す。
 func String1000ToNullString(v *valueobject.String1000) sql.NullString {
@@ -147,7 +161,6 @@ func NewWeightKgFromNullString(s sql.NullString) (*valueobject.WeightKg, error) 
 	return NewWeightKgFromString(s.String)
 }
 
-
 // ─── UUID ───────────────────────────────────────────────
 
 func UUIDStringFromBytes(b []byte) (string, error) {
@@ -165,4 +178,29 @@ func NewPrimaryIDFromBytes[T valueobject.PrimaryID](b []byte) (*T, error) {
 		return nil, err
 	}
 	return valueobject.NewPrimaryIDFromString[T](s)
+}
+
+// UUID文字列 -> 16 bytes binary
+func UUIDStringToBytes(s string) ([]byte, error) {
+	u, err := uuid.Parse(s)
+	if err != nil {
+		return nil, err
+	}
+	return u[:], nil
+}
+
+// ---- url / URL ─────────────────────────────────────────────
+
+func NewURLFromNullString(s sql.NullString) (*valueobject.URL, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	return valueobject.NewURL(s.String)
+}
+
+func URLPtrToNullString(u *valueobject.URL) sql.NullString {
+	if u == nil {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: u.Value(), Valid: true}
 }
