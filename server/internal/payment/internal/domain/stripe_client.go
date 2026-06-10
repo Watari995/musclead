@@ -46,4 +46,9 @@ type StripeClient interface {
 	// 署名不一致 / パース失敗時は error を返す。
 	// 検証は TX 外で実行する想定 (DB 操作なし、 純粋な HMAC + JSON 処理)。
 	ParseWebhookEvent(ctx context.Context, input ParseWebhookEventInput) (output ParseWebhookEventOutput, err error)
+
+	// CreatePortalSession は Stripe Customer Portal Session を作成し、 リダイレクト URL を返す。
+	// 解約 / カード変更フローで、 クライアントは返り値の URL に遷移する (window.location = portalURL)。
+	// ReturnURL は infra コンストラクタで環境変数から受け取る想定 (環境差分)。
+	CreatePortalSession(ctx context.Context, customerID string) (portalURL valueobject.URL, err error)
 }
