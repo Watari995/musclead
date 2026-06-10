@@ -36,45 +36,6 @@ type InitiatePayment struct {
 	stripeClient     paymentdomain.StripeClient
 }
 
-func NewInitiatePayment(
-	paymentRepo paymentdomain.PaymentRepository,
-	paymentEventRepo paymentdomain.PaymentEventRepository,
-	stripeClient paymentdomain.StripeClient,
-) *InitiatePayment {
-	return &InitiatePayment{
-		paymentRepo:      paymentRepo,
-		paymentEventRepo: paymentEventRepo,
-		stripeClient:     stripeClient,
-	}
-}
-
-// Execute は申込を開始する。
-//
-// TODO (User 実装):
-//
-//	// 1. 既存 Stripe Customer ID 再利用
-//	existing, _ := uc.paymentRepo.FindLatestSucceededByUserID(ctx, input.UserID)
-//	var customerID string
-//	if existing != nil && existing.StripeCustomerID() != nil {
-//	    customerID = *existing.StripeCustomerID()
-//	} else {
-//	    cid, err := uc.stripeClient.CreateCustomer(ctx, paymentdomain.CreateCustomerInput{
-//	        UserID: input.UserID, Email: input.Email,
-//	    })
-//	    if err != nil { return InitiatePaymentOutput{}, err }
-//	    customerID = cid
-//	}
-//
-//	// 2. payment INSERT (pending)
-//	payment := paymentdomain.CreatePayment(input.UserID, input.Amount, currency, &customerID, nil, nil, nil)
-//	if err := uc.paymentRepo.Save(ctx, payment); err != nil { ... }
-//
-//	// 3. Checkout Session 作成
-//	sess, err := uc.stripeClient.CreateCheckoutSession(ctx, paymentdomain.CreateCheckoutSessionInput{
-//	    CustomerID: customerID, PriceID: input.PriceID, PaymentID: payment.ID(),
-//	})
-//
-//	// 4. payment UPDATE + checkout_url を返す
 func (uc *InitiatePayment) Execute(ctx context.Context, input InitiatePaymentInput) (InitiatePaymentOutput, error) {
 	existing, _ := uc.paymentRepo.FindLatestSucceededByUserID(ctx, input.UserID)
 	var stripeCustomerID string
@@ -124,4 +85,16 @@ func (uc *InitiatePayment) Execute(ctx context.Context, input InitiatePaymentInp
 		PaymentID:   payment.ID(),
 		CheckoutURL: sess.CheckoutSessionURL,
 	}, nil
+}
+
+func NewInitiatePayment(
+	paymentRepo paymentdomain.PaymentRepository,
+	paymentEventRepo paymentdomain.PaymentEventRepository,
+	stripeClient paymentdomain.StripeClient,
+) *InitiatePayment {
+	return &InitiatePayment{
+		paymentRepo:      paymentRepo,
+		paymentEventRepo: paymentEventRepo,
+		stripeClient:     stripeClient,
+	}
 }

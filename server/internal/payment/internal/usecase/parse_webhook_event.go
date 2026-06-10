@@ -28,11 +28,6 @@ type ParseWebhookEvent struct {
 	stripeClient paymentdomain.StripeClient
 }
 
-func NewParseWebhookEvent(stripeClient paymentdomain.StripeClient) *ParseWebhookEvent {
-	return &ParseWebhookEvent{stripeClient: stripeClient}
-}
-
-// return uc.stripeClient.ParseWebhookEvent(ctx, input)
 func (uc *ParseWebhookEvent) Execute(ctx context.Context, input ParseWebhookEventInput) (ParseWebhookEventOutput, error) {
 	output, err := uc.stripeClient.ParseWebhookEvent(ctx, paymentdomain.ParseWebhookEventInput{
 		Payload:         input.Payload,
@@ -46,4 +41,8 @@ func (uc *ParseWebhookEvent) Execute(ctx context.Context, input ParseWebhookEven
 		EventType:     output.EventType,
 		Payload:       output.Payload,
 	}, nil
+}
+
+func NewParseWebhookEvent(stripeClient paymentdomain.StripeClient) *ParseWebhookEvent {
+	return &ParseWebhookEvent{stripeClient: stripeClient}
 }

@@ -22,10 +22,10 @@ type HandleFailure struct {
 	retryStrategy paymentdomain.RetryStrategy
 }
 
-func NewHandleFailure(retryStrategy paymentdomain.RetryStrategy) *HandleFailure {
-	return &HandleFailure{retryStrategy: retryStrategy}
-}
-
 func (uc *HandleFailure) Execute(ctx context.Context, input HandleFailureInput) error {
 	return uc.retryStrategy.OnFailure(ctx, input.StripeEvent, input.Cause)
+}
+
+func NewHandleFailure(retryStrategy paymentdomain.RetryStrategy) *HandleFailure {
+	return &HandleFailure{retryStrategy: retryStrategy}
 }

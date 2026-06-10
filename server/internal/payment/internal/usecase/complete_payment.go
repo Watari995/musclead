@@ -31,22 +31,6 @@ type CompletePayment struct {
 	txManager        dbtx.TransactionManager
 }
 
-func NewCompletePayment(
-	paymentRepo paymentdomain.PaymentRepository,
-	paymentEventRepo paymentdomain.PaymentEventRepository,
-	stripeEventRepo paymentdomain.StripeEventRepository,
-	outboxEventRepo paymentdomain.OutboxEventRepository,
-	txManager dbtx.TransactionManager,
-) *CompletePayment {
-	return &CompletePayment{
-		paymentRepo:      paymentRepo,
-		paymentEventRepo: paymentEventRepo,
-		stripeEventRepo:  stripeEventRepo,
-		outboxEventRepo:  outboxEventRepo,
-		txManager:        txManager,
-	}
-}
-
 // Execute は Webhook 受信時の本処理。
 //
 // TODO (User 実装):
@@ -69,4 +53,20 @@ func NewCompletePayment(
 //	})
 func (uc *CompletePayment) Execute(ctx context.Context, input CompletePaymentInput) error {
 	return errNotImplemented
+}
+
+func NewCompletePayment(
+	paymentRepo paymentdomain.PaymentRepository,
+	paymentEventRepo paymentdomain.PaymentEventRepository,
+	stripeEventRepo paymentdomain.StripeEventRepository,
+	outboxEventRepo paymentdomain.OutboxEventRepository,
+	txManager dbtx.TransactionManager,
+) *CompletePayment {
+	return &CompletePayment{
+		paymentRepo:      paymentRepo,
+		paymentEventRepo: paymentEventRepo,
+		stripeEventRepo:  stripeEventRepo,
+		outboxEventRepo:  outboxEventRepo,
+		txManager:        txManager,
+	}
 }

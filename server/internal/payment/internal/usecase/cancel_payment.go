@@ -32,6 +32,15 @@ type CancelPayment struct {
 	txManager        dbtx.TransactionManager
 }
 
+// Execute は Webhook 受信時の本処理。 CompletePayment と同じパターンの TX。
+//
+// TODO (User 実装):
+//   - txManager.Processing 内で stripe_events Create + payments UPDATE + payment_events + outbox INSERT
+//   - 詳細は CompletePayment のコメント参照
+func (uc *CancelPayment) Execute(ctx context.Context, input CancelPaymentInput) error {
+	return errNotImplemented
+}
+
 func NewCancelPayment(
 	paymentRepo paymentdomain.PaymentRepository,
 	paymentEventRepo paymentdomain.PaymentEventRepository,
@@ -46,13 +55,4 @@ func NewCancelPayment(
 		outboxEventRepo:  outboxEventRepo,
 		txManager:        txManager,
 	}
-}
-
-// Execute は Webhook 受信時の本処理。 CompletePayment と同じパターンの TX。
-//
-// TODO (User 実装):
-//   - txManager.Processing 内で stripe_events Create + payments UPDATE + payment_events + outbox INSERT
-//   - 詳細は CompletePayment のコメント参照
-func (uc *CancelPayment) Execute(ctx context.Context, input CancelPaymentInput) error {
-	return errNotImplemented
 }

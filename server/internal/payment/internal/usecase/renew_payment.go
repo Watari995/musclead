@@ -29,6 +29,14 @@ type RenewPayment struct {
 	txManager        dbtx.TransactionManager
 }
 
+// Execute は Webhook 受信時の本処理。 CompletePayment / CancelPayment と同じパターンの TX。
+//
+// TODO (User 実装):
+//   - 詳細は CompletePayment のコメント参照、 status は変えず current_period_end のみ更新
+func (uc *RenewPayment) Execute(ctx context.Context, input RenewPaymentInput) error {
+	return errNotImplemented
+}
+
 func NewRenewPayment(
 	paymentRepo paymentdomain.PaymentRepository,
 	paymentEventRepo paymentdomain.PaymentEventRepository,
@@ -43,12 +51,4 @@ func NewRenewPayment(
 		outboxEventRepo:  outboxEventRepo,
 		txManager:        txManager,
 	}
-}
-
-// Execute は Webhook 受信時の本処理。 CompletePayment / CancelPayment と同じパターンの TX。
-//
-// TODO (User 実装):
-//   - 詳細は CompletePayment のコメント参照、 status は変えず current_period_end のみ更新
-func (uc *RenewPayment) Execute(ctx context.Context, input RenewPaymentInput) error {
-	return errNotImplemented
 }
