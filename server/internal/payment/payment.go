@@ -43,14 +43,13 @@ func (m *Module) Query() publicfunctions.PaymentQuery { return m.query }
 // TODO (User 実装):
 //  1. gorp model 登録 (dbmap.AddTableWithName で PaymentModel / PaymentEventModel / StripeEventModel / OutboxEventModel)
 //  2. Repository × 4 を NewXxxRepository で生成
-//  3. usecase × 7 を生成:
+//  3. usecase × 6 を生成:
 //     - parseWebhookEvent := paymentusecase.NewParseWebhookEvent(stripeClient)
 //     - initiatePayment := paymentusecase.NewInitiatePayment(paymentRepo, paymentEventRepo, stripeClient)
 //     - completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
 //     - cancelPayment := paymentusecase.NewCancelPayment(...)
 //     - renewPayment := paymentusecase.NewRenewPayment(...)
 //     - handleFailure := paymentusecase.NewHandleFailure(retryStrategy)
-//     - getPayment := paymentusecase.NewGetPayment(paymentRepo)
 //  4. WebhookHandler を生成 (mux に登録)
 //  5. publicfunctions の PaymentCommand / PaymentQuery 実装 struct を作って詰める
 //  6. Module を返却
