@@ -49,6 +49,7 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	createExercise := trainingusecase.NewCreateExercise(exerciseRepo)
 	updateExercise := trainingusecase.NewUpdateExercise(exerciseRepo)
 	deleteExercise := trainingusecase.NewDeleteExerciseByID(exerciseRepo)
+	reorderExercises := trainingusecase.NewReorderExercises(exerciseRepo, txManager)
 	// routine
 	findRoutine := trainingusecase.NewFindRoutineByID(routineQueryService)
 	listRoutines := trainingusecase.NewListRoutines(routineQueryService)
@@ -56,5 +57,5 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	updateRoutine := trainingusecase.NewUpdateRoutine(routineRepo)
 	deleteRoutine := trainingusecase.NewDeleteRoutineByID(routineRepo)
 
-	return &Module{TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining), ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, listExercises, createExercise, updateExercise, deleteExercise), RoutineHandler: traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine)}
+	return &Module{TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining), ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, listExercises, createExercise, updateExercise, deleteExercise, reorderExercises), RoutineHandler: traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine)}
 }

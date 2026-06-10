@@ -15,11 +15,12 @@ import (
 )
 
 type ExerciseHandler struct {
-	find   *trainingusecase.FindExerciseByID
-	list   *trainingusecase.ListExercises
-	create *trainingusecase.CreateExercise
-	update *trainingusecase.UpdateExercise
-	delete *trainingusecase.DeleteExerciseByID
+	find    *trainingusecase.FindExerciseByID
+	list    *trainingusecase.ListExercises
+	create  *trainingusecase.CreateExercise
+	update  *trainingusecase.UpdateExercise
+	delete  *trainingusecase.DeleteExerciseByID
+	reorder *trainingusecase.ReorderExercises
 }
 
 func NewExerciseHandler(
@@ -28,18 +29,21 @@ func NewExerciseHandler(
 	create *trainingusecase.CreateExercise,
 	update *trainingusecase.UpdateExercise,
 	delete *trainingusecase.DeleteExerciseByID,
+	reorder *trainingusecase.ReorderExercises,
 ) http.Handler {
 	h := &ExerciseHandler{
-		find:   find,
-		list:   list,
-		create: create,
-		update: update,
-		delete: delete,
+		find:    find,
+		list:    list,
+		create:  create,
+		update:  update,
+		delete:  delete,
+		reorder: reorder,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /exercises/{id}", h.Find)
 	mux.HandleFunc("GET /exercises", h.List)
 	mux.HandleFunc("POST /exercises", h.Create)
+	mux.HandleFunc("POST /exercises/reorder", h.Reorder)
 	mux.HandleFunc("PUT /exercises/{id}", h.Update)
 	mux.HandleFunc("DELETE /exercises/{id}", h.Delete)
 	return mux
@@ -142,6 +146,46 @@ func (h *ExerciseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteJSON(w, http.StatusCreated, trainingdto.UpsertExerciseResponse{ID: output.ID.Value()})
+}
+
+// Reorder godoc
+//
+// @Summary エクササイズ並び替え
+// @Description 種目マスタ全件を、 渡された exercise_ids の順序どおりに並び替える。
+// @Tags exercises
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body trainingdto.ReorderExercisesRequest true "並び替え後の ExerciseID 一覧(全件)"
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises/reorder [post]
+func (h *ExerciseHandler) Reorder(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	var req trainingdto.ReorderExercisesRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	orderedIDs := make([]valueobject.ExerciseID, 0, len(req.ExerciseIDs))
+	for _, raw := range req.ExerciseIDs {
+		id, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](raw)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exerciseID"))
+			return
+		}
+		orderedIDs = append(orderedIDs, *id)
+	}
+	if err := h.reorder.Execute(r.Context(), trainingusecase.ReorderExercisesInput{UserID: userID, OrderedIDs: orderedIDs}); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteNoContent(w)
 }
 
 // Update godoc

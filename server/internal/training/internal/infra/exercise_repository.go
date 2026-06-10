@@ -24,13 +24,13 @@ func NewExerciseRepository(dbmap *gorp.DbMap) trainingdomain.ExerciseRepository 
 }
 
 const insertExerciseSQL = `
-INSERT INTO exercises (id, user_id, name, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO exercises (id, user_id, name, display_order, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 const updateExerciseSQL = `
 UPDATE exercises
-SET name = ?, updated_at = ?
+SET name = ?, display_order = ?, updated_at = ?
 WHERE id = ?
 `
 
@@ -46,7 +46,7 @@ func (r *exerciseRepository) FindByIDAndUserID(ctx context.Context, id valueobje
 	}
 	var row ExerciseModel
 	err = q.SelectOne(&row,
-		"SELECT id, user_id, name, created_at, updated_at FROM exercises WHERE id = ? and user_id = ?",
+		"SELECT id, user_id, name, display_order, created_at, updated_at FROM exercises WHERE id = ? and user_id = ?",
 		idBytes, userIDBytes,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -58,6 +58,44 @@ func (r *exerciseRepository) FindByIDAndUserID(ctx context.Context, id valueobje
 	return toExercise(row)
 }
 
+func (r *exerciseRepository) FindAllByUserID(ctx context.Context, userID valueobject.UserID) ([]*trainingdomain.Exercise, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var rows []ExerciseModel
+	_, err = q.Select(&rows,
+		"SELECT id, user_id, name, display_order, created_at, updated_at FROM exercises WHERE user_id = ? ORDER BY display_order ASC",
+		bytes)
+	if err != nil {
+		return nil, err
+	}
+	exercises := make([]*trainingdomain.Exercise, 0, len(rows))
+	for _, row := range rows {
+		e, err := toExercise(row)
+		if err != nil {
+			return nil, err
+		}
+		exercises = append(exercises, e)
+	}
+	return exercises, nil
+}
+
+func (r *exerciseRepository) NextDisplayOrder(ctx context.Context, userID valueobject.UserID) (int, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := userID.Bytes()
+	if err != nil {
+		return 0, err
+	}
+	// 末尾に追加するため、 既存の最大値 + 1 を返す(0 件なら 0)
+	next, err := q.SelectInt("SELECT COALESCE(MAX(display_order) + 1, 0) FROM exercises WHERE user_id = ?", bytes)
+	if err != nil {
+		return 0, err
+	}
+	return int(next), nil
+}
+
 func (r *exerciseRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context, userID valueobject.UserID, limit int, offset int) ([]*trainingdomain.Exercise, pagination.OffsetPaginator, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := userID.Bytes()
@@ -66,7 +104,7 @@ func (r *exerciseRepository) FindAllByUserIDWithOffsetPagination(ctx context.Con
 	}
 	var rows []ExerciseModel
 	_, err = q.Select(&rows,
-		"SELECT id, user_id, name, created_at, updated_at FROM exercises WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+		"SELECT id, user_id, name, display_order, created_at, updated_at FROM exercises WHERE user_id = ? ORDER BY display_order ASC LIMIT ? OFFSET ?",
 		bytes, limit, offset)
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
@@ -97,7 +135,7 @@ func (r *exerciseRepository) Save(ctx context.Context, exercise *trainingdomain.
 		return err
 	}
 	// update first
-	result, err := q.Exec(updateExerciseSQL, exercise.Name().Value(), exercise.UpdatedAt(), idBytes)
+	result, err := q.Exec(updateExerciseSQL, exercise.Name().Value(), exercise.DisplayOrder().Value(), exercise.UpdatedAt(), idBytes)
 	if err != nil {
 		if sqlerr.IsDuplicateKey(err) {
 			return myerror.NewExerciseNameAlreadyExistsError()
@@ -151,7 +189,11 @@ func toExercise(row ExerciseModel) (*trainingdomain.Exercise, error) {
 	if err != nil {
 		return nil, err
 	}
-	return trainingdomain.NewExercise(*exerciseID, *userID, *name, row.CreatedAt, row.UpdatedAt), nil
+	displayOrder, err := valueobject.NewNonNegativeInt(int(row.DisplayOrder))
+	if err != nil {
+		return nil, err
+	}
+	return trainingdomain.NewExercise(*exerciseID, *userID, *name, *displayOrder, row.CreatedAt, row.UpdatedAt), nil
 }
 
 func buildInsertExerciseParams(exercise *trainingdomain.Exercise) ([]any, error) {
@@ -163,5 +205,5 @@ func buildInsertExerciseParams(exercise *trainingdomain.Exercise) ([]any, error)
 	if err != nil {
 		return nil, err
 	}
-	return []any{bytes, userIDBytes, exercise.Name().Value(), exercise.CreatedAt(), exercise.UpdatedAt()}, nil
+	return []any{bytes, userIDBytes, exercise.Name().Value(), exercise.DisplayOrder().Value(), exercise.CreatedAt(), exercise.UpdatedAt()}, nil
 }
