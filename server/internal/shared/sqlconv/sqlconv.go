@@ -180,6 +180,15 @@ func NewPrimaryIDFromBytes[T valueobject.PrimaryID](b []byte) (*T, error) {
 	return valueobject.NewPrimaryIDFromString[T](s)
 }
 
+// UUID文字列 -> 16 bytes binary
+func UUIDStringToBytes(s string) ([]byte, error) {
+	u, err := uuid.Parse(s)
+	if err != nil {
+		return nil, err
+	}
+	return u[:], nil
+}
+
 // ---- url / URL ─────────────────────────────────────────────
 
 func NewURLFromNullString(s sql.NullString) (*valueobject.URL, error) {
