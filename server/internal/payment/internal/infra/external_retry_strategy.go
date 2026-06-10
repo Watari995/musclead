@@ -9,7 +9,7 @@ import (
 // MVPでは外部サービスのリトライに任せる
 type ExternalRetryStrategy struct{}
 
-// errをそのまま返すことで
+// errをそのまま返すことで外部サービスが再度リトライすることができる
 func (s *ExternalRetryStrategy) OnFailure(ctx context.Context, event *paymentdomain.StripeEvent, err error) error {
 	return err
 }
