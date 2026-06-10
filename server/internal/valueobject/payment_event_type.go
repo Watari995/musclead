@@ -26,3 +26,7 @@ func NewPaymentEventTypeFromString(s string) (*PaymentEventType, error) {
 		return nil, ErrInvalidPaymentEventType
 	}
 }
+
+func NewPaymentEventTypeFromCode(c PaymentEventTypeCode) PaymentEventType {
+	return PaymentEventType{LiteralBase: LiteralBase[string]{v: string(c)}}
+}
