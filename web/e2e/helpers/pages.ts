@@ -18,6 +18,7 @@ export const TARGET_PAGES: readonly TargetPage[] = [
   { path: "/login" },
   { path: "/register" },
   { path: "/meals" },
+  { path: "/weights" },
   {
     path: "/trainings",
     interact: async (page) => {

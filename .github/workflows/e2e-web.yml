@@ -137,17 +137,20 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}
+          # package-lock (= Playwright バージョン) と playwright.config.ts
+          # (= インストール対象ブラウザ集合) の両方でキャッシュを無効化する。
+          # webkit 追加など projects 変更時に古いキャッシュを掴まないようにするため。
+          key: playwright-${{ runner.os }}-${{ hashFiles('web/package-lock.json', 'web/playwright.config.ts') }}
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: web
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Install Playwright system deps
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         working-directory: web
-        run: npx playwright install-deps chromium
+        run: npx playwright install-deps chromium webkit
 
       - name: Build web
         working-directory: web

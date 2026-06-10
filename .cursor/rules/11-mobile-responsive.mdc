@@ -39,7 +39,7 @@ musclead はスマホ利用が主用途(トレ中・食事中に記録)。 **全
 
 - 入力欄は **`font-size: 16px` 以上**を必ず確保(iOS Safari の自動 zoom を防ぐ)。 `globals.css` で `input/select/textarea { font-size: max(16px, 1rem) }` を設定済み。 個別に `text-sm` 等で 16px 未満にしない
 - 数値入力は `inputMode` を適切に指定(`decimal` / `numeric`)してテンキーを出す
-- 日時入力 (`datetime-local`) は OS のピッカーに任せる
+- 日時入力 (`datetime-local` / `date` / `time`) は OS のピッカーに任せる。 ただし iOS Safari はネイティブ表示 (`-webkit-appearance` 既定) のままだと内部要素が値テキスト (和暦等) の content 幅まで広がり `max-width:100%` を貫通してはみ出す。 `globals.css` で `appearance:none + min-width:0` を設定済み
 - 1 行に複数の入力を並べる時、 モバイルでは **2 列まで**。 3 列以上はモバイル時に縦積みまたはカード状にまとめる(`SetField.tsx` 参照)
 
 ## 5. ボタン / 操作要素
@@ -94,7 +94,7 @@ musclead では PWA アイコンが **Next.js ファイル規約系統** と **m
 
 ### 自動ガード (CI 必須)
 
-目視確認の漏れを防ぐため、 GitHub Actions の **`E2E (web mobile UI)` ワークフローが PR の必須チェック**。 以下を iPhone SE viewport (375 × 667) で自動検査する:
+目視確認の漏れを防ぐため、 GitHub Actions の **`E2E (web mobile UI)` ワークフローが PR の必須チェック**。 iPhone SE viewport (375 × 667) で、 **Chromium と WebKit (= iOS Safari エンジン) の両方**で以下を自動検査する。 datetime-local 等ネイティブフォームコントロールの描画は両エンジンで差があり、 Chromium だけでは Safari 固有のはみ出しを検出できないため。
 
 | 検査 | 落ちる条件 |
 |---|---|

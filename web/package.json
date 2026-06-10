@@ -13,7 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "e2e:install": "playwright install --with-deps chromium"
+    "e2e:install": "playwright install --with-deps chromium webkit"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.14",
