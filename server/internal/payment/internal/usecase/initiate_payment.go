@@ -105,7 +105,7 @@ func (uc *InitiatePayment) Execute(ctx context.Context, input InitiatePaymentInp
 	paymentEvent := paymentdomain.CreatePaymentEvent(
 		payment.ID(), valueobject.NewPaymentEventTypeFromCode(valueobject.PaymentEventTypeInitiated), metadata,
 	)
-	if err := uc.paymentEventRepo.Save(ctx, paymentEvent); err != nil {
+	if err := uc.paymentEventRepo.Create(ctx, paymentEvent); err != nil {
 		return InitiatePaymentOutput{}, err
 	}
 	// Checkout Session Created
