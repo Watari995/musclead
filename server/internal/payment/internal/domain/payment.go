@@ -84,6 +84,12 @@ func (p *Payment) UpdatedAt() time.Time {
 	return p.updatedAt
 }
 
+func (p *Payment) SetCheckoutSession(sessionID string, checkoutURL valueobject.URL) {
+	p.stripeCheckoutSessionID = &sessionID
+	p.checkoutURL = &checkoutURL
+	p.updatedAt = time.Now()
+}
+
 func CreatePayment(
 	userID valueobject.UserID,
 	amount valueobject.NonNegativeInt,

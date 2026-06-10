@@ -10,7 +10,7 @@ import (
 // InitiatePaymentInput は purchase 集約から呼ばれる入力。
 type InitiatePaymentInput struct {
 	UserID  valueobject.UserID
-	Email   valueobject.Email         // Stripe Customer 作成時に渡す
+	Email   valueobject.Email          // Stripe Customer 作成時に渡す
 	Amount  valueobject.NonNegativeInt // 480 (税込 JPY)
 	PriceID string                     // Stripe Price ID (商品差分、 usecase 引数で受け取る)
 }
@@ -76,5 +76,52 @@ func NewInitiatePayment(
 //
 //	// 4. payment UPDATE + checkout_url を返す
 func (uc *InitiatePayment) Execute(ctx context.Context, input InitiatePaymentInput) (InitiatePaymentOutput, error) {
-	return InitiatePaymentOutput{}, errNotImplemented
+	existing, _ := uc.paymentRepo.FindLatestSucceededByUserID(ctx, input.UserID)
+	var stripeCustomerID string
+	if existing != nil && existing.StripeCustomerID() != nil {
+		stripeCustomerID = *existing.StripeCustomerID()
+	} else {
+		var err error
+		stripeCustomerID, err = uc.stripeClient.CreateCustomer(ctx, paymentdomain.CreateCustomerInput{
+			UserID: input.UserID, Email: input.Email,
+		})
+		if err != nil {
+			return InitiatePaymentOutput{}, err
+		}
+	}
+	// payment INSERT (pending)
+	payment := paymentdomain.CreatePayment(
+		input.UserID, input.Amount, valueobject.NewCurrencyFromCode(valueobject.CurrencyJPY), &stripeCustomerID, nil, nil, nil,
+	)
+	if err := uc.paymentRepo.Save(ctx, payment); err != nil {
+		return InitiatePaymentOutput{}, err
+	}
+	// payment_events INSERT (initiated)
+	metadata := valueobject.Metadata{
+		"amount":             input.Amount.Value(),
+		"currency":           valueobject.CurrencyJPY,
+		"stripe_customer_id": stripeCustomerID,
+	}
+	paymentEvent := paymentdomain.CreatePaymentEvent(
+		payment.ID(), valueobject.NewPaymentEventTypeFromCode(valueobject.PaymentEventTypeInitiated), metadata,
+	)
+	if err := uc.paymentEventRepo.Save(ctx, paymentEvent); err != nil {
+		return InitiatePaymentOutput{}, err
+	}
+	// Checkout Session Created
+	sess, err := uc.stripeClient.CreateCheckoutSession(ctx, paymentdomain.CreateCheckoutSessionInput{
+		CustomerID: stripeCustomerID, PriceID: input.PriceID, PaymentID: payment.ID(),
+	})
+	if err != nil {
+		return InitiatePaymentOutput{}, err
+	}
+	// payment update
+	payment.SetCheckoutSession(sess.SessionID, sess.CheckoutSessionURL)
+	if err := uc.paymentRepo.Save(ctx, payment); err != nil {
+		return InitiatePaymentOutput{}, err
+	}
+	return InitiatePaymentOutput{
+		PaymentID:   payment.ID(),
+		CheckoutURL: sess.CheckoutSessionURL,
+	}, nil
 }
