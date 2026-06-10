@@ -261,7 +261,7 @@ func (h *UserHandler) GenerateProfileImagePresignedURL(w http.ResponseWriter, r 
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
 		return
 	}
-	contentType, err := valueobject.NewImageContentType(req.ContentType)
+	contentType, err := valueobject.NewImageContentTypeFromString(req.ContentType)
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid content type"))
 		return
