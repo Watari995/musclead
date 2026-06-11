@@ -92,6 +92,21 @@ func (p *Payment) SetCheckoutSession(sessionID string, checkoutURL valueobject.U
 	p.updatedAt = time.Now()
 }
 
+func (p *Payment) MarkSucceeded(stripeSubscriptionID string, currentPeriodEnd time.Time) {
+	now := time.Now()
+	p.status = valueobject.NewPaymentStatusFromCode(valueobject.PaymentStatusSucceeded)
+	p.stripeSubscriptionID = &stripeSubscriptionID
+	p.currentPeriodEnd = &currentPeriodEnd
+	p.succeededAt = &now
+	p.updatedAt = now
+}
+
+func (p *Payment) MarkCanceled() {
+	now := time.Now()
+	p.status = valueobject.NewPaymentStatusFromCode(valueobject.PaymentStatusCanceled)
+	p.updatedAt = now
+}
+
 func CreatePayment(
 	userID valueobject.UserID,
 	amount valueobject.NonNegativeInt,
