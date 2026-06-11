@@ -3,18 +3,16 @@ package purchaseusecase
 import (
 	"context"
 
-	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
+	paymentpublic "github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	purchasedomain "github.com/Watari995/musclead/internal/purchase/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
 // SubscribeInput はサブスク申込み時に handler から渡される入力。
+// handler は HTTP プロトコルから取得した最小情報 (UserID + Plan) だけを渡す。
 type SubscribeInput struct {
-	UserID  valueobject.UserID
-	Email   valueobject.Email
-	Amount  valueobject.NonNegativeInt
-	PriceID string                       // Stripe Price ID (plan に応じて handler / main.go で解決)
-	Plan    valueobject.SubscriptionPlan // pro / 将来 pro_annual 等
+	UserID valueobject.UserID
+	Plan   valueobject.SubscriptionPlan
 }
 
 // SubscribeOutput は client にレスポンスする情報。
@@ -22,54 +20,52 @@ type SubscribeOutput struct {
 	CheckoutURL valueobject.URL
 }
 
+// UserQuery は user 集約の参照用 interface。
+// user モジュールが publicfunctions.UserQuery として公開する想定 (Phase 後半で追加)。
+// 注入することで purchase usecase が user の email を取得できる。
+type UserQuery interface {
+	GetEmailByUserID(ctx context.Context, userID valueobject.UserID) (valueobject.Email, error)
+}
+
 // Subscribe はサブスク申込みのオーケストレータ usecase (ADR 0013)。
 //
 // 流れ:
-//  1. 既存 pending order を user で検索 → あれば再利用、 なければ CreateSubscriptionOrder (pending、 plan は入力で受け取る)
-//  2. paymentCommand.InitiatePayment(...) を呼ぶ (Phase 1 で公開済み)
-//     → payment 集約が paymentID と Stripe Checkout Session URL を返す
-//  3. order に payment_id を紐付ける (AttachPayment) → Save (UPDATE)
-//  4. CheckoutURL を client に返却
+//  1. 既存 pending order を user で検索 → あれば再利用、 なければ新規 INSERT
+//  2. user の email を userQuery 経由で取得 (cross-module)
+//  3. plan → priceID を priceIDByPlan map で解決
+//  4. payment.Command.InitiatePayment を呼ぶ (cross-module)
+//  5. order に payment_id を紐付け → Save (UPDATE)
+//  6. CheckoutURL を Output で返却
 //
 // 設計メモ:
-//   - plan は input で受け取って汎用化 (将来 pro_annual 等を追加する時 interface を変えなくて済む)
-//   - subscription (権利状態) はここでは作らない。 Webhook 受信時に別途 purchase worker (Phase 9) が作る
-//   - payment 側の Stripe API 呼び出しは payment 集約に閉じる (purchase は Stripe を知らない)
+//   - publicfunctions (paymentCommand / userQuery) は usecase 層で呼ぶ。 handler は触らない (ADR 0013)
+//   - business 設定 (priceIDByPlan / proAmount) も usecase が保持、 handler に漏らさない
+//   - subscription (権利状態) はここで作らない。 Webhook 受信時に別途 purchase worker (Phase 9) が作る
 type Subscribe struct {
 	orderRepo      purchasedomain.SubscriptionOrderRepository
-	paymentCommand publicfunctions.PaymentCommand
+	paymentCommand paymentpublic.PaymentCommand
+	userQuery      UserQuery
+	priceIDByPlan  map[valueobject.SubscriptionPlanCode]string
+	proAmount      valueobject.NonNegativeInt
 }
 
 func (uc *Subscribe) Execute(ctx context.Context, input SubscribeInput) (SubscribeOutput, error) {
-	order, err := uc.orderRepo.FindPendingByUserID(ctx, input.UserID)
-	if err != nil {
-		return SubscribeOutput{}, err
-	}
-	if order == nil {
-		order = purchasedomain.CreateSubscriptionOrder(input.UserID, input.Plan)
-		if err := uc.orderRepo.Save(ctx, order); err != nil {
-			return SubscribeOutput{}, err
-		}
-	}
-	resp, err := uc.paymentCommand.InitiatePayment(ctx, publicfunctions.InitiatePaymentRequest{
-		UserID:  input.UserID,
-		Email:   input.Email,
-		Amount:  input.Amount,
-		PriceID: input.PriceID,
-	})
-	if err != nil {
-		return SubscribeOutput{}, err
-	}
-	order.AttachPayment(resp.PaymentID)
-	if err := uc.orderRepo.Save(ctx, order); err != nil {
-		return SubscribeOutput{}, err
-	}
-	return SubscribeOutput{CheckoutURL: resp.CheckoutURL}, nil
+	// TODO (User 実装): 上記の「流れ」 を実装
+	return SubscribeOutput{}, nil
 }
 
-func NewSubscribe(orderRepo purchasedomain.SubscriptionOrderRepository, paymentCommand publicfunctions.PaymentCommand) *Subscribe {
+func NewSubscribe(
+	orderRepo purchasedomain.SubscriptionOrderRepository,
+	paymentCommand paymentpublic.PaymentCommand,
+	userQuery UserQuery,
+	priceIDByPlan map[valueobject.SubscriptionPlanCode]string,
+	proAmount valueobject.NonNegativeInt,
+) *Subscribe {
 	return &Subscribe{
 		orderRepo:      orderRepo,
 		paymentCommand: paymentCommand,
+		userQuery:      userQuery,
+		priceIDByPlan:  priceIDByPlan,
+		proAmount:      proAmount,
 	}
 }
