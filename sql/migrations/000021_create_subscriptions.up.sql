@@ -25,7 +25,7 @@ CREATE TABLE subscriptions (
   updated_at            DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
   KEY idx_user_status (user_id, status),                              -- Pro gate / 解約予約状態の検索用
-  KEY idx_payment (payment_id),
+  UNIQUE KEY uk_payment (payment_id),                                 -- 1 payment = 1 subscription、 並列 Webhook の二重 INSERT 防止 (ADR 0014 ③)
   KEY idx_order (subscription_order_id),
   CONSTRAINT fk_subscriptions_user FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB
