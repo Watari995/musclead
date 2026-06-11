@@ -2,9 +2,8 @@ package purchaseusecase
 
 import (
 	"context"
-	"errors"
 
-	paymentpublic "github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
+	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	purchasedomain "github.com/Watari995/musclead/internal/purchase/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -38,39 +37,37 @@ type SubscribeOutput struct {
 //   - payment 側の Stripe API 呼び出しは payment 集約に閉じる (purchase は Stripe を知らない)
 type Subscribe struct {
 	orderRepo      purchasedomain.SubscriptionOrderRepository
-	paymentCommand paymentpublic.PaymentCommand
+	paymentCommand publicfunctions.PaymentCommand
 }
 
-// TODO (User 実装):
-//
-//	// 1. 既存 pending order を user で検索
-//	order, err := uc.orderRepo.FindPendingByUserID(ctx, input.UserID)
-//	if err != nil { return SubscribeOutput{}, err }
-//	if order == nil {
-//	    order = purchasedomain.CreateSubscriptionOrder(input.UserID, input.Plan)
-//	    if err := uc.orderRepo.Save(ctx, order); err != nil { return SubscribeOutput{}, err }
-//	}
-//
-//	// 2. payment.InitiatePayment を呼ぶ
-//	resp, err := uc.paymentCommand.InitiatePayment(ctx, paymentpublic.InitiatePaymentRequest{
-//	    UserID:  input.UserID,
-//	    Email:   input.Email,
-//	    Amount:  input.Amount,
-//	    PriceID: input.PriceID,
-//	})
-//	if err != nil { return SubscribeOutput{}, err }
-//
-//	// 3. order に payment_id を紐付け
-//	order.AttachPayment(resp.PaymentID)
-//	if err := uc.orderRepo.Save(ctx, order); err != nil { return SubscribeOutput{}, err }
-//
-//	// 4. CheckoutURL 返却
-//	return SubscribeOutput{CheckoutURL: resp.CheckoutURL}, nil
 func (uc *Subscribe) Execute(ctx context.Context, input SubscribeInput) (SubscribeOutput, error) {
-	return SubscribeOutput{}, errors.New("Subscribe: not implemented")
+	order, err := uc.orderRepo.FindPendingByUserID(ctx, input.UserID)
+	if err != nil {
+		return SubscribeOutput{}, err
+	}
+	if order == nil {
+		order = purchasedomain.CreateSubscriptionOrder(input.UserID, input.Plan)
+		if err := uc.orderRepo.Save(ctx, order); err != nil {
+			return SubscribeOutput{}, err
+		}
+	}
+	resp, err := uc.paymentCommand.InitiatePayment(ctx, publicfunctions.InitiatePaymentRequest{
+		UserID:  input.UserID,
+		Email:   input.Email,
+		Amount:  input.Amount,
+		PriceID: input.PriceID,
+	})
+	if err != nil {
+		return SubscribeOutput{}, err
+	}
+	order.AttachPayment(resp.PaymentID)
+	if err := uc.orderRepo.Save(ctx, order); err != nil {
+		return SubscribeOutput{}, err
+	}
+	return SubscribeOutput{CheckoutURL: resp.CheckoutURL}, nil
 }
 
-func NewSubscribe(orderRepo purchasedomain.SubscriptionOrderRepository, paymentCommand paymentpublic.PaymentCommand) *Subscribe {
+func NewSubscribe(orderRepo purchasedomain.SubscriptionOrderRepository, paymentCommand publicfunctions.PaymentCommand) *Subscribe {
 	return &Subscribe{
 		orderRepo:      orderRepo,
 		paymentCommand: paymentCommand,
