@@ -112,6 +112,11 @@ h.completePayment.Execute(ctx, ...)      // 別 TX
 - [ADR 0013](0013-purchase-payment-separation.md): purchase / payment 分離
 - [ADR 0014](0014-webhook-idempotency-and-retry.md): Webhook 冪等性
 - [ADR 0015](0015-outbox-pattern-and-async-mail.md): Outbox パターン (TX 外 SNS publish)
+- [ADR 0019](0019-billing-module-webhook-orchestrator.md): handler の置き場所を `internal/billing/` に移設
+
+## 更新履歴
+
+- 2026-06-11: handler の置き場所を [ADR 0019](0019-billing-module-webhook-orchestrator.md) で `internal/billing/internal/handler/webhook_handler.go` に移設。 本 ADR の「handler は parse + dispatch のみ、 usecase は単機能」 の方針は据え置き。 影響セクションのファイルパス (`internal/payment/internal/handler/webhook_handler.go`) は新位置 (`internal/billing/internal/handler/webhook_handler.go`) に読み替え。
 
 ## 影響
 
