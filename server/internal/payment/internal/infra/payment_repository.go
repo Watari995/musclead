@@ -24,7 +24,6 @@ func NewPaymentRepository(dbmap *gorp.DbMap) paymentdomain.PaymentRepository {
 const paymentSelectColumns = `
 	id,
 	user_id,
-	amount,
 	currency,
 	status,
 	stripe_customer_id,
@@ -90,10 +89,9 @@ func (r *paymentRepository) FindByStripeSubscriptionID(ctx context.Context, stri
 }
 
 const upsertPaymentSQL = `
-INSERT INTO payments (id, user_id, amount, currency, status, stripe_customer_id, stripe_subscription_id, stripe_checkout_session_id, checkout_url, current_period_end, succeeded_at, failed_at, failure_reason, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO payments (id, user_id, currency, status, stripe_customer_id, stripe_subscription_id, stripe_checkout_session_id, checkout_url, current_period_end, succeeded_at, failed_at, failure_reason, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-    amount = VALUES(amount),
     currency = VALUES(currency),
     status = VALUES(status),
     stripe_customer_id = VALUES(stripe_customer_id),
@@ -130,10 +128,6 @@ func toPayment(row PaymentModel) (*paymentdomain.Payment, error) {
 	if err != nil {
 		return nil, err
 	}
-	amount, err := valueobject.NewNonNegativeInt(row.Amount)
-	if err != nil {
-		return nil, err
-	}
 	currency, err := valueobject.NewCurrencyFromString(row.Currency)
 	if err != nil {
 		return nil, err
@@ -150,7 +144,6 @@ func toPayment(row PaymentModel) (*paymentdomain.Payment, error) {
 	return paymentdomain.NewPayment(
 		*id,
 		*userID,
-		*amount,
 		*currency,
 		*status,
 		sqlconv.NewStringFromNullString(row.StripeCustomerID),
@@ -175,7 +168,6 @@ func buildUpsertPaymentParams(payment *paymentdomain.Payment) ([]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	amount := payment.Amount().Value()
 	currency := payment.Currency().Value()
 	status := payment.Status().Value()
 	stripeCustomerID := sqlconv.StringPtrToNullString(payment.StripeCustomerID())
@@ -191,7 +183,6 @@ func buildUpsertPaymentParams(payment *paymentdomain.Payment) ([]any, error) {
 	return []any{
 		bytes,
 		userIDBytes,
-		amount,
 		currency,
 		status,
 		stripeCustomerID,

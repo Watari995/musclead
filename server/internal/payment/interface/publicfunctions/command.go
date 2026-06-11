@@ -11,10 +11,10 @@ import (
 )
 
 // InitiatePaymentRequest は Pro 申込時に purchase 集約から渡される入力。
+// 金額は Stripe 側の Price object で管理しているためここでは受け取らない。
 type InitiatePaymentRequest struct {
 	UserID  valueobject.UserID
 	Email   valueobject.Email
-	Amount  valueobject.NonNegativeInt
 	PriceID string
 }
 

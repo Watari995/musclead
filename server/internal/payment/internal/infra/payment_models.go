@@ -10,7 +10,6 @@ import (
 type PaymentModel struct {
 	ID                      []byte         `db:"id"`
 	UserID                  []byte         `db:"user_id"`
-	Amount                  int            `db:"amount"`
 	Currency                string         `db:"currency"`
 	Status                  string         `db:"status"`
 	StripeCustomerID        sql.NullString `db:"stripe_customer_id"`

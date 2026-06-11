@@ -11,7 +11,6 @@ import (
 type Payment struct {
 	id                      valueobject.PaymentID
 	userID                  valueobject.UserID
-	amount                  valueobject.NonNegativeInt
 	currency                valueobject.Currency
 	status                  valueobject.PaymentStatus
 	stripeCustomerID        *string
@@ -32,10 +31,6 @@ func (p *Payment) ID() valueobject.PaymentID {
 
 func (p *Payment) UserID() valueobject.UserID {
 	return p.userID
-}
-
-func (p *Payment) Amount() valueobject.NonNegativeInt {
-	return p.amount
 }
 
 func (p *Payment) Currency() valueobject.Currency {
@@ -114,7 +109,6 @@ func (p *Payment) MarkRenewed(periodEnd time.Time) {
 
 func CreatePayment(
 	userID valueobject.UserID,
-	amount valueobject.NonNegativeInt,
 	currency valueobject.Currency,
 	stripeCustomerID *string,
 	stripeCheckoutSessionID *string,
@@ -125,7 +119,6 @@ func CreatePayment(
 	return &Payment{
 		id:                      valueobject.NewPrimaryID[valueobject.PaymentID](),
 		userID:                  userID,
-		amount:                  amount,
 		currency:                currency,
 		status:                  valueobject.NewPaymentStatusFromCode(valueobject.PaymentStatusPending),
 		stripeCustomerID:        stripeCustomerID,
@@ -141,7 +134,6 @@ func CreatePayment(
 func NewPayment(
 	id valueobject.PaymentID,
 	userID valueobject.UserID,
-	amount valueobject.NonNegativeInt,
 	currency valueobject.Currency,
 	status valueobject.PaymentStatus,
 	stripeCustomerID *string,
@@ -158,7 +150,6 @@ func NewPayment(
 	return &Payment{
 		id:                      id,
 		userID:                  userID,
-		amount:                  amount,
 		currency:                currency,
 		status:                  status,
 		stripeCustomerID:        stripeCustomerID,
