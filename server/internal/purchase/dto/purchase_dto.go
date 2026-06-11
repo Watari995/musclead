@@ -1,14 +1,12 @@
 // Package dto は purchase module の HTTP 入出力 DTO を定義する。
 package dto
 
-// TODO: HTTP リクエスト / レスポンス DTO 定義 (User 実装)
-//
-// 例 (Pro 申込 API):
-//   type SubscribeToProRequest struct {
-//       // payment_id は body で受け取らない (内部生成)
-//   }
-//   type SubscribeToProResponse struct {
-//       CheckoutURL string `json:"checkout_url"`   // クライアントを Stripe Checkout にリダイレクトさせる先
-//   }
-//
-// 参考: internal/user/dto/user_dto.go
+// SubscribeRequest は POST /purchase/subscribe の body。
+type SubscribeRequest struct {
+	Plan string `json:"plan"` // "pro" 等、 valueobject.SubscriptionPlan で validate
+}
+
+// SubscribeResponse は申込み成功時のレスポンス。 client は CheckoutURL に遷移する。
+type SubscribeResponse struct {
+	CheckoutURL string `json:"checkout_url"`
+}
