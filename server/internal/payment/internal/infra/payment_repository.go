@@ -47,10 +47,10 @@ func (r *paymentRepository) FindByID(ctx context.Context, id valueobject.Payment
 	var row PaymentModel
 	err = q.SelectOne(&row,
 		`SELECT`+paymentSelectColumns+` FROM payments WHERE id = ?`, bytes)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return toPayment(row)
@@ -66,10 +66,10 @@ func (r *paymentRepository) FindLatestSucceededByUserID(ctx context.Context, use
 	err = q.SelectOne(&row,
 		`SELECT`+paymentSelectColumns+` FROM payments WHERE user_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1`,
 		bytes, string(valueobject.PaymentStatusSucceeded))
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return toPayment(row)
@@ -80,10 +80,10 @@ func (r *paymentRepository) FindByStripeSubscriptionID(ctx context.Context, stri
 	var row PaymentModel
 	err := q.SelectOne(&row,
 		`SELECT`+paymentSelectColumns+` FROM payments WHERE stripe_subscription_id = ?`, stripeSubscriptionID)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return toPayment(row)

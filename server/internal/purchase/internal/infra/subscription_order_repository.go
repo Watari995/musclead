@@ -28,10 +28,10 @@ func (r *subscriptionOrderRepository) FindPendingByUserID(ctx context.Context, u
 	}
 	var row SubscriptionOrderModel
 	err = q.SelectOne(&row, "SELECT id, user_id, plan, status, payment_id, succeeded_at, failed_at, created_at, updated_at FROM subscription_orders WHERE user_id = ? AND status = ? LIMIT 1", bytes, string(valueobject.SubscriptionOrderStatusPending))
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return toSubscriptionOrder(row)
@@ -45,10 +45,10 @@ func (r *subscriptionOrderRepository) FindByPaymentID(ctx context.Context, payme
 	}
 	var row SubscriptionOrderModel
 	err = q.SelectOne(&row, "SELECT id, user_id, plan, status, payment_id, succeeded_at, failed_at, created_at, updated_at FROM subscription_orders WHERE payment_id = ? LIMIT 1", bytes)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return toSubscriptionOrder(row)

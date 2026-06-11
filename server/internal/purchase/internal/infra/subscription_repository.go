@@ -2,16 +2,15 @@ package purchaseinfra
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	purchasedomain "github.com/Watari995/musclead/internal/purchase/internal/domain"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
+	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 )
-
-// errSubscriptionRepoNotImplemented は skeleton 状態のメソッドが返す sentinel error。
-// User が中身を実装したら各メソッドから削除する。
-var errSubscriptionRepoNotImplemented = errors.New("subscription_repository: method not implemented")
 
 type subscriptionRepository struct {
 	dbmap *gorp.DbMap
@@ -22,43 +21,116 @@ func NewSubscriptionRepository(dbmap *gorp.DbMap) purchasedomain.SubscriptionRep
 }
 
 func (r *subscriptionRepository) FindLatestByUserID(ctx context.Context, userID valueobject.UserID) (*purchasedomain.Subscription, error) {
-	return nil, errSubscriptionRepoNotImplemented
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var row SubscriptionModel
+	err = q.SelectOne(&row, "SELECT id, user_id, plan, status, subscription_order_id, payment_id, activated_at, expires_at, canceled_at, created_at, updated_at FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", bytes)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toSubscription(row)
 }
 
 func (r *subscriptionRepository) FindByPaymentID(ctx context.Context, paymentID valueobject.PaymentID) (*purchasedomain.Subscription, error) {
-	return nil, errSubscriptionRepoNotImplemented
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := paymentID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var row SubscriptionModel
+	err = q.SelectOne(&row, "SELECT id, user_id, plan, status, subscription_order_id, payment_id, activated_at, expires_at, canceled_at, created_at, updated_at FROM subscriptions WHERE payment_id = ?", bytes)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return toSubscription(row)
 }
+
+const upsertSubscriptionSQL = `
+INSERT INTO subscriptions (id, user_id, plan, status, subscription_order_id, payment_id, activated_at, expires_at, canceled_at, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    status = VALUES(status),
+    expires_at = VALUES(expires_at),
+    canceled_at = VALUES(canceled_at),
+    updated_at = VALUES(updated_at)
+`
 
 func (r *subscriptionRepository) Save(ctx context.Context, subscription *purchasedomain.Subscription) error {
-	return errSubscriptionRepoNotImplemented
+	q := dbtx.Querier(ctx, r.dbmap)
+	params, err := buildUpsertSubscriptionParams(subscription)
+	if err != nil {
+		return err
+	}
+	_, err = q.Exec(upsertSubscriptionSQL, params...)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// 共通 SELECT 句。 field 順は migration (000021_create_subscriptions.up.sql) の column 順に揃える。
-//
-// TODO (User 実装): const subscriptionSelectColumns = ``
-//   - id, user_id, plan, status, subscription_order_id, payment_id,
-//     activated_at, expires_at, canceled_at, created_at, updated_at
+func buildUpsertSubscriptionParams(subscription *purchasedomain.Subscription) ([]any, error) {
+	bytes, err := subscription.ID().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	userIDBytes, err := subscription.UserID().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	plan := subscription.Plan().Value()
+	status := subscription.Status().Value()
+	subscriptionOrderIDBytes, err := sqlconv.NewBytesFromNullablePrimaryID(subscription.SubscriptionOrderID())
+	if err != nil {
+		return nil, err
+	}
+	paymentIDBytes, err := subscription.PaymentID().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	activatedAt := subscription.ActivatedAt()
+	expiresAt := subscription.ExpiresAt()
+	canceledAt := sqlconv.ToNullTime(subscription.CanceledAt())
+	createdAt := subscription.CreatedAt()
+	updatedAt := subscription.UpdatedAt()
+	return []any{bytes, userIDBytes, plan, status, subscriptionOrderIDBytes, paymentIDBytes, activatedAt, expiresAt, canceledAt, createdAt, updatedAt}, nil
+}
 
-// TODO (User 実装): FindLatestByUserID
-//   - 入力: user_id (BINARY(16))
-//   - SQL: SELECT ... FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1
-//   - 結果: sql.ErrNoRows なら (nil, nil)
-//   - 用途: Pro 判定 (subscription.expires_at > NOW() で gate)、 マイページ表示
-
-// TODO (User 実装): FindByPaymentID
-//   - SQL: WHERE payment_id = ?
-//   - 用途: Webhook (renew / cancel) で payment 経由 subscription を引く
-
-// TODO (User 実装): Save (upsert)
-//   - INSERT ... ON DUPLICATE KEY UPDATE
-//   - UPDATE 句: status / expires_at / canceled_at / updated_at が主、 他は変えない想定
-//   - 参考: payment_repository.go の upsertPaymentSQL
-
-// TODO (User 実装): toSubscription(row) (*Subscription, error)
-//   - id, userID, paymentID: sqlconv.NewPrimaryIDFromBytes[T]
-//   - subscriptionOrderID: row.SubscriptionOrderID が nil なら nil
-//   - plan: valueobject.NewSubscriptionPlanFromString
-//   - status: valueobject.NewSubscriptionStatusFromString
-//   - canceledAt: sqlconv.FromNullTime
-//   - 全部揃ったら purchasedomain.NewSubscription(...) で復元
-
+func toSubscription(row SubscriptionModel) (*purchasedomain.Subscription, error) {
+	id, err := sqlconv.NewPrimaryIDFromBytes[valueobject.SubscriptionID](row.ID)
+	if err != nil {
+		return nil, err
+	}
+	userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.UserID)
+	if err != nil {
+		return nil, err
+	}
+	plan, err := valueobject.NewSubscriptionPlanFromString(row.Plan)
+	if err != nil {
+		return nil, err
+	}
+	status, err := valueobject.NewSubscriptionStatusFromString(row.Status)
+	if err != nil {
+		return nil, err
+	}
+	subscriptionOrderID, err := sqlconv.NewPrimaryIDFromNullableBytes[valueobject.SubscriptionOrderID](row.SubscriptionOrderID)
+	if err != nil {
+		return nil, err
+	}
+	paymentID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.PaymentID](row.PaymentID)
+	if err != nil {
+		return nil, err
+	}
+	activatedAt := row.ActivatedAt
+	expiresAt := row.ExpiresAt
+	canceledAt := sqlconv.FromNullTime(row.CanceledAt)
+	return purchasedomain.NewSubscription(*id, *userID, *plan, *status, subscriptionOrderID, *paymentID, activatedAt, expiresAt, canceledAt, row.CreatedAt, row.UpdatedAt), nil
+}
