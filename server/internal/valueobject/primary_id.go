@@ -35,3 +35,5 @@ type PaymentID struct{ PrimaryIDBase }
 type PaymentEventID struct{ PrimaryIDBase }
 type StripeEventID struct{ PrimaryIDBase }
 type OutboxEventID struct{ PrimaryIDBase }
+type SubscriptionOrderID struct{ PrimaryIDBase }
+type SubscriptionID struct{ PrimaryIDBase }
