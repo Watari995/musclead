@@ -2,6 +2,9 @@ package paymentusecase
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -34,7 +37,60 @@ type RenewPayment struct {
 // TODO (User 実装):
 //   - 詳細は CompletePayment のコメント参照、 status は変えず current_period_end のみ更新
 func (uc *RenewPayment) Execute(ctx context.Context, input RenewPaymentInput) error {
-	return errNotImplemented
+	stripeSubscriptionID := input.Payload["subscription"].(string)
+	periodEndRaw, ok := input.Payload["current_period_end"].(float64)
+	if !ok {
+		return fmt.Errorf("current_period_end is not a float64")
+	}
+	currentPeriodEnd := time.Unix(int64(periodEndRaw), 0)
+	stripeEventMetadata := valueobject.Metadata{
+		"stripe_event_id":        input.StripeEventID,
+		"stripe_subscription_id": stripeSubscriptionID,
+		"current_period_end":     currentPeriodEnd.Format(time.RFC3339),
+	}
+	stripeEvent := paymentdomain.CreateStripeEvent(input.StripeEventID, input.EventType, stripeEventMetadata)
+	payment, err := uc.paymentRepo.FindByStripeSubscriptionID(ctx, stripeSubscriptionID)
+	if err != nil {
+		return err
+	}
+	if payment == nil {
+		return paymentdomain.ErrPaymentNotFound
+	}
+	payment.MarkRenewed(currentPeriodEnd)
+
+	paymentEventMetadata := valueobject.Metadata{
+		"stripe_event_id":        input.StripeEventID,
+		"stripe_subscription_id": stripeSubscriptionID,
+	}
+	paymentEvent := paymentdomain.CreatePaymentEvent(payment.ID(), valueobject.NewPaymentEventTypeFromCode(valueobject.PaymentEventTypeRenewed), paymentEventMetadata)
+
+	outboxEventMetadata := valueobject.Metadata{
+		"stripe_event_id":        input.StripeEventID,
+		"stripe_subscription_id": stripeSubscriptionID,
+		"current_period_end":     currentPeriodEnd.Format(time.RFC3339),
+		"subscription_plan":      valueobject.SubscriptionPlanPro,
+	}
+	outboxEvent := paymentdomain.CreateOutboxEvent(valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentRenewed), payment.ID().String(), outboxEventMetadata)
+
+	// stripe_events / payments / payment_events / outbox_events を atomic に保存 (ADR 0014, 0018)
+	return uc.txManager.Processing(ctx, func(ctx context.Context) error {
+		if err := uc.stripeEventRepo.Create(ctx, stripeEvent); err != nil {
+			if errors.Is(err, paymentdomain.ErrStripeEventAlreadyExists) {
+				return nil
+			}
+			return err
+		}
+		if err := uc.paymentRepo.Save(ctx, payment); err != nil {
+			return err
+		}
+		if err := uc.paymentEventRepo.Create(ctx, paymentEvent); err != nil {
+			return err
+		}
+		if err := uc.outboxEventRepo.Save(ctx, outboxEvent); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func NewRenewPayment(

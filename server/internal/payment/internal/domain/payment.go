@@ -107,6 +107,11 @@ func (p *Payment) MarkCanceled() {
 	p.updatedAt = now
 }
 
+func (p *Payment) MarkRenewed(periodEnd time.Time) {
+	p.currentPeriodEnd = &periodEnd
+	p.updatedAt = time.Now()
+}
+
 func CreatePayment(
 	userID valueobject.UserID,
 	amount valueobject.NonNegativeInt,
