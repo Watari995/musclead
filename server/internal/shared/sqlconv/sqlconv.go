@@ -180,6 +180,14 @@ func NewPrimaryIDFromBytes[T valueobject.PrimaryID](b []byte) (*T, error) {
 	return valueobject.NewPrimaryIDFromString[T](s)
 }
 
+func NewPrimaryIDFromNullableBytes[T valueobject.PrimaryID](b []byte) (*T, error) {
+	// スライスは初期値がnil
+	if b == nil {
+		return nil, nil
+	}
+	return NewPrimaryIDFromBytes[T](b)
+}
+
 // UUID文字列 -> 16 bytes binary
 func UUIDStringToBytes(s string) ([]byte, error) {
 	u, err := uuid.Parse(s)
@@ -187,6 +195,18 @@ func UUIDStringToBytes(s string) ([]byte, error) {
 		return nil, err
 	}
 	return u[:], nil
+}
+
+// nullable uuid -> []byte
+func NewBytesFromNullablePrimaryID[T valueobject.PrimaryID](id *T) ([]byte, error) {
+	if id == nil {
+		return nil, nil
+	}
+	bytes, err := (*id).Bytes()
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }
 
 // ---- url / URL ─────────────────────────────────────────────

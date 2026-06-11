@@ -2,16 +2,15 @@ package purchaseinfra
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	purchasedomain "github.com/Watari995/musclead/internal/purchase/internal/domain"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
+	"github.com/Watari995/musclead/internal/shared/sqlconv"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 )
-
-// errSubscriptionOrderRepoNotImplemented は skeleton 状態のメソッドが返す sentinel error。
-// User が中身を実装したら各メソッドから削除する。
-var errSubscriptionOrderRepoNotImplemented = errors.New("subscription_order_repository: method not implemented")
 
 type subscriptionOrderRepository struct {
 	dbmap *gorp.DbMap
@@ -22,43 +21,112 @@ func NewSubscriptionOrderRepository(dbmap *gorp.DbMap) purchasedomain.Subscripti
 }
 
 func (r *subscriptionOrderRepository) FindPendingByUserID(ctx context.Context, userID valueobject.UserID) (*purchasedomain.SubscriptionOrder, error) {
-	return nil, errSubscriptionOrderRepoNotImplemented
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var row SubscriptionOrderModel
+	err = q.SelectOne(&row, "SELECT id, user_id, plan, status, payment_id, succeeded_at, failed_at, created_at, updated_at FROM subscription_orders WHERE user_id = ? AND status = ? LIMIT 1", bytes, string(valueobject.SubscriptionOrderStatusPending))
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return toSubscriptionOrder(row)
 }
 
 func (r *subscriptionOrderRepository) FindByPaymentID(ctx context.Context, paymentID valueobject.PaymentID) (*purchasedomain.SubscriptionOrder, error) {
-	return nil, errSubscriptionOrderRepoNotImplemented
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := paymentID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var row SubscriptionOrderModel
+	err = q.SelectOne(&row, "SELECT id, user_id, plan, status, payment_id, succeeded_at, failed_at, created_at, updated_at FROM subscription_orders WHERE payment_id = ? LIMIT 1", bytes)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return toSubscriptionOrder(row)
 }
+
+const upsertSubscriptionOrderSQL = `
+INSERT INTO subscription_orders (id, user_id, plan, status, payment_id, succeeded_at, failed_at, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    plan = VALUES(plan),
+    status = VALUES(status),
+    payment_id = VALUES(payment_id),
+    succeeded_at = VALUES(succeeded_at),
+    failed_at = VALUES(failed_at),
+    updated_at = VALUES(updated_at)
+`
 
 func (r *subscriptionOrderRepository) Save(ctx context.Context, order *purchasedomain.SubscriptionOrder) error {
-	return errSubscriptionOrderRepoNotImplemented
+	q := dbtx.Querier(ctx, r.dbmap)
+	params, err := buildUpsertSubscriptionOrderParams(order)
+	if err != nil {
+		return err
+	}
+	_, err = q.Exec(upsertSubscriptionOrderSQL, params...)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// 共通 SELECT 句。 field 順は migration (000020_create_subscription_orders.up.sql) の column 順に揃える。
-//
-// TODO (User 実装): const subscriptionOrderSelectColumns = ``
-//   - id, user_id, plan, status, payment_id, succeeded_at, failed_at, created_at, updated_at
+func buildUpsertSubscriptionOrderParams(order *purchasedomain.SubscriptionOrder) ([]any, error) {
+	bytes, err := order.ID().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	userIDBytes, err := order.UserID().Bytes()
+	if err != nil {
+		return nil, err
+	}
+	plan := order.Plan().Value()
+	status := order.Status().Value()
+	paymentIDBytes, err := sqlconv.NewBytesFromNullablePrimaryID(order.PaymentID())
+	if err != nil {
+		return nil, err
+	}
+	succeededAt := sqlconv.ToNullTime(order.SucceededAt())
+	failedAt := sqlconv.ToNullTime(order.FailedAt())
+	createdAt := order.CreatedAt()
+	updatedAt := order.UpdatedAt()
+	return []any{bytes, userIDBytes, plan, status, paymentIDBytes, succeededAt, failedAt, createdAt, updatedAt}, nil
+}
 
-// TODO (User 実装): FindPendingByUserID
-//   - 入力: user_id (BINARY(16) に変換、 user_id.Bytes())
-//   - SQL: SELECT ... FROM subscription_orders WHERE user_id = ? AND status = 'pending' ORDER BY created_at DESC LIMIT 1
-//   - 結果: sql.ErrNoRows なら (nil, nil) musclead 流儀
-//   - 変換: toSubscriptionOrder(row)
-// func (r *subscriptionOrderRepository) FindPendingByUserID(ctx context.Context, userID valueobject.UserID) (*purchasedomain.SubscriptionOrder, error)
+func toSubscriptionOrder(row SubscriptionOrderModel) (*purchasedomain.SubscriptionOrder, error) {
+	// nullStringなどに注意して変換する
+	id, err := sqlconv.NewPrimaryIDFromBytes[valueobject.SubscriptionOrderID](row.ID)
+	if err != nil {
+		return nil, err
+	}
+	userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.UserID)
+	if err != nil {
+		return nil, err
+	}
 
-// TODO (User 実装): FindByPaymentID
-//   - 入力: payment_id (BINARY(16) に変換、 paymentID.Bytes())
-//   - SQL: SELECT ... FROM subscription_orders WHERE payment_id = ?
+	plan, err := valueobject.NewSubscriptionPlanFromString(row.Plan)
+	if err != nil {
+		return nil, err
+	}
+	status, err := valueobject.NewSubscriptionOrderStatusFromString(row.Status)
+	if err != nil {
+		return nil, err
+	}
+	paymentID, err := sqlconv.NewPrimaryIDFromNullableBytes[valueobject.PaymentID](row.PaymentID)
+	if err != nil {
+		return nil, err
+	}
+	succeededAt := sqlconv.FromNullTime(row.SucceededAt)
+	failedAt := sqlconv.FromNullTime(row.FailedAt)
 
-// TODO (User 実装): Save (upsert)
-//   - INSERT ... ON DUPLICATE KEY UPDATE
-//   - status / payment_id / succeeded_at / failed_at / updated_at を UPDATE 句に
-//   - 参考: payment_repository.go の upsertPaymentSQL
-
-// TODO (User 実装): toSubscriptionOrder(row) (*SubscriptionOrder, error)
-//   - id: sqlconv.NewPrimaryIDFromBytes[valueobject.SubscriptionOrderID](row.ID)
-//   - paymentID: row.PaymentID が nil なら nil、 そうでなければ sqlconv.NewPrimaryIDFromBytes[valueobject.PaymentID]
-//   - status: valueobject.NewSubscriptionOrderStatusFromString(row.Status) → *SubscriptionOrderStatus
-//   - plan: valueobject.NewSubscriptionPlanFromString(row.Plan)
-//   - succeededAt / failedAt: sqlconv.FromNullTime
-//   - 全部揃ったら purchasedomain.NewSubscriptionOrder(...) で復元
-
+	return purchasedomain.NewSubscriptionOrder(*id, *userID, *plan, *status, paymentID, succeededAt, failedAt, row.CreatedAt, row.UpdatedAt), nil
+}
