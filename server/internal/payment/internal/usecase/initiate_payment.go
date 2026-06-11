@@ -40,13 +40,12 @@ func (uc *InitiatePayment) InitiatePayment(ctx context.Context, req publicfuncti
 		}
 	}
 	payment := paymentdomain.CreatePayment(
-		req.UserID, req.Amount, valueobject.NewCurrencyFromCode(valueobject.CurrencyJPY), &stripeCustomerID, nil, nil, nil,
+		req.UserID, valueobject.NewCurrencyFromCode(valueobject.CurrencyJPY), &stripeCustomerID, nil, nil, nil,
 	)
 	if err := uc.paymentRepo.Save(ctx, payment); err != nil {
 		return publicfunctions.InitiatePaymentResponse{}, err
 	}
 	metadata := valueobject.Metadata{
-		"amount":             req.Amount.Value(),
 		"currency":           valueobject.CurrencyJPY,
 		"stripe_customer_id": stripeCustomerID,
 	}

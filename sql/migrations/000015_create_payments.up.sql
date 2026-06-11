@@ -4,7 +4,6 @@
 CREATE TABLE payments (
   id                         BINARY(16)    NOT NULL,
   user_id                    BINARY(16)    NOT NULL,
-  amount                     INT           NOT NULL,                      -- 480 (税込 JPY)
   currency                   VARCHAR(3)    NOT NULL,                      -- 'JPY'
   status                     VARCHAR(20)   NOT NULL,                      -- 'pending' / 'succeeded' / 'failed' / 'canceled'
   stripe_customer_id         VARCHAR(255)  NULL,

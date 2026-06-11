@@ -27,10 +27,10 @@ func (r *stripeEventRepository) FindByStripeEventID(ctx context.Context, stripeE
 	err := q.SelectOne(&row,
 		`SELECT id, stripe_event_id, event_type, payload, processed_at, processing_error, created_at, updated_at FROM stripe_events WHERE stripe_event_id = ?`, stripeEventID,
 	)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return toStripeEvent(row)

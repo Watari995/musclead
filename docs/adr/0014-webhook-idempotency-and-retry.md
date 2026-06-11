@@ -189,3 +189,8 @@ Stripe の Webhook リトライ仕様:
 - [ADR 0013](0013-purchase-payment-separation.md): purchase / payment 分離
 - [ADR 0015](0015-outbox-pattern-and-async-mail.md): Outbox + メール非同期
 - [ADR 0017](0017-stripe-integration-details.md): Stripe 統合の細部
+- [ADR 0019](0019-billing-module-webhook-orchestrator.md): Webhook handler の置き場所を `internal/billing/` に変更
+
+## 更新履歴
+
+- 2026-06-11: Webhook handler の置き場所を [ADR 0019](0019-billing-module-webhook-orchestrator.md) で `internal/billing/` に移設。 「handler は両 context のオーケストレーター」 の趣旨は維持し、 ファイル位置で構造的に表現する形に変更。 単一 TX で全 atomic の図 (本 ADR ①) は MVP では「各 usecase 独自 TX + 冪等性で結果整合」 にダウングレード ([ADR 0019](0019-billing-module-webhook-orchestrator.md) ⑥)。

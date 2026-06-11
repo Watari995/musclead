@@ -36,14 +36,17 @@ func NewWebhookHandler(
 	cancelPayment *paymentusecase.CancelPayment,
 	renewPayment *paymentusecase.RenewPayment,
 	handleFailure *paymentusecase.HandleFailure,
-) *WebhookHandler {
-	return &WebhookHandler{
+) http.Handler {
+	h := &WebhookHandler{
 		parseWebhookEvent: parseWebhookEvent,
 		completePayment:   completePayment,
 		cancelPayment:     cancelPayment,
 		renewPayment:      renewPayment,
 		handleFailure:     handleFailure,
 	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /payment/webhook", h.Handle)
+	return mux
 }
 
 func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {

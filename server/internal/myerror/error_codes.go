@@ -37,12 +37,17 @@ type weightErrors struct {
 	NotFoundError ErrorCode
 }
 
+type subscriptionOrderErrors struct {
+	NotFoundError ErrorCode
+}
+
 var ErrorCodes = struct {
 	General  generalErrors
 	User     userErrors
 	Meal     mealErrors
 	Training trainingErrors
 	Weight   weightErrors
+	SubscriptionOrder subscriptionOrderErrors
 }{
 	General: generalErrors{
 		InternalError:        "general.internal_error",
@@ -73,5 +78,8 @@ var ErrorCodes = struct {
 	},
 	Weight: weightErrors{
 		NotFoundError: "weight.not_found_error",
+	},
+	SubscriptionOrder: subscriptionOrderErrors{
+		NotFoundError: "subscription_order.not_found_error",
 	},
 }
