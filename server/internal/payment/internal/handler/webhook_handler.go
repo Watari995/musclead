@@ -1,9 +1,12 @@
 package paymenthandler
 
 import (
+	"io"
 	"net/http"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	paymentusecase "github.com/Watari995/musclead/internal/payment/internal/usecase"
+	"github.com/Watari995/musclead/internal/shared/httpx"
 )
 
 // WebhookHandler は POST /payment/webhook を処理する。
@@ -43,34 +46,58 @@ func NewWebhookHandler(
 	}
 }
 
-// Handle は POST /payment/webhook を処理する。
-//
-// TODO (User 実装):
-//
-//	body, _ := io.ReadAll(r.Body)
-//	sig := r.Header.Get("Stripe-Signature")
-//
-//	event, err := h.parseWebhookEvent.Execute(ctx, paymentdomain.ParseWebhookEventInput{
-//	    Payload: body, SignatureHeader: sig,
-//	})
-//	if err != nil { http.Error(w, "invalid signature", http.StatusUnauthorized); return }
-//
-//	var processErr error
-//	switch event.EventType {
-//	case "checkout.session.completed":
-//	    processErr = h.completePayment.Execute(ctx, paymentusecase.CompletePaymentInput{...})
-//	case "customer.subscription.deleted":
-//	    processErr = h.cancelPayment.Execute(ctx, paymentusecase.CancelPaymentInput{...})
-//	case "invoice.payment_succeeded":
-//	    processErr = h.renewPayment.Execute(ctx, paymentusecase.RenewPaymentInput{...})
-//	}
-//
-//	if processErr != nil {
-//	    if err := h.handleFailure.Execute(ctx, paymentusecase.HandleFailureInput{Cause: processErr}); err != nil {
-//	        http.Error(w, "internal error", http.StatusInternalServerError); return
-//	    }
-//	}
-//	w.WriteHeader(http.StatusOK)
 func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "webhook handler not implemented", http.StatusNotImplemented)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("failed to read request body").Wrap(err))
+		return
+	}
+	signature := r.Header.Get("Stripe-Signature")
+
+	// 1. parse + 署名検証
+	event, err := h.parseWebhookEvent.Execute(r.Context(), paymentusecase.ParseWebhookEventInput{
+		Payload:         body,
+		SignatureHeader: signature,
+	})
+	if err != nil {
+		httpx.WriteError(w, myerror.NewUnauthorizedError().SetMessage("invalid signature").Wrap(err))
+		return
+	}
+
+	// 2. event_type で分岐 (Stripe Webhook プロトコルの解釈)
+	var processErr error
+	switch event.EventType {
+	case "checkout.session.completed":
+		processErr = h.completePayment.Execute(r.Context(), paymentusecase.CompletePaymentInput{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+		})
+	case "customer.subscription.deleted":
+		processErr = h.cancelPayment.Execute(r.Context(), paymentusecase.CancelPaymentInput{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+		})
+	case "invoice.payment_succeeded":
+		processErr = h.renewPayment.Execute(r.Context(), paymentusecase.RenewPaymentInput{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+		})
+	default:
+		// musclead が興味ない event_type (customer.created 等) は無視して 200 を返す (Stripe のリトライ抑止)
+	}
+
+	// 3. 失敗時は RetryStrategy に委譲 (ExternalRetryStrategy なら err を返して 500 → Stripe 自動リトライ)
+	if processErr != nil {
+		if err := h.handleFailure.Execute(r.Context(), paymentusecase.HandleFailureInput{
+			Cause: processErr,
+		}); err != nil {
+			httpx.WriteError(w, myerror.NewInternalError().Wrap(err))
+			return
+		}
+	}
+
+	httpx.WriteOK(w)
 }
