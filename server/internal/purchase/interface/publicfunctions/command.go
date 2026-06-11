@@ -1,7 +1,32 @@
 // Package publicfunctions は purchase module が他 module に公開する Command / Query interface を定義する。
 //
-// MVP (Phase 2) では他 module から purchase を呼ぶ場面はまだ無い。
-// 将来 Pro gate middleware (subscriptions テーブルを見る) が必要になった時、 ここに Query 追加。
+// 設計 (ADR 0019): billing module (Webhook orchestrator) が Stripe イベント受信時に
+// 「Pro 化を確定させる」 ために本 interface を呼ぶ。 依存方向は `billing → purchase`。
 package publicfunctions
 
-// 現状: 空。 将来必要になったら interface を追加。
+import (
+	"context"
+	"time"
+
+	"github.com/Watari995/musclead/internal/valueobject"
+)
+
+// ActivateSubscriptionRequest は Stripe checkout 完了時に billing handler から渡される入力。
+//
+// 設計メモ:
+//   - PaymentID で `subscriptions.payment_id` を引いて冪等性チェック (ADR 0014 ③)
+//   - ExpiresAt は Stripe 側の current_period_end を渡す (purchase は Stripe 知らない)
+type ActivateSubscriptionRequest struct {
+	PaymentID valueobject.PaymentID
+	UserID    valueobject.UserID
+	Plan      valueobject.SubscriptionPlan
+	ExpiresAt time.Time
+}
+
+// PurchaseCommand は purchase 集約に対する書き込み系操作の公開 API。
+//
+// MVP (Phase 2 後半) では ActivateSubscription のみ公開。
+// 将来 Webhook で「解約」 「期限切れ」 を扱う際は Cancel / Expire を追加。
+type PurchaseCommand interface {
+	ActivateSubscription(ctx context.Context, req ActivateSubscriptionRequest) error
+}
