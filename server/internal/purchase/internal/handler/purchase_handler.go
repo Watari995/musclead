@@ -3,8 +3,11 @@ package purchasehandler
 import (
 	"net/http"
 
+	"github.com/Watari995/musclead/internal/myerror"
+	"github.com/Watari995/musclead/internal/purchase/dto"
 	purchaseusecase "github.com/Watari995/musclead/internal/purchase/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/httpx"
+	"github.com/Watari995/musclead/internal/valueobject"
 )
 
 // PurchaseHandler は purchase 関連の HTTP handler を提供する。
@@ -14,6 +17,13 @@ import (
 //   - business logic は Subscribe usecase に集約 (priceID 解決 / email 取得 / 金額決定 等)
 type PurchaseHandler struct {
 	subscribe *purchaseusecase.Subscribe
+}
+
+func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe) http.Handler {
+	h := &PurchaseHandler{subscribe: subscribe}
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /purchase/subscribe", h.Subscribe)
+	return mux
 }
 
 // Subscribe godoc
@@ -36,10 +46,25 @@ type PurchaseHandler struct {
 //  4. h.subscribe.Execute(ctx, SubscribeInput{UserID, Plan}) を呼ぶ
 //  5. CheckoutURL を dto.SubscribeResponse として httpx.WriteJSON で返却
 func (h *PurchaseHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
-	// TODO (User 実装): 上記の「流れ」 を実装
-	httpx.WriteError(w, nil)
-}
-
-func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe) *PurchaseHandler {
-	return &PurchaseHandler{subscribe: subscribe}
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, myerror.NewUnauthorizedError())
+		return
+	}
+	var req dto.SubscribeRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	plan, err := valueobject.NewSubscriptionPlanFromString(req.Plan)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid plan"))
+		return
+	}
+	output, err := h.subscribe.Execute(r.Context(), purchaseusecase.SubscribeInput{UserID: userID, Plan: *plan})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, dto.SubscribeResponse{CheckoutURL: output.CheckoutURL.String()})
 }

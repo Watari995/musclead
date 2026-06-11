@@ -9,7 +9,35 @@
 //   - subscriptions: 継続的な権利状態 (active / canceled / expired)
 package purchase
 
-// TODO: NewModule の実装 (User が wire を組み立てる)
+import (
+	"net/http"
+
+	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
+	purchasehandler "github.com/Watari995/musclead/internal/purchase/internal/handler"
+	purchaseinfra "github.com/Watari995/musclead/internal/purchase/internal/infra"
+	purchaseusecase "github.com/Watari995/musclead/internal/purchase/internal/usecase"
+	userpublicfunctions "github.com/Watari995/musclead/internal/user/interface/publicfunctions"
+	"github.com/Watari995/musclead/internal/valueobject"
+	"github.com/go-gorp/gorp/v3"
+)
+
+type Module struct {
+	Handler http.Handler
+}
+
+func NewModule(dbmap *gorp.DbMap, paymentCommand publicfunctions.PaymentCommand, userQuery userpublicfunctions.UserQuery, priceIDByPlan map[valueobject.SubscriptionPlanCode]string) *Module {
+	// repositoryを作成
+	dbmap.AddTableWithName(purchaseinfra.SubscriptionOrderModel{}, "subscription_orders").SetKeys(false, "ID")
+	dbmap.AddTableWithName(purchaseinfra.SubscriptionModel{}, "subscriptions").SetKeys(false, "ID")
+	orderRepo := purchaseinfra.NewSubscriptionOrderRepository(dbmap)
+
+	subscribe := purchaseusecase.NewSubscribe(orderRepo, paymentCommand, userQuery, priceIDByPlan)
+	handler := purchasehandler.NewPurchaseHandler(subscribe)
+	return &Module{
+		Handler: handler,
+	}
+}
+
 //
 // 必要な引数:
 //   - dbmap *gorp.DbMap

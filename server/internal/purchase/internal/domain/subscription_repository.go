@@ -12,7 +12,6 @@ import (
 //   - 「Not Found なら (nil, nil)」 musclead 既存流儀
 //   - Save は INSERT / UPDATE 兼用 (upsert)
 //
-// TODO (User 実装):
 //   - メソッド候補:
 //     Save(ctx, sub *Subscription) error
 //     FindLatestByUserID(ctx, userID valueobject.UserID) (*Subscription, error)

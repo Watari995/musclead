@@ -26,3 +26,7 @@ func NewSubscriptionPlanFromString(s string) (*SubscriptionPlan, error) {
 func NewSubscriptionPlanFromCode(c SubscriptionPlanCode) SubscriptionPlan {
 	return SubscriptionPlan{LiteralBase: LiteralBase[string]{v: string(c)}}
 }
+
+func (s SubscriptionPlan) Code() SubscriptionPlanCode {
+	return SubscriptionPlanCode(s.Value())
+}
