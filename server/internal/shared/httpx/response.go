@@ -17,3 +17,7 @@ func WriteJSON(w http.ResponseWriter,
 func WriteNoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func WriteOK(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+}
