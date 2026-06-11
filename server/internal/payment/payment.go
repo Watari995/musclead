@@ -6,24 +6,23 @@
 package payment
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
+	paymenthandler "github.com/Watari995/musclead/internal/payment/internal/handler"
+	paymentinfra "github.com/Watari995/musclead/internal/payment/internal/infra"
+	paymentusecase "github.com/Watari995/musclead/internal/payment/internal/usecase"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
+	"github.com/go-gorp/gorp/v3"
 )
 
 // Module は payment module の公開 API。
 // 他 module (purchase 等) は Module.Command / Query 経由でのみ payment を操作できる。
 type Module struct {
-	// Handler は payment 専用の HTTP handler (例: POST /payment/webhook)。
-	// main.go の mux に登録する想定。
 	Handler http.Handler
-
-	// command は paymentCommand interface (publicfunctions.PaymentCommand) の実装。
-	// 他 module (purchase 等) から ID で参照させるため、 Command() getter 経由でアクセス。
 	command publicfunctions.PaymentCommand
-
-	// query は payment の読み込み系 API (publicfunctions.PaymentQuery) の実装。
-	query publicfunctions.PaymentQuery
+	query   publicfunctions.PaymentQuery
 }
 
 // Command は他 module 公開用 getter (immutable 保護)。
@@ -32,30 +31,84 @@ func (m *Module) Command() publicfunctions.PaymentCommand { return m.command }
 // Query は他 module 公開用 getter。
 func (m *Module) Query() publicfunctions.PaymentQuery { return m.query }
 
-// NewModule は payment module を初期化する。 Composition Root (cmd/server/main.go) から呼ぶ。
-//
-// 必要な引数:
-//   - dbmap: gorp DB マッピング
-//   - txManager: dbtx.TransactionManager
-//   - stripeClient: paymentinfra.NewStripeClient(...)
-//   - retryStrategy: paymentinfra.NewExternalRetryStrategy()
-//
-// TODO (User 実装):
-//  1. gorp model 登録 (dbmap.AddTableWithName で PaymentModel / PaymentEventModel / StripeEventModel / OutboxEventModel)
-//  2. Repository × 4 を NewXxxRepository で生成
-//  3. usecase × 6 を生成:
-//     - parseWebhookEvent := paymentusecase.NewParseWebhookEvent(stripeClient)
-//     - initiatePayment := paymentusecase.NewInitiatePayment(paymentRepo, paymentEventRepo, stripeClient)
-//     - completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
-//     - cancelPayment := paymentusecase.NewCancelPayment(...)
-//     - renewPayment := paymentusecase.NewRenewPayment(...)
-//     - handleFailure := paymentusecase.NewHandleFailure(retryStrategy)
-//  4. WebhookHandler を生成 (mux に登録)
-//  5. publicfunctions の PaymentCommand / PaymentQuery 実装 struct を作って詰める
-//  6. Module を返却
-//
-// 参考: internal/weight/weight.go, internal/user/user.go
-func NewModule( /* TODO: 依存を受け取る引数 */ ) *Module {
-	// TODO: User 実装、 上記の wire を組み立てる
-	return &Module{}
+// Config は NewModule に渡す環境差分のまとまり。
+type Config struct {
+	StripeAPIKey               string
+	StripeSuccessURL           string
+	StripeCancelURL            string
+	StripeWebhookSigningSecret string
+	StripePortalReturnURL      string
 }
+
+// NewModule は payment module を初期化する。 Composition Root (cmd/server/main.go) から呼ぶ。
+func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
+	txManager := dbtx.NewTransactionManager(dbmap)
+
+	dbmap.AddTableWithName(paymentinfra.PaymentModel{}, "payments").SetKeys(false, "ID")
+	dbmap.AddTableWithName(paymentinfra.PaymentEventModel{}, "payment_events").SetKeys(false, "ID")
+	dbmap.AddTableWithName(paymentinfra.StripeEventModel{}, "stripe_events").SetKeys(false, "ID")
+	dbmap.AddTableWithName(paymentinfra.OutboxEventModel{}, "outbox_events").SetKeys(false, "ID")
+
+	paymentRepo := paymentinfra.NewPaymentRepository(dbmap)
+	paymentEventRepo := paymentinfra.NewPaymentEventRepository(dbmap)
+	stripeEventRepo := paymentinfra.NewStripeEventRepository(dbmap)
+	outboxEventRepo := paymentinfra.NewOutboxEventRepository(dbmap)
+
+	stripeClient := paymentinfra.NewStripeClient(
+		cfg.StripeAPIKey,
+		cfg.StripeSuccessURL,
+		cfg.StripeCancelURL,
+		cfg.StripeWebhookSigningSecret,
+		cfg.StripePortalReturnURL,
+	)
+	retryStrategy := &paymentinfra.ExternalRetryStrategy{}
+
+	parseWebhookEvent := paymentusecase.NewParseWebhookEvent(stripeClient)
+	initiatePayment := paymentusecase.NewInitiatePayment(paymentRepo, paymentEventRepo, stripeClient)
+	completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
+	cancelPayment := paymentusecase.NewCancelPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
+	renewPayment := paymentusecase.NewRenewPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
+	handleFailure := paymentusecase.NewHandleFailure(retryStrategy)
+
+	webhookHandler := paymenthandler.NewWebhookHandler(
+		parseWebhookEvent,
+		completePayment,
+		cancelPayment,
+		renewPayment,
+		handleFailure,
+	)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /payment/webhook", webhookHandler.Handle)
+
+	return &Module{
+		Handler: mux,
+		command: &paymentCommand{initiatePayment: initiatePayment},
+		query:   paymentQuery{},
+	}
+}
+
+// paymentCommand は publicfunctions.PaymentCommand の実装。
+// usecase をラップして公開 interface に詰め替える役割。
+type paymentCommand struct {
+	initiatePayment *paymentusecase.InitiatePayment
+}
+
+func (c *paymentCommand) InitiatePayment(ctx context.Context, req publicfunctions.InitiatePaymentRequest) (publicfunctions.InitiatePaymentResponse, error) {
+	output, err := c.initiatePayment.Execute(ctx, paymentusecase.InitiatePaymentInput{
+		UserID:  req.UserID,
+		Email:   req.Email,
+		Amount:  req.Amount,
+		PriceID: req.PriceID,
+	})
+	if err != nil {
+		return publicfunctions.InitiatePaymentResponse{}, err
+	}
+	return publicfunctions.InitiatePaymentResponse{
+		PaymentID:   output.PaymentID,
+		CheckoutURL: output.CheckoutURL,
+	}, nil
+}
+
+// paymentQuery は publicfunctions.PaymentQuery の MVP 空実装。 将来 method 追加時に struct を埋める。
+type paymentQuery struct{}
