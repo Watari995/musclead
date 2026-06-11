@@ -37,7 +37,10 @@ type RenewPayment struct {
 // TODO (User 実装):
 //   - 詳細は CompletePayment のコメント参照、 status は変えず current_period_end のみ更新
 func (uc *RenewPayment) Execute(ctx context.Context, input RenewPaymentInput) error {
-	stripeSubscriptionID := input.Payload["subscription"].(string)
+	stripeSubscriptionID, ok := input.Payload["subscription"].(string)
+	if !ok {
+		return fmt.Errorf("subscription is not a string")
+	}
 	periodEndRaw, ok := input.Payload["current_period_end"].(float64)
 	if !ok {
 		return fmt.Errorf("current_period_end is not a float64")

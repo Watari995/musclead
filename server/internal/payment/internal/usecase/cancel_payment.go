@@ -3,6 +3,7 @@ package paymentusecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -39,7 +40,10 @@ type CancelPayment struct {
 //   - txManager.Processing 内で stripe_events Create + payments UPDATE + payment_events + outbox INSERT
 //   - 詳細は CompletePayment のコメント参照
 func (uc *CancelPayment) Execute(ctx context.Context, input CancelPaymentInput) error {
-	stripeSubscriptionID := input.Payload["subscription"].(string)
+	stripeSubscriptionID, ok := input.Payload["subscription"].(string)
+	if !ok {
+		return fmt.Errorf("subscription is not a string")
+	}
 	stripeEventMetadata := valueobject.Metadata{
 		"stripe_event_id":        input.StripeEventID,
 		"stripe_subscription_id": stripeSubscriptionID,

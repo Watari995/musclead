@@ -35,7 +35,10 @@ type CompletePayment struct {
 }
 
 func (uc *CompletePayment) Execute(ctx context.Context, input CompletePaymentInput) error {
-	stripeSubscriptionID := input.Payload["subscription"].(string)
+	stripeSubscriptionID, ok := input.Payload["subscription"].(string)
+	if !ok {
+		return fmt.Errorf("subscription is not a string")
+	}
 	periodEndRaw, ok := input.Payload["current_period_end"].(float64)
 	if !ok {
 		return fmt.Errorf("current_period_end is not a float64")
