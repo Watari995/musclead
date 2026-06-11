@@ -77,11 +77,8 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 		handleFailure,
 	)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /payment/webhook", webhookHandler.Handle)
-
 	return &Module{
-		Handler: mux,
+		Handler: webhookHandler,
 		command: initiatePayment,
 		query:   paymentQuery{},
 	}
