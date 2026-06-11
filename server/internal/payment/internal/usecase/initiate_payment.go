@@ -3,23 +3,10 @@ package paymentusecase
 import (
 	"context"
 
+	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
-
-// InitiatePaymentInput は purchase 集約から呼ばれる入力。
-type InitiatePaymentInput struct {
-	UserID  valueobject.UserID
-	Email   valueobject.Email          // Stripe Customer 作成時に渡す
-	Amount  valueobject.NonNegativeInt // 480 (税込 JPY)
-	PriceID string                     // Stripe Price ID (商品差分、 usecase 引数で受け取る)
-}
-
-// InitiatePaymentOutput は purchase 集約に返す結果。
-type InitiatePaymentOutput struct {
-	PaymentID   valueobject.PaymentID
-	CheckoutURL valueobject.URL
-}
 
 // InitiatePayment は Pro 申込開始 (Stripe Checkout Session 作成) を担う。
 //
@@ -30,36 +17,36 @@ type InitiatePaymentOutput struct {
 //  4. StripeClient.CreateCheckoutSession で URL 取得 (PaymentID を Idempotency-Key)
 //  5. payments UPDATE (checkout_url + stripe_checkout_session_id)
 //  6. CheckoutURL を返す
+//
+// publicfunctions.PaymentCommand interface を直接実装する (musclead 既存流儀)。
 type InitiatePayment struct {
 	paymentRepo      paymentdomain.PaymentRepository
 	paymentEventRepo paymentdomain.PaymentEventRepository
 	stripeClient     paymentdomain.StripeClient
 }
 
-func (uc *InitiatePayment) Execute(ctx context.Context, input InitiatePaymentInput) (InitiatePaymentOutput, error) {
-	existing, _ := uc.paymentRepo.FindLatestSucceededByUserID(ctx, input.UserID)
+func (uc *InitiatePayment) InitiatePayment(ctx context.Context, req publicfunctions.InitiatePaymentRequest) (publicfunctions.InitiatePaymentResponse, error) {
+	existing, _ := uc.paymentRepo.FindLatestSucceededByUserID(ctx, req.UserID)
 	var stripeCustomerID string
 	if existing != nil && existing.StripeCustomerID() != nil {
 		stripeCustomerID = *existing.StripeCustomerID()
 	} else {
 		var err error
 		stripeCustomerID, err = uc.stripeClient.CreateCustomer(ctx, paymentdomain.CreateCustomerInput{
-			UserID: input.UserID, Email: input.Email,
+			UserID: req.UserID, Email: req.Email,
 		})
 		if err != nil {
-			return InitiatePaymentOutput{}, err
+			return publicfunctions.InitiatePaymentResponse{}, err
 		}
 	}
-	// payment INSERT (pending)
 	payment := paymentdomain.CreatePayment(
-		input.UserID, input.Amount, valueobject.NewCurrencyFromCode(valueobject.CurrencyJPY), &stripeCustomerID, nil, nil, nil,
+		req.UserID, req.Amount, valueobject.NewCurrencyFromCode(valueobject.CurrencyJPY), &stripeCustomerID, nil, nil, nil,
 	)
 	if err := uc.paymentRepo.Save(ctx, payment); err != nil {
-		return InitiatePaymentOutput{}, err
+		return publicfunctions.InitiatePaymentResponse{}, err
 	}
-	// payment_events INSERT (initiated)
 	metadata := valueobject.Metadata{
-		"amount":             input.Amount.Value(),
+		"amount":             req.Amount.Value(),
 		"currency":           valueobject.CurrencyJPY,
 		"stripe_customer_id": stripeCustomerID,
 	}
@@ -67,21 +54,19 @@ func (uc *InitiatePayment) Execute(ctx context.Context, input InitiatePaymentInp
 		payment.ID(), valueobject.NewPaymentEventTypeFromCode(valueobject.PaymentEventTypeInitiated), metadata,
 	)
 	if err := uc.paymentEventRepo.Create(ctx, paymentEvent); err != nil {
-		return InitiatePaymentOutput{}, err
+		return publicfunctions.InitiatePaymentResponse{}, err
 	}
-	// Checkout Session Created
 	sess, err := uc.stripeClient.CreateCheckoutSession(ctx, paymentdomain.CreateCheckoutSessionInput{
-		CustomerID: stripeCustomerID, PriceID: input.PriceID, PaymentID: payment.ID(),
+		CustomerID: stripeCustomerID, PriceID: req.PriceID, PaymentID: payment.ID(),
 	})
 	if err != nil {
-		return InitiatePaymentOutput{}, err
+		return publicfunctions.InitiatePaymentResponse{}, err
 	}
-	// payment update
 	payment.SetCheckoutSession(sess.SessionID, sess.CheckoutSessionURL)
 	if err := uc.paymentRepo.Save(ctx, payment); err != nil {
-		return InitiatePaymentOutput{}, err
+		return publicfunctions.InitiatePaymentResponse{}, err
 	}
-	return InitiatePaymentOutput{
+	return publicfunctions.InitiatePaymentResponse{
 		PaymentID:   payment.ID(),
 		CheckoutURL: sess.CheckoutSessionURL,
 	}, nil

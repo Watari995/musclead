@@ -6,7 +6,6 @@
 package payment
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
@@ -83,31 +82,9 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 
 	return &Module{
 		Handler: mux,
-		command: &paymentCommand{initiatePayment: initiatePayment},
+		command: initiatePayment,
 		query:   paymentQuery{},
 	}
-}
-
-// paymentCommand は publicfunctions.PaymentCommand の実装。
-// usecase をラップして公開 interface に詰め替える役割。
-type paymentCommand struct {
-	initiatePayment *paymentusecase.InitiatePayment
-}
-
-func (c *paymentCommand) InitiatePayment(ctx context.Context, req publicfunctions.InitiatePaymentRequest) (publicfunctions.InitiatePaymentResponse, error) {
-	output, err := c.initiatePayment.Execute(ctx, paymentusecase.InitiatePaymentInput{
-		UserID:  req.UserID,
-		Email:   req.Email,
-		Amount:  req.Amount,
-		PriceID: req.PriceID,
-	})
-	if err != nil {
-		return publicfunctions.InitiatePaymentResponse{}, err
-	}
-	return publicfunctions.InitiatePaymentResponse{
-		PaymentID:   output.PaymentID,
-		CheckoutURL: output.CheckoutURL,
-	}, nil
 }
 
 // paymentQuery は publicfunctions.PaymentQuery の MVP 空実装。 将来 method 追加時に struct を埋める。
