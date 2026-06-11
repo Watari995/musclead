@@ -2,9 +2,12 @@ package paymentdomain
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Watari995/musclead/internal/valueobject"
 )
+
+var ErrPaymentNotFound = errors.New("payment not found")
 
 // PaymentRepository は payments テーブルへの永続化を抽象化する。
 //

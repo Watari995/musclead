@@ -30,3 +30,7 @@ func NewCurrencyFromString(s string) (*Currency, error) {
 		return nil, ErrInvalidCurrency
 	}
 }
+
+func NewCurrencyFromCode(c CurrencyCode) Currency {
+	return Currency{LiteralBase: LiteralBase[string]{v: string(c)}}
+}
