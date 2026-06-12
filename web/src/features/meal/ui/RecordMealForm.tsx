@@ -84,6 +84,10 @@ export function RecordMealForm() {
       {
         ...form,
         eaten_at: new Date(form.eaten_at!).toISOString(),
+        calories: form.calories ?? 0,
+        protein_g: form.protein_g ?? 0,
+        fat_g: form.fat_g ?? 0,
+        carbohydrate_g: form.carbohydrate_g ?? 0,
         memo: trimmedMemo === "" ? undefined : trimmedMemo,
         photos: imagePaths.map((path, i) => ({
           image_path: path,
@@ -223,7 +227,7 @@ function NumField({
 }: {
   label: string;
   value: number | undefined;
-  onChange: (v: number) => void;
+  onChange: (v: number | undefined) => void;
   step?: string;
 }) {
   return (
@@ -232,8 +236,12 @@ function NumField({
         type="number"
         step={step}
         min={0}
-        value={value ?? 0}
-        onChange={(e) => onChange(Number(e.target.value))}
+        placeholder="0"
+        value={value ?? ""}
+        onChange={(e) => {
+          const raw = e.target.value;
+          onChange(raw === "" ? undefined : Number(raw));
+        }}
       />
     </Label>
   );
@@ -243,10 +251,6 @@ function initialForm(): RecordMealRequest {
   return {
     meal_type: "breakfast",
     eaten_at: toLocalInput(new Date()),
-    calories: 0,
-    protein_g: 0,
-    fat_g: 0,
-    carbohydrate_g: 0,
     memo: "",
     photos: [],
   };
