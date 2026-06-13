@@ -7,7 +7,7 @@ import {
   useUploadMealPhotoMutation,
 } from "@/features/meal/api/meals";
 import { toLocalInput } from "@/features/meal/model/meal";
-import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
+import { Button, Card, ErrorText, Label, NumberField, TextInput } from "@/shared/ui";
 
 const MAX_PHOTOS = 5;
 const ACCEPT_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -232,16 +232,12 @@ function NumField({
 }) {
   return (
     <Label label={label}>
-      <TextInput
-        type="number"
+      <NumberField
         step={step}
         min={0}
         placeholder="0"
-        value={value ?? ""}
-        onChange={(e) => {
-          const raw = e.target.value;
-          onChange(raw === "" ? undefined : Number(raw));
-        }}
+        value={value}
+        onChange={onChange}
       />
     </Label>
   );

@@ -48,10 +48,34 @@ className="text-[var(--color-ink)] border-[var(--color-line)]"
 | 見出し | `<SectionTitle>` (`text-base font-bold tracking-tight`) |
 | ラベル | `<Label label="...">` (子要素は input 等) |
 | テキスト入力 | `<TextInput>` (`h-11`、 罫線、 focus 時 ink) |
+| 数値入力 | `<NumberField>` (`TextInput` ベース、 空欄 = `undefined`、 placeholder 必須) |
 | ボタン | `<Button variant="primary"|"ghost"|"danger">` |
 | エラー文 | `<ErrorText>` |
 
 **新しい入力フォーム/カードは必ずこれを使う**。 個別に Tailwind で書き直さない。
+
+### 数値入力の規約(`NumberField`)
+
+> 目的: フォーカスのたびに `0` を消す状態を作らない。 空欄スタート + placeholder を徹底する。
+
+- **整数/小数の数値入力は `<NumberField>` を使う**。 内部で `value ?? ""` 表示・ 空欄 → `undefined` 変換を担保しているので、 `value ?? 0` を自分で書かない。
+- **placeholder は必須 prop**。 共通の既定値は持たせない(フィールドごとに例示値や単位を渡す。 例: `"0"` / `"回"` / `"例: 90"`)。
+- **state を `0` で初期化しない**。 未入力は `undefined`(または `null`)で表し、 表示は空欄にする。 `useState({ reps: 0 })` のような 0 起点は禁止。
+- **null セマンティクスがある項目**(例: 休憩秒数の「種目デフォルトを使う」)は call 側で `value={x ?? undefined}` / `onChange={(v) => ({ x: v ?? null })}` と橋渡しする。
+- **送信時に 0 等へ寄せる**のは form 側の責務(BE の VO 要件は機能ごとに違うため)。 例: `calories: form.calories ?? 0`。
+
+#### 小数精度が必要な項目(体重・体脂肪率など)
+
+`NonNegativeDecimal` 等で**文字列のまま送る**項目は、 number 化すると桁落ち(`"60.00"` → `60`)するため `NumberField` を使わず、 `string` state + `<TextInput type="number">` で扱う。 ただし**同じ規約を守る**:
+
+- 初期値は `""`(`"0"` 起点は禁止)、 placeholder で例示(例: `"例: 60.0"`)。
+- 空文字は送信時に `|| "0"` 等で寄せる(VO が空文字を弾くため)。
+
+#### 禁則(数値入力)
+
+- `value={x ?? 0}` / `value={x || 0}`(0 起点表示)
+- 数値 state の `0` / `"0"` 初期化
+- placeholder なしの数値入力
 
 ## 5. レイアウト規約
 
