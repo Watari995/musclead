@@ -54,7 +54,7 @@ export function createInitialSet(setNumber: number): SetDraft {
   return {
     key: nextKey("set"),
     setNumber,
-    weightKg: "0",
+    weightKg: "",
     reps: 0,
     restSeconds: null,
     memo: "",
@@ -213,7 +213,8 @@ export function toRecordRequest(
       memo: ex.memo ? ex.memo : undefined,
       sets: ex.sets.map((s) => ({
         set_number: s.setNumber,
-        weight_kg: s.weightKg,
+        // 未入力(空文字)は 0 として送る(VO が空文字を弾くため)
+        weight_kg: s.weightKg || "0",
         reps: s.reps,
         rest_seconds: s.restSeconds ?? undefined,
         memo: s.memo ? s.memo : undefined,
