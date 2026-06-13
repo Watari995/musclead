@@ -50,6 +50,7 @@ export function RecordWeightForm() {
             type="number"
             step="0.01"
             min={0}
+            placeholder="例: 60.0"
             value={form.weight_kg}
             onChange={(e) => setForm({ ...form, weight_kg: e.target.value })}
             required
@@ -69,6 +70,7 @@ export function RecordWeightForm() {
             step="0.01"
             min={0}
             max={100}
+            placeholder="例: 18.0"
             value={form.body_fat_percentage}
             onChange={(e) =>
               setForm({ ...form, body_fat_percentage: e.target.value })
@@ -80,6 +82,7 @@ export function RecordWeightForm() {
             type="number"
             step="0.01"
             min={0}
+            placeholder="例: 30.0"
             value={form.skeletal_muscle_kg}
             onChange={(e) =>
               setForm({ ...form, skeletal_muscle_kg: e.target.value })
