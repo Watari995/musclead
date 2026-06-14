@@ -1,28 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { ThemePicker } from "@/features/user/ui/ThemePicker";
-import { useAccessToken } from "@/shared/auth/access-token";
-import { SettingsDetailHeader } from "../_components/SettingsDetailHeader";
 
+// 認証ガード / サイドバーは settings/layout.tsx が持つ。 ここは内容のみ。
 export default function AppearanceSettingsPage() {
-  const router = useRouter();
-  const { token, ready } = useAccessToken();
-
-  useEffect(() => {
-    if (ready && !token) router.replace("/login");
-  }, [ready, token, router]);
-
-  if (!ready || !token) return null;
-
   return (
-    <div className="space-y-6">
-      <SettingsDetailHeader title="外観" />
-      <p className="text-sm text-[var(--color-ink-muted)]">
-        テーマモードを選択してください。 選んだ瞬間に保存されます。
-      </p>
+    <section className="space-y-4">
+      <header className="space-y-1">
+        <h2 className="text-lg font-bold tracking-tight">外観</h2>
+        <p className="text-sm text-[var(--color-ink-muted)]">
+          テーマモードを選択してください。 選んだ瞬間に保存されます。
+        </p>
+      </header>
       <ThemePicker />
-    </div>
+    </section>
   );
 }

@@ -1,23 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSubscribeMutation } from "@/features/purchase/api/purchase";
-import { useAccessToken } from "@/shared/auth/access-token";
 import { Button } from "@/shared/ui";
-import { SettingsDetailHeader } from "../_components/SettingsDetailHeader";
 
-// プランページ (Pro 申込み)。
-// 現在 /settings ハブの動線はコメントアウトで非表示 (Stripe 本番設定が整うまで)。
-// ページ自体は残しており、 ハブのリンクを復活させれば再開できる。
+// プランページ (Pro 申込み)。 認証ガード / サイドバーは settings/layout.tsx が持つ。
+// 現在 layout のサイドバー動線はコメントアウトで非表示 (Stripe 本番設定が test のため)。
+// ページ自体は残しており、 サイドバーのリンクを復活させれば再開できる。
 export default function PlanSettingsPage() {
-  const router = useRouter();
-  const { token, ready } = useAccessToken();
   const subscribe = useSubscribeMutation();
-
-  useEffect(() => {
-    if (ready && !token) router.replace("/login");
-  }, [ready, token, router]);
 
   // Stripe Checkout からの戻りクエリ (?purchase=success|cancel) を読む。
   // useSearchParams は Suspense 境界が要るため、 既存流儀に倣い window から直接読む。
@@ -35,8 +26,6 @@ export default function PlanSettingsPage() {
     window.history.replaceState({}, "", url.toString());
   }, [returnStatus]);
 
-  if (!ready || !token) return null;
-
   const handleUpgrade = () => {
     subscribe.mutate(
       { plan: "pro" },
@@ -49,11 +38,13 @@ export default function PlanSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <SettingsDetailHeader title="プラン" />
-      <p className="text-sm text-[var(--color-ink-muted)]">
-        Pro にアップグレードすると、 すべての機能が利用できます。
-      </p>
+    <section className="space-y-4">
+      <header className="space-y-1">
+        <h2 className="text-lg font-bold tracking-tight">プラン</h2>
+        <p className="text-sm text-[var(--color-ink-muted)]">
+          Pro にアップグレードすると、 すべての機能が利用できます。
+        </p>
+      </header>
 
       {returnStatus === "success" && (
         <p className="text-sm text-[var(--color-ink)] rounded-md border border-[var(--color-line)] bg-[var(--color-surface-alt)] px-3 py-2">
@@ -88,6 +79,6 @@ export default function PlanSettingsPage() {
           </p>
         )}
       </div>
-    </div>
+    </section>
   );
 }
