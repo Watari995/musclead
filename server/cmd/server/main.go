@@ -28,6 +28,9 @@ import (
 	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/meal"
+	"github.com/Watari995/musclead/internal/billing"
+	"github.com/Watari995/musclead/internal/payment"
+	"github.com/Watari995/musclead/internal/purchase"
 	_ "github.com/Watari995/musclead/internal/shared"
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/shared/httpx"
@@ -35,6 +38,7 @@ import (
 	sharedstorage "github.com/Watari995/musclead/internal/shared/infra/storage"
 	"github.com/Watari995/musclead/internal/training"
 	"github.com/Watari995/musclead/internal/user"
+	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/Watari995/musclead/internal/weight"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -155,6 +159,18 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
 	trainingModule := training.NewModule(dbmap)
 	weightModule := weight.NewModule(dbmap, redisClient)
+	paymentModule := payment.NewModule(dbmap, payment.Config{
+		StripeAPIKey:               os.Getenv("STRIPE_SECRET_KEY"),
+		StripeSuccessURL:           os.Getenv("STRIPE_SUCCESS_URL"),
+		StripeCancelURL:            os.Getenv("STRIPE_CANCEL_URL"),
+		StripeWebhookSigningSecret: os.Getenv("STRIPE_WEBHOOK_SIGNING_SECRET"),
+		StripePortalReturnURL:      os.Getenv("STRIPE_PORTAL_RETURN_URL"),
+	})
+	priceIDByPlan := map[valueobject.SubscriptionPlanCode]string{
+		valueobject.SubscriptionPlanPro: os.Getenv("STRIPE_PRO_PRICE_ID"),
+	}
+	purchaseModule := purchase.NewModule(dbmap, paymentModule.Command(), userModule.UserQuery(), priceIDByPlan)
+	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))
@@ -175,6 +191,11 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// weights
 	mux.Handle("/weights", authModule.Middleware(weightModule.Handler))
 	mux.Handle("/weights/", authModule.Middleware(weightModule.Handler))
+	// purchase
+	mux.Handle("/purchase", purchaseModule.Handler)
+	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
+	// billing (Stripe Webhook、 auth middleware なし)
+	mux.Handle("/billing/", billingModule.Handler)
 	return httpx.CORSMiddleware(mux)
 }
 

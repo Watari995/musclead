@@ -102,6 +102,7 @@ export type ExerciseDTO = TrainingDto<"ExerciseDTO">;
 export type ListExercisesResponse = TrainingDto<"ListExercisesResponse">;
 export type UpsertExerciseRequest = TrainingDto<"UpsertExerciseRequest">;
 export type UpsertExerciseResponse = TrainingDto<"UpsertExerciseResponse">;
+export type ReorderExercisesRequest = TrainingDto<"ReorderExercisesRequest">;
 
 export type RoutineDTO = TrainingDto<"RoutineDTO">;
 export type RoutineExerciseDTO = TrainingDto<"RoutineExerciseDTO">;

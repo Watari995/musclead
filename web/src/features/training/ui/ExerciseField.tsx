@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Exercise } from "@/features/training/model/exercise";
 import type { ExerciseDraft, SetDraft } from "@/features/training/model/training-draft";
-import { Button, Card, Label, TextInput } from "@/shared/ui";
+import { Button, Card, Label, NumberField, TextInput } from "@/shared/ui";
 import { SetField } from "./SetField";
 
 type Props = {
@@ -106,17 +106,11 @@ export function ExerciseField({
       {/* exercise メタ: 既定の休憩 + メモ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Label label="既定の休憩(秒)">
-          <TextInput
-            type="number"
+          <NumberField
             min={0}
-            value={exercise.restSeconds ?? ""}
+            value={exercise.restSeconds ?? undefined}
             placeholder="例: 90"
-            onChange={(e) =>
-              onChange({
-                restSeconds:
-                  e.target.value === "" ? null : Number(e.target.value),
-              })
-            }
+            onChange={(v) => onChange({ restSeconds: v ?? null })}
             disabled={disabled}
           />
         </Label>

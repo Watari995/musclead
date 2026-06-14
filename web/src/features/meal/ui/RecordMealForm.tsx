@@ -7,7 +7,7 @@ import {
   useUploadMealPhotoMutation,
 } from "@/features/meal/api/meals";
 import { toLocalInput } from "@/features/meal/model/meal";
-import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
+import { Button, Card, ErrorText, Label, NumberField, TextInput } from "@/shared/ui";
 
 const MAX_PHOTOS = 5;
 const ACCEPT_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -84,6 +84,10 @@ export function RecordMealForm() {
       {
         ...form,
         eaten_at: new Date(form.eaten_at!).toISOString(),
+        calories: form.calories ?? 0,
+        protein_g: form.protein_g ?? 0,
+        fat_g: form.fat_g ?? 0,
+        carbohydrate_g: form.carbohydrate_g ?? 0,
         memo: trimmedMemo === "" ? undefined : trimmedMemo,
         photos: imagePaths.map((path, i) => ({
           image_path: path,
@@ -223,17 +227,17 @@ function NumField({
 }: {
   label: string;
   value: number | undefined;
-  onChange: (v: number) => void;
+  onChange: (v: number | undefined) => void;
   step?: string;
 }) {
   return (
     <Label label={label}>
-      <TextInput
-        type="number"
+      <NumberField
         step={step}
         min={0}
-        value={value ?? 0}
-        onChange={(e) => onChange(Number(e.target.value))}
+        placeholder="0"
+        value={value}
+        onChange={onChange}
       />
     </Label>
   );
@@ -243,10 +247,6 @@ function initialForm(): RecordMealRequest {
   return {
     meal_type: "breakfast",
     eaten_at: toLocalInput(new Date()),
-    calories: 0,
-    protein_g: 0,
-    fat_g: 0,
-    carbohydrate_g: 0,
     memo: "",
     photos: [],
   };

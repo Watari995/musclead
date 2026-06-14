@@ -19,6 +19,7 @@ type Module struct {
 	PublicHandler http.Handler
 	Handler       http.Handler
 	userCommand   publicfunctions.UserCommand
+	userQuery     publicfunctions.UserQuery
 }
 
 func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) *Module {
@@ -39,6 +40,8 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
 
+	getEmailByUserID := userusecase.NewGetEmailByUserID(repo)
+
 	// 認証済みルートをひとつの mux にまとめる
 	authedMux := http.NewServeMux()
 	userhandler.RegisterAuthenticatedHandlers(authedMux, urlBuilder, me, find, updateUser, delete, generateProfileImagePresignedURL)
@@ -48,10 +51,17 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 		PublicHandler: userhandler.NewPublic(register),
 		Handler:       authedMux,
 		userCommand:   authenticate,
+		userQuery:     getEmailByUserID,
 	}
 }
 
-// immutableにするためにゲッター経由で取得する
+// UserCommand は他 module 公開用 getter。
+// userCommand は unexported にし setter を持たないことで、 NewModule 後の依存差し替えを防ぐ。
 func (m *Module) UserCommand() publicfunctions.UserCommand {
 	return m.userCommand
+}
+
+// UserQuery は他 module 公開用 getter (UserCommand と同様の immutable 保護)。
+func (m *Module) UserQuery() publicfunctions.UserQuery {
+	return m.userQuery
 }

@@ -64,6 +64,21 @@ textarea {
   max-width: 100%;
 }
 
+/* iOS Safari の datetime-local / date / time はネイティブ表示 (-webkit-appearance
+   既定) のままだと、 内部の -webkit-datetime-edit が値テキスト (和暦 "R8/06/09 20:12"
+   等) の content 幅まで広がり、 max-width:100% を貫通してコンテナをはみ出す。
+   appearance:none + min-width:0 で通常の text 入力同様に width:100% を尊重させる
+   (タップ時のネイティブピッカーはそのまま開く)。 */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+}
+
 /* react-day-picker theming — snkrdunk テイスト (monochrome, sharp) に寄せる */
 .rdp-root {
   --rdp-accent-color: var(--color-ink);

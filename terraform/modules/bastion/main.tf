@@ -86,6 +86,18 @@ resource "aws_security_group_rule" "rds_from_bastion" {
   description = "Allow Bastion to access RDS"
 }
 
+# ElastiCache の SG に Bastion からの 6379 inbound を許可する
+# (operator が redis-cli で cache 中身確認 / FLUSHDB / 緊急修復するため)
+resource "aws_security_group_rule" "cache_from_bastion" {
+  type                     = "ingress"
+  from_port                = 6379
+  to_port                  = 6379
+  protocol                 = "tcp"
+  security_group_id        = var.cache_sg_id
+  source_security_group_id = aws_security_group.bastion.id
+  description              = "Allow Bastion to access ElastiCache"
+}
+
 
 # Bastion EC2 本体
 resource "aws_instance" "bastion" {

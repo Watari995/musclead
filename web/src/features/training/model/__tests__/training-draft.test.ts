@@ -103,7 +103,7 @@ describe("set operations", () => {
   it("updateSet patches only the targeted set", () => {
     const draft = addSet(createInitialTraining(), 0);
     const after = updateSet(draft, 0, 1, { weightKg: "80.00", reps: 5 });
-    expect(after.exercises[0].sets[0].weightKg).toBe("0");
+    expect(after.exercises[0].sets[0].weightKg).toBe("");
     expect(after.exercises[0].sets[1].weightKg).toBe("80.00");
     expect(after.exercises[0].sets[1].reps).toBe(5);
   });

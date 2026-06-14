@@ -3,6 +3,9 @@ package valueobject
 type PrimaryID interface {
 	// PrimaryIDBase を埋め込んだ型を指定
 	~struct{ PrimaryIDBase }
+	// Genericsの型制約は型情報のみで、埋め込みメソッドを表に出さない。
+	// 制約を明示するとTからメソッド呼び出しが可能になる
+	Bytes() ([]byte, error)
 }
 
 func NewPrimaryID[T PrimaryID]() T {
@@ -31,3 +34,9 @@ type ExerciseID struct{ PrimaryIDBase }
 type RoutineID struct{ PrimaryIDBase }
 type RoutineExerciseID struct{ PrimaryIDBase }
 type WeightID struct{ PrimaryIDBase }
+type PaymentID struct{ PrimaryIDBase }
+type PaymentEventID struct{ PrimaryIDBase }
+type StripeEventID struct{ PrimaryIDBase }
+type OutboxEventID struct{ PrimaryIDBase }
+type SubscriptionOrderID struct{ PrimaryIDBase }
+type SubscriptionID struct{ PrimaryIDBase }

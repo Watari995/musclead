@@ -95,10 +95,11 @@ module "dns" {
 }
 
 module "bastion" {
-  source    = "./modules/bastion"
-  vpc_id    = module.network.vpc_id
-  subnet_id = module.network.public_subnet_ids[0]
-  rds_sg_id = module.network.rds_sg_id
+  source      = "./modules/bastion"
+  vpc_id      = module.network.vpc_id
+  subnet_id   = module.network.public_subnet_ids[0]
+  rds_sg_id   = module.network.rds_sg_id
+  cache_sg_id = module.network.cache_sg_id
 }
 
 module "github_oidc" {

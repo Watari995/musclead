@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   apiClient,
   type ListExercisesResponse,
+  type ReorderExercisesRequest,
   type UpsertExerciseRequest,
   type UpsertExerciseResponse,
 } from "@/shared/api/client";
@@ -103,6 +104,41 @@ export function useUpdateExerciseMutation(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: EXERCISE_QUERY_KEY(id) });
+    },
+  });
+}
+
+export function useReorderExercisesMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    // ordered には並び替え後の全件を渡す。 楽観的にキャッシュを更新する。
+    mutationFn: async (ordered: Exercise[]) => {
+      const body: ReorderExercisesRequest = {
+        exercise_ids: ordered.map((e) => e.id),
+      };
+      const { error, response } = await apiClient.POST("/exercises/reorder", {
+        body,
+      });
+      if (error) {
+        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      }
+    },
+    onMutate: async (ordered: Exercise[]) => {
+      await queryClient.cancelQueries({ queryKey: EXERCISES_QUERY_KEY });
+      const previous = queryClient.getQueryData<Exercise[]>(EXERCISES_QUERY_KEY);
+      queryClient.setQueryData<Exercise[]>(
+        EXERCISES_QUERY_KEY,
+        ordered.map((e, i) => ({ ...e, displayOrder: i })),
+      );
+      return { previous };
+    },
+    onError: (_err, _ordered, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(EXERCISES_QUERY_KEY, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY });
     },
   });
 }

@@ -47,6 +47,30 @@ handler → usecase → domain
 - **domain は何にも依存しない**(純粋ロジック)
 - **infra が domain interface を実装**(依存性逆転)
 
+## handler の責務(必須ルール)
+
+**handler は usecase だけを呼ぶ。 domain interface / infra 実装の直接利用は禁止。**
+
+| OK / NG | 例 |
+|---|---|
+| ✅ OK | `handler` の struct field に `*usecase.Xxx` を持つ |
+| ❌ NG | `handler` の struct field に `domain.PaymentRepository` を持つ |
+| ❌ NG | `handler` の struct field に `domain.StripeClient` を持つ |
+| ❌ NG | `handler` の struct field に `domain.RetryStrategy` を持つ |
+| ❌ NG | `handler` 内で `infra.NewXxxRepository(...)` を呼ぶ |
+
+### 理由
+
+- レイヤ依存方向(handler → usecase → domain)を厳格に守る
+- handler のテスト時に usecase の mock だけで済む(domain interface の mock を別途用意しなくていい)
+- アーキテクチャ境界が崩れない
+
+### 薄い wrapper usecase は許容
+
+handler が直接 domain interface を呼びたくなる場面でも、 **薄い wrapper usecase** を作って経由する。 中身が 1 行でも問題なし(境界明示が目的)。
+
+例: `domain.StripeClient.ParseWebhookEvent` を handler から直接呼ばず、 `ParseWebhookEvent` usecase を作って handler はそれを呼ぶ。
+
 ## モジュール間連携
 
 | 種類 | OK / NG |

@@ -1,7 +1,7 @@
 "use client";
 
 import type { SetDraft } from "@/features/training/model/training-draft";
-import { TextInput } from "@/shared/ui";
+import { NumberField, TextInput } from "@/shared/ui";
 
 type Props = {
   set: SetDraft;
@@ -51,29 +51,23 @@ export function SetField({
             />
           </MobileField>
           <MobileField label="レップ">
-            <TextInput
-              type="number"
+            <NumberField
               min={0}
               placeholder="回"
-              value={set.reps || ""}
-              onChange={(e) => onChange({ reps: Number(e.target.value) })}
+              value={set.reps || undefined}
+              onChange={(v) => onChange({ reps: v ?? 0 })}
               aria-label={`セット${set.setNumber}のレップ`}
               disabled={disabled}
             />
           </MobileField>
           <MobileField label="休憩(秒)">
-            <TextInput
-              type="number"
+            <NumberField
               min={0}
               placeholder={
                 exerciseDefaultRest !== null ? `${exerciseDefaultRest}` : "秒"
               }
-              value={set.restSeconds ?? ""}
-              onChange={(e) =>
-                onChange({
-                  restSeconds: e.target.value === "" ? null : Number(e.target.value),
-                })
-              }
+              value={set.restSeconds ?? undefined}
+              onChange={(v) => onChange({ restSeconds: v ?? null })}
               aria-label={`セット${set.setNumber}の休憩秒数`}
               disabled={disabled}
             />
@@ -95,29 +89,23 @@ export function SetField({
           aria-label={`セット${set.setNumber}の重量`}
           disabled={disabled}
         />
-        <TextInput
-          type="number"
+        <NumberField
           min={0}
           placeholder="回"
-          value={set.reps || ""}
-          onChange={(e) => onChange({ reps: Number(e.target.value) })}
+          value={set.reps || undefined}
+          onChange={(v) => onChange({ reps: v ?? 0 })}
           aria-label={`セット${set.setNumber}のレップ`}
           disabled={disabled}
         />
-        <TextInput
-          type="number"
+        <NumberField
           min={0}
           placeholder={
             exerciseDefaultRest !== null
               ? `${exerciseDefaultRest}秒(既定)`
               : "休憩 秒"
           }
-          value={set.restSeconds ?? ""}
-          onChange={(e) =>
-            onChange({
-              restSeconds: e.target.value === "" ? null : Number(e.target.value),
-            })
-          }
+          value={set.restSeconds ?? undefined}
+          onChange={(v) => onChange({ restSeconds: v ?? null })}
           aria-label={`セット${set.setNumber}の休憩秒数`}
           disabled={disabled}
         />
