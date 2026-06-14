@@ -250,6 +250,14 @@ func NewSubscriptionOrderNotFoundError() MyError {
 	}
 }
 
+func NewPaymentNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.Payment.NotFoundError,
+	}
+}
+
 // ─── ヘルパー ───
 func IsCode(err error, code ErrorCode) bool {
 	if myErr, ok := errors.AsType[MyError](err); ok {

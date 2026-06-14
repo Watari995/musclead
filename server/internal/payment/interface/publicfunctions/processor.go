@@ -1,8 +1,3 @@
-// Package publicfunctions の Stripe Webhook 検証 / パース interface。
-//
-// 設計 (ADR 0019): billing module が Stripe 固有の署名検証を payment に閉じたまま
-// 呼べるように、 publicfunctions 経由で公開する。 billing から見ると「Stripe SDK を
-// 直接触らずに Stripe Event を取り出せるラッパー」 として扱える。
 package publicfunctions
 
 import (

@@ -3,14 +3,9 @@ package paymentusecase
 import (
 	"context"
 
+	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 )
-
-// HandleFailureInput は Webhook 処理失敗時に handler から渡される。
-type HandleFailureInput struct {
-	StripeEvent *paymentdomain.StripeEvent
-	Cause       error
-}
 
 // HandleFailure は Webhook 処理失敗時の挙動を RetryStrategy に委譲する薄い wrapper usecase。
 //
@@ -22,8 +17,9 @@ type HandleFailure struct {
 	retryStrategy paymentdomain.RetryStrategy
 }
 
-func (uc *HandleFailure) Execute(ctx context.Context, input HandleFailureInput) error {
-	return uc.retryStrategy.OnFailure(ctx, input.StripeEvent, input.Cause)
+func (uc *HandleFailure) HandleFailure(ctx context.Context, input publicfunctions.HandleFailureRequest) error {
+	stripeEvent := paymentdomain.CreateStripeEvent(input.StripeEventID, input.EventType, input.Payload)
+	return uc.retryStrategy.OnFailure(ctx, stripeEvent, input.Cause)
 }
 
 func NewHandleFailure(retryStrategy paymentdomain.RetryStrategy) *HandleFailure {

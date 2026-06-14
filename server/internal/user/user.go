@@ -55,11 +55,13 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	}
 }
 
-// immutableにするためにゲッター経由で取得する
+// UserCommand は他 module 公開用 getter。
+// userCommand は unexported にし setter を持たないことで、 NewModule 後の依存差し替えを防ぐ。
 func (m *Module) UserCommand() publicfunctions.UserCommand {
 	return m.userCommand
 }
 
+// UserQuery は他 module 公開用 getter (UserCommand と同様の immutable 保護)。
 func (m *Module) UserQuery() publicfunctions.UserQuery {
 	return m.userQuery
 }

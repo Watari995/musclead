@@ -1,10 +1,13 @@
 package billinghandler
 
 import (
+	"io"
 	"net/http"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	paymentpublicfunctions "github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	purchasepublicfunctions "github.com/Watari995/musclead/internal/purchase/interface/publicfunctions"
+	"github.com/Watari995/musclead/internal/shared/httpx"
 )
 
 // WebhookHandler は Stripe Webhook を受信し、 payment / purchase 両 context に dispatch する。
@@ -45,6 +48,71 @@ type WebhookHandler struct {
 //   - CompletePayment レスポンスから ActivateSubscriptionRequest を組み立てて purchase に渡す
 //   - dispatch ロジックは Stripe プロトコル解釈なので handler 配置で OK (ADR 0018 ①)
 func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	// Stripe-Signature を取得
+	signatureHeader := r.Header.Get("Stripe-Signature")
+	if signatureHeader == "" {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("Stripe-Signature is required"))
+		return
+	}
+	event, err := h.stripeProcessor.ParseAndVerify(r.Context(), payload, signatureHeader)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	// event.EventTypeで分岐
+	var errResponse error
+	switch event.EventType {
+	case "checkout.session.completed":
+		var resp paymentpublicfunctions.CompletePaymentResponse
+		resp, errResponse = h.paymentWebhookCommand.CompletePayment(r.Context(), paymentpublicfunctions.CompletePaymentRequest{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+		})
+		// completePaymentが成功した時のみActivateSubscriptionを呼ぶ
+		if errResponse == nil {
+			errResponse = h.purchaseCommand.ActivateSubscription(r.Context(), purchasepublicfunctions.ActivateSubscriptionRequest{
+				PaymentID: resp.PaymentID,
+				UserID:    resp.UserID,
+				Plan:      resp.Plan,
+				ExpiresAt: resp.ExpiresAt,
+			})
+		}
+	case "customer.subscription.deleted":
+		errResponse = h.paymentWebhookCommand.CancelPayment(r.Context(), paymentpublicfunctions.CancelPaymentRequest{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+		})
+	case "invoice.paid":
+		errResponse = h.paymentWebhookCommand.RenewPayment(r.Context(), paymentpublicfunctions.RenewPaymentRequest{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+		})
+	default:
+		httpx.WriteOK(w)
+		return
+	}
+	// 全体のswitchでどこかで失敗したらHandleFailureを呼ぶ
+	if errResponse != nil {
+		if ferr := h.paymentWebhookCommand.HandleFailure(r.Context(), paymentpublicfunctions.HandleFailureRequest{
+			StripeEventID: event.StripeEventID,
+			EventType:     event.EventType,
+			Payload:       event.Payload,
+			Cause:         errResponse,
+		}); ferr != nil {
+			httpx.WriteError(w, ferr)
+			return
+		}
+	}
+	// 成功で200レスポンスを返す
+	httpx.WriteOK(w)
 }
 
 // NewWebhookHandler は WebhookHandler を組み立て、 POST /billing/webhook にマウントした http.Handler を返す。

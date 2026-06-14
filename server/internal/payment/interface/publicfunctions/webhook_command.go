@@ -9,6 +9,7 @@ package publicfunctions
 
 import (
 	"context"
+	"time"
 
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -26,7 +27,7 @@ type CompletePaymentResponse struct {
 	PaymentID valueobject.PaymentID
 	UserID    valueobject.UserID
 	Plan      valueobject.SubscriptionPlan
-	ExpiresAt valueobject.Metadata // current_period_end など、 確定後に埋める
+	ExpiresAt time.Time
 }
 
 // CancelPaymentRequest は Stripe 'customer.subscription.deleted' 受信時の入力。
@@ -48,14 +49,17 @@ type HandleFailureRequest struct {
 	StripeEventID string
 	EventType     string
 	Payload       valueobject.Metadata
+	Cause         error
 }
 
 // PaymentWebhookCommand は billing module (Webhook orchestrator) 専用の公開 API。
+// Stripe Webhook 起点の状態遷移 4 種を 1 つの interface に束ねる。
 //
 // 設計メモ (ADR 0018, 0019):
 //   - 各メソッドは内部で独自 TX を張る (handler は TX を持たない)
 //   - 冪等性は stripe_events UNIQUE で吸収、 重複受信は no-op
 //   - CompletePayment のみ response を返す (billing が purchase.ActivateSubscription に流すため)
+//   - 既存 PaymentCommand / PaymentQuery と命名体系を揃える (CQRS の Command)
 type PaymentWebhookCommand interface {
 	CompletePayment(ctx context.Context, req CompletePaymentRequest) (CompletePaymentResponse, error)
 	CancelPayment(ctx context.Context, req CancelPaymentRequest) error
