@@ -70,6 +70,12 @@ type TrainingDto<K extends string> =
       ? Schemas[P]
       : never
     : never;
+type PurchaseDto<K extends string> =
+  `github_com_Watari995_musclead_internal_purchase_dto.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
 type Httpx<K extends string> =
   `github_com_Watari995_musclead_internal_shared_httpx.${K}` extends infer P
     ? P extends keyof Schemas
@@ -110,6 +116,9 @@ export type ListRoutinesResponse = TrainingDto<"ListRoutinesResponse">;
 export type UpsertRoutineRequest = TrainingDto<"UpsertRoutineRequest">;
 export type UpsertRoutineExerciseRequest = TrainingDto<"UpsertRoutineExerciseRequest">;
 export type UpsertRoutineResponse = TrainingDto<"UpsertRoutineResponse">;
+
+export type SubscribeRequest = PurchaseDto<"SubscribeRequest">;
+export type SubscribeResponse = PurchaseDto<"SubscribeResponse">;
 
 export type ErrorResponse = Httpx<"ErrorResponse">;
 
