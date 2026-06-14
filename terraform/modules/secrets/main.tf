@@ -47,3 +47,25 @@ resource "aws_ssm_parameter" "db_host" {
     Name = "musclead-db-host"
   }
 }
+
+resource "aws_ssm_parameter" "stripe_secret_key" {
+  name        = "/musclead/${var.env}/stripe_secret_key"
+  description = "Stripe API secret key (sk_test / sk_live)"
+  type        = "SecureString"
+  value       = var.stripe_secret_key
+
+  tags = {
+    Name = "musclead-stripe-secret-key"
+  }
+}
+
+resource "aws_ssm_parameter" "stripe_webhook_signing_secret" {
+  name        = "/musclead/${var.env}/stripe_webhook_signing_secret"
+  description = "Stripe Webhook 署名検証 secret (whsec_)"
+  type        = "SecureString"
+  value       = var.stripe_webhook_signing_secret
+
+  tags = {
+    Name = "musclead-stripe-webhook-signing-secret"
+  }
+}

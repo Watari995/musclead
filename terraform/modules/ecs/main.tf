@@ -159,7 +159,12 @@ resource "aws_ecs_task_definition" "server" {
       { name = "AWS_REGION", value = var.aws_region },
       { name = "STORAGE_BUCKET", value = var.storage_bucket_name },
       { name = "REDIS_HOST", value = var.cache_endpoint },
-      { name = "REDIS_PORT", value = "6379" }
+      { name = "REDIS_PORT", value = "6379" },
+      # Stripe 設定値 (secret ではない: price ID は公開、 URL は遷移先)
+      { name = "STRIPE_PRO_PRICE_ID", value = var.stripe_pro_price_id },
+      { name = "STRIPE_SUCCESS_URL", value = var.stripe_success_url },
+      { name = "STRIPE_CANCEL_URL", value = var.stripe_cancel_url },
+      { name = "STRIPE_PORTAL_RETURN_URL", value = var.stripe_portal_return_url }
     ]
 
     # SSM 由来 secrets(IAM Role 経由で復号化)
@@ -168,6 +173,8 @@ resource "aws_ecs_task_definition" "server" {
       { name = "DB_USER", valueFrom = var.db_user_arn },
       { name = "DB_PASSWORD", valueFrom = var.db_password_arn },
       { name = "DB_HOST", valueFrom = var.db_host_arn },
+      { name = "STRIPE_SECRET_KEY", valueFrom = var.stripe_secret_key_arn },
+      { name = "STRIPE_WEBHOOK_SIGNING_SECRET", valueFrom = var.stripe_webhook_signing_secret_arn },
     ]
 
     # CloudWatch Logs に awslogs ドライバで送信

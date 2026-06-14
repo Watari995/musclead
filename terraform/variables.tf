@@ -67,3 +67,40 @@ variable "enable_cache" {
   type        = bool
   default     = false
 }
+
+# ── Stripe ─────────────
+variable "stripe_secret_key" {
+  description = "Stripe API secret key (sk_test / sk_live)。 terraform.tfvars で投入"
+  type        = string
+  sensitive   = true
+}
+
+variable "stripe_webhook_signing_secret" {
+  description = "Stripe Webhook 署名検証 secret (whsec_)。 terraform.tfvars で投入"
+  type        = string
+  sensitive   = true
+}
+
+variable "stripe_pro_price_id" {
+  description = "Stripe Pro プランの Price ID"
+  type        = string
+  default     = "price_1TgMut866skNoey5280aSIKe"
+}
+
+variable "stripe_success_url" {
+  description = "Checkout 成功時の戻り URL"
+  type        = string
+  default     = "https://app.musclead.com/settings?purchase=success"
+}
+
+variable "stripe_cancel_url" {
+  description = "Checkout キャンセル時の戻り URL"
+  type        = string
+  default     = "https://app.musclead.com/settings?purchase=cancel"
+}
+
+variable "stripe_portal_return_url" {
+  description = "Customer Portal の戻り URL"
+  type        = string
+  default     = "https://app.musclead.com/settings"
+}
