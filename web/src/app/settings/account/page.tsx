@@ -1,22 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useLogoutMutation } from "@/features/user/api/user";
-import { useAccessToken } from "@/shared/auth/access-token";
 import { Button } from "@/shared/ui";
-import { SettingsDetailHeader } from "../_components/SettingsDetailHeader";
 
+// 認証ガード / サイドバーは settings/layout.tsx が持つ。 ここは内容のみ。
 export default function AccountSettingsPage() {
   const router = useRouter();
-  const { token, ready } = useAccessToken();
   const logout = useLogoutMutation();
-
-  useEffect(() => {
-    if (ready && !token) router.replace("/login");
-  }, [ready, token, router]);
-
-  if (!ready || !token) return null;
 
   const handleLogout = () => {
     logout.mutate(undefined, {
@@ -25,11 +16,13 @@ export default function AccountSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <SettingsDetailHeader title="アカウント" />
-      <p className="text-sm text-[var(--color-ink-muted)]">
-        現在のデバイスからサインアウトします。
-      </p>
+    <section className="space-y-4">
+      <header className="space-y-1">
+        <h2 className="text-lg font-bold tracking-tight">アカウント</h2>
+        <p className="text-sm text-[var(--color-ink-muted)]">
+          現在のデバイスからサインアウトします。
+        </p>
+      </header>
       <Button
         type="button"
         variant="ghost"
@@ -38,6 +31,6 @@ export default function AccountSettingsPage() {
       >
         {logout.isPending ? "ログアウト中…" : "ログアウト"}
       </Button>
-    </div>
+    </section>
   );
 }
