@@ -12,3 +12,12 @@ db_port     = 3306
 
 # Route 53 hosted zone ID(AWS Console で確認 / aws route53 list-hosted-zones)
 hosted_zone_id = "REPLACE_WITH_HOSTED_ZONE_ID"
+
+# Stripe (Dashboard > API keys / Webhooks で取得)
+stripe_secret_key             = "sk_test_REPLACE_ME"
+stripe_webhook_signing_secret = "whsec_REPLACE_ME" # Webhook endpoint 作成時に発行される署名 secret
+# 以下は default あり (variables.tf)。 上書きする場合のみ記載
+# stripe_pro_price_id      = "price_xxx"
+# stripe_success_url       = "https://app.musclead.com/settings?purchase=success"
+# stripe_cancel_url        = "https://app.musclead.com/settings?purchase=cancel"
+# stripe_portal_return_url = "https://app.musclead.com/settings"

@@ -38,12 +38,14 @@ module "ecr" {
 }
 
 module "secrets" {
-  source      = "./modules/secrets"
-  env         = var.env
-  jwt_secret  = var.jwt_secret
-  db_user     = var.db_user
-  db_password = var.db_password
-  db_host     = module.rds.endpoint
+  source                        = "./modules/secrets"
+  env                           = var.env
+  jwt_secret                    = var.jwt_secret
+  db_user                       = var.db_user
+  db_password                   = var.db_password
+  db_host                       = module.rds.endpoint
+  stripe_secret_key             = var.stripe_secret_key
+  stripe_webhook_signing_secret = var.stripe_webhook_signing_secret
 }
 
 module "acm" {
@@ -68,21 +70,29 @@ module "ecs" {
     module.secrets.db_user_arn,
     module.secrets.db_password_arn,
     module.secrets.db_host_arn,
+    module.secrets.stripe_secret_key_arn,
+    module.secrets.stripe_webhook_signing_secret_arn,
   ]
-  jwt_secret_arn      = module.secrets.jwt_secret_arn
-  db_user_arn         = module.secrets.db_user_arn
-  db_password_arn     = module.secrets.db_password_arn
-  db_host_arn         = module.secrets.db_host_arn
-  db_name             = var.db_name
-  db_port             = var.db_port
-  subnet_ids          = module.network.public_subnet_ids
-  server_sg_id        = module.network.server_fargate_sg_id
-  target_group_arn    = module.alb.server_target_group_arn
-  allowed_origin      = var.allowed_origin
-  storage_bucket_name = module.storage.bucket_name
-  storage_bucket_arn  = module.storage.bucket_arn
-  aws_region          = var.aws_region
-  cache_endpoint      = var.enable_cache ? module.cache[0].endpoint : ""
+  jwt_secret_arn                    = module.secrets.jwt_secret_arn
+  db_user_arn                       = module.secrets.db_user_arn
+  db_password_arn                   = module.secrets.db_password_arn
+  db_host_arn                       = module.secrets.db_host_arn
+  stripe_secret_key_arn             = module.secrets.stripe_secret_key_arn
+  stripe_webhook_signing_secret_arn = module.secrets.stripe_webhook_signing_secret_arn
+  db_name                           = var.db_name
+  db_port                           = var.db_port
+  subnet_ids                        = module.network.public_subnet_ids
+  server_sg_id                      = module.network.server_fargate_sg_id
+  target_group_arn                  = module.alb.server_target_group_arn
+  allowed_origin                    = var.allowed_origin
+  storage_bucket_name               = module.storage.bucket_name
+  storage_bucket_arn                = module.storage.bucket_arn
+  aws_region                        = var.aws_region
+  cache_endpoint                    = var.enable_cache ? module.cache[0].endpoint : ""
+  stripe_pro_price_id               = var.stripe_pro_price_id
+  stripe_success_url                = var.stripe_success_url
+  stripe_cancel_url                 = var.stripe_cancel_url
+  stripe_portal_return_url          = var.stripe_portal_return_url
 }
 
 

@@ -19,3 +19,13 @@ output "db_host_arn" {
   description = "DB host Parameter の ARN"
   value       = aws_ssm_parameter.db_host.arn
 }
+
+output "stripe_secret_key_arn" {
+  description = "Stripe secret key Parameter の ARN"
+  value       = aws_ssm_parameter.stripe_secret_key.arn
+}
+
+output "stripe_webhook_signing_secret_arn" {
+  description = "Stripe Webhook 署名 secret Parameter の ARN"
+  value       = aws_ssm_parameter.stripe_webhook_signing_secret.arn
+}
