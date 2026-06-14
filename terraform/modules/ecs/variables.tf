@@ -30,7 +30,37 @@ variable "db_host_arn" {
   sensitive = true
 }
 
+variable "stripe_secret_key_arn" {
+  type      = string
+  sensitive = true
+}
+
+variable "stripe_webhook_signing_secret_arn" {
+  type      = string
+  sensitive = true
+}
+
 # 平文 env(これはsecretではないので直接渡す)
+
+variable "stripe_pro_price_id" {
+  description = "Stripe Pro プランの Price ID (price_)"
+  type        = string
+}
+
+variable "stripe_success_url" {
+  description = "Checkout 成功時の戻り URL"
+  type        = string
+}
+
+variable "stripe_cancel_url" {
+  description = "Checkout キャンセル時の戻り URL"
+  type        = string
+}
+
+variable "stripe_portal_return_url" {
+  description = "Customer Portal の戻り URL"
+  type        = string
+}
 variable "db_name" {
   type = string
 }
