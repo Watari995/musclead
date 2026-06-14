@@ -9,6 +9,7 @@ package publicfunctions
 
 import (
 	"context"
+	"time"
 
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -26,7 +27,7 @@ type CompletePaymentResponse struct {
 	PaymentID valueobject.PaymentID
 	UserID    valueobject.UserID
 	Plan      valueobject.SubscriptionPlan
-	ExpiresAt valueobject.Metadata // current_period_end など、 確定後に埋める
+	ExpiresAt time.Time
 }
 
 // CancelPaymentRequest は Stripe 'customer.subscription.deleted' 受信時の入力。
@@ -48,6 +49,7 @@ type HandleFailureRequest struct {
 	StripeEventID string
 	EventType     string
 	Payload       valueobject.Metadata
+	Cause         error
 }
 
 // PaymentWebhookCommand は billing module (Webhook orchestrator) 専用の公開 API。
