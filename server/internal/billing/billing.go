@@ -32,8 +32,8 @@ type Module struct {
 //	purchaseModule = purchase.NewModule(paymentModule.Command(), ...)
 //	billingModule  = billing.NewModule(
 //	    paymentModule.WebhookCommand(),
-//	    paymentModule.StripeProcessor(),
-//	    purchaseModule.Command(),
+//	    paymentModule.Processor(),
+//	    purchaseModule.PurchaseCommand(),
 //	)
 func NewModule(
 	paymentWebhookCommand paymentpublicfunctions.PaymentWebhookCommand,

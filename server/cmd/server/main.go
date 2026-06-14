@@ -28,6 +28,7 @@ import (
 	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/meal"
+	"github.com/Watari995/musclead/internal/billing"
 	"github.com/Watari995/musclead/internal/payment"
 	"github.com/Watari995/musclead/internal/purchase"
 	_ "github.com/Watari995/musclead/internal/shared"
@@ -169,6 +170,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 		valueobject.SubscriptionPlanPro: os.Getenv("STRIPE_PRO_PRICE_ID"),
 	}
 	purchaseModule := purchase.NewModule(dbmap, paymentModule.Command(), userModule.UserQuery(), priceIDByPlan)
+	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))
@@ -192,8 +194,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// purchase
 	mux.Handle("/purchase", purchaseModule.Handler)
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
-	// payment (Stripe Webhook など、 auth middleware なし)
-	mux.Handle("/payment/", paymentModule.Handler)
+	// billing (Stripe Webhook、 auth middleware なし)
+	mux.Handle("/billing/", billingModule.Handler)
 	return httpx.CORSMiddleware(mux)
 }
 
