@@ -46,7 +46,7 @@ func buildInsertPaymentEventParams(event *paymentdomain.PaymentEvent) ([]any, er
 	return []any{
 		bytes,
 		paymentIDBytes,
-		event.EventType(),
+		event.EventType().Value(),
 		event.Metadata(),
 		event.CreatedAt(),
 	}, nil

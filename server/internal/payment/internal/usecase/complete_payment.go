@@ -22,15 +22,23 @@ type CompletePayment struct {
 }
 
 func (uc *CompletePayment) CompletePayment(ctx context.Context, input publicfunctions.CompletePaymentRequest) (publicfunctions.CompletePaymentResponse, error) {
+	// client_reference_id に InitiatePayment 時の PaymentID を載せている (CreateCheckoutSession 参照)。
+	// subscription_id は InitiatePayment 時点では未確定なので、 payment の引き当ては client_reference_id で行う (X-2)。
+	clientReferenceID, ok := input.Payload["client_reference_id"].(string)
+	if !ok {
+		return publicfunctions.CompletePaymentResponse{}, fmt.Errorf("client_reference_id is not a string")
+	}
+	paymentID, err := valueobject.NewPrimaryIDFromString[valueobject.PaymentID](clientReferenceID)
+	if err != nil {
+		return publicfunctions.CompletePaymentResponse{}, err
+	}
 	stripeSubscriptionID, ok := input.Payload["subscription"].(string)
 	if !ok {
 		return publicfunctions.CompletePaymentResponse{}, fmt.Errorf("subscription is not a string")
 	}
-	periodEndRaw, ok := input.Payload["current_period_end"].(float64)
-	if !ok {
-		return publicfunctions.CompletePaymentResponse{}, fmt.Errorf("current_period_end is not a float64")
-	}
-	currentPeriodEnd := time.Unix(int64(periodEndRaw), 0)
+	// checkout.session.completed の payload には current_period_end が含まれない。
+	// 月額プラン (Pro 1 種) のみなので仮値 (now + 1ヶ月) を入れる。 厳密値は invoice.paid で更新される (RenewPayment)。
+	currentPeriodEnd := time.Now().AddDate(0, 1, 0)
 
 	stripeEventMetadata := valueobject.Metadata{
 		"stripe_event_id":        input.StripeEventID,
@@ -39,7 +47,7 @@ func (uc *CompletePayment) CompletePayment(ctx context.Context, input publicfunc
 	}
 	stripeEvent := paymentdomain.CreateStripeEvent(input.StripeEventID, input.EventType, stripeEventMetadata)
 
-	payment, err := uc.paymentRepo.FindByStripeSubscriptionID(ctx, stripeSubscriptionID)
+	payment, err := uc.paymentRepo.FindByID(ctx, *paymentID)
 	if err != nil {
 		return publicfunctions.CompletePaymentResponse{}, err
 	}

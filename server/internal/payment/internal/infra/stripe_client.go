@@ -66,10 +66,15 @@ func (s *stripeClient) CreateCustomer(ctx context.Context, input paymentdomain.C
 //   - mode は "subscription" 固定
 func (s *stripeClient) CreateCheckoutSession(ctx context.Context, input paymentdomain.CreateCheckoutSessionInput) (paymentdomain.CreateCheckoutSessionOutput, error) {
 	params := &stripe.CheckoutSessionParams{
-		Customer:   stripe.String(input.CustomerID),
-		Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)),
-		SuccessURL: stripe.String(s.successURL),
-		CancelURL:  stripe.String(s.cancelURL),
+		Customer: stripe.String(input.CustomerID),
+		// ClientReferenceID に PaymentID を載せると checkout.session.completed の
+		// payload["client_reference_id"] で返ってくる。 これを使って Webhook 受信時に
+		// 「どの payment か」 を特定する (ADR 0014 / X-2)。
+		// subscription_id は InitiatePayment 時点では未確定なので引き当てキーに使えない。
+		ClientReferenceID: stripe.String(input.PaymentID.Value()),
+		Mode:              stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+		SuccessURL:        stripe.String(s.successURL),
+		CancelURL:         stripe.String(s.cancelURL),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{Price: stripe.String(input.PriceID), Quantity: stripe.Int64(1)},
 		},
@@ -97,7 +102,12 @@ func (s *stripeClient) CreateCheckoutSession(ctx context.Context, input paymentd
 //   - event.Data.Raw を JSON unmarshal して valueobject.Metadata に詰める
 //   - usecase は EventType でブランチし、 Payload (map) から必要な field を取り出す
 func (s *stripeClient) ParseWebhookEvent(ctx context.Context, input paymentdomain.ParseWebhookEventInput) (paymentdomain.ParseWebhookEventOutput, error) {
-	event, err := webhook.ConstructEvent(input.Payload, input.SignatureHeader, s.webhookSigningSecret)
+	// IgnoreAPIVersionMismatch: Stripe アカウントの API version (例: 2026-05-27.dahlia) と
+	// stripe-go SDK が期待する version (basil) が異なると ConstructEvent は reject する。
+	// 我々は event.Data.Raw を自前で json.Unmarshal して map に詰めており、 SDK のオブジェクト型
+	// デシリアライズに依存しないため、 version 差分を無視して安全に署名検証のみ行う。
+	event, err := webhook.ConstructEventWithOptions(input.Payload, input.SignatureHeader, s.webhookSigningSecret,
+		webhook.ConstructEventOptions{IgnoreAPIVersionMismatch: true})
 	if err != nil {
 		return paymentdomain.ParseWebhookEventOutput{}, err
 	}
