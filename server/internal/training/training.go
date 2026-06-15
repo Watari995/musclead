@@ -5,6 +5,7 @@ package training
 import (
 	"net/http"
 
+	purchasepublicfunctions "github.com/Watari995/musclead/internal/purchase/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
 	traininghandler "github.com/Watari995/musclead/internal/training/internal/handler"
 	traininginfra "github.com/Watari995/musclead/internal/training/internal/infra"
@@ -18,7 +19,7 @@ type Module struct {
 	RoutineHandler  http.Handler
 }
 
-func NewModule(dbmap *gorp.DbMap) *Module {
+func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.SubscriptionQuery) *Module {
 	// == repo ==
 	dbmap.AddTableWithName(traininginfra.TrainingModel{}, "trainings").SetKeys(false, "ID")
 	dbmap.AddTableWithName(traininginfra.TrainingExerciseModel{}, "training_exercises").SetKeys(false, "ID")
@@ -53,7 +54,7 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	// routine
 	findRoutine := trainingusecase.NewFindRoutineByID(routineQueryService)
 	listRoutines := trainingusecase.NewListRoutines(routineQueryService)
-	createRoutine := trainingusecase.NewCreateRoutine(routineRepo)
+	createRoutine := trainingusecase.NewCreateRoutine(routineRepo, subscriptionQuery)
 	updateRoutine := trainingusecase.NewUpdateRoutine(routineRepo)
 	deleteRoutine := trainingusecase.NewDeleteRoutineByID(routineRepo)
 

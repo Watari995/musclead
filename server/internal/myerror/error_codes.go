@@ -31,6 +31,7 @@ type trainingErrors struct {
 	ExerciseUsedInTrainingError    ErrorCode
 	RoutineNotFoundError           ErrorCode
 	RoutineNameAlreadyExistsError  ErrorCode
+	RoutineLimitReachedError       ErrorCode
 }
 
 type weightErrors struct {
@@ -85,6 +86,7 @@ var ErrorCodes = struct {
 		ExerciseUsedInTrainingError:    "training.exercise_used_in_training_error",
 		RoutineNotFoundError:           "training.routine_not_found_error",
 		RoutineNameAlreadyExistsError:  "training.routine_name_already_exists_error",
+		RoutineLimitReachedError:       "training.routine_limit_reached_error",
 	},
 	Weight: weightErrors{
 		NotFoundError: "weight.not_found_error",

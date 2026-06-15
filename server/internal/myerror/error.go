@@ -234,6 +234,14 @@ func NewRoutineNameAlreadyExistsError() MyError {
 	}
 }
 
+func NewRoutineLimitReachedError() MyError {
+	return &myError{
+		status:      http.StatusForbidden,
+		generalCode: ErrorCodes.General.PermissionError,
+		code:        ErrorCodes.Training.RoutineLimitReachedError,
+	}
+}
+
 func NewWeightNotFoundError() MyError {
 	return &myError{
 		status:      http.StatusNotFound,

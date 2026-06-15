@@ -24,8 +24,9 @@ import (
 )
 
 type Module struct {
-	Handler         http.Handler
-	purchaseCommand purchasepublicfunctions.PurchaseCommand
+	Handler           http.Handler
+	purchaseCommand   purchasepublicfunctions.PurchaseCommand
+	subscriptionQuery purchasepublicfunctions.SubscriptionQuery
 }
 
 func NewModule(dbmap *gorp.DbMap, paymentCommand paymentpublicfunctions.PaymentCommand, userQuery userpublicfunctions.UserQuery, priceIDByPlan map[valueobject.SubscriptionPlanCode]string) *Module {
@@ -40,12 +41,14 @@ func NewModule(dbmap *gorp.DbMap, paymentCommand paymentpublicfunctions.PaymentC
 	renewSubscription := purchaseusecase.NewRenewSubscription(subscriptionRepo)
 	cancelSubscription := purchaseusecase.NewCancelSubscription(subscriptionRepo)
 	purchaseCommand := purchaseusecase.NewPurchaseCommand(activateSubscription, renewSubscription, cancelSubscription)
+	subscriptionQuery := purchaseusecase.NewSubscriptionQuery(getSubscription)
 	createPortalSession := purchaseusecase.NewCreatePortalSession(paymentCommand)
 
 	handler := purchasehandler.NewPurchaseHandler(subscribe, getSubscription, createPortalSession)
 	return &Module{
-		Handler:         handler,
-		purchaseCommand: purchaseCommand,
+		Handler:           handler,
+		purchaseCommand:   purchaseCommand,
+		subscriptionQuery: subscriptionQuery,
 	}
 }
 
@@ -53,4 +56,8 @@ func NewModule(dbmap *gorp.DbMap, paymentCommand paymentpublicfunctions.PaymentC
 // purchaseCommand は unexported にし setter を持たないことで、 NewModule 後の依存差し替えを防ぐ。
 func (m *Module) PurchaseCommand() purchasepublicfunctions.PurchaseCommand {
 	return m.purchaseCommand
+}
+
+func (m *Module) SubscriptionQuery() purchasepublicfunctions.SubscriptionQuery {
+	return m.subscriptionQuery
 }
