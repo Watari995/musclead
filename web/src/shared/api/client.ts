@@ -119,6 +119,8 @@ export type UpsertRoutineResponse = TrainingDto<"UpsertRoutineResponse">;
 
 export type SubscribeRequest = PurchaseDto<"SubscribeRequest">;
 export type SubscribeResponse = PurchaseDto<"SubscribeResponse">;
+export type GetSubscriptionResponse = PurchaseDto<"GetSubscriptionResponse">;
+export type CreatePortalSessionResponse = PurchaseDto<"CreatePortalSessionResponse">;
 
 export type ErrorResponse = Httpx<"ErrorResponse">;
 
