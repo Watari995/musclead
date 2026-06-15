@@ -10,3 +10,9 @@ type SubscribeRequest struct {
 type SubscribeResponse struct {
 	CheckoutURL string `json:"checkout_url"`
 }
+
+type GetSubscriptionResponse struct {
+	IsPro     bool    `json:"is_pro"`
+	Plan      *string `json:"plan,omitempty"`
+	ExpiresAt *string `json:"expires_at,omitempty"`
+}

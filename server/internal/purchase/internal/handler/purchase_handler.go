@@ -2,6 +2,7 @@ package purchasehandler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/purchase/dto"
@@ -16,13 +17,15 @@ import (
 //   - handler は HTTP I/O のみ。 publicfunctions / business 設定値は持たない
 //   - business logic は Subscribe usecase に集約 (priceID 解決 / email 取得 / 金額決定 等)
 type PurchaseHandler struct {
-	subscribe *purchaseusecase.Subscribe
+	subscribe       *purchaseusecase.Subscribe
+	getSubscription *purchaseusecase.GetSubscription
 }
 
-func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe) http.Handler {
-	h := &PurchaseHandler{subscribe: subscribe}
+func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe, getSubscription *purchaseusecase.GetSubscription) http.Handler {
+	h := &PurchaseHandler{subscribe: subscribe, getSubscription: getSubscription}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /purchase/subscribe", h.Subscribe)
+	mux.HandleFunc("GET /purchase/subscription", h.GetSubscription)
 	return mux
 }
 
@@ -38,13 +41,6 @@ func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe) http.Handler {
 // @Failure 400 {object} httpx.ErrorResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /purchase/subscribe [post]
-//
-// 流れ:
-//  1. UserID を context から取得 (httpx.UserIDFromContext)
-//  2. body を dto.SubscribeRequest にデコード (httpx.DecodeJSON)
-//  3. req.Plan を valueobject.SubscriptionPlan に validate
-//  4. h.subscribe.Execute(ctx, SubscribeInput{UserID, Plan}) を呼ぶ
-//  5. CheckoutURL を dto.SubscribeResponse として httpx.WriteJSON で返却
 func (h *PurchaseHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
@@ -67,4 +63,37 @@ func (h *PurchaseHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteJSON(w, http.StatusOK, dto.SubscribeResponse{CheckoutURL: output.CheckoutURL.String()})
+}
+
+// GetSubscription godoc
+//
+// @Summary サブスクリプション状態取得
+// @Tags purchase
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dto.GetSubscriptionResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /purchase/subscription [get]
+func (h *PurchaseHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, myerror.NewUnauthorizedError())
+		return
+	}
+	output, err := h.getSubscription.Execute(r.Context(), purchaseusecase.GetSubscriptionInput{UserID: userID})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	var plan *string
+	if output.Plan != nil {
+		s := output.Plan.String()
+		plan = &s
+	}
+	var expiresAt *string
+	if output.ExpiresAt != nil {
+		s := output.ExpiresAt.Format(time.RFC3339)
+		expiresAt = &s
+	}
+	httpx.WriteJSON(w, http.StatusOK, dto.GetSubscriptionResponse{IsPro: output.IsPro, Plan: plan, ExpiresAt: expiresAt})
 }
