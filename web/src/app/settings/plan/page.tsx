@@ -1,14 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSubscribeMutation } from "@/features/purchase/api/purchase";
+import {
+  usePortalSessionMutation,
+  useSubscribeMutation,
+  useSubscriptionQuery,
+} from "@/features/purchase/api/purchase";
 import { Button } from "@/shared/ui";
 
-// プランページ (Pro 申込み)。 認証ガード / サイドバーは settings/layout.tsx が持つ。
+// プランページ。 認証ガード / サイドバーは settings/layout.tsx が持つ。
 // 現在 layout のサイドバー動線はコメントアウトで非表示 (Stripe 本番設定が test のため)。
 // ページ自体は残しており、 サイドバーのリンクを復活させれば再開できる。
+//
+// 表示は GET /purchase/subscription の is_pro で出し分け:
+//   - free → 「Pro にアップグレード」 (POST /subscribe → Checkout)
+//   - pro  → 「現在 Pro (期限)」 + 「お支払い・解約の管理」 (POST /portal-session → Customer Portal)
 export default function PlanSettingsPage() {
+  const subscriptionQuery = useSubscriptionQuery();
   const subscribe = useSubscribeMutation();
+  const portal = usePortalSessionMutation();
 
   // Stripe Checkout からの戻りクエリ (?purchase=success|cancel) を読む。
   // useSearchParams は Suspense 境界が要るため、 既存流儀に倣い window から直接読む。
@@ -37,6 +47,17 @@ export default function PlanSettingsPage() {
     );
   };
 
+  const handleManage = () => {
+    portal.mutate(undefined, {
+      onSuccess: (data) => {
+        if (data.portal_url) window.location.href = data.portal_url;
+      },
+    });
+  };
+
+  const isPro = subscriptionQuery.data?.is_pro ?? false;
+  const expiresAt = subscriptionQuery.data?.expires_at;
+
   return (
     <section className="space-y-4">
       <header className="space-y-1">
@@ -57,28 +78,61 @@ export default function PlanSettingsPage() {
         </p>
       )}
 
-      <div className="rounded-md border border-[var(--color-line)] p-4 space-y-3">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="font-bold tracking-tight">Pro</span>
-          <span className="text-sm text-[var(--color-ink-muted)]">
-            ¥480 / 月
-          </span>
+      {subscriptionQuery.isPending ? (
+        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+      ) : isPro ? (
+        <div className="rounded-md border border-[var(--color-line)] p-4 space-y-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="font-bold tracking-tight">現在のプラン: Pro</span>
+            <span className="text-sm text-[var(--color-ink-muted)]">
+              ¥480 / 月
+            </span>
+          </div>
+          {expiresAt && (
+            <p className="text-sm text-[var(--color-ink-muted)]">
+              {new Date(expiresAt).toLocaleDateString("ja-JP")} まで有効
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleManage}
+            disabled={portal.isPending}
+          >
+            {portal.isPending ? "リダイレクト中…" : "お支払い・解約の管理"}
+          </Button>
+          {portal.isError && (
+            <p className="text-sm text-[var(--color-accent)]">
+              {portal.error instanceof Error
+                ? portal.error.message
+                : "エラーが発生しました。 時間をおいて再度お試しください。"}
+            </p>
+          )}
         </div>
-        <Button
-          type="button"
-          onClick={handleUpgrade}
-          disabled={subscribe.isPending}
-        >
-          {subscribe.isPending ? "リダイレクト中…" : "Pro にアップグレード"}
-        </Button>
-        {subscribe.isError && (
-          <p className="text-sm text-[var(--color-accent)]">
-            {subscribe.error instanceof Error
-              ? subscribe.error.message
-              : "エラーが発生しました。 時間をおいて再度お試しください。"}
-          </p>
-        )}
-      </div>
+      ) : (
+        <div className="rounded-md border border-[var(--color-line)] p-4 space-y-3">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="font-bold tracking-tight">Pro</span>
+            <span className="text-sm text-[var(--color-ink-muted)]">
+              ¥480 / 月
+            </span>
+          </div>
+          <Button
+            type="button"
+            onClick={handleUpgrade}
+            disabled={subscribe.isPending}
+          >
+            {subscribe.isPending ? "リダイレクト中…" : "Pro にアップグレード"}
+          </Button>
+          {subscribe.isError && (
+            <p className="text-sm text-[var(--color-accent)]">
+              {subscribe.error instanceof Error
+                ? subscribe.error.message
+                : "エラーが発生しました。 時間をおいて再度お試しください。"}
+            </p>
+          )}
+        </div>
+      )}
     </section>
   );
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Watari995/musclead/internal/valueobject"
 )
+
 type Subscription struct {
 	id                  valueobject.SubscriptionID
 	userID              valueobject.UserID
@@ -49,6 +50,10 @@ func (s *Subscription) ActivatedAt() time.Time {
 
 func (s *Subscription) ExpiresAt() time.Time {
 	return s.expiresAt
+}
+
+func (s *Subscription) IsPro() bool {
+	return s.expiresAt.After(time.Now())
 }
 
 func (s *Subscription) CanceledAt() *time.Time {
