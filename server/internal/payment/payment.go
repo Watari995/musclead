@@ -49,7 +49,8 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 	)
 
 	initiatePayment := paymentusecase.NewInitiatePayment(paymentRepo, paymentEventRepo, stripeClient)
-	paymentCommand := paymentusecase.NewPaymentCommand(initiatePayment)
+	createPortalSession := paymentusecase.NewCreatePortalSession(paymentRepo, stripeClient)
+	paymentCommand := paymentusecase.NewPaymentCommand(initiatePayment, createPortalSession)
 
 	completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, stripeClient, txManager)
 	cancelPayment := paymentusecase.NewCancelPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)

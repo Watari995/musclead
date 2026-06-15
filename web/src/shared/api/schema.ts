@@ -889,6 +889,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/purchase/portal-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Customer Portal セッション作成 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_purchase_dto.CreatePortalSessionResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/purchase/subscribe": {
         parameters: {
             query?: never;
@@ -942,6 +987,51 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/purchase/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** サブスクリプション状態取得 */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_purchase_dto.GetSubscriptionResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2193,6 +2283,14 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_meal_dto.UpdateMealResponse": {
             meal_id?: string;
+        };
+        "github_com_Watari995_musclead_internal_purchase_dto.CreatePortalSessionResponse": {
+            portal_url?: string;
+        };
+        "github_com_Watari995_musclead_internal_purchase_dto.GetSubscriptionResponse": {
+            expires_at?: string;
+            is_pro?: boolean;
+            plan?: string;
         };
         "github_com_Watari995_musclead_internal_purchase_dto.SubscribeRequest": {
             /** @description "pro" 等、 valueobject.SubscriptionPlan で validate */
