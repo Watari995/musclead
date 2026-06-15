@@ -250,6 +250,14 @@ func NewSubscriptionOrderNotFoundError() MyError {
 	}
 }
 
+func NewSubscriptionNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.Subscription.NotFoundError,
+	}
+}
+
 func NewPaymentNotFoundError() MyError {
 	return &myError{
 		status:      http.StatusNotFound,

@@ -41,6 +41,10 @@ type subscriptionOrderErrors struct {
 	NotFoundError ErrorCode
 }
 
+type subscriptionErrors struct {
+	NotFoundError ErrorCode
+}
+
 type paymentErrors struct {
 	NotFoundError ErrorCode
 }
@@ -52,6 +56,7 @@ var ErrorCodes = struct {
 	Training          trainingErrors
 	Weight            weightErrors
 	SubscriptionOrder subscriptionOrderErrors
+	Subscription      subscriptionErrors
 	Payment           paymentErrors
 }{
 	General: generalErrors{
@@ -86,6 +91,9 @@ var ErrorCodes = struct {
 	},
 	SubscriptionOrder: subscriptionOrderErrors{
 		NotFoundError: "subscription_order.not_found_error",
+	},
+	Subscription: subscriptionErrors{
+		NotFoundError: "subscription.not_found_error",
 	},
 	Payment: paymentErrors{
 		NotFoundError: "payment.not_found_error",

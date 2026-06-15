@@ -39,8 +39,10 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	updatePreferences := userusecase.NewUpdatePreferences(prefsRepo)
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
+	userCommand := userusecase.NewUserCommand(authenticate)
 
 	getEmailByUserID := userusecase.NewGetEmailByUserID(repo)
+	userQuery := userusecase.NewUserQuery(getEmailByUserID)
 
 	// 認証済みルートをひとつの mux にまとめる
 	authedMux := http.NewServeMux()
@@ -50,8 +52,8 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
 		Handler:       authedMux,
-		userCommand:   authenticate,
-		userQuery:     getEmailByUserID,
+		userCommand:   userCommand,
+		userQuery:     userQuery,
 	}
 }
 
