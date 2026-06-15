@@ -49,6 +49,7 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 	)
 
 	initiatePayment := paymentusecase.NewInitiatePayment(paymentRepo, paymentEventRepo, stripeClient)
+	paymentCommand := paymentusecase.NewPaymentCommand(initiatePayment)
 
 	completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, stripeClient, txManager)
 	cancelPayment := paymentusecase.NewCancelPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
@@ -59,7 +60,7 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 	parseWebhookEvent := paymentusecase.NewParseWebhookEvent(stripeClient)
 
 	return &Module{
-		command:        initiatePayment,
+		command:        paymentCommand,
 		webhookCommand: webhookCommand,
 		query:          paymentQuery{}, // 今後追加する場合はここに追記
 		processor:      parseWebhookEvent,
