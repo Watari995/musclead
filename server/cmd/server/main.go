@@ -27,8 +27,8 @@ import (
 
 	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/auth"
-	"github.com/Watari995/musclead/internal/meal"
 	"github.com/Watari995/musclead/internal/billing"
+	"github.com/Watari995/musclead/internal/meal"
 	"github.com/Watari995/musclead/internal/payment"
 	"github.com/Watari995/musclead/internal/purchase"
 	_ "github.com/Watari995/musclead/internal/shared"
@@ -157,7 +157,6 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	userModule := user.NewModule(dbmap, storageClient, urlBuilder)
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
-	trainingModule := training.NewModule(dbmap)
 	weightModule := weight.NewModule(dbmap, redisClient)
 	paymentModule := payment.NewModule(dbmap, payment.Config{
 		StripeAPIKey:               os.Getenv("STRIPE_SECRET_KEY"),
@@ -171,6 +170,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	}
 	purchaseModule := purchase.NewModule(dbmap, paymentModule.Command(), userModule.UserQuery(), priceIDByPlan)
 	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
+	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery())
+
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
 	mux.Handle("/users/", authModule.Middleware(userModule.Handler))

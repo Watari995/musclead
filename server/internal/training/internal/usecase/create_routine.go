@@ -4,9 +4,13 @@ import (
 	"context"
 
 	"github.com/Watari995/musclead/internal/myerror"
+	purchasepublicfunctions "github.com/Watari995/musclead/internal/purchase/interface/publicfunctions"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
+
+// maxRoutinesForFreeUser は無料ユーザーが作成できるルーティンの最大数
+const maxRoutinesForFreeUser = 3
 
 type CreateRoutineInput struct {
 	UserID      valueobject.UserID
@@ -18,10 +22,26 @@ type CreateRoutineOutput struct {
 }
 
 type CreateRoutine struct {
-	routineRepo trainingdomain.RoutineRepository
+	routineRepo       trainingdomain.RoutineRepository
+	subscriptionQuery purchasepublicfunctions.SubscriptionQuery
 }
 
 func (uc *CreateRoutine) Execute(ctx context.Context, input CreateRoutineInput) (*CreateRoutineOutput, error) {
+	// サブスクチェック
+	isPro, err := uc.subscriptionQuery.IsPro(ctx, input.UserID)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	if !isPro {
+		routineCount, err := uc.routineRepo.CountByUserID(ctx, input.UserID)
+		if err != nil {
+			return nil, myerror.NewInternalError().Wrap(err)
+		}
+		if routineCount >= maxRoutinesForFreeUser {
+			return nil, myerror.NewRoutineLimitReachedError()
+		}
+	}
+	// 作成
 	routine := trainingdomain.CreateRoutine(input.RoutineSpec, input.UserID)
 	if err := uc.routineRepo.Save(ctx, routine); err != nil {
 		if myerror.IsCode(err, myerror.ErrorCodes.Training.RoutineNameAlreadyExistsError) {
@@ -32,6 +52,6 @@ func (uc *CreateRoutine) Execute(ctx context.Context, input CreateRoutineInput) 
 	return &CreateRoutineOutput{ID: routine.ID()}, nil
 }
 
-func NewCreateRoutine(routineRepo trainingdomain.RoutineRepository) *CreateRoutine {
-	return &CreateRoutine{routineRepo: routineRepo}
+func NewCreateRoutine(routineRepo trainingdomain.RoutineRepository, subscriptionQuery purchasepublicfunctions.SubscriptionQuery) *CreateRoutine {
+	return &CreateRoutine{routineRepo: routineRepo, subscriptionQuery: subscriptionQuery}
 }
