@@ -16,3 +16,7 @@ type GetSubscriptionResponse struct {
 	Plan      *string `json:"plan,omitempty"`
 	ExpiresAt *string `json:"expires_at,omitempty"`
 }
+
+type CreatePortalSessionResponse struct {
+	PortalURL string `json:"portal_url"`
+}

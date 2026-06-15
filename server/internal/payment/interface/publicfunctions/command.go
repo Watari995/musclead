@@ -24,6 +24,14 @@ type InitiatePaymentResponse struct {
 	CheckoutURL valueobject.URL
 }
 
+type CreatePortalSessionRequest struct {
+	UserID valueobject.UserID
+}
+
+type CreatePortalSessionResponse struct {
+	PortalURL valueobject.URL
+}
+
 // PaymentCommand は payment 集約に対する書き込み系操作の公開 API。
 // purchase context からは Module.Command() 経由でアクセスする。
 //
@@ -31,4 +39,5 @@ type InitiatePaymentResponse struct {
 // Webhook 受信時に内部の handler から呼ばれるため、 外部公開しない。
 type PaymentCommand interface {
 	InitiatePayment(ctx context.Context, req InitiatePaymentRequest) (InitiatePaymentResponse, error)
+	CreatePortalSession(ctx context.Context, req CreatePortalSessionRequest) (CreatePortalSessionResponse, error)
 }

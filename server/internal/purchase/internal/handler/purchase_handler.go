@@ -17,15 +17,17 @@ import (
 //   - handler は HTTP I/O のみ。 publicfunctions / business 設定値は持たない
 //   - business logic は Subscribe usecase に集約 (priceID 解決 / email 取得 / 金額決定 等)
 type PurchaseHandler struct {
-	subscribe       *purchaseusecase.Subscribe
-	getSubscription *purchaseusecase.GetSubscription
+	subscribe           *purchaseusecase.Subscribe
+	getSubscription     *purchaseusecase.GetSubscription
+	createPortalSession *purchaseusecase.CreatePortalSession
 }
 
-func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe, getSubscription *purchaseusecase.GetSubscription) http.Handler {
-	h := &PurchaseHandler{subscribe: subscribe, getSubscription: getSubscription}
+func NewPurchaseHandler(subscribe *purchaseusecase.Subscribe, getSubscription *purchaseusecase.GetSubscription, createPortalSession *purchaseusecase.CreatePortalSession) http.Handler {
+	h := &PurchaseHandler{subscribe: subscribe, getSubscription: getSubscription, createPortalSession: createPortalSession}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /purchase/subscribe", h.Subscribe)
 	mux.HandleFunc("GET /purchase/subscription", h.GetSubscription)
+	mux.HandleFunc("POST /purchase/portal-session", h.CreatePortalSession)
 	return mux
 }
 
@@ -96,4 +98,27 @@ func (h *PurchaseHandler) GetSubscription(w http.ResponseWriter, r *http.Request
 		expiresAt = &s
 	}
 	httpx.WriteJSON(w, http.StatusOK, dto.GetSubscriptionResponse{IsPro: output.IsPro, Plan: plan, ExpiresAt: expiresAt})
+}
+
+// CreatePortalSession godoc
+//
+// @Summary Customer Portal セッション作成
+// @Tags purchase
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dto.CreatePortalSessionResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /purchase/portal-session [post]
+func (h *PurchaseHandler) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, myerror.NewUnauthorizedError())
+		return
+	}
+	output, err := h.createPortalSession.Execute(r.Context(), purchaseusecase.CreatePortalSessionInput{UserID: userID})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, dto.CreatePortalSessionResponse{PortalURL: output.PortalURL.String()})
 }
