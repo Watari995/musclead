@@ -68,6 +68,19 @@ func (r *routineRepository) FindByIDAndUserID(ctx context.Context, id valueobjec
 	return toRoutine(row, exercises[id.String()])
 }
 
+func (r *routineRepository) CountByUserID(ctx context.Context, userID valueobject.UserID) (int, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return 0, err
+	}
+	count, err := q.SelectInt("SELECT COUNT(*) FROM routines WHERE user_id = ?", userIDBytes)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (r *routineRepository) Save(ctx context.Context, routine *trainingdomain.Routine) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := routine.ID().Bytes()

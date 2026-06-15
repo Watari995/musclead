@@ -22,6 +22,15 @@ export class RoutineNameTakenError extends Error {
   }
 }
 
+// RoutineLimitReachedError は無料プランのルーティン上限 (3件) に達した時。
+// 呼び出し側は Pro へのアップグレード導線を出す。
+export class RoutineLimitReachedError extends Error {
+  constructor() {
+    super("ルーティンは無料プランで3件までです。");
+    this.name = "RoutineLimitReachedError";
+  }
+}
+
 export function useRoutinesQuery(enabled: boolean = true) {
   return useQuery({
     queryKey: ROUTINES_QUERY_KEY,
@@ -65,6 +74,9 @@ export function useCreateRoutineMutation() {
       if (error) {
         if (error.error?.code === "training.routine_name_already_exists_error") {
           throw new RoutineNameTakenError();
+        }
+        if (error.error?.code === "training.routine_limit_reached_error") {
+          throw new RoutineLimitReachedError();
         }
         throw new Error(error.error?.message ?? `HTTP ${response.status}`);
       }
