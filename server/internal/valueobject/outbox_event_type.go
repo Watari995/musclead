@@ -29,3 +29,7 @@ func NewOutboxEventTypeFromString(s string) (*OutboxEventType, error) {
 func NewOutboxEventTypeFromCode(c OutboxEventTypeCode) OutboxEventType {
 	return OutboxEventType{LiteralBase: LiteralBase[string]{v: string(c)}}
 }
+
+func (o OutboxEventType) IsPaymentSucceeded() bool {
+	return o.Value() == string(OutboxEventTypePaymentSucceeded)
+}
