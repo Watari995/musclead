@@ -36,10 +36,12 @@ func NewModule(dbmap *gorp.DbMap, paymentCommand paymentpublicfunctions.PaymentC
 
 	subscribe := purchaseusecase.NewSubscribe(orderRepo, paymentCommand, userQuery, priceIDByPlan)
 	activateSubscription := purchaseusecase.NewActivateSubscription(subscriptionRepo, orderRepo)
+	renewSubscription := purchaseusecase.NewRenewSubscription(subscriptionRepo)
+	purchaseCommand := purchaseusecase.NewPurchaseCommand(activateSubscription, renewSubscription)
 	handler := purchasehandler.NewPurchaseHandler(subscribe)
 	return &Module{
 		Handler:         handler,
-		purchaseCommand: activateSubscription,
+		purchaseCommand: purchaseCommand,
 	}
 }
 

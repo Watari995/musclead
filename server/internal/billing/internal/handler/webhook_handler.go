@@ -22,6 +22,21 @@ type WebhookHandler struct {
 	purchaseCommand       purchasepublicfunctions.PurchaseCommand
 }
 
+func NewWebhookHandler(
+	paymentWebhookCommand paymentpublicfunctions.PaymentWebhookCommand,
+	stripeProcessor paymentpublicfunctions.StripeWebhookProcessor,
+	purchaseCommand purchasepublicfunctions.PurchaseCommand,
+) http.Handler {
+	h := &WebhookHandler{
+		paymentWebhookCommand: paymentWebhookCommand,
+		stripeProcessor:       stripeProcessor,
+		purchaseCommand:       purchaseCommand,
+	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /billing/webhook", h.Handle)
+	return mux
+}
+
 // Handle godoc
 //
 // @Summary  Stripe Webhook 受信 (Pro 申込み完了 / 解約 / 月次更新)
@@ -32,21 +47,6 @@ type WebhookHandler struct {
 // @Success  200
 // @Failure  400 {object} httpx.ErrorResponse
 // @Router   /billing/webhook [post]
-//
-// 流れ (ADR 0019):
-//  1. r.Body を読み取り、 r.Header.Get("Stripe-Signature") を取得
-//  2. h.stripeProcessor.ParseAndVerify で署名検証 + StripeEvent 化 (TX 外)
-//  3. event.EventType で dispatch:
-//     - 'checkout.session.completed'   → CompletePayment → ActivateSubscription
-//     - 'customer.subscription.deleted' → CancelPayment (purchase 側 Cancel は将来)
-//     - 'invoice.paid'                  → RenewPayment   (purchase 側 Renew は将来)
-//     - その他                           → HandleFailure
-//  4. 各段階の error は httpx.WriteError で HTTP status に変換、 5xx は Stripe リトライ任せ (ADR 0014 ⑤)
-//
-// 設計メモ:
-//   - publicfunctions のみ import (`payment/internal/*`, `purchase/internal/*` は触らない)
-//   - CompletePayment レスポンスから ActivateSubscriptionRequest を組み立てて purchase に渡す
-//   - dispatch ロジックは Stripe プロトコル解釈なので handler 配置で OK (ADR 0018 ①)
 func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -90,11 +90,19 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			Payload:       event.Payload,
 		})
 	case "invoice.paid":
-		errResponse = h.paymentWebhookCommand.RenewPayment(r.Context(), paymentpublicfunctions.RenewPaymentRequest{
+		var resp paymentpublicfunctions.RenewPaymentResponse
+		resp, errResponse = h.paymentWebhookCommand.RenewPayment(r.Context(), paymentpublicfunctions.RenewPaymentRequest{
 			StripeEventID: event.StripeEventID,
 			EventType:     event.EventType,
 			Payload:       event.Payload,
 		})
+		// renewPaymentが成功した時のみrenewSubscriptionを呼ぶ
+		if errResponse == nil {
+			errResponse = h.purchaseCommand.RenewSubscription(r.Context(), purchasepublicfunctions.RenewSubscriptionRequest{
+				PaymentID: resp.PaymentID,
+				ExpiresAt: resp.ExpiresAt,
+			})
+		}
 	default:
 		httpx.WriteOK(w)
 		return
@@ -113,21 +121,4 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 	// 成功で200レスポンスを返す
 	httpx.WriteOK(w)
-}
-
-// NewWebhookHandler は WebhookHandler を組み立て、 POST /billing/webhook にマウントした http.Handler を返す。
-// 各 module の publicfunctions のみ受け取り、 internal の型は知らない (ADR 0019 ①)。
-func NewWebhookHandler(
-	paymentWebhookCommand paymentpublicfunctions.PaymentWebhookCommand,
-	stripeProcessor paymentpublicfunctions.StripeWebhookProcessor,
-	purchaseCommand purchasepublicfunctions.PurchaseCommand,
-) http.Handler {
-	h := &WebhookHandler{
-		paymentWebhookCommand: paymentWebhookCommand,
-		stripeProcessor:       stripeProcessor,
-		purchaseCommand:       purchaseCommand,
-	}
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /billing/webhook", h.Handle)
-	return mux
 }

@@ -3,6 +3,8 @@ package paymentinfra
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"time"
 
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -10,6 +12,7 @@ import (
 	billingportalsession "github.com/stripe/stripe-go/v82/billingportal/session"
 	checkoutsession "github.com/stripe/stripe-go/v82/checkout/session"
 	"github.com/stripe/stripe-go/v82/customer"
+	"github.com/stripe/stripe-go/v82/subscription"
 	"github.com/stripe/stripe-go/v82/webhook"
 )
 
@@ -140,4 +143,23 @@ func (s *stripeClient) CreatePortalSession(ctx context.Context, customerID strin
 		return valueobject.URL{}, err
 	}
 	return *portalURL, nil
+}
+
+// RetrieveSubscription は Stripe からサブスクリプションを取得し、 現在の課金期間終了時刻を返す。
+//
+// 設計:
+//   - current_period_end は subscription 直下ではなく items.data[].current_period_end にある
+//     (stripe-go v82 / Stripe API dahlia で確認済み。 最近の API 変更で item 単位へ移動)
+//   - 単一プランなので item は 1 つ。 念のため空チェックして Data[0] を読む
+func (s *stripeClient) RetrieveSubscription(ctx context.Context, subscriptionID string) (time.Time, error) {
+	params := &stripe.SubscriptionParams{}
+	params.Context = ctx
+	sub, err := subscription.Get(subscriptionID, params)
+	if err != nil {
+		return time.Time{}, err
+	}
+	if sub.Items == nil || len(sub.Items.Data) == 0 {
+		return time.Time{}, fmt.Errorf("subscription %s has no items", subscriptionID)
+	}
+	return time.Unix(sub.Items.Data[0].CurrentPeriodEnd, 0), nil
 }

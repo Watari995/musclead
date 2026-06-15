@@ -44,6 +44,11 @@ type RenewPaymentRequest struct {
 	Payload       valueobject.Metadata
 }
 
+type RenewPaymentResponse struct {
+	PaymentID valueobject.PaymentID
+	ExpiresAt time.Time
+}
+
 // HandleFailureRequest は処理不能 event を RetryStrategy に委譲するための入力。
 type HandleFailureRequest struct {
 	StripeEventID string
@@ -63,6 +68,6 @@ type HandleFailureRequest struct {
 type PaymentWebhookCommand interface {
 	CompletePayment(ctx context.Context, req CompletePaymentRequest) (CompletePaymentResponse, error)
 	CancelPayment(ctx context.Context, req CancelPaymentRequest) error
-	RenewPayment(ctx context.Context, req RenewPaymentRequest) error
+	RenewPayment(ctx context.Context, req RenewPaymentRequest) (RenewPaymentResponse, error)
 	HandleFailure(ctx context.Context, req HandleFailureRequest) error
 }

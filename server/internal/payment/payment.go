@@ -50,9 +50,9 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 
 	initiatePayment := paymentusecase.NewInitiatePayment(paymentRepo, paymentEventRepo, stripeClient)
 
-	completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
+	completePayment := paymentusecase.NewCompletePayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, stripeClient, txManager)
 	cancelPayment := paymentusecase.NewCancelPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
-	renewPayment := paymentusecase.NewRenewPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, txManager)
+	renewPayment := paymentusecase.NewRenewPayment(paymentRepo, paymentEventRepo, stripeEventRepo, outboxEventRepo, stripeClient, txManager)
 	handleFailure := paymentusecase.NewHandleFailure(retryStrategy)
 	webhookCommand := paymentusecase.NewWebhookCommand(completePayment, cancelPayment, renewPayment, handleFailure)
 
