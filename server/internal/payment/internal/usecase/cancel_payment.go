@@ -20,9 +20,11 @@ type CancelPayment struct {
 }
 
 func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunctions.CancelPaymentRequest) (publicfunctions.CancelPaymentResponse, error) {
-	stripeSubscriptionID, ok := input.Payload["subscription"].(string)
+	// customer.subscription.deleted の object は subscription 本体なので、 sub の id は
+	// "subscription" ではなく "id" フィールドにある (checkout / invoice はサブスクを参照するので "subscription")。
+	stripeSubscriptionID, ok := input.Payload["id"].(string)
 	if !ok {
-		return publicfunctions.CancelPaymentResponse{}, myerror.NewInternalError().SetMessage("subscription is not a string")
+		return publicfunctions.CancelPaymentResponse{}, myerror.NewInternalError().SetMessage("subscription id is not a string")
 	}
 	stripeEventMetadata := valueobject.Metadata{
 		"stripe_event_id":        input.StripeEventID,
