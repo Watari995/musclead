@@ -19,10 +19,10 @@ type CancelPayment struct {
 	txManager        dbtx.TransactionManager
 }
 
-func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunctions.CancelPaymentRequest) error {
+func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunctions.CancelPaymentRequest) (publicfunctions.CancelPaymentResponse, error) {
 	stripeSubscriptionID, ok := input.Payload["subscription"].(string)
 	if !ok {
-		return myerror.NewInternalError().SetMessage("subscription is not a string")
+		return publicfunctions.CancelPaymentResponse{}, myerror.NewInternalError().SetMessage("subscription is not a string")
 	}
 	stripeEventMetadata := valueobject.Metadata{
 		"stripe_event_id":        input.StripeEventID,
@@ -31,10 +31,10 @@ func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunction
 	stripeEvent := paymentdomain.CreateStripeEvent(input.StripeEventID, input.EventType, stripeEventMetadata)
 	payment, err := uc.paymentRepo.FindByStripeSubscriptionID(ctx, stripeSubscriptionID)
 	if err != nil {
-		return err
+		return publicfunctions.CancelPaymentResponse{}, myerror.NewInternalError().Wrap(err)
 	}
 	if payment == nil {
-		return paymentdomain.ErrPaymentNotFound
+		return publicfunctions.CancelPaymentResponse{}, myerror.NewPaymentNotFoundError()
 	}
 	payment.MarkCanceled()
 
@@ -52,7 +52,7 @@ func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunction
 	outboxEvent := paymentdomain.CreateOutboxEvent(valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentCanceled), payment.ID().String(), outboxEventMetadata)
 
 	// stripe_events / payments / payment_events / outbox_events を atomic に保存 (ADR 0014, 0018)
-	return uc.txManager.Processing(ctx, func(ctx context.Context) error {
+	if err := uc.txManager.Processing(ctx, func(ctx context.Context) error {
 		if err := uc.stripeEventRepo.Create(ctx, stripeEvent); err != nil {
 			// UNIQUE 違反 = 既に処理済みの Webhook 重複受信、 no-op で正常終了 (冪等性吸収)
 			if errors.Is(err, paymentdomain.ErrStripeEventAlreadyExists) {
@@ -70,7 +70,11 @@ func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunction
 			return err
 		}
 		return nil
-	})
+	}); err != nil {
+		return publicfunctions.CancelPaymentResponse{}, myerror.NewInternalError().Wrap(err)
+	}
+
+	return publicfunctions.CancelPaymentResponse{PaymentID: payment.ID()}, nil
 }
 
 func NewCancelPayment(

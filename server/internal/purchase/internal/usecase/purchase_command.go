@@ -24,15 +24,18 @@ import (
 type purchaseCommand struct {
 	activateSubscription *ActivateSubscription
 	renewSubscription    *RenewSubscription
+	cancelSubscription   *CancelSubscription
 }
 
 func NewPurchaseCommand(
 	activateSubscription *ActivateSubscription,
 	renewSubscription *RenewSubscription,
+	cancelSubscription *CancelSubscription,
 ) purchasepublicfunctions.PurchaseCommand {
 	return &purchaseCommand{
 		activateSubscription: activateSubscription,
 		renewSubscription:    renewSubscription,
+		cancelSubscription:   cancelSubscription,
 	}
 }
 
@@ -42,4 +45,8 @@ func (c *purchaseCommand) ActivateSubscription(ctx context.Context, req purchase
 
 func (c *purchaseCommand) RenewSubscription(ctx context.Context, req purchasepublicfunctions.RenewSubscriptionRequest) error {
 	return c.renewSubscription.RenewSubscription(ctx, req)
+}
+
+func (c *purchaseCommand) CancelSubscription(ctx context.Context, req purchasepublicfunctions.CancelSubscriptionRequest) error {
+	return c.cancelSubscription.CancelSubscription(ctx, req)
 }

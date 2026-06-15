@@ -84,11 +84,18 @@ func (h *WebhookHandler) Handle(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	case "customer.subscription.deleted":
-		errResponse = h.paymentWebhookCommand.CancelPayment(r.Context(), paymentpublicfunctions.CancelPaymentRequest{
+		var resp paymentpublicfunctions.CancelPaymentResponse
+		resp, errResponse = h.paymentWebhookCommand.CancelPayment(r.Context(), paymentpublicfunctions.CancelPaymentRequest{
 			StripeEventID: event.StripeEventID,
 			EventType:     event.EventType,
 			Payload:       event.Payload,
 		})
+		// cancelPaymentが成功した時のみCancelSubscriptionを呼ぶ
+		if errResponse == nil {
+			errResponse = h.purchaseCommand.CancelSubscription(r.Context(), purchasepublicfunctions.CancelSubscriptionRequest{
+				PaymentID: resp.PaymentID,
+			})
+		}
 	case "invoice.paid":
 		var resp paymentpublicfunctions.RenewPaymentResponse
 		resp, errResponse = h.paymentWebhookCommand.RenewPayment(r.Context(), paymentpublicfunctions.RenewPaymentRequest{

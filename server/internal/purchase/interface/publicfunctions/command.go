@@ -28,6 +28,10 @@ type RenewSubscriptionRequest struct {
 	ExpiresAt time.Time
 }
 
+type CancelSubscriptionRequest struct {
+	PaymentID valueobject.PaymentID
+}
+
 // PurchaseCommand は purchase 集約に対する書き込み系操作の公開 API。
 //
 // MVP (Phase 2 後半) では ActivateSubscription のみ公開。
@@ -35,4 +39,5 @@ type RenewSubscriptionRequest struct {
 type PurchaseCommand interface {
 	ActivateSubscription(ctx context.Context, req ActivateSubscriptionRequest) error
 	RenewSubscription(ctx context.Context, req RenewSubscriptionRequest) error
+	CancelSubscription(ctx context.Context, req CancelSubscriptionRequest) error
 }

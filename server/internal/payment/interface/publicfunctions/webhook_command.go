@@ -37,6 +37,10 @@ type CancelPaymentRequest struct {
 	Payload       valueobject.Metadata
 }
 
+type CancelPaymentResponse struct {
+	PaymentID valueobject.PaymentID
+}
+
 // RenewPaymentRequest は Stripe 'invoice.paid' (月次更新) 受信時の入力。
 type RenewPaymentRequest struct {
 	StripeEventID string
@@ -67,7 +71,7 @@ type HandleFailureRequest struct {
 //   - 既存 PaymentCommand / PaymentQuery と命名体系を揃える (CQRS の Command)
 type PaymentWebhookCommand interface {
 	CompletePayment(ctx context.Context, req CompletePaymentRequest) (CompletePaymentResponse, error)
-	CancelPayment(ctx context.Context, req CancelPaymentRequest) error
+	CancelPayment(ctx context.Context, req CancelPaymentRequest) (CancelPaymentResponse, error)
 	RenewPayment(ctx context.Context, req RenewPaymentRequest) (RenewPaymentResponse, error)
 	HandleFailure(ctx context.Context, req HandleFailureRequest) error
 }

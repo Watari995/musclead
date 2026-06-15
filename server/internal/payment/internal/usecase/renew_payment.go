@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -29,7 +30,7 @@ func (uc *RenewPayment) RenewPayment(ctx context.Context, input publicfunctions.
 	// invoice.paid の payload 直下に current_period_end は無いため、 Stripe から取得する (権威ある値)。
 	currentPeriodEnd, err := uc.stripeClient.RetrieveSubscription(ctx, stripeSubscriptionID)
 	if err != nil {
-		return publicfunctions.RenewPaymentResponse{}, err
+		return publicfunctions.RenewPaymentResponse{}, myerror.NewInternalError().Wrap(err)
 	}
 	stripeEventMetadata := valueobject.Metadata{
 		"stripe_event_id":        input.StripeEventID,
@@ -39,10 +40,10 @@ func (uc *RenewPayment) RenewPayment(ctx context.Context, input publicfunctions.
 	stripeEvent := paymentdomain.CreateStripeEvent(input.StripeEventID, input.EventType, stripeEventMetadata)
 	payment, err := uc.paymentRepo.FindByStripeSubscriptionID(ctx, stripeSubscriptionID)
 	if err != nil {
-		return publicfunctions.RenewPaymentResponse{}, err
+		return publicfunctions.RenewPaymentResponse{}, myerror.NewInternalError().Wrap(err)
 	}
 	if payment == nil {
-		return publicfunctions.RenewPaymentResponse{}, paymentdomain.ErrPaymentNotFound
+		return publicfunctions.RenewPaymentResponse{}, myerror.NewPaymentNotFoundError()
 	}
 	payment.MarkRenewed(currentPeriodEnd)
 

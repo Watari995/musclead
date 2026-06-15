@@ -47,7 +47,7 @@ func (w *webhookCommand) CompletePayment(ctx context.Context, req publicfunction
 	return w.completePayment.CompletePayment(ctx, req)
 }
 
-func (w *webhookCommand) CancelPayment(ctx context.Context, req publicfunctions.CancelPaymentRequest) error {
+func (w *webhookCommand) CancelPayment(ctx context.Context, req publicfunctions.CancelPaymentRequest) (publicfunctions.CancelPaymentResponse, error) {
 	return w.cancelPayment.CancelPayment(ctx, req)
 }
 
