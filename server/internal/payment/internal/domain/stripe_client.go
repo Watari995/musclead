@@ -2,6 +2,7 @@ package paymentdomain
 
 import (
 	"context"
+	"time"
 
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -51,4 +52,9 @@ type StripeClient interface {
 	// 解約 / カード変更フローで、 クライアントは返り値の URL に遷移する (window.location = portalURL)。
 	// ReturnURL は infra コンストラクタで環境変数から受け取る想定 (環境差分)。
 	CreatePortalSession(ctx context.Context, customerID string) (portalURL valueobject.URL, err error)
+
+	// RetrieveSubscription は Stripe からサブスクリプションを取得し、 現在の課金期間終了時刻を返す。
+	// current_period_end は subscription 直下ではなく items.data[].current_period_end にある (stripe-go v82 で確認済み)。
+	// Webhook payload には正確な期末が無い (checkout) / 別フィールド (invoice) のため、 ここで権威ある値を取得する。
+	RetrieveSubscription(ctx context.Context, subscriptionID string) (currentPeriodEnd time.Time, err error)
 }

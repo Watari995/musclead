@@ -18,6 +18,7 @@ type CompletePayment struct {
 	paymentEventRepo paymentdomain.PaymentEventRepository
 	stripeEventRepo  paymentdomain.StripeEventRepository
 	outboxEventRepo  paymentdomain.OutboxEventRepository
+	stripeClient     paymentdomain.StripeClient
 	txManager        dbtx.TransactionManager
 }
 
@@ -36,9 +37,11 @@ func (uc *CompletePayment) CompletePayment(ctx context.Context, input publicfunc
 	if !ok {
 		return publicfunctions.CompletePaymentResponse{}, fmt.Errorf("subscription is not a string")
 	}
-	// checkout.session.completed の payload には current_period_end が含まれない。
-	// 月額プラン (Pro 1 種) のみなので仮値 (now + 1ヶ月) を入れる。 厳密値は invoice.paid で更新される (RenewPayment)。
-	currentPeriodEnd := time.Now().AddDate(0, 1, 0)
+	// checkout.session.completed の payload には正確な期末が無いため、 Stripe から取得する (権威ある値)。
+	currentPeriodEnd, err := uc.stripeClient.RetrieveSubscription(ctx, stripeSubscriptionID)
+	if err != nil {
+		return publicfunctions.CompletePaymentResponse{}, err
+	}
 
 	stripeEventMetadata := valueobject.Metadata{
 		"stripe_event_id":        input.StripeEventID,
@@ -107,6 +110,7 @@ func NewCompletePayment(
 	paymentEventRepo paymentdomain.PaymentEventRepository,
 	stripeEventRepo paymentdomain.StripeEventRepository,
 	outboxEventRepo paymentdomain.OutboxEventRepository,
+	stripeClient paymentdomain.StripeClient,
 	txManager dbtx.TransactionManager,
 ) *CompletePayment {
 	return &CompletePayment{
@@ -114,6 +118,7 @@ func NewCompletePayment(
 		paymentEventRepo: paymentEventRepo,
 		stripeEventRepo:  stripeEventRepo,
 		outboxEventRepo:  outboxEventRepo,
+		stripeClient:     stripeClient,
 		txManager:        txManager,
 	}
 }
