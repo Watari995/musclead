@@ -8,6 +8,7 @@ import (
 
 type RoutineRepository interface {
 	FindByIDAndUserID(ctx context.Context, id valueobject.RoutineID, userID valueobject.UserID) (*Routine, error)
+	CountByUserID(ctx context.Context, userID valueobject.UserID) (int, error)
 	Save(ctx context.Context, routine *Routine) error
 	DeleteByID(ctx context.Context, id valueobject.RoutineID) error
 }
