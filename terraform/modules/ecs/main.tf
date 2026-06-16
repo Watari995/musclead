@@ -109,6 +109,21 @@ resource "aws_iam_role_policy" "server_task_storage" {
   })
 }
 
+# outbox relay が SQS にメッセージを送るための権限 (Task Role)。
+resource "aws_iam_role_policy" "server_task_sqs" {
+  name = "musclead-server-sqs-send"
+  role = aws_iam_role.server_task.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["sqs:SendMessage"]
+      Resource = var.outbox_queue_arn
+    }]
+  })
+}
+
 # CloudWatch Log Group: Server containerのログ集約先
 resource "aws_cloudwatch_log_group" "server" {
   name              = "/musclead/ecs/server"
@@ -164,7 +179,9 @@ resource "aws_ecs_task_definition" "server" {
       { name = "STRIPE_PRO_PRICE_ID", value = var.stripe_pro_price_id },
       { name = "STRIPE_SUCCESS_URL", value = var.stripe_success_url },
       { name = "STRIPE_CANCEL_URL", value = var.stripe_cancel_url },
-      { name = "STRIPE_PORTAL_RETURN_URL", value = var.stripe_portal_return_url }
+      { name = "STRIPE_PORTAL_RETURN_URL", value = var.stripe_portal_return_url },
+      # outbox relay の送信先 SQS
+      { name = "OUTBOX_QUEUE_URL", value = var.outbox_queue_url }
     ]
 
     # SSM 由来 secrets(IAM Role 経由で復号化)

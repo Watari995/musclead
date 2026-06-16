@@ -62,6 +62,19 @@ module "alb" {
   acm_certificate_arn = module.acm.certificate_arn
 }
 
+module "sqs" {
+  source = "./modules/sqs"
+}
+
+module "outbox_consumer" {
+  source          = "./modules/outbox_consumer"
+  sqs_queue_arn   = module.sqs.queue_arn
+  domain_name     = var.domain_name
+  hosted_zone_id  = var.hosted_zone_id
+  from_address    = "no-reply@${var.domain_name}"
+  lambda_zip_path = "${path.module}/../server/lambda.zip"
+}
+
 module "ecs" {
   source           = "./modules/ecs"
   server_image_url = "${module.ecr.server_repository_url}:latest"
@@ -93,6 +106,8 @@ module "ecs" {
   stripe_success_url                = var.stripe_success_url
   stripe_cancel_url                 = var.stripe_cancel_url
   stripe_portal_return_url          = var.stripe_portal_return_url
+  outbox_queue_url                  = module.sqs.queue_url
+  outbox_queue_arn                  = module.sqs.queue_arn
 }
 
 
