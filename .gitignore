@@ -12,6 +12,9 @@ server/tmp/
 # cmd ビルド成果物 (go build ./cmd/X が吐くバイナリ)
 server/server
 server/outbox-consumer
+# Lambda ビルド成果物 (bootstrap バイナリ + zip)
+server/bootstrap
+server/lambda.zip
 *.out
 vendor/
 

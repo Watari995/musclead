@@ -66,6 +66,15 @@ module "sqs" {
   source = "./modules/sqs"
 }
 
+module "outbox_consumer" {
+  source          = "./modules/outbox_consumer"
+  sqs_queue_arn   = module.sqs.queue_arn
+  domain_name     = var.domain_name
+  hosted_zone_id  = var.hosted_zone_id
+  from_address    = "no-reply@${var.domain_name}"
+  lambda_zip_path = "${path.module}/../server/lambda.zip"
+}
+
 module "ecs" {
   source           = "./modules/ecs"
   server_image_url = "${module.ecr.server_repository_url}:latest"
