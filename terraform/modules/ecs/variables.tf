@@ -101,6 +101,16 @@ variable "storage_bucket_arn" {
   type        = string
 }
 
+variable "outbox_queue_url" {
+  description = "outbox relay の送信先 SQS URL(BE の OUTBOX_QUEUE_URL env)"
+  type        = string
+}
+
+variable "outbox_queue_arn" {
+  description = "outbox SQS ARN(Task Role の SendMessage policy で参照)"
+  type        = string
+}
+
 variable "aws_region" {
   description = "AWS region(BE が AWS SDK 初期化で使用)"
   type        = string

@@ -62,6 +62,10 @@ module "alb" {
   acm_certificate_arn = module.acm.certificate_arn
 }
 
+module "sqs" {
+  source = "./modules/sqs"
+}
+
 module "ecs" {
   source           = "./modules/ecs"
   server_image_url = "${module.ecr.server_repository_url}:latest"
@@ -93,6 +97,8 @@ module "ecs" {
   stripe_success_url                = var.stripe_success_url
   stripe_cancel_url                 = var.stripe_cancel_url
   stripe_portal_return_url          = var.stripe_portal_return_url
+  outbox_queue_url                  = module.sqs.queue_url
+  outbox_queue_arn                  = module.sqs.queue_arn
 }
 
 
