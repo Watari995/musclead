@@ -512,6 +512,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/exercises/{id}/best-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 種目の最高記録(最重量セット)を取得
+         * @description 同一種目の全セットから最大重量(同重量なら最多 reps)の 1 セットを返す。記録が無ければ 204。
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 対象 ExerciseID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.BestSetDTO"];
+                    };
+                };
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -2319,6 +2386,12 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse": {
             error?: components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorDetail"];
+        };
+        "github_com_Watari995_musclead_internal_training_dto.BestSetDTO": {
+            performed_at?: string;
+            reps?: number;
+            training_id?: string;
+            weight_kg?: string;
         };
         "github_com_Watari995_musclead_internal_training_dto.ExerciseDTO": {
             created_at?: string;

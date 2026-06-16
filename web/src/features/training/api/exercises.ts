@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   apiClient,
+  type BestSetDTO,
   type ListExercisesResponse,
   type ReorderExercisesRequest,
   type UpsertExerciseRequest,
@@ -12,6 +13,8 @@ import { toExercise, type Exercise } from "../model/exercise";
 
 export const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 const EXERCISE_QUERY_KEY = (id: string) => ["exercise", id] as const;
+const EXERCISE_BEST_SET_QUERY_KEY = (id: string) =>
+  ["exercise", id, "best-set"] as const;
 
 export class ExerciseNameTakenError extends Error {
   constructor() {
@@ -57,6 +60,27 @@ export function useExerciseQuery(id: string, enabled: boolean = true) {
         throw new Error(error.error?.message ?? `HTTP ${response.status}`);
       }
       return toExercise(data);
+    },
+  });
+}
+
+// 種目の最高記録(最重量セット)。記録が無ければ 204 が返るので null を返す。
+export function useExerciseBestSetQuery(id: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: EXERCISE_BEST_SET_QUERY_KEY(id),
+    enabled: enabled && Boolean(id),
+    queryFn: async (): Promise<BestSetDTO | null> => {
+      const { data, error, response } = await apiClient.GET(
+        "/exercises/{id}/best-set",
+        { params: { path: { id } } },
+      );
+      if (response.status === 204) {
+        return null;
+      }
+      if (error) {
+        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      }
+      return (data as BestSetDTO) ?? null;
     },
   });
 }

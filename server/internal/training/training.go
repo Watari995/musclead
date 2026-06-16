@@ -34,6 +34,7 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	exerciseRepo := traininginfra.NewExerciseRepository(dbmap)
 	routineRepo := traininginfra.NewRoutineRepository(dbmap)
 	routineQueryService := traininginfra.NewRoutineQueryService(dbmap)
+	exerciseRecordQueryService := traininginfra.NewExerciseRecordQueryService(dbmap)
 
 	txManager := dbtx.NewTransactionManager(dbmap)
 
@@ -57,6 +58,8 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	createRoutine := trainingusecase.NewCreateRoutine(routineRepo, subscriptionQuery)
 	updateRoutine := trainingusecase.NewUpdateRoutine(routineRepo)
 	deleteRoutine := trainingusecase.NewDeleteRoutineByID(routineRepo)
+	// exercise record
+	findBestSet := trainingusecase.NewFindBestSet(exerciseRecordQueryService)
 
-	return &Module{TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining), ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, listExercises, createExercise, updateExercise, deleteExercise, reorderExercises), RoutineHandler: traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine)}
+	return &Module{TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining), ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, findBestSet, listExercises, createExercise, updateExercise, deleteExercise, reorderExercises), RoutineHandler: traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine)}
 }
