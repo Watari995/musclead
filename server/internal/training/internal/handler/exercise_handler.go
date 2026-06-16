@@ -15,16 +15,18 @@ import (
 )
 
 type ExerciseHandler struct {
-	find    *trainingusecase.FindExerciseByID
-	list    *trainingusecase.ListExercises
-	create  *trainingusecase.CreateExercise
-	update  *trainingusecase.UpdateExercise
-	delete  *trainingusecase.DeleteExerciseByID
-	reorder *trainingusecase.ReorderExercises
+	find        *trainingusecase.FindExerciseByID
+	findBestSet *trainingusecase.FindBestSet
+	list        *trainingusecase.ListExercises
+	create      *trainingusecase.CreateExercise
+	update      *trainingusecase.UpdateExercise
+	delete      *trainingusecase.DeleteExerciseByID
+	reorder     *trainingusecase.ReorderExercises
 }
 
 func NewExerciseHandler(
 	find *trainingusecase.FindExerciseByID,
+	findBestSet *trainingusecase.FindBestSet,
 	list *trainingusecase.ListExercises,
 	create *trainingusecase.CreateExercise,
 	update *trainingusecase.UpdateExercise,
@@ -32,15 +34,17 @@ func NewExerciseHandler(
 	reorder *trainingusecase.ReorderExercises,
 ) http.Handler {
 	h := &ExerciseHandler{
-		find:    find,
-		list:    list,
-		create:  create,
-		update:  update,
-		delete:  delete,
-		reorder: reorder,
+		find:        find,
+		findBestSet: findBestSet,
+		list:        list,
+		create:      create,
+		update:      update,
+		delete:      delete,
+		reorder:     reorder,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /exercises/{id}", h.Find)
+	mux.HandleFunc("GET /exercises/{id}/best-set", h.FindBestSet)
 	mux.HandleFunc("GET /exercises", h.List)
 	mux.HandleFunc("POST /exercises", h.Create)
 	mux.HandleFunc("POST /exercises/reorder", h.Reorder)
@@ -78,6 +82,48 @@ func (h *ExerciseHandler) Find(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteJSON(w, http.StatusOK, trainingdto.ExerciseFromEntity(output.Exercise))
+}
+
+// FindBestSet godoc
+//
+// @Summary 種目の最高記録(最重量セット)を取得
+// @Description 同一種目の全セットから最大重量(同重量なら最多 reps)の 1 セットを返す。記録が無ければ 204。
+// @Tags exercises
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 ExerciseID"
+// @Success 200 {object} trainingdto.BestSetDTO
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises/{id}/best-set [get]
+func (h *ExerciseHandler) FindBestSet(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exerciseID"))
+		return
+	}
+	output, err := h.findBestSet.Execute(r.Context(), trainingusecase.FindBestSetInput{UserID: userID, ExerciseID: *exerciseID})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	// 記録なし(初回種目)は 204 No Content
+	if output == nil || output.BestSet == nil {
+		httpx.WriteNoContent(w)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, trainingdto.BestSetDTO{
+		WeightKg:    output.BestSet.WeightKg.String(),
+		Reps:        output.BestSet.Reps.Value(),
+		PerformedAt: output.BestSet.PerformedAt,
+		TrainingID:  output.BestSet.TrainingID.Value(),
+	})
 }
 
 // List godoc
