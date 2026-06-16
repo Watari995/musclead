@@ -92,13 +92,14 @@ func (r RecordTrainingExerciseRequest) ToSpec() (trainingdomain.TrainingExercise
 		}
 		memo = m
 	}
-	sets := lo.Map(r.Sets, func(s RecordTrainingSetRequest, _ int) trainingdomain.TrainingSetSpec {
+	sets := make([]trainingdomain.TrainingSetSpec, 0, len(r.Sets))
+	for _, s := range r.Sets {
 		spec, err := s.ToSpec()
 		if err != nil {
-			return trainingdomain.TrainingSetSpec{}
+			return trainingdomain.TrainingExerciseSpec{}, err
 		}
-		return spec
-	})
+		sets = append(sets, spec)
+	}
 	return trainingdomain.TrainingExerciseSpec{
 		ExerciseID:   *exerciseID,
 		DisplayOrder: *displayOrder,
@@ -124,13 +125,14 @@ func (r RecordTrainingRequest) ToSpec() (trainingdomain.TrainingSpec, error) {
 		}
 		memo = m
 	}
-	exercises := lo.Map(r.Exercises, func(e RecordTrainingExerciseRequest, _ int) trainingdomain.TrainingExerciseSpec {
+	exercises := make([]trainingdomain.TrainingExerciseSpec, 0, len(r.Exercises))
+	for _, e := range r.Exercises {
 		spec, err := e.ToSpec()
 		if err != nil {
-			return trainingdomain.TrainingExerciseSpec{}
+			return trainingdomain.TrainingSpec{}, err
 		}
-		return spec
-	})
+		exercises = append(exercises, spec)
+	}
 	return trainingdomain.TrainingSpec{
 		StartedAt: r.StartedAt,
 		EndedAt:   r.EndedAt,
