@@ -76,7 +76,7 @@ func (c *consumer) processOne(ctx context.Context, msg message) error {
 			"event_id":   &ddbtypes.AttributeValueMemberS{Value: msg.EventID},
 			"expires_at": &ddbtypes.AttributeValueMemberN{Value: strconv.FormatInt(time.Now().Unix()+c.ttlSecond, 10)},
 		},
-		ConditionExpression: aws.String("attribute_not_exists(event_id)"),
+		ConditionExpression: aws.String("attribute_not_exists(event_id)"), // 重複削除
 	})
 	if err != nil {
 		var condErr *ddbtypes.ConditionalCheckFailedException
