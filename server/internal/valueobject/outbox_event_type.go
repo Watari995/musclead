@@ -30,6 +30,7 @@ func NewOutboxEventTypeFromCode(c OutboxEventTypeCode) OutboxEventType {
 	return OutboxEventType{LiteralBase: LiteralBase[string]{v: string(c)}}
 }
 
+// メールの送信条件に合致するかどうかを判定する
 func (o OutboxEventType) IsPaymentSucceeded() bool {
 	return o.Value() == string(OutboxEventTypePaymentSucceeded)
 }

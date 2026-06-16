@@ -9,6 +9,9 @@ server/bin/
 server/*.exe
 server/tmp/
 *.test
+# cmd ビルド成果物 (go build ./cmd/X が吐くバイナリ)
+server/server
+server/outbox-consumer
 *.out
 vendor/
 
