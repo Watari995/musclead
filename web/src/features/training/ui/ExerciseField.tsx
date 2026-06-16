@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Exercise } from "@/features/training/model/exercise";
 import type { ExerciseDraft, SetDraft } from "@/features/training/model/training-draft";
 import { Button, Card, Label, NumberField, TextInput } from "@/shared/ui";
+import { BestSetBadge } from "./BestSetBadge";
 import { SetField } from "./SetField";
 
 type Props = {
@@ -60,6 +61,9 @@ export function ExerciseField({
               ))}
             </select>
           </Label>
+          {exercise.exerciseID && (
+            <BestSetBadge exerciseID={exercise.exerciseID} />
+          )}
           {exercises.length === 0 && (
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
               まだ種目が登録されていません。{" "}

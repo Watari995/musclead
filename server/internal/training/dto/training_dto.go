@@ -109,9 +109,9 @@ func (r RecordTrainingExerciseRequest) ToSpec() (trainingdomain.TrainingExercise
 }
 
 type RecordTrainingRequest struct {
-	StartedAt time.Time               `json:"started_at"`
-	EndedAt   *time.Time              `json:"ended_at,omitempty"`
-	Memo      *string                 `json:"memo,omitempty"`
+	StartedAt time.Time                       `json:"started_at"`
+	EndedAt   *time.Time                      `json:"ended_at,omitempty"`
+	Memo      *string                         `json:"memo,omitempty"`
 	Exercises []RecordTrainingExerciseRequest `json:"exercises"`
 }
 
@@ -240,6 +240,13 @@ func TrainingFromEntity(t *trainingdomain.Training) TrainingDTO {
 		UpdatedAt: t.UpdatedAt(),
 		Exercises: exercises,
 	}
+}
+
+type BestSetDTO struct {
+	WeightKg    string    `json:"weight_kg"`
+	Reps        int       `json:"reps"`
+	PerformedAt time.Time `json:"performed_at"`
+	TrainingID  string    `json:"training_id"`
 }
 
 // private 変換汎用メソッド

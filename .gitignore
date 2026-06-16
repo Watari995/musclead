@@ -8,6 +8,8 @@
 server/bin/
 server/*.exe
 server/tmp/
+server/bootstrap
+server/lambda.zip
 *.test
 *.out
 vendor/
@@ -38,6 +40,7 @@ terraform/**/terraform.tfvars
 # Secrets / Env
 .env
 .env.local
+.env.bak
 *.pem
 *.key
 
