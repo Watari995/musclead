@@ -244,13 +244,6 @@ func TrainingFromEntity(t *trainingdomain.Training) TrainingDTO {
 	}
 }
 
-type BestSetDTO struct {
-	WeightKg    string    `json:"weight_kg"`
-	Reps        int       `json:"reps"`
-	PerformedAt time.Time `json:"performed_at"`
-	TrainingID  string    `json:"training_id"`
-}
-
 // private 変換汎用メソッド
 func memoToPtrStr(memo *valueobject.String1000) *string {
 	// nullableなvoをstringに変換
