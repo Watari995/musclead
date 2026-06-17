@@ -42,7 +42,7 @@ const findRoutineListSQL = `
 SELECT id, user_id, name, created_at, updated_at
 FROM routines
 WHERE user_id = ?
-ORDER BY created_at DESC
+ORDER BY display_order ASC
 LIMIT ? OFFSET ?
 `
 
