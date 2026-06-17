@@ -1,0 +1,83 @@
+name: Deploy to VM
+
+# main への push で「CIでビルド → ghcr.io(private) へ push → VM が pull して再起動」を自動化。
+# VM(1GB) ではビルドしない。速度重視: amd64 のみ + GitHub Actions レイヤキャッシュ。
+on:
+  push:
+    branches: [main, chore/migrate-off-aws] # TODO: 動作確認後 chore/... は外して main のみに
+    paths:
+      - "server/**"
+      - "sql/migrations/**"
+      - "deploy/docker-compose.yml"
+      - "deploy/Caddyfile"
+      - ".github/workflows/deploy-vm.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vm
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/watari995/musclead-server
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 速度: linux/amd64 のみ(VMはAMD) + gha レイヤキャッシュ
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: server/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # compose/Caddyfile を VM へ同期(.env は触らない)
+      - name: Copy compose files to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "deploy/docker-compose.yml,deploy/Caddyfile"
+          target: "musclead"
+          overwrite: true
+
+      # VM はビルドせず pull して差し替えるだけ
+      - name: Pull & restart on VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/musclead
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f deploy/docker-compose.yml --env-file deploy/.env pull server
+            docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
+            docker logout ghcr.io
+            docker image prune -f
+            sleep 4
+            docker compose -f deploy/docker-compose.yml ps --format '{{.Name}} {{.Status}}'

@@ -34,9 +34,10 @@ services:
     # 外部公開しない(VM 内からのみ接続)
 
   server:
-    build:
-      context: ..
-      dockerfile: server/Dockerfile
+    # CI(GitHub Actions)がビルドして ghcr.io へ push したイメージを pull する。
+    # VM ではビルドしない(1GBなので軽量・高速・安全)。
+    image: ghcr.io/watari995/musclead-server:latest
+    pull_policy: always
     restart: always
     env_file: .env
     # compose が固定で上書きする値(.env より優先)
