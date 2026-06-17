@@ -1,3 +1,5 @@
+source 'https://cdn.cocoapods.org/'
+
 # Firebase iOS SDK は iOS 15+ を要求するため固定。
 platform :ios, '15.0'
 
