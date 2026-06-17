@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
@@ -100,6 +101,7 @@ class _ProfileBody extends ConsumerWidget {
               child: _row(context, '外観', value: _modeLabel(mode)),
             ),
             AppListRow(
+              onTap: () => context.push('/plan'),
               child: _row(context, 'プラン', value: isPro ? 'Pro' : 'Free'),
             ),
           ],
