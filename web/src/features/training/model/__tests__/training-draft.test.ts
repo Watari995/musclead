@@ -5,6 +5,7 @@ import {
   createInitialExercise,
   createInitialSet,
   createInitialTraining,
+  deserializeDraft,
   fromTrainingDTO,
   isoToLocalInput,
   localInputToISO,
@@ -12,6 +13,7 @@ import {
   removeExercise,
   removeSet,
   resolveRestSeconds,
+  serializeDraft,
   toRecordRequest,
   updateExercise,
   updateSet,
@@ -224,6 +226,47 @@ describe("fromTrainingDTO", () => {
     expect(draft.exercises).toEqual([]);
     expect(draft.memo).toBe("");
     expect(draft.endedAt).toBe("");
+  });
+});
+
+describe("serializeDraft / deserializeDraft", () => {
+  it("round-trips a draft (React key は復元時に振り直す)", () => {
+    let draft = createInitialTraining();
+    draft = updateTraining(draft, { memo: "胸の日" });
+    draft = addExercise(draft);
+    draft = updateExercise(draft, 0, { exerciseID: "ex-1" });
+    draft = updateSet(draft, 0, 0, { weightKg: "60", reps: 10 });
+
+    const restored = deserializeDraft(serializeDraft(draft));
+
+    expect(restored).not.toBeNull();
+    expect(restored?.memo).toBe("胸の日");
+    expect(restored?.exercises).toHaveLength(2);
+    expect(restored?.exercises[0].exerciseID).toBe("ex-1");
+    expect(restored?.exercises[0].sets[0].weightKg).toBe("60");
+    expect(restored?.exercises[0].sets[0].reps).toBe(10);
+    // key は永続化された値ではなく新規採番されている
+    expect(restored?.exercises[0].key).not.toBe(draft.exercises[0].key);
+  });
+
+  it("壊れた値・空には null を返す", () => {
+    expect(deserializeDraft(null)).toBeNull();
+    expect(deserializeDraft("")).toBeNull();
+    expect(deserializeDraft("not json")).toBeNull();
+    expect(deserializeDraft("{}")).toBeNull();
+    expect(deserializeDraft(JSON.stringify({ exercises: "x" }))).toBeNull();
+  });
+
+  it("種目に sets が無くても 1 セットを補う", () => {
+    const raw = JSON.stringify({
+      startedAt: "2026-06-17T10:00",
+      endedAt: "",
+      memo: "",
+      exercises: [{ exerciseID: "ex-1", displayOrder: 1 }],
+    });
+    const restored = deserializeDraft(raw);
+    expect(restored?.exercises[0].sets).toHaveLength(1);
+    expect(restored?.exercises[0].sets[0].setNumber).toBe(1);
   });
 });
 
