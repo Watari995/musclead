@@ -70,9 +70,18 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.14.0
   mocktail: ^1.0.5
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# App アイコン生成: assets/icon/app_icon.png を 1024px の正式アイコンに差し替えて
+#   `fvm dart run flutter_launcher_icons` を再実行すると iOS 全サイズが更新される。
+flutter_launcher_icons:
+  ios: true
+  remove_alpha_ios: true # App Store は不透明アイコン必須
+  background_color_ios: "#FFFFFF"
+  image_path: "assets/icon/app_icon.png"
 
 # The following section is specific to Flutter packages.
 flutter:

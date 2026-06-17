@@ -131,8 +131,60 @@ class _ProfileBody extends ConsumerWidget {
             ),
           ],
         ),
+        const SizedBox(height: 10),
+        AppListBox(
+          children: [
+            AppListRow(
+              onTap: () => _confirmDelete(context, ref, user.id),
+              child: Center(
+                child: Text(
+                  'アカウントを削除',
+                  style: TextStyle(
+                    color: context.tokens.accent,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+  ) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('アカウントを削除'),
+        content: const Text('アカウントとすべてのデータが削除されます。この操作は取り消せません。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('削除する', style: TextStyle(color: context.tokens.accent)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref.read(userRepositoryProvider).deleteAccount(userId);
+      await ref.read(authControllerProvider.notifier).logout();
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+      }
+    }
   }
 
   Widget _row(

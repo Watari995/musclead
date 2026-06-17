@@ -15,6 +15,10 @@ class UserRepository {
     return MeResponse.fromJson(res.data!);
   });
 
+  /// アカウント削除（App Store のアカウント削除要件に対応）。
+  Future<void> deleteAccount(String userId) =>
+      guardApi(() => _dio.delete<void>('/users/$userId'));
+
   /// テーマ設定の更新（Patch-string: set + value）。
   Future<void> updateTheme(String theme) => guardApi(() async {
     await _dio.patch<Map<String, dynamic>>(
