@@ -42,6 +42,7 @@ import (
 	"github.com/Watari995/musclead/internal/weight"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -86,9 +87,10 @@ func run() error {
 	s3RawClient := s3.NewFromConfig(awsCfg)
 	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
 	urlBuilder := sharedstorage.NewS3URLBuilder(os.Getenv("AWS_REGION"), os.Getenv("STORAGE_BUCKET"))
+	sqsClient := sqs.NewFromConfig(awsCfg)
 	redisClient := newRedisClient(context.Background())
 	slog.Info("redis client initialized", "type", fmt.Sprintf("%T", redisClient))
-	mux := newMux(dbmap, storageClient, urlBuilder, redisClient)
+	mux, paymentModule := newMux(dbmap, storageClient, urlBuilder, redisClient, sqsClient)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -98,6 +100,9 @@ func run() error {
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	// outbox relay worker を起動 (ctx Done で停止)。 SQS 未設定時は no-op。
+	go paymentModule.RunRelay(ctx)
 
 	errCh := make(chan error, 1)
 	go func() {
@@ -145,7 +150,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client) http.Handler {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client, sqsClient *sqs.Client) (http.Handler, *payment.Module) {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -164,7 +169,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 		StripeCancelURL:            os.Getenv("STRIPE_CANCEL_URL"),
 		StripeWebhookSigningSecret: os.Getenv("STRIPE_WEBHOOK_SIGNING_SECRET"),
 		StripePortalReturnURL:      os.Getenv("STRIPE_PORTAL_RETURN_URL"),
-	})
+		SQSQueueURL:                os.Getenv("OUTBOX_QUEUE_URL"),
+	}, userModule.UserQuery(), sqsClient)
 	priceIDByPlan := map[valueobject.SubscriptionPlanCode]string{
 		valueobject.SubscriptionPlanPro: os.Getenv("STRIPE_PRO_PRICE_ID"),
 	}
@@ -197,7 +203,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
 	// billing (Stripe Webhook、 auth middleware なし)
 	mux.Handle("/billing/", billingModule.Handler)
-	return httpx.CORSMiddleware(mux)
+	return httpx.CORSMiddleware(mux), paymentModule
 }
 
 // healthHandler はサーバー稼働確認用のシンプルなヘルスチェック。

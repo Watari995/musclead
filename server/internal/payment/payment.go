@@ -1,12 +1,21 @@
 package payment
 
 import (
+	"context"
+	"log/slog"
+	"time"
+
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	paymentinfra "github.com/Watari995/musclead/internal/payment/internal/infra"
 	paymentusecase "github.com/Watari995/musclead/internal/payment/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	userpublicfunctions "github.com/Watari995/musclead/internal/user/interface/publicfunctions"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/go-gorp/gorp/v3"
 )
+
+// relayInterval は outbox relay worker のポーリング間隔。
+const relayInterval = 10 * time.Second
 
 // Module は payment module の公開 API。
 // 他 module (purchase 等) は Module.Command / Query 経由でのみ payment を操作できる。
@@ -15,6 +24,8 @@ type Module struct {
 	webhookCommand publicfunctions.PaymentWebhookCommand
 	query          publicfunctions.PaymentQuery
 	processor      publicfunctions.StripeWebhookProcessor
+	relayOutbox    *paymentusecase.RelayOutbox
+	relayEnabled   bool // SQSQueueURL が設定されている時だけ relay を回す
 }
 
 // Config は NewModule に渡す環境差分のまとまり。
@@ -24,10 +35,11 @@ type Config struct {
 	StripeCancelURL            string
 	StripeWebhookSigningSecret string
 	StripePortalReturnURL      string
+	SQSQueueURL                string // outbox relay の送信先。 空なら relay 無効 (ローカル等)
 }
 
 // NewModule は payment module を初期化する。 Composition Root (cmd/server/main.go) から呼ぶ。
-func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
+func NewModule(dbmap *gorp.DbMap, cfg Config, userQuery userpublicfunctions.UserQuery, sqsClient *sqs.Client) *Module {
 	dbmap.AddTableWithName(paymentinfra.PaymentModel{}, "payments").SetKeys(false, "ID")
 	dbmap.AddTableWithName(paymentinfra.PaymentEventModel{}, "payment_events").SetKeys(false, "ID")
 	dbmap.AddTableWithName(paymentinfra.StripeEventModel{}, "stripe_events").SetKeys(false, "ID")
@@ -60,11 +72,38 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 
 	parseWebhookEvent := paymentusecase.NewParseWebhookEvent(stripeClient)
 
+	publisher := paymentinfra.NewSQSPublisher(sqsClient, cfg.SQSQueueURL)
+	relayOutbox := paymentusecase.NewRelayOutbox(outboxEventRepo, paymentRepo, userQuery, publisher)
+
 	return &Module{
 		command:        paymentCommand,
 		webhookCommand: webhookCommand,
 		query:          paymentQuery{}, // 今後追加する場合はここに追記
 		processor:      parseWebhookEvent,
+		relayOutbox:    relayOutbox,
+		relayEnabled:   cfg.SQSQueueURL != "",
+	}
+}
+
+// RunRelay は outbox relay worker を起動する。 main.go から goroutine で起動する想定。
+// SQSQueueURL 未設定時は no-op (ローカル等で SQS 無しでも起動できるように)。
+func (m *Module) RunRelay(ctx context.Context) {
+	if !m.relayEnabled {
+		slog.Info("outbox relay disabled (no SQS queue URL)")
+		return
+	}
+	ticker := time.NewTicker(relayInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			if err := m.relayOutbox.Execute(ctx); err != nil {
+				slog.Error("outbox relay failed", "err", err)
+			}
+		}
 	}
 }
 

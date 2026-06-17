@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   type TrainingDraft,
   addExercise,
@@ -22,7 +21,9 @@ import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 import { ExerciseField } from "./ExerciseField";
 
 type Props = {
-  initial: TrainingDraft;
+  /** 親が保持する draft(controlled)。 親側で下書きの自動退避などを担う。 */
+  value: TrainingDraft;
+  onChange: (draft: TrainingDraft) => void;
   submitLabel: string;
   submittingLabel: string;
   onSubmit: (payload: RecordTrainingRequest) => void | Promise<void>;
@@ -32,7 +33,8 @@ type Props = {
 };
 
 export function TrainingForm({
-  initial,
+  value: draft,
+  onChange,
   submitLabel,
   submittingLabel,
   onSubmit,
@@ -40,7 +42,12 @@ export function TrainingForm({
   errorMessage,
   onCancel,
 }: Props) {
-  const [draft, setDraft] = useState<TrainingDraft>(initial);
+  // 既存の `setDraft((d) => ...)` 呼び出しをそのまま使えるよう、
+  // 関数型アップデートを controlled な onChange に橋渡しするアダプタ。
+  const setDraft = (
+    updater: TrainingDraft | ((prev: TrainingDraft) => TrainingDraft),
+  ) =>
+    onChange(typeof updater === "function" ? updater(draft) : updater);
 
   const exercisesQuery = useExercisesQuery();
   const exercises = exercisesQuery.data ?? [];
