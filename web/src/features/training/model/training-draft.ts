@@ -255,6 +255,64 @@ function setFromDTO(dto: TrainingSetDTO): SetDraft {
   };
 }
 
+// ─── localStorage 下書き(自動退避) ────────────────
+// 提出までの一時退避。 アプリをキルしても端末に残り、 開き直すと復元できる。
+// React key は永続化せず、 復元時に振り直す(生成器の重複を防ぐため)。
+
+/** 新規トレーニングの下書き保存キー */
+export const NEW_TRAINING_DRAFT_KEY = "musclead.training-draft.new";
+
+/** Draft → JSON 文字列 */
+export function serializeDraft(draft: TrainingDraft): string {
+  return JSON.stringify(draft);
+}
+
+/**
+ * JSON 文字列 → Draft。 best-effort。
+ * 壊れた JSON / 形が違う値は null を返す(呼び出し側は初期状態にフォールバック)。
+ */
+export function deserializeDraft(raw: string | null): TrainingDraft | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Partial<TrainingDraft>;
+    if (!parsed || !Array.isArray(parsed.exercises)) return null;
+    return {
+      startedAt:
+        typeof parsed.startedAt === "string"
+          ? parsed.startedAt
+          : toLocalInput(new Date()),
+      endedAt: typeof parsed.endedAt === "string" ? parsed.endedAt : "",
+      memo: typeof parsed.memo === "string" ? parsed.memo : "",
+      exercises: parsed.exercises.map(reviveExercise),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function reviveExercise(ex: Partial<ExerciseDraft> | undefined): ExerciseDraft {
+  const sets = Array.isArray(ex?.sets) ? ex.sets.map(reviveSet) : [];
+  return {
+    key: nextKey("ex"),
+    exerciseID: typeof ex?.exerciseID === "string" ? ex.exerciseID : "",
+    displayOrder: typeof ex?.displayOrder === "number" ? ex.displayOrder : 1,
+    restSeconds: typeof ex?.restSeconds === "number" ? ex.restSeconds : null,
+    memo: typeof ex?.memo === "string" ? ex.memo : "",
+    sets: sets.length > 0 ? sets : [createInitialSet(1)],
+  };
+}
+
+function reviveSet(s: Partial<SetDraft> | undefined): SetDraft {
+  return {
+    key: nextKey("set"),
+    setNumber: typeof s?.setNumber === "number" ? s.setNumber : 1,
+    weightKg: typeof s?.weightKg === "string" ? s.weightKg : "",
+    reps: typeof s?.reps === "number" ? s.reps : 0,
+    restSeconds: typeof s?.restSeconds === "number" ? s.restSeconds : null,
+    memo: typeof s?.memo === "string" ? s.memo : "",
+  };
+}
+
 // ─── 表示ヘルパー ─────────────────────────────────
 
 export function formatDateTime(iso: string | undefined): string {

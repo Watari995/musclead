@@ -150,7 +150,13 @@ export function useStartTrainingFromRoutineMutation() {
       return data as RecordTrainingResponse;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TRAININGS_QUERY_KEY });
+      // 即時 refetch すると、 まだ表示中の一覧に新規分が一瞬描画されてから
+      // 記録画面へ遷移してしまう(チラつき)。 stale マークのみに留め、
+      // 一覧へ戻った時に再取得させる。
+      queryClient.invalidateQueries({
+        queryKey: TRAININGS_QUERY_KEY,
+        refetchType: "none",
+      });
     },
   });
 }
