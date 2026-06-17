@@ -14,7 +14,10 @@ import {
   updateTraining,
 } from "@/features/training/model/training-draft";
 import { type RecordTrainingRequest } from "@/shared/api/client";
-import { useExercisesQuery } from "@/features/training/api/exercises";
+import {
+  useBestSetsQuery,
+  useExercisesQuery,
+} from "@/features/training/api/exercises";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 import { ExerciseField } from "./ExerciseField";
 
@@ -41,6 +44,13 @@ export function TrainingForm({
 
   const exercisesQuery = useExercisesQuery();
   const exercises = exercisesQuery.data ?? [];
+
+  // 選択中の全種目の最高記録を 1 リクエストでまとめて取得(N+1 回避)。
+  const selectedExerciseIDs = draft.exercises
+    .map((e) => e.exerciseID)
+    .filter(Boolean);
+  const bestSetsQuery = useBestSetsQuery(selectedExerciseIDs);
+  const bestSets = bestSetsQuery.data;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +108,8 @@ export function TrainingForm({
               exercise={exercise}
               index={index}
               exercises={exercises}
+              bestSet={bestSets?.get(exercise.exerciseID) ?? null}
+              bestSetLoading={bestSetsQuery.isLoading}
               onChange={(patch) =>
                 setDraft((d) => updateExercise(d, index, patch))
               }

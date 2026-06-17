@@ -44,3 +44,24 @@ type ReorderExercisesRequest struct {
 	ExerciseIDs []string `json:"exercise_ids"`
 }
 
+type BestSetDTO struct {
+	WeightKg    string    `json:"weight_kg"` // weightは精度のためstringとして持つ
+	Reps        int       `json:"reps"`
+	PerformedAt time.Time `json:"performed_at"`
+	TrainingID  string    `json:"training_id"`
+	ExerciseID  string    `json:"exercise_id"`
+}
+
+func BestSetFromData(b *trainingdomain.BestSetView) BestSetDTO {
+	return BestSetDTO{
+		WeightKg:    b.WeightKg.String(),
+		Reps:        b.Reps.Value(),
+		PerformedAt: b.PerformedAt,
+		TrainingID:  b.TrainingID.Value(),
+		ExerciseID:  b.ExerciseID.Value(),
+	}
+}
+
+type ListBestSetsResponse struct {
+	BestSets []BestSetDTO `json:"best_sets"`
+}
