@@ -11,6 +11,7 @@ import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../data/meal_dtos.dart';
 import '../data/meal_repository.dart';
+import 'meal_record_sheet.dart';
 
 class MealsScreen extends ConsumerWidget {
   const MealsScreen({super.key});
@@ -21,6 +22,10 @@ class MealsScreen extends ConsumerWidget {
     return TabPage(
       title: '食事',
       subtitle: dateJpLong(DateTime.now()),
+      trailing: IconButton(
+        icon: Icon(Icons.add, color: context.tokens.accent),
+        onPressed: () => showMealRecordSheet(context),
+      ),
       onRefresh: () => ref.refresh(mealsProvider.future),
       children: [
         AsyncValueView<List<MealDto>>(

@@ -7,6 +7,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/meal/presentation/meals_screen.dart';
+import '../../features/training/presentation/training_record_screen.dart';
 import '../../features/training/presentation/trainings_screen.dart';
 import '../../features/user/presentation/profile_screen.dart';
 import '../../features/weight/presentation/weights_screen.dart';
@@ -41,6 +42,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+      // トレーニング記録はタブシェルの上にフルスクリーンで push する
+      GoRoute(
+        path: '/trainings/new',
+        builder: (_, _) => const TrainingRecordScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             HomeShell(navigationShell: navigationShell),

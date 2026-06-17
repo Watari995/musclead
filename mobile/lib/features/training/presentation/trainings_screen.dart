@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
@@ -18,6 +19,10 @@ class TrainingsScreen extends ConsumerWidget {
     final trainings = ref.watch(trainingsProvider);
     return TabPage(
       title: 'トレーニング',
+      trailing: IconButton(
+        icon: Icon(Icons.add, color: context.tokens.accent),
+        onPressed: () => context.push('/trainings/new'),
+      ),
       onRefresh: () => ref.refresh(trainingsProvider.future),
       children: [
         AsyncValueView<List<TrainingDto>>(
