@@ -47,6 +47,10 @@ type UpsertRoutineResponse struct {
 	ID string `json:"id"`
 }
 
+type ReorderRoutinesRequest struct {
+	RoutineIDs []string `json:"routine_ids"`
+}
+
 // ----- Entity view ────────────────────────────────────────
 
 type RoutineExerciseDTO struct {

@@ -118,6 +118,7 @@ export type ListRoutinesResponse = TrainingDto<"ListRoutinesResponse">;
 export type UpsertRoutineRequest = TrainingDto<"UpsertRoutineRequest">;
 export type UpsertRoutineExerciseRequest = TrainingDto<"UpsertRoutineExerciseRequest">;
 export type UpsertRoutineResponse = TrainingDto<"UpsertRoutineResponse">;
+export type ReorderRoutinesRequest = TrainingDto<"ReorderRoutinesRequest">;
 
 export type SubscribeRequest = PurchaseDto<"SubscribeRequest">;
 export type SubscribeResponse = PurchaseDto<"SubscribeResponse">;

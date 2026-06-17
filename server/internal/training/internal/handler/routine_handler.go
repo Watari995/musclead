@@ -15,11 +15,12 @@ import (
 )
 
 type RoutineHandler struct {
-	find   *trainingusecase.FindRoutineByID
-	list   *trainingusecase.ListRoutines
-	create *trainingusecase.CreateRoutine
-	update *trainingusecase.UpdateRoutine
-	delete *trainingusecase.DeleteRoutineByID
+	find    *trainingusecase.FindRoutineByID
+	list    *trainingusecase.ListRoutines
+	create  *trainingusecase.CreateRoutine
+	update  *trainingusecase.UpdateRoutine
+	delete  *trainingusecase.DeleteRoutineByID
+	reorder *trainingusecase.ReorderRoutines
 }
 
 func NewRoutineHandler(
@@ -28,18 +29,21 @@ func NewRoutineHandler(
 	create *trainingusecase.CreateRoutine,
 	update *trainingusecase.UpdateRoutine,
 	delete *trainingusecase.DeleteRoutineByID,
+	reorder *trainingusecase.ReorderRoutines,
 ) http.Handler {
 	h := &RoutineHandler{
-		find:   find,
-		list:   list,
-		create: create,
-		update: update,
-		delete: delete,
+		find:    find,
+		list:    list,
+		create:  create,
+		update:  update,
+		delete:  delete,
+		reorder: reorder,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /routines/{id}", h.Find)
 	mux.HandleFunc("GET /routines", h.List)
 	mux.HandleFunc("POST /routines", h.Create)
+	mux.HandleFunc("POST /routines/reorder", h.Reorder)
 	mux.HandleFunc("PUT /routines/{id}", h.Update)
 	mux.HandleFunc("DELETE /routines/{id}", h.Delete)
 	return mux
@@ -147,6 +151,46 @@ func (h *RoutineHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteJSON(w, http.StatusCreated, trainingdto.UpsertRoutineResponse{ID: output.ID.Value()})
+}
+
+// Reorder godoc
+//
+// @Summary ルーティン並び替え
+// @Description ルーティン全件を、 渡された routine_ids の順序どおりに並び替える。
+// @Tags routines
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body trainingdto.ReorderRoutinesRequest true "並び替え後の RoutineID 一覧(全件)"
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /routines/reorder [post]
+func (h *RoutineHandler) Reorder(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	var req trainingdto.ReorderRoutinesRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	orderedIDs := make([]valueobject.RoutineID, 0, len(req.RoutineIDs))
+	for _, raw := range req.RoutineIDs {
+		id, err := valueobject.NewPrimaryIDFromString[valueobject.RoutineID](raw)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid routineID"))
+			return
+		}
+		orderedIDs = append(orderedIDs, *id)
+	}
+	if err := h.reorder.Execute(r.Context(), trainingusecase.ReorderRoutinesInput{UserID: userID, OrderedIDs: orderedIDs}); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteNoContent(w)
 }
 
 // Update godoc

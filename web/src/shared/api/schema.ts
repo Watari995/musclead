@@ -1197,6 +1197,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/routines/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * ルーティン並び替え
+         * @description ルーティン全件を、 渡された routine_ids の順序どおりに並び替える。
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description 並び替え後の RoutineID 一覧(全件) */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ReorderRoutinesRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/routines/{id}": {
         parameters: {
             query?: never;
@@ -2433,6 +2493,9 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_training_dto.ReorderExercisesRequest": {
             exercise_ids?: string[];
+        };
+        "github_com_Watari995_musclead_internal_training_dto.ReorderRoutinesRequest": {
+            routine_ids?: string[];
         };
         "github_com_Watari995_musclead_internal_training_dto.RoutineDTO": {
             created_at?: string;
