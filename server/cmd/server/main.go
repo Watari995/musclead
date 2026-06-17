@@ -40,6 +40,7 @@ import (
 	"github.com/Watari995/musclead/internal/user"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/Watari995/musclead/internal/weight"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -58,6 +59,15 @@ func main() {
 		slog.Error("server terminated with error", "error", err)
 		os.Exit(1)
 	}
+}
+
+// storagePublicBaseURL は画像公開 URL のベースを返す。
+// STORAGE_PUBLIC_BASE_URL があればそれ(R2 の公開ドメイン等)、無ければ AWS S3 の形式を組み立てる。
+func storagePublicBaseURL(bucket string) string {
+	if base := os.Getenv("STORAGE_PUBLIC_BASE_URL"); base != "" {
+		return base
+	}
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com", bucket, os.Getenv("AWS_REGION"))
 }
 
 func run() error {
@@ -84,9 +94,16 @@ func run() error {
 	if err != nil {
 		log.Fatalf("aws config: %v", err)
 	}
-	s3RawClient := s3.NewFromConfig(awsCfg)
-	storageClient := sharedstorage.NewS3Client(s3RawClient, os.Getenv("STORAGE_BUCKET"))
-	urlBuilder := sharedstorage.NewS3URLBuilder(os.Getenv("AWS_REGION"), os.Getenv("STORAGE_BUCKET"))
+	// オブジェクトストレージは S3 互換 (AWS S3 / Cloudflare R2)。
+	// STORAGE_ENDPOINT を指定すると R2 等のカスタムエンドポイントへ向く(未指定なら AWS S3)。
+	bucket := os.Getenv("STORAGE_BUCKET")
+	s3RawClient := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+		if endpoint := os.Getenv("STORAGE_ENDPOINT"); endpoint != "" {
+			o.BaseEndpoint = aws.String(endpoint)
+		}
+	})
+	storageClient := sharedstorage.NewS3Client(s3RawClient, bucket)
+	urlBuilder := sharedstorage.NewS3URLBuilder(storagePublicBaseURL(bucket))
 	sqsClient := sqs.NewFromConfig(awsCfg)
 	redisClient := newRedisClient(context.Background())
 	slog.Info("redis client initialized", "type", fmt.Sprintf("%T", redisClient))
@@ -170,6 +187,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 		StripeWebhookSigningSecret: os.Getenv("STRIPE_WEBHOOK_SIGNING_SECRET"),
 		StripePortalReturnURL:      os.Getenv("STRIPE_PORTAL_RETURN_URL"),
 		SQSQueueURL:                os.Getenv("OUTBOX_QUEUE_URL"),
+		ResendAPIKey:               os.Getenv("RESEND_API_KEY"),
+		MailFromAddress:            os.Getenv("MAIL_FROM_ADDRESS"),
 	}, userModule.UserQuery(), sqsClient)
 	priceIDByPlan := map[valueobject.SubscriptionPlanCode]string{
 		valueobject.SubscriptionPlanPro: os.Getenv("STRIPE_PRO_PRICE_ID"),
