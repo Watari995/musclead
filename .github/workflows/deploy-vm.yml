@@ -4,7 +4,7 @@ name: Deploy to VM
 # VM(1GB) ではビルドしない。速度重視: amd64 のみ + GitHub Actions レイヤキャッシュ。
 on:
   push:
-    branches: [main, chore/migrate-off-aws] # TODO: 動作確認後 chore/... は外して main のみに
+    branches: [main]
     paths:
       - "server/**"
       - "sql/migrations/**"
