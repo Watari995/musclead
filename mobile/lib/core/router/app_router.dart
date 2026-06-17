@@ -7,6 +7,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/meal/presentation/meals_screen.dart';
+import '../../features/training/presentation/exercises_screen.dart';
 import '../../features/training/presentation/training_record_screen.dart';
 import '../../features/training/presentation/trainings_screen.dart';
 import '../../features/user/presentation/profile_screen.dart';
@@ -47,6 +48,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/trainings/new',
         builder: (_, _) => const TrainingRecordScreen(),
       ),
+      GoRoute(path: '/exercises', builder: (_, _) => const ExercisesScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             HomeShell(navigationShell: navigationShell),

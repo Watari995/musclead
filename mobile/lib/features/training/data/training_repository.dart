@@ -42,6 +42,9 @@ class TrainingRepository {
     ),
   );
 
+  Future<void> deleteExercise(String id) =>
+      guardApi(() => _dio.delete<void>('/exercises/$id'));
+
   // --- Routines ---
   Future<List<RoutineDto>> listRoutines({int limit = 100, int offset = 0}) =>
       guardApi(() async {

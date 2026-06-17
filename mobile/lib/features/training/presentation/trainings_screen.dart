@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/util/formatters.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
@@ -26,6 +27,13 @@ class TrainingsScreen extends ConsumerWidget {
       ),
       onRefresh: () => ref.refresh(trainingsProvider.future),
       children: [
+        AppButton(
+          label: '種目を管理',
+          icon: Icons.fitness_center,
+          variant: AppButtonVariant.glass,
+          onPressed: () => context.push('/exercises'),
+        ),
+        const SizedBox(height: 10),
         AsyncValueView<List<TrainingDto>>(
           value: trainings,
           onRetry: () => ref.invalidate(trainingsProvider),
