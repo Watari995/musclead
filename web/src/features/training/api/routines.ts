@@ -6,6 +6,7 @@ import {
   type ListRoutinesResponse,
   type RecordTrainingRequest,
   type RecordTrainingResponse,
+  type ReorderRoutinesRequest,
   type RoutineDTO,
   type UpsertRoutineRequest,
   type UpsertRoutineResponse,
@@ -37,7 +38,7 @@ export function useRoutinesQuery(enabled: boolean = true) {
     enabled,
     queryFn: async (): Promise<RoutineDTO[]> => {
       const { data, error, response } = await apiClient.GET("/routines", {
-        params: { query: { limit: 50, offset: 0 } },
+        params: { query: { limit: 100, offset: 0 } },
       });
       if (error) {
         throw new Error(error.error?.message ?? `HTTP ${response.status}`);
@@ -106,6 +107,39 @@ export function useUpdateRoutineMutation(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ROUTINES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ROUTINE_QUERY_KEY(id) });
+    },
+  });
+}
+
+export function useReorderRoutinesMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    // ordered には並び替え後の全件を渡す。 楽観的にキャッシュを更新する。
+    mutationFn: async (ordered: RoutineDTO[]) => {
+      const body: ReorderRoutinesRequest = {
+        routine_ids: ordered.map((r) => r.id ?? ""),
+      };
+      const { error, response } = await apiClient.POST("/routines/reorder", {
+        body,
+      });
+      if (error) {
+        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      }
+    },
+    onMutate: async (ordered: RoutineDTO[]) => {
+      await queryClient.cancelQueries({ queryKey: ROUTINES_QUERY_KEY });
+      const previous =
+        queryClient.getQueryData<RoutineDTO[]>(ROUTINES_QUERY_KEY);
+      queryClient.setQueryData<RoutineDTO[]>(ROUTINES_QUERY_KEY, ordered);
+      return { previous };
+    },
+    onError: (_err, _ordered, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(ROUTINES_QUERY_KEY, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ROUTINES_QUERY_KEY });
     },
   });
 }

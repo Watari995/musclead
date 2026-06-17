@@ -24,8 +24,8 @@ func NewRoutineRepository(dbmap *gorp.DbMap) trainingdomain.RoutineRepository {
 }
 
 const insertRoutineSQL = `
-INSERT INTO routines (id, user_id, name, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO routines (id, user_id, name, display_order, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 const insertRoutineExerciseSQL = `
@@ -35,7 +35,7 @@ VALUES (?, ?, ?, ?, ?, ?)
 
 const updateRoutineSQL = `
 UPDATE routines
-SET name = ?, updated_at = ?
+SET name = ?, display_order = ?, updated_at = ?
 WHERE id = ?
 `
 
@@ -51,7 +51,7 @@ func (r *routineRepository) FindByIDAndUserID(ctx context.Context, id valueobjec
 	}
 	var row RoutineModel
 	err = q.SelectOne(&row,
-		"SELECT id, user_id, name, created_at, updated_at FROM routines WHERE id = ? AND user_id = ?",
+		"SELECT id, user_id, name, display_order, created_at, updated_at FROM routines WHERE id = ? AND user_id = ?",
 		idBytes, userIDBytes,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -68,6 +68,45 @@ func (r *routineRepository) FindByIDAndUserID(ctx context.Context, id valueobjec
 	return toRoutine(row, exercises[id.String()])
 }
 
+func (r *routineRepository) FindAllByUserID(ctx context.Context, userID valueobject.UserID) ([]*trainingdomain.Routine, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var rows []RoutineModel
+	if _, err = q.Select(&rows,
+		"SELECT id, user_id, name, display_order, created_at, updated_at FROM routines WHERE user_id = ? ORDER BY display_order ASC",
+		userIDBytes,
+	); err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return []*trainingdomain.Routine{}, nil
+	}
+	routineIDs := make([][]byte, 0, len(rows))
+	for _, row := range rows {
+		routineIDs = append(routineIDs, row.ID)
+	}
+	exercises, err := r.loadExercises(ctx, routineIDs)
+	if err != nil {
+		return nil, err
+	}
+	routines := make([]*trainingdomain.Routine, 0, len(rows))
+	for _, row := range rows {
+		routineID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.RoutineID](row.ID)
+		if err != nil {
+			return nil, err
+		}
+		routine, err := toRoutine(row, exercises[routineID.String()])
+		if err != nil {
+			return nil, err
+		}
+		routines = append(routines, routine)
+	}
+	return routines, nil
+}
+
 func (r *routineRepository) CountByUserID(ctx context.Context, userID valueobject.UserID) (int, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	userIDBytes, err := userID.Bytes()
@@ -81,6 +120,20 @@ func (r *routineRepository) CountByUserID(ctx context.Context, userID valueobjec
 	return int(count), nil
 }
 
+func (r *routineRepository) NextDisplayOrder(ctx context.Context, userID valueobject.UserID) (int, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return 0, err
+	}
+	// 末尾に追加するため、 既存の最大値 + 1 を返す(0 件なら 0)
+	next, err := q.SelectInt("SELECT COALESCE(MAX(display_order) + 1, 0) FROM routines WHERE user_id = ?", userIDBytes)
+	if err != nil {
+		return 0, err
+	}
+	return int(next), nil
+}
+
 func (r *routineRepository) Save(ctx context.Context, routine *trainingdomain.Routine) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := routine.ID().Bytes()
@@ -92,7 +145,7 @@ func (r *routineRepository) Save(ctx context.Context, routine *trainingdomain.Ro
 		return err
 	}
 	// update first if exists
-	result, err := q.Exec(updateRoutineSQL, routine.Name().Value(), routine.UpdatedAt(), idBytes)
+	result, err := q.Exec(updateRoutineSQL, routine.Name().Value(), routine.DisplayOrder().Value(), routine.UpdatedAt(), idBytes)
 	if err != nil {
 		if sqlerr.IsDuplicateKey(err) {
 			return myerror.NewRoutineNameAlreadyExistsError()
@@ -105,7 +158,7 @@ func (r *routineRepository) Save(ctx context.Context, routine *trainingdomain.Ro
 	}
 	// insert if not updated
 	if rowsAffected == 0 {
-		result, err = q.Exec(insertRoutineSQL, idBytes, userIDBytes, routine.Name().Value(), routine.CreatedAt(), routine.UpdatedAt())
+		result, err = q.Exec(insertRoutineSQL, idBytes, userIDBytes, routine.Name().Value(), routine.DisplayOrder().Value(), routine.CreatedAt(), routine.UpdatedAt())
 		if err != nil {
 			if sqlerr.IsDuplicateKey(err) {
 				return myerror.NewRoutineNameAlreadyExistsError()
@@ -160,7 +213,11 @@ func toRoutine(row RoutineModel, exercises []*trainingdomain.RoutineExercise) (*
 	if err != nil {
 		return nil, err
 	}
-	return trainingdomain.NewRoutine(*routineID, *userID, *name, row.CreatedAt, row.UpdatedAt, exercises), nil
+	displayOrder, err := valueobject.NewNonNegativeInt(int(row.DisplayOrder))
+	if err != nil {
+		return nil, err
+	}
+	return trainingdomain.NewRoutine(*routineID, *userID, *name, *displayOrder, row.CreatedAt, row.UpdatedAt, exercises), nil
 }
 
 func (r *routineRepository) loadExercises(ctx context.Context, routineIDs [][]byte) (map[string][]*trainingdomain.RoutineExercise, error) {
