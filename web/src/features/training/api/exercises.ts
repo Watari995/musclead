@@ -1,9 +1,15 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   apiClient,
   type BestSetDTO,
+  type ListBestSetsResponse,
   type ListExercisesResponse,
   type ReorderExercisesRequest,
   type UpsertExerciseRequest,
@@ -13,8 +19,8 @@ import { toExercise, type Exercise } from "../model/exercise";
 
 export const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 const EXERCISE_QUERY_KEY = (id: string) => ["exercise", id] as const;
-const EXERCISE_BEST_SET_QUERY_KEY = (id: string) =>
-  ["exercise", id, "best-set"] as const;
+const BEST_SETS_QUERY_KEY = (ids: string[]) =>
+  ["exercises", "best-sets", ids] as const;
 
 export class ExerciseNameTakenError extends Error {
   constructor() {
@@ -64,23 +70,29 @@ export function useExerciseQuery(id: string, enabled: boolean = true) {
   });
 }
 
-// 種目の最高記録(最重量セット)。記録が無ければ 204 が返るので null を返す。
-export function useExerciseBestSetQuery(id: string, enabled: boolean = true) {
+// 複数種目の最高記録(最重量セット)を 1 リクエストでまとめて取得する。
+// 記録のある種目だけ返ってくるので、exercise_id をキーにした Map にして返す。
+export function useBestSetsQuery(exerciseIDs: string[]) {
+  const ids = Array.from(new Set(exerciseIDs.filter(Boolean))).sort();
   return useQuery({
-    queryKey: EXERCISE_BEST_SET_QUERY_KEY(id),
-    enabled: enabled && Boolean(id),
-    queryFn: async (): Promise<BestSetDTO | null> => {
+    queryKey: BEST_SETS_QUERY_KEY(ids),
+    enabled: ids.length > 0,
+    placeholderData: keepPreviousData, // 種目追加時に既存バッジを消さない
+    staleTime: 60_000,
+    queryFn: async (): Promise<Map<string, BestSetDTO>> => {
       const { data, error, response } = await apiClient.GET(
-        "/exercises/{id}/best-set",
-        { params: { path: { id } } },
+        "/exercises/best-sets",
+        { params: { query: { exercise_ids: ids } } },
       );
-      if (response.status === 204) {
-        return null;
-      }
       if (error) {
         throw new Error(error.error?.message ?? `HTTP ${response.status}`);
       }
-      return (data as BestSetDTO) ?? null;
+      const list = (data as ListBestSetsResponse).best_sets ?? [];
+      const map = new Map<string, BestSetDTO>();
+      for (const b of list) {
+        if (b.exercise_id) map.set(b.exercise_id, b);
+      }
+      return map;
     },
   });
 }

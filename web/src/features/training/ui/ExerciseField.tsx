@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Exercise } from "@/features/training/model/exercise";
 import type { ExerciseDraft, SetDraft } from "@/features/training/model/training-draft";
+import type { BestSetDTO } from "@/shared/api/client";
 import { Button, Card, Label, NumberField, TextInput } from "@/shared/ui";
 import { BestSetBadge } from "./BestSetBadge";
 import { SetField } from "./SetField";
@@ -11,6 +12,8 @@ type Props = {
   exercise: ExerciseDraft;
   index: number;
   exercises: Exercise[];
+  bestSet: BestSetDTO | null;
+  bestSetLoading: boolean;
   onChange: (patch: Partial<Omit<ExerciseDraft, "key" | "sets" | "displayOrder">>) => void;
   onRemove: () => void;
   onMoveUp?: () => void;
@@ -28,6 +31,8 @@ export function ExerciseField({
   exercise,
   index,
   exercises,
+  bestSet,
+  bestSetLoading,
   onChange,
   onRemove,
   onMoveUp,
@@ -62,7 +67,7 @@ export function ExerciseField({
             </select>
           </Label>
           {exercise.exerciseID && (
-            <BestSetBadge exerciseID={exercise.exerciseID} />
+            <BestSetBadge bestSet={bestSet} loading={bestSetLoading} />
           )}
           {exercises.length === 0 && (
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
