@@ -187,6 +187,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 		StripeWebhookSigningSecret: os.Getenv("STRIPE_WEBHOOK_SIGNING_SECRET"),
 		StripePortalReturnURL:      os.Getenv("STRIPE_PORTAL_RETURN_URL"),
 		SQSQueueURL:                os.Getenv("OUTBOX_QUEUE_URL"),
+		ResendAPIKey:               os.Getenv("RESEND_API_KEY"),
+		MailFromAddress:            os.Getenv("MAIL_FROM_ADDRESS"),
 	}, userModule.UserQuery(), sqsClient)
 	priceIDByPlan := map[valueobject.SubscriptionPlanCode]string{
 		valueobject.SubscriptionPlanPro: os.Getenv("STRIPE_PRO_PRICE_ID"),
