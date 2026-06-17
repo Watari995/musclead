@@ -34,7 +34,10 @@ class _ExerciseDraft {
 
 /// トレーニング記録画面（Training > 種目 > セット の入れ子を入力して保存）。
 class TrainingRecordScreen extends ConsumerStatefulWidget {
-  const TrainingRecordScreen({super.key});
+  const TrainingRecordScreen({super.key, this.initialExercises = const []});
+
+  /// ルーティンから開始する場合の初期種目（exerciseId + 表示名）。
+  final List<({String exerciseId, String name})> initialExercises;
 
   @override
   ConsumerState<TrainingRecordScreen> createState() =>
@@ -46,6 +49,14 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   final List<_ExerciseDraft> _exercises = [];
   bool _saving = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final e in widget.initialExercises) {
+      _exercises.add(_ExerciseDraft(e.exerciseId, e.name));
+    }
+  }
 
   @override
   void dispose() {

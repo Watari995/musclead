@@ -27,11 +27,26 @@ class TrainingsScreen extends ConsumerWidget {
       ),
       onRefresh: () => ref.refresh(trainingsProvider.future),
       children: [
-        AppButton(
-          label: '種目を管理',
-          icon: Icons.fitness_center,
-          variant: AppButtonVariant.glass,
-          onPressed: () => context.push('/exercises'),
+        Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: '種目',
+                icon: Icons.fitness_center,
+                variant: AppButtonVariant.glass,
+                onPressed: () => context.push('/exercises'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: AppButton(
+                label: 'ルーティン',
+                icon: Icons.list_alt,
+                variant: AppButtonVariant.glass,
+                onPressed: () => context.push('/routines'),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         AsyncValueView<List<TrainingDto>>(

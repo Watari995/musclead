@@ -54,6 +54,12 @@ class TrainingRepository {
         );
         return ListRoutinesResponse.fromJson(res.data!).routines;
       });
+
+  Future<void> createRoutine(UpsertRoutineRequest request) =>
+      guardApi(() => _dio.post<void>('/routines', data: request.toJson()));
+
+  Future<void> deleteRoutine(String id) =>
+      guardApi(() => _dio.delete<void>('/routines/$id'));
 }
 
 final trainingRepositoryProvider = Provider<TrainingRepository>(
