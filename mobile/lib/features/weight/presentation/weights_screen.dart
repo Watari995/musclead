@@ -10,6 +10,7 @@ import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../data/weight_dtos.dart';
 import '../data/weight_repository.dart';
+import 'weight_record_sheet.dart';
 
 class WeightsScreen extends ConsumerWidget {
   const WeightsScreen({super.key});
@@ -19,6 +20,10 @@ class WeightsScreen extends ConsumerWidget {
     final weights = ref.watch(weightsProvider);
     return TabPage(
       title: '体重',
+      trailing: IconButton(
+        icon: Icon(Icons.add, color: context.tokens.accent),
+        onPressed: () => showWeightRecordSheet(context),
+      ),
       onRefresh: () => ref.refresh(weightsProvider.future),
       children: [
         AsyncValueView<List<WeightDto>>(
