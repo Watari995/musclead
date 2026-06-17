@@ -26,8 +26,9 @@ class WeightRepository {
       guardApi(() => _dio.delete<void>('/weights/$id'));
 }
 
-final weightRepositoryProvider =
-    Provider<WeightRepository>((ref) => WeightRepository(ref.watch(dioProvider)));
+final weightRepositoryProvider = Provider<WeightRepository>(
+  (ref) => WeightRepository(ref.watch(dioProvider)),
+);
 
 /// 直近の体重記録（新しい順で返るため、グラフ用に昇順へ並べ替えて使う）。
 final weightsProvider = FutureProvider<List<WeightDto>>(

@@ -55,18 +55,26 @@ class LoginScreen extends HookConsumerWidget {
                       color: t.accent,
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    child: const Icon(Icons.fitness_center, color: Colors.white, size: 34),
+                    child: const Icon(
+                      Icons.fitness_center,
+                      color: Colors.white,
+                      size: 34,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 18),
                 const Center(
-                  child: Text('musclead',
-                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800)),
+                  child: Text(
+                    'musclead',
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Center(
-                  child: Text('筋トレ・食事・体重を一元管理',
-                      style: TextStyle(fontSize: 13, color: t.muted)),
+                  child: Text(
+                    '筋トレ・食事・体重を一元管理',
+                    style: TextStyle(fontSize: 13, color: t.muted),
+                  ),
                 ),
                 const SizedBox(height: 34),
                 AppTextField(
@@ -89,11 +97,17 @@ class LoginScreen extends HookConsumerWidget {
                 ),
                 if (error.value != null) ...[
                   const SizedBox(height: 12),
-                  Text(error.value!,
-                      style: TextStyle(color: t.accent, fontSize: 13)),
+                  Text(
+                    error.value!,
+                    style: TextStyle(color: t.accent, fontSize: 13),
+                  ),
                 ],
                 const SizedBox(height: 22),
-                AppButton(label: 'ログイン', loading: loading.value, onPressed: submit),
+                AppButton(
+                  label: 'ログイン',
+                  loading: loading.value,
+                  onPressed: submit,
+                ),
                 const SizedBox(height: 14),
                 AppButton(
                   label: 'アカウントを作成',

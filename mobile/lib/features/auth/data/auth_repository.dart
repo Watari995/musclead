@@ -14,41 +14,41 @@ class AuthRepository {
   final TokenStore _tokenStore;
 
   Future<void> login(String email, String password) => guardApi(() async {
-        final res = await _dio.post<Map<String, dynamic>>(
-          '/auth/login',
-          data: LoginRequest(email: email, password: password).toJson(),
-        );
-        final token = AccessTokenResponse.fromJson(res.data!);
-        await _tokenStore.writeAccessToken(token.accessToken);
-      });
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/auth/login',
+      data: LoginRequest(email: email, password: password).toJson(),
+    );
+    final token = AccessTokenResponse.fromJson(res.data!);
+    await _tokenStore.writeAccessToken(token.accessToken);
+  });
 
   Future<void> register({
     required String name,
     required String email,
     required String password,
     String? birthday,
-  }) =>
-      guardApi(() async {
-        await _dio.post<Map<String, dynamic>>(
-          '/users',
-          data: RegisterRequest(
-            name: name,
-            email: email,
-            password: password,
-            birthday: birthday,
-          ).toJson(),
-        );
-      });
+  }) => guardApi(() async {
+    await _dio.post<Map<String, dynamic>>(
+      '/users',
+      data: RegisterRequest(
+        name: name,
+        email: email,
+        password: password,
+        birthday: birthday,
+      ).toJson(),
+    );
+  });
 
   Future<void> logout() => guardApi(() async {
-        try {
-          await _dio.post<void>('/auth/logout');
-        } finally {
-          await _tokenStore.clear();
-        }
-      });
+    try {
+      await _dio.post<void>('/auth/logout');
+    } finally {
+      await _tokenStore.clear();
+    }
+  });
 }
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider)),
+  (ref) =>
+      AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider)),
 );

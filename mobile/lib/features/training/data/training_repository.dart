@@ -36,11 +36,11 @@ class TrainingRepository {
       });
 
   Future<void> createExercise(String name) => guardApi(
-        () => _dio.post<void>(
-          '/exercises',
-          data: UpsertExerciseRequest(name: name).toJson(),
-        ),
-      );
+    () => _dio.post<void>(
+      '/exercises',
+      data: UpsertExerciseRequest(name: name).toJson(),
+    ),
+  );
 
   // --- Routines ---
   Future<List<RoutineDto>> listRoutines({int limit = 100, int offset = 0}) =>

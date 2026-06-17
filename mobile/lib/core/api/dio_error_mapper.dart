@@ -33,7 +33,9 @@ Failure _fromResponse(Response<dynamic>? res) {
     final err = (data['error'] as Map).cast<String, dynamic>();
     code = err['code'] as String?;
     message = err['message'] as String?;
-    extra = err['data'] is Map ? (err['data'] as Map).cast<String, dynamic>() : null;
+    extra = err['data'] is Map
+        ? (err['data'] as Map).cast<String, dynamic>()
+        : null;
   }
 
   if (status == 401) return UnauthorizedFailure(message ?? 'ログインが必要です');

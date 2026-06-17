@@ -53,10 +53,7 @@ class GlassSurface extends StatelessWidget {
               borderRadius: radius,
               border: showBorder ? Border.all(color: t.glassBorder) : null,
             ),
-            child: Padding(
-              padding: padding ?? EdgeInsets.zero,
-              child: child,
-            ),
+            child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
           ),
         ),
       ),

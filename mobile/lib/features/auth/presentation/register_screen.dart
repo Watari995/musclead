@@ -26,7 +26,9 @@ class RegisterScreen extends HookConsumerWidget {
       loading.value = true;
       error.value = null;
       try {
-        await ref.read(authControllerProvider.notifier).register(
+        await ref
+            .read(authControllerProvider.notifier)
+            .register(
               name: name.text.trim(),
               email: email.text.trim(),
               password: password.text,
@@ -54,8 +56,10 @@ class RegisterScreen extends HookConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('アカウント作成',
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+              const Text(
+                'アカウント作成',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+              ),
               const SizedBox(height: 24),
               AppTextField(
                 label: 'お名前',
@@ -84,10 +88,17 @@ class RegisterScreen extends HookConsumerWidget {
               ),
               if (error.value != null) ...[
                 const SizedBox(height: 12),
-                Text(error.value!, style: TextStyle(color: t.accent, fontSize: 13)),
+                Text(
+                  error.value!,
+                  style: TextStyle(color: t.accent, fontSize: 13),
+                ),
               ],
               const SizedBox(height: 24),
-              AppButton(label: '作成してはじめる', loading: loading.value, onPressed: submit),
+              AppButton(
+                label: '作成してはじめる',
+                loading: loading.value,
+                onPressed: submit,
+              ),
             ],
           ),
         ),

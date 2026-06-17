@@ -13,8 +13,16 @@ class HomeShell extends StatelessWidget {
 
   static const _tabs = [
     (icon: Icons.restaurant_outlined, active: Icons.restaurant, label: '食事'),
-    (icon: Icons.fitness_center_outlined, active: Icons.fitness_center, label: 'トレーニング'),
-    (icon: Icons.monitor_weight_outlined, active: Icons.monitor_weight, label: '体重'),
+    (
+      icon: Icons.fitness_center_outlined,
+      active: Icons.fitness_center,
+      label: 'トレーニング',
+    ),
+    (
+      icon: Icons.monitor_weight_outlined,
+      active: Icons.monitor_weight,
+      label: '体重',
+    ),
     (icon: Icons.person_outline, active: Icons.person, label: 'マイページ'),
   ];
 
@@ -78,7 +86,11 @@ class _GlassTabBar extends StatelessWidget {
 }
 
 class _TabItem extends StatelessWidget {
-  const _TabItem({required this.spec, required this.selected, required this.onTap});
+  const _TabItem({
+    required this.spec,
+    required this.selected,
+    required this.onTap,
+  });
 
   final _TabSpec spec;
   final bool selected;
@@ -101,12 +113,20 @@ class _TabItem extends StatelessWidget {
               color: selected ? t.accentWeak : Colors.transparent,
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Icon(selected ? spec.active : spec.icon, size: 23, color: color),
+            child: Icon(
+              selected ? spec.active : spec.icon,
+              size: 23,
+              color: color,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             spec.label,
-            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
           ),
         ],
       ),

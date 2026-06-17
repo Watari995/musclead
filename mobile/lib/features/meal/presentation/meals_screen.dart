@@ -93,8 +93,13 @@ class _SummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('$kcal',
-                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+              Text(
+                '$kcal',
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(width: 4),
               Text('kcal', style: TextStyle(fontSize: 14, color: t.muted)),
             ],
@@ -112,7 +117,11 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _MacroBar extends StatelessWidget {
-  const _MacroBar({required this.label, required this.grams, required this.color});
+  const _MacroBar({
+    required this.label,
+    required this.grams,
+    required this.color,
+  });
 
   final String label;
   final Decimal grams;
@@ -123,7 +132,10 @@ class _MacroBar extends StatelessWidget {
     final t = context.tokens;
     return Row(
       children: [
-        SizedBox(width: 64, child: Text(label, style: const TextStyle(fontSize: 12.5))),
+        SizedBox(
+          width: 64,
+          child: Text(label, style: const TextStyle(fontSize: 12.5)),
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Container(
@@ -136,8 +148,10 @@ class _MacroBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        Text('${grams.toStringAsFixed(0)}g',
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+        Text(
+          '${grams.toStringAsFixed(0)}g',
+          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+        ),
       ],
     );
   }
@@ -158,21 +172,33 @@ class _MealRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(meal.memo?.isNotEmpty == true ? meal.memo! : meal.mealType,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  meal.memo?.isNotEmpty == true ? meal.memo! : meal.mealType,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 2),
-                Row(children: [
-                  Text(hhmm(meal.eatenAt),
-                      style: TextStyle(fontSize: 12, color: t.muted)),
-                  const SizedBox(width: 8),
-                  AppBadge(meal.mealType),
-                ]),
+                Row(
+                  children: [
+                    Text(
+                      hhmm(meal.eatenAt),
+                      style: TextStyle(fontSize: 12, color: t.muted),
+                    ),
+                    const SizedBox(width: 8),
+                    AppBadge(meal.mealType),
+                  ],
+                ),
               ],
             ),
           ),
-          Text('${meal.calories}',
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            '${meal.calories}',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
           Text(' kcal', style: TextStyle(fontSize: 11, color: t.muted)),
         ],
       ),

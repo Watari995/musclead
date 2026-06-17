@@ -13,11 +13,13 @@ class DecimalStringConverter implements JsonConverter<Decimal, String> {
   String toJson(Decimal object) => object.toString();
 }
 
-class NullableDecimalStringConverter implements JsonConverter<Decimal?, String?> {
+class NullableDecimalStringConverter
+    implements JsonConverter<Decimal?, String?> {
   const NullableDecimalStringConverter();
 
   @override
-  Decimal? fromJson(String? json) => (json == null || json.isEmpty) ? null : Decimal.parse(json);
+  Decimal? fromJson(String? json) =>
+      (json == null || json.isEmpty) ? null : Decimal.parse(json);
 
   @override
   String? toJson(Decimal? object) => object?.toString();

@@ -24,7 +24,9 @@ final authSignalProvider = Provider<AuthSignal>((ref) {
 
 /// 実体は main() で PersistCookieJar（永続）に override する。
 final cookieJarProvider = Provider<CookieJar>(
-  (ref) => throw UnimplementedError('cookieJarProvider must be overridden in main()'),
+  (ref) => throw UnimplementedError(
+    'cookieJarProvider must be overridden in main()',
+  ),
 );
 
 /// 認証付き Dio。refresh と失敗時処理は controller を参照せず自己完結させ循環依存を避ける。

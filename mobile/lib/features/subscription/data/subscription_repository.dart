@@ -13,9 +13,9 @@ class SubscriptionRepository {
   /// 現在のサブスク状態（is_pro / plan / expires_at）を取得。
   /// iOS では購入導線は持たず、この状態のみを参照する（App Store 3.1.1 対応）。
   Future<GetSubscriptionResponse> get() => guardApi(() async {
-        final res = await _dio.get<Map<String, dynamic>>('/purchase/subscription');
-        return GetSubscriptionResponse.fromJson(res.data!);
-      });
+    final res = await _dio.get<Map<String, dynamic>>('/purchase/subscription');
+    return GetSubscriptionResponse.fromJson(res.data!);
+  });
 }
 
 final subscriptionRepositoryProvider = Provider<SubscriptionRepository>(

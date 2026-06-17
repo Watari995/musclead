@@ -49,17 +49,28 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accent: accent,
       accentWeak: accent.withValues(alpha: dark ? 0.22 : 0.14),
       gold: dark ? const Color(0xFFE3B341) : const Color(0xFFC8861A),
-      goldWeak: (dark ? const Color(0xFFE3B341) : const Color(0xFFC8861A)).withValues(alpha: 0.16),
+      goldWeak: (dark ? const Color(0xFFE3B341) : const Color(0xFFC8861A))
+          .withValues(alpha: 0.16),
       macroP: dark ? const Color(0xFF6EA0FF) : const Color(0xFF4A7FE0),
       macroF: dark ? const Color(0xFFE6B552) : const Color(0xFFD99528),
       macroC: dark ? const Color(0xFF5FCE82) : const Color(0xFF3FA364),
-      border: dark ? Colors.white.withValues(alpha: 0.14) : Colors.black.withValues(alpha: 0.10),
-      hairline: dark ? Colors.white.withValues(alpha: 0.10) : Colors.black.withValues(alpha: 0.08),
+      border: dark
+          ? Colors.white.withValues(alpha: 0.14)
+          : Colors.black.withValues(alpha: 0.10),
+      hairline: dark
+          ? Colors.white.withValues(alpha: 0.10)
+          : Colors.black.withValues(alpha: 0.08),
       muted: dark ? const Color(0xFF98989D) : const Color(0xFF6B6B70),
       subtle: dark ? const Color(0xFF5B5B60) : const Color(0xFFA0A0A5),
-      glassTint: dark ? const Color(0xFF2C2C2E).withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.55),
-      glassBorder: dark ? Colors.white.withValues(alpha: 0.16) : Colors.white.withValues(alpha: 0.70),
-      glassHighlight: dark ? Colors.white.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.85),
+      glassTint: dark
+          ? const Color(0xFF2C2C2E).withValues(alpha: 0.5)
+          : Colors.white.withValues(alpha: 0.55),
+      glassBorder: dark
+          ? Colors.white.withValues(alpha: 0.16)
+          : Colors.white.withValues(alpha: 0.70),
+      glassHighlight: dark
+          ? Colors.white.withValues(alpha: 0.18)
+          : Colors.white.withValues(alpha: 0.85),
     );
   }
 

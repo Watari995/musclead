@@ -34,7 +34,9 @@ class TrainingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SectionTitle('履歴'),
-                AppListBox(children: [for (final tr in list) _TrainingRow(training: tr)]),
+                AppListBox(
+                  children: [for (final tr in list) _TrainingRow(training: tr)],
+                ),
               ],
             );
           },
@@ -67,11 +69,18 @@ class _TrainingRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(mdWeekday(training.startedAt),
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                Text(
+                  mdWeekday(training.startedAt),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text('$count 種目',
-                    style: TextStyle(fontSize: 12, color: t.muted)),
+                Text(
+                  '$count 種目',
+                  style: TextStyle(fontSize: 12, color: t.muted),
+                ),
               ],
             ),
           ),

@@ -60,7 +60,10 @@ class _ProfileBody extends ConsumerWidget {
                 child: Text(
                   user.name.isNotEmpty ? user.name.characters.first : '?',
                   style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -68,16 +71,24 @@ class _ProfileBody extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(user.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 16)),
-                    Text(user.email,
-                        style: TextStyle(fontSize: 12, color: t.muted)),
+                    Text(
+                      user.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      user.email,
+                      style: TextStyle(fontSize: 12, color: t.muted),
+                    ),
                   ],
                 ),
               ),
-              AppBadge(isPro ? 'Pro' : 'Free',
-                  tone: isPro ? BadgeTone.accent : BadgeTone.neutral),
+              AppBadge(
+                isPro ? 'Pro' : 'Free',
+                tone: isPro ? BadgeTone.accent : BadgeTone.neutral,
+              ),
             ],
           ),
         ),
@@ -96,7 +107,9 @@ class _ProfileBody extends ConsumerWidget {
         const SectionTitle('その他'),
         AppListBox(
           children: [
-            AppListRow(child: _row(context, 'バージョン', value: '1.0.0 (1)', chevron: false)),
+            AppListRow(
+              child: _row(context, 'バージョン', value: '1.0.0 (1)', chevron: false),
+            ),
           ],
         ),
         const SizedBox(height: 18),
@@ -105,9 +118,13 @@ class _ProfileBody extends ConsumerWidget {
             AppListRow(
               onTap: () => ref.read(authControllerProvider.notifier).logout(),
               child: Center(
-                child: Text('ログアウト',
-                    style: TextStyle(
-                        color: context.colors.onSurface, fontWeight: FontWeight.w600)),
+                child: Text(
+                  'ログアウト',
+                  style: TextStyle(
+                    color: context.colors.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -116,7 +133,12 @@ class _ProfileBody extends ConsumerWidget {
     );
   }
 
-  Widget _row(BuildContext context, String label, {String? value, bool chevron = true}) {
+  Widget _row(
+    BuildContext context,
+    String label, {
+    String? value,
+    bool chevron = true,
+  }) {
     final t = context.tokens;
     return Row(
       children: [
@@ -133,10 +155,10 @@ class _ProfileBody extends ConsumerWidget {
   }
 
   static String _modeLabel(ThemeMode m) => switch (m) {
-        ThemeMode.system => 'システム',
-        ThemeMode.light => 'ライト',
-        ThemeMode.dark => 'ダーク',
-      };
+    ThemeMode.system => 'システム',
+    ThemeMode.light => 'ライト',
+    ThemeMode.dark => 'ダーク',
+  };
 
   void _showThemeSheet(BuildContext context, WidgetRef ref, ThemeMode current) {
     showModalBottomSheet<void>(
@@ -159,7 +181,10 @@ class _ProfileBody extends ConsumerWidget {
                     ThemeMode.dark => 'dark',
                   };
                   // ベストエフォートでサーバ設定も更新
-                  ref.read(userRepositoryProvider).updateTheme(apiTheme).ignore();
+                  ref
+                      .read(userRepositoryProvider)
+                      .updateTheme(apiTheme)
+                      .ignore();
                   Navigator.of(sheetContext).pop();
                 },
               ),

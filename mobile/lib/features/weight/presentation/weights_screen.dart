@@ -36,9 +36,17 @@ class WeightsScreen extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _ChartCard(ascending: asc, latest: list.first, previous: list.length > 1 ? list[1] : null),
+                _ChartCard(
+                  ascending: asc,
+                  latest: list.first,
+                  previous: list.length > 1 ? list[1] : null,
+                ),
                 const SectionTitle('最近の記録'),
-                AppListBox(children: [for (final w in list.take(10)) _WeightRow(weight: w)]),
+                AppListBox(
+                  children: [
+                    for (final w in list.take(10)) _WeightRow(weight: w),
+                  ],
+                ),
               ],
             );
           },
@@ -49,7 +57,11 @@ class WeightsScreen extends ConsumerWidget {
 }
 
 class _ChartCard extends StatelessWidget {
-  const _ChartCard({required this.ascending, required this.latest, this.previous});
+  const _ChartCard({
+    required this.ascending,
+    required this.latest,
+    this.previous,
+  });
 
   final List<WeightDto> ascending;
   final WeightDto latest;
@@ -74,8 +86,13 @@ class _ChartCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(latest.weightKg.toString(),
-                  style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
+              Text(
+                latest.weightKg.toString(),
+                style: const TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(width: 4),
               Text('kg', style: TextStyle(fontSize: 16, color: t.muted)),
               const Spacer(),
@@ -89,15 +106,21 @@ class _ChartCard extends StatelessWidget {
           if (latest.bodyFatPercentage != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Text('体脂肪 ${latest.bodyFatPercentage}%',
-                  style: TextStyle(fontSize: 13, color: t.muted)),
+              child: Text(
+                '体脂肪 ${latest.bodyFatPercentage}%',
+                style: TextStyle(fontSize: 13, color: t.muted),
+              ),
             ),
           const SizedBox(height: 14),
           SizedBox(
             height: 150,
             child: spots.length < 2
-                ? Center(child: Text('記録が増えるとグラフが表示されます',
-                    style: TextStyle(color: t.muted, fontSize: 12)))
+                ? Center(
+                    child: Text(
+                      '記録が増えるとグラフが表示されます',
+                      style: TextStyle(color: t.muted, fontSize: 12),
+                    ),
+                  )
                 : LineChart(
                     LineChartData(
                       gridData: const FlGridData(show: false),
@@ -141,16 +164,22 @@ class _WeightRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(mdWeekday(weight.measuredAt),
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  mdWeekday(weight.measuredAt),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 if (weight.bodyFatPercentage != null)
-                  Text('体脂肪 ${weight.bodyFatPercentage}%',
-                      style: TextStyle(fontSize: 11, color: t.muted)),
+                  Text(
+                    '体脂肪 ${weight.bodyFatPercentage}%',
+                    style: TextStyle(fontSize: 11, color: t.muted),
+                  ),
               ],
             ),
           ),
-          Text('${weight.weightKg} kg',
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            '${weight.weightKg} kg',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );

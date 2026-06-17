@@ -1,13 +1,14 @@
 # musclead — Project Context
 
-> 筋トレ・食事・体重 一元管理 SaaS。 SODA入社準備のため Go + Connect-RPC + sqlc + DDD で実装。
+> 筋トレ・食事・体重 一元管理 SaaS。 SODA入社準備のため、 バックエンドは Go(net/http REST + OpenAPI/swag)+ sqlc + DDD、 iOS は Flutter で実装。
 
 ---
 
 ## 📚 設計ドキュメント
 
 - [ドメインモデル](docs/domain-model.md)
-- [ADR](docs/adr/)
+- [ADR](docs/adr/)（iOS=Flutter 採用: [ADR-0021](docs/adr/0021-adopt-flutter-for-ios.md)）
+- iOS アプリ: `mobile/`（Flutter。 実装は AI 担当。 UI プレビュー: `mobile/preview/index.html`）
 
 ---
 
@@ -34,11 +35,13 @@
 > **大原則: コードは基本的に人間が書く(学習目的)。 AI は勝手にコードを書かない。**
 > AI がコードを書いてよいのは、 人間が明示的に「書いて」と依頼した時だけ。
 > それ以外は「方針提示・ヒント・レビュー」に徹する。
+> **例外: iOS(`mobile/` の Flutter)実装は AI に委任**(学習対象は Go バックエンドのため。 詳細は [ADR-0021](docs/adr/0021-adopt-flutter-for-ios.md))。
 
 | 種類 | 担当 |
 |---|---|
 | 設計・方針 | 議論で決定 |
 | **すべての Go コード実装**(VO / Entity / UseCase / Repository / Handler / ヘルパー等) | **人間**(学習目的) |
+| **iOS(Flutter / `mobile/`)の実装** | **AI**(委任。 Go バックエンドが学習対象のため) |
 | 設定ファイル / CI / Makefile / migration 等の非ロジック | AI 可(依頼ベース) |
 | コードレビュー | **AI** |
 | 詰まった時のガイド・ヒント | **AI**(原則コードは出さず方針提示。 明示依頼時のみ正解コード) |

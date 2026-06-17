@@ -46,9 +46,18 @@ class AppButton extends StatelessWidget {
             child: CircularProgressIndicator(strokeWidth: 2, color: fg),
           )
         else ...[
-          if (icon != null) ...[Icon(icon, size: 19, color: fg), const SizedBox(width: 8)],
-          Text(label,
-              style: TextStyle(color: fg, fontSize: 15, fontWeight: FontWeight.w600)),
+          if (icon != null) ...[
+            Icon(icon, size: 19, color: fg),
+            const SizedBox(width: 8),
+          ],
+          Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ],
     );
@@ -65,22 +74,22 @@ class AppButton extends StatelessWidget {
     final opacity = enabled ? 1.0 : 0.5;
     final Widget button = switch (variant) {
       AppButtonVariant.primary => Opacity(
-          opacity: opacity,
-          child: Material(
-            color: t.accent,
-            borderRadius: BorderRadius.circular(14),
-            clipBehavior: Clip.antiAlias,
-            child: inner,
-          ),
+        opacity: opacity,
+        child: Material(
+          color: t.accent,
+          borderRadius: BorderRadius.circular(14),
+          clipBehavior: Clip.antiAlias,
+          child: inner,
         ),
+      ),
       AppButtonVariant.glass => Opacity(
-          opacity: opacity,
-          child: GlassSurface(
-            borderRadius: BorderRadius.circular(14),
-            shadow: false,
-            child: inner,
-          ),
+        opacity: opacity,
+        child: GlassSurface(
+          borderRadius: BorderRadius.circular(14),
+          shadow: false,
+          child: inner,
         ),
+      ),
       AppButtonVariant.text => Opacity(opacity: opacity, child: inner),
     };
 

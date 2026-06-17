@@ -10,12 +10,11 @@ part 'meal_dtos.g.dart';
 
 @freezed
 abstract class PhotoDto with _$PhotoDto {
-  const factory PhotoDto({
-    @Default(0) int displayOrder,
-    String? imageUrl,
-  }) = _PhotoDto;
+  const factory PhotoDto({@Default(0) int displayOrder, String? imageUrl}) =
+      _PhotoDto;
 
-  factory PhotoDto.fromJson(Map<String, dynamic> json) => _$PhotoDtoFromJson(json);
+  factory PhotoDto.fromJson(Map<String, dynamic> json) =>
+      _$PhotoDtoFromJson(json);
 }
 
 @freezed
@@ -35,7 +34,8 @@ abstract class MealDto with _$MealDto {
     DateTime? updatedAt,
   }) = _MealDto;
 
-  factory MealDto.fromJson(Map<String, dynamic> json) => _$MealDtoFromJson(json);
+  factory MealDto.fromJson(Map<String, dynamic> json) =>
+      _$MealDtoFromJson(json);
 }
 
 @freezed

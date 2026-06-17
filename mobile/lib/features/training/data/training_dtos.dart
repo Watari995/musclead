@@ -81,7 +81,8 @@ abstract class RecordTrainingSetRequest with _$RecordTrainingSetRequest {
 }
 
 @freezed
-abstract class RecordTrainingExerciseRequest with _$RecordTrainingExerciseRequest {
+abstract class RecordTrainingExerciseRequest
+    with _$RecordTrainingExerciseRequest {
   const factory RecordTrainingExerciseRequest({
     required String exerciseId,
     required int displayOrder,

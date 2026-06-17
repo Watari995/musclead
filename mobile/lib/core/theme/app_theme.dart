@@ -11,16 +11,14 @@ ThemeData buildAppTheme(Brightness brightness, Color accent) {
   final dark = brightness == Brightness.dark;
   final tokens = AppTokens.build(brightness, accent);
 
-  final scheme = ColorScheme.fromSeed(
-    seedColor: accent,
-    brightness: brightness,
-  ).copyWith(
-    primary: accent,
-    onPrimary: Colors.white,
-    surface: dark ? const Color(0xFF1C1C1E) : Colors.white,
-    onSurface: dark ? const Color(0xFFF5F5F7) : const Color(0xFF1C1C1E),
-    outline: tokens.border,
-  );
+  final scheme = ColorScheme.fromSeed(seedColor: accent, brightness: brightness)
+      .copyWith(
+        primary: accent,
+        onPrimary: Colors.white,
+        surface: dark ? const Color(0xFF1C1C1E) : Colors.white,
+        onSurface: dark ? const Color(0xFFF5F5F7) : const Color(0xFF1C1C1E),
+        outline: tokens.border,
+      );
 
   return ThemeData(
     useMaterial3: true,

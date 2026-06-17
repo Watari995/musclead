@@ -45,7 +45,8 @@ abstract class ListRoutinesResponse with _$ListRoutinesResponse {
 }
 
 @freezed
-abstract class UpsertRoutineExerciseRequest with _$UpsertRoutineExerciseRequest {
+abstract class UpsertRoutineExerciseRequest
+    with _$UpsertRoutineExerciseRequest {
   const factory UpsertRoutineExerciseRequest({
     required String exerciseId,
     required int displayOrder,

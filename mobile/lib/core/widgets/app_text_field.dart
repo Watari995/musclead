@@ -38,17 +38,19 @@ class AppTextField extends StatelessWidget {
     final t = context.tokens;
     final cs = context.colors;
     OutlineInputBorder border(Color c) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
-          borderSide: BorderSide(color: c),
-        );
+      borderRadius: BorderRadius.circular(13),
+      borderSide: BorderSide(color: c),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 2, bottom: 6),
-          child: Text(label,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
         ),
         TextField(
           controller: controller,
@@ -67,7 +69,10 @@ class AppTextField extends StatelessWidget {
             filled: true,
             fillColor: cs.surface,
             isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 13,
+              vertical: 14,
+            ),
             enabledBorder: border(t.border),
             focusedBorder: border(t.accent),
             errorText: errorText,

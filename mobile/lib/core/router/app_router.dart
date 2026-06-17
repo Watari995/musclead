@@ -46,18 +46,33 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             HomeShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: '/meals', builder: (_, _) => const MealsScreen())],
-          ),
-          StatefulShellBranch(
             routes: [
-              GoRoute(path: '/trainings', builder: (_, _) => const TrainingsScreen())
+              GoRoute(path: '/meals', builder: (_, _) => const MealsScreen()),
             ],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/weights', builder: (_, _) => const WeightsScreen())],
+            routes: [
+              GoRoute(
+                path: '/trainings',
+                builder: (_, _) => const TrainingsScreen(),
+              ),
+            ],
           ),
           StatefulShellBranch(
-            routes: [GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen())],
+            routes: [
+              GoRoute(
+                path: '/weights',
+                builder: (_, _) => const WeightsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (_, _) => const ProfileScreen(),
+              ),
+            ],
           ),
         ],
       ),

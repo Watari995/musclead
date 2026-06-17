@@ -26,8 +26,10 @@ class MealRepository {
       guardApi(() => _dio.delete<void>('/meals/$id'));
 }
 
-final mealRepositoryProvider =
-    Provider<MealRepository>((ref) => MealRepository(ref.watch(dioProvider)));
+final mealRepositoryProvider = Provider<MealRepository>(
+  (ref) => MealRepository(ref.watch(dioProvider)),
+);
 
-final mealsProvider =
-    FutureProvider<List<MealDto>>((ref) => ref.watch(mealRepositoryProvider).list());
+final mealsProvider = FutureProvider<List<MealDto>>(
+  (ref) => ref.watch(mealRepositoryProvider).list(),
+);
