@@ -10,6 +10,7 @@ import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
+import 'training_detail_screen.dart';
 
 class TrainingsScreen extends ConsumerWidget {
   const TrainingsScreen({super.key});
@@ -68,6 +69,11 @@ class _TrainingRow extends StatelessWidget {
     final t = context.tokens;
     final count = training.exercises.length;
     return AppListRow(
+      onTap: () => Navigator.of(context, rootNavigator: true).push(
+        MaterialPageRoute<void>(
+          builder: (_) => TrainingDetailScreen(training: training),
+        ),
+      ),
       child: Row(
         children: [
           Expanded(
