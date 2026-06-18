@@ -7,6 +7,7 @@ import '../../../core/widgets/app_card.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
+import 'training_record_screen.dart';
 
 /// トレーニング詳細（種目 > セットの読み取り表示）。
 class TrainingDetailScreen extends ConsumerWidget {
@@ -27,6 +28,14 @@ class TrainingDetailScreen extends ConsumerWidget {
         title: Text('${mdWeekday(training.startedAt)} の記録'),
         backgroundColor: Colors.transparent,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => TrainingRecordScreen(editingTraining: training),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _confirmDelete(context, ref),

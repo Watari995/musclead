@@ -48,6 +48,15 @@
 
 ---
 
+## 🚀 リリースフロー
+
+- **「リリースノート」= GitHub Release**（`docs/` 以下のファイルではない）
+  - `gh release create vX.Y.Z --title "vX.Y.Z — <タイトル>" --notes "<内容>"` で作成
+  - バージョンタグは `main` merge 後に打つ
+- TestFlight へのアップロードは `.github/workflows/` の専用ワークフローで自動化（未整備の場合は手動）
+
+---
+
 ## 🔄 進行ルール
 
 - **詰まったら30分ルール** で質問
