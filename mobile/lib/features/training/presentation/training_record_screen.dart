@@ -203,25 +203,29 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         title: const Text('トレーニング記録'),
         backgroundColor: Colors.transparent,
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
-            for (var i = 0; i < _exercises.length; i++) _exerciseCard(i),
-            const SizedBox(height: 4),
-            AppButton(
-              label: '種目を追加',
-              icon: Icons.add,
-              variant: AppButtonVariant.glass,
-              onPressed: _pickExercise,
-            ),
-            const SizedBox(height: 12),
-            _overallMemoCard(),
-            if (_error != null) ...[
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            children: [
+              for (var i = 0; i < _exercises.length; i++) _exerciseCard(i),
+              const SizedBox(height: 4),
+              AppButton(
+                label: '種目を追加',
+                icon: Icons.add,
+                variant: AppButtonVariant.glass,
+                onPressed: _pickExercise,
+              ),
               const SizedBox(height: 12),
-              Text(_error!, style: TextStyle(color: t.accent, fontSize: 13)),
+              _overallMemoCard(),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(_error!, style: TextStyle(color: t.accent, fontSize: 13)),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
