@@ -22,25 +22,47 @@ You can't tell whether the scale moved because of muscle or because of yesterday
 ## What you can do
 
 - 🏋️ **Log workouts** — sets, reps, weight. Build it once as a routine, reuse it forever.
-- ⚖️ **Track your weight** — daily check-ins, trend over time, no drama.
-- 🍱 **Log meals** — what you actually ate, not what an algorithm guessed.
+- ⚖️ **Track your weight** — daily check-ins with body fat and muscle mass, trend over time.
+- 🍱 **Log meals** — PFC macros tracked automatically, per meal and per day.
 - 🔐 **Your account, your data** — personal, private, no social feed.
 
 ## Why you'll actually use it
 
 - **All-in-one.** No more "log workout in Strong, weight in Health, food in MyFitnessPal."
-- **Fast and minimal.** No ads, no nags, no streak shame. Free forever for the core, Premium only for AI-heavy stuff.
+- **Fast and minimal.** No ads, no nags, no streak shame.
 - **Built for trainees who are sick of bloat.** If you've ever closed an app because it asked you to rate it mid-set, you're the target user.
+
+## Platforms
+
+| Platform | Status |
+|---|---|
+| **iOS (App Store)** | v1.0.0 審査中（2026-06-18 提出） |
+| **Web** | https://app.musclead.com |
 
 <details>
 <summary>👩‍💻 For developers</summary>
 
-Go backend (DDD + modular monolith) + Next.js frontend, typed end-to-end via OpenAPI.
+**Stack**
+
+| Layer | Tech |
+|---|---|
+| Backend | Go (net/http REST + OpenAPI/swag) + gorp + DDD |
+| Frontend (Web) | Next.js + React + Tailwind v4 |
+| iOS | Flutter 3.x (Riverpod v2 / go_router) |
+| DB | PostgreSQL |
+| Hosting | Oracle VM (API) + Vercel (Web) |
+
 See [`CLAUDE.md`](CLAUDE.md), [`docs/domain-model.md`](docs/domain-model.md), and the [ADRs](docs/adr/) for the full picture.
 
 ```bash
-make db-up && make migrate-up && make dev   # backend → :8080
-cd web && npm install && npm run dev        # frontend → :3000
+# Backend → :8080
+make db-up && make migrate-up && make dev
+
+# Web → :3000
+cd web && npm install && npm run dev
+
+# iOS (requires fvm)
+cd mobile && fvm flutter pub get && fvm flutter run
 ```
 
 </details>
