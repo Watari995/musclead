@@ -99,6 +99,27 @@ func (m *MealTemplate) UpdatedAt() time.Time {
 	return m.updatedAt
 }
 
+type UpdateMealTemplateParams struct {
+	Name          valueobject.String100
+	MealType      valueobject.String20
+	Calories      valueobject.NonNegativeInt
+	ProteinG      *valueobject.NonNegativeDecimal
+	FatG          *valueobject.NonNegativeDecimal
+	CarbohydrateG *valueobject.NonNegativeDecimal
+}
+
+func (m *MealTemplate) Update(
+	params UpdateMealTemplateParams,
+) {
+	m.name = params.Name
+	m.mealType = params.MealType
+	m.calories = params.Calories
+	m.proteinG = params.ProteinG
+	m.fatG = params.FatG
+	m.carbohydrateG = params.CarbohydrateG
+	m.updatedAt = time.Now()
+}
+
 func CreateMealTemplate(
 	userID valueobject.UserID,
 	name valueobject.String100,
