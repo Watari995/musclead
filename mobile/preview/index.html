@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>musclead iOS — UI プレビュー (Liquid Glass / Monochrome)</title>
+<style>
+  /* ===== Liquid Glass + neutral base + 1 swappable accent =====
+     アクセントは --accent 1トークンで全体を駆動 → Flutter の ColorScheme.primary に対応。
+     PFC は意味を持つデータ配色(--macro-*)として別管理、自己ベストは --gold。 */
+  :root{
+    --accent:#ef3a3a;                                   /* ← ブランド赤(既定・差し替え可) */
+    --accent-weak:color-mix(in srgb, var(--accent) 14%, transparent);
+    --macro-p:#4a7fe0; --macro-f:#d99528; --macro-c:#3fa364;
+    --gold:#c8861a; --gold-weak:color-mix(in srgb, var(--gold) 16%, transparent);
+
+    --canvas:#f2f2f2; --surface:#ffffff; --surface-2:#fbfbfb;
+    --ink:#1c1c1e; --muted:#6b6b70; --subtle:#a0a0a5;
+    --border:rgba(0,0,0,.10); --hair:rgba(0,0,0,.08);
+    --track:#e6e6e8; --chip:rgba(0,0,0,.06);
+    --statusbar:#1c1c1e; --home-ind:rgba(0,0,0,.32);
+    --glass-bg:rgba(255,255,255,.55); --glass-border:rgba(255,255,255,.7);
+    --glass-hi:rgba(255,255,255,.85);
+    --device:#0b0d10; --wall:radial-gradient(120% 80% at 50% -10%, #ffffff, #e9e9eb 60%, #dededf);
+    --shadow:0 14px 40px rgba(20,24,30,.30);
+  }
+  body.dark{
+    --accent:#ff5b5b;
+    --macro-p:#6ea0ff; --macro-f:#e6b552; --macro-c:#5fce82;
+    --gold:#e3b341;
+
+    --canvas:#000000; --surface:#1c1c1e; --surface-2:#2c2c2e;
+    --ink:#f5f5f7; --muted:#98989d; --subtle:#5b5b60;
+    --border:rgba(255,255,255,.14); --hair:rgba(255,255,255,.10);
+    --track:#2c2c2e; --chip:rgba(255,255,255,.12);
+    --statusbar:#f5f5f7; --home-ind:rgba(255,255,255,.5);
+    --glass-bg:rgba(44,44,46,.5); --glass-border:rgba(255,255,255,.16);
+    --glass-hi:rgba(255,255,255,.18);
+    --wall:radial-gradient(120% 80% at 50% -10%, #1c1c1e, #0c0c0d 60%, #000);
+    --shadow:0 14px 40px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box; -webkit-font-smoothing:antialiased;}
+  html,body{margin:0;}
+  body{
+    font-family:-apple-system,"SF Pro Text",BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic UI",Helvetica,Arial,sans-serif;
+    background:#33373d; background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px); background-size:22px 22px;
+    color:#fff; min-height:100vh;
+  }
+  .board-head{position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:16px 24px; background:rgba(20,23,27,.82); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,.08);}
+  .board-head h1{font-size:15px; margin:0; font-weight:700;}
+  .board-head .sub{font-size:12px; color:#aeb6bf;}
+  .legend{display:flex; gap:14px; font-size:11.5px; color:#aeb6bf; flex-wrap:wrap;}
+  .legend b{color:#e6edf3; font-weight:600;}
+  .toggle{background:#2b3138; border:1px solid #3a424b; color:#e6edf3; padding:8px 14px; border-radius:999px; font-size:13px; cursor:pointer; font-weight:600;}
+  .toggle:hover{background:#343b43;}
+  .accent-pick{margin-left:auto; display:flex; align-items:center; gap:7px;}
+  .accent-pick .legend{color:#aeb6bf; margin-right:2px;}
+  .sw{width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,.45); cursor:pointer; padding:0; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .12s;}
+  .sw:hover{transform:scale(1.14);}
+
+  .board{display:flex; flex-wrap:wrap; gap:40px 34px; padding:40px; justify-content:center; align-items:flex-start;}
+  figure{margin:0; display:flex; flex-direction:column; align-items:center; gap:14px;}
+  figcaption{font-size:13px; color:#cdd4db; font-weight:600;}
+
+  /* ===== Device ===== */
+  .phone{width:380px; height:812px; border-radius:46px; background:var(--device); padding:11px; box-shadow:var(--shadow); position:relative; flex:0 0 auto;}
+  .screen{position:relative; width:100%; height:100%; border-radius:36px; overflow:hidden; background:var(--canvas); color:var(--ink);}
+  .screen.wall{background:var(--wall);}
+  .notch{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:30px; background:var(--device); border-radius:16px; z-index:40;}
+  .home-ind{position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:128px; height:5px; border-radius:3px; background:var(--home-ind); z-index:40;}
+
+  .statusbar{position:absolute; top:0; left:0; right:0; height:48px; z-index:35; display:flex; align-items:flex-end; justify-content:space-between; padding:0 26px 6px; font-size:13.5px; font-weight:600; color:var(--statusbar);}
+  .sigs{display:flex; align-items:center; gap:6px;}
+  .bars{display:flex; align-items:flex-end; gap:2px; height:11px;}
+  .bars span{width:3px; background:currentColor; border-radius:1px;}
+  .bars span:nth-child(1){height:4px}.bars span:nth-child(2){height:6px}.bars span:nth-child(3){height:8px}.bars span:nth-child(4){height:11px}
+  .wifi{width:16px; height:11px; background:currentColor; -webkit-mask:radial-gradient(circle at 50% 100%, #000 30%, transparent 31%) bottom/100% 100% no-repeat;}
+  .batt{width:24px; height:12px; border:1.3px solid currentColor; border-radius:3px; position:relative; opacity:.9;}
+  .batt::after{content:""; position:absolute; right:-3px; top:3.4px; width:2px; height:5px; background:currentColor; border-radius:0 1px 1px 0;}
+  .batt::before{content:""; position:absolute; left:1.4px; top:1.4px; bottom:1.4px; width:68%; background:currentColor; border-radius:1px;}
+
+  /* ===== Liquid Glass ===== */
+  .glass{background:var(--glass-bg); -webkit-backdrop-filter:blur(26px) saturate(180%); backdrop-filter:blur(26px) saturate(180%); border:1px solid var(--glass-border); box-shadow:inset 0 1px 0 var(--glass-hi), 0 10px 30px rgba(0,0,0,.16); position:relative;}
+  .glass::before{content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(180deg, var(--glass-hi), transparent 44%); opacity:.55;}
+
+  .content{position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .content::-webkit-scrollbar{display:none;}
+  .content.tab{padding:50px 0 120px;}
+  .content.pushed{padding:98px 0 30px;}
+  .content.center{padding:56px 0 40px;}
+  .pad{padding:0 18px;}
+
+  /* nav + tab chrome */
+  .navbar{position:absolute; top:0; left:0; right:0; height:94px; padding:48px 12px 0; z-index:25; display:flex; align-items:center; border-radius:0 0 0 0;}
+  .navbar .nb{display:flex; align-items:center; width:100%; height:46px;}
+  .navbar .ttl{font-size:16px; font-weight:600; flex:1; text-align:center;}
+  .navbar .side{min-width:60px; display:flex; align-items:center;}
+  .navbar .side.r{justify-content:flex-end;}
+  .back{display:inline-flex; align-items:center; gap:1px; color:var(--accent); font-size:16px; font-weight:500;}
+  .ico-btn{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; color:var(--accent);}
+
+  .tabbar{position:absolute; left:14px; right:14px; bottom:14px; height:64px; border-radius:30px; z-index:30; display:flex; align-items:center; padding:0 6px;}
+  .tab{display:flex; flex-direction:column; align-items:center; gap:2px; color:var(--subtle); font-size:10px; font-weight:600; flex:1; text-decoration:none;}
+  .tab .ic{width:46px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:15px;}
+  .tab svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;}
+  .tab.active{color:var(--accent);} .tab.active .ic{background:var(--accent-weak);}
+
+  .fab{position:absolute; right:22px; bottom:98px; width:54px; height:54px; border-radius:18px; z-index:32; display:flex; align-items:center; justify-content:center; background:var(--accent); box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.25);}
+  .fab svg{width:26px; height:26px; stroke:#fff; fill:none; stroke-width:2.2; stroke-linecap:round;}
+
+  .largetitle{font-size:28px; font-weight:800; letter-spacing:-.4px; padding:8px 18px 6px;}
+  .largetitle .date{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-top:3px;}
+
+  /* ===== content components ===== */
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:15px;}
+  .box{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .box .row{display:flex; align-items:center; gap:12px; padding:13px 15px; border-top:1px solid var(--hair);}
+  .box .row:first-child{border-top:none;}
+  .muted{color:var(--muted);} .small{font-size:12px;} .xsmall{font-size:11px;}
+  .sec-title{font-size:12.5px; font-weight:700; color:var(--muted); padding:18px 6px 8px;}
+  .chev{margin-left:auto; color:var(--subtle); font-size:17px;}
+
+  .btn{display:flex; align-items:center; justify-content:center; gap:8px; height:48px; border-radius:14px; font-size:15px; font-weight:600;}
+  .btn-primary{background:var(--accent); color:#fff; box-shadow:inset 0 1px 0 rgba(255,255,255,.22);}
+  .btn-glass{color:var(--ink);}
+  .btn-block{width:100%;}
+
+  .label{display:block; font-size:13px; font-weight:600; margin:0 0 6px 2px;}
+  .input{width:100%; height:48px; border:1px solid var(--border); border-radius:13px; background:var(--surface); color:var(--ink); padding:0 14px; font-size:16px; display:flex; align-items:center;}
+  .input.ph{color:var(--subtle);}
+
+  .badge{display:inline-flex; align-items:center; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; background:var(--chip); color:var(--muted);}
+  .badge.solid{background:var(--ink); color:var(--surface);}
+  .badge.pro{background:var(--accent-weak); color:var(--accent);}
+  .badge.gold{background:var(--gold-weak); color:var(--gold);}
+  .avatar{width:46px; height:46px; border-radius:50%; background:var(--ink); color:var(--surface); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; flex:0 0 auto;}
+  .thumb{width:52px; height:52px; border-radius:11px; flex:0 0 auto; background:linear-gradient(135deg,#cfcfd3,#9a9a9f);}
+  .thumb.b{background:linear-gradient(135deg,#bcbcc1,#7c7c82);}
+  .thumb.c{background:linear-gradient(135deg,#dcdce0,#aeaeb3);}
+
+  .track{height:7px; border-radius:4px; background:var(--track); overflow:hidden;}
+  .track > i{display:block; height:100%; border-radius:4px;}
+  .pfc{display:flex; flex-direction:column; gap:11px; margin-top:14px;}
+  .pfc .r{display:grid; grid-template-columns:64px 1fr auto; align-items:center; gap:10px; font-size:12.5px;}
+  .pfc .r b{font-weight:700;}
+  .kcal{font-size:30px; font-weight:800; letter-spacing:-.5px;}
+  .delta{color:var(--muted); font-weight:700;}
+
+  table.sets{width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;}
+  table.sets th{font-size:11px; color:var(--muted); font-weight:600; text-align:left; padding:5px 8px;}
+  table.sets td{padding:7px 8px; border-top:1px solid var(--hair); font-variant-numeric:tabular-nums;}
+  table.sets td.n{color:var(--muted); width:34px;}
+  table.sets tr.best td{background:var(--gold-weak);}
+  .ex-head{display:flex; align-items:center; gap:8px;}
+  .ex-head h4{margin:0; font-size:15px; font-weight:700;}
+
+  .stat3{display:flex; flex:1;}
+  .stat3 > div{flex:1; text-align:center;}
+  .stat3 b{display:block; font-size:19px; font-weight:800;}
+  .stat3 span{font-size:11px; color:var(--muted);}
+  .vline{width:1px; background:var(--border);}
+
+  .chart{width:100%; height:auto; display:block;}
+  .row-meal .meta{flex:1; min-width:0;} .row-meal .meta .t{font-weight:600; font-size:14px;}
+  .spacer{height:14px;}
+  .logo{width:62px; height:62px; border-radius:18px; background:var(--ink); display:flex; align-items:center; justify-content:center; margin:0 auto 18px;}
+  .logo svg{width:34px; height:34px; stroke:var(--surface); fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round;}
+</style>
+</head>
+<body>
+  <header class="board-head">
+    <div>
+      <h1>musclead — iOS UI プレビュー</h1>
+      <div class="sub">Flutter / Liquid Glass + モノクロ / iPhone (基準 375–390px)</div>
+    </div>
+    <div class="accent-pick"><span class="legend">アクセント</span>
+      <button class="sw" style="background:#ef3a3a" title="ブランド赤(既定)" onclick="setAccent('#ef3a3a')"></button>
+      <button class="sw" style="background:#0a84ff" title="ブルー" onclick="setAccent('#0a84ff')"></button>
+      <button class="sw" style="background:#00bcd4" title="ターコイズブルー" onclick="setAccent('#00bcd4')"></button>
+      <button class="sw" style="background:#30c759" title="グリーン" onclick="setAccent('#30c759')"></button>
+      <button class="sw" style="background:#ff9f0a" title="オレンジ" onclick="setAccent('#ff9f0a')"></button>
+      <button class="sw" style="background:#bf5af2" title="パープル" onclick="setAccent('#bf5af2')"></button>
+    </div>
+    <button class="toggle" onclick="document.body.classList.toggle('dark');this.textContent=document.body.classList.contains('dark')?'☀️ ライト':'🌙 ダーク'">🌙 ダーク</button>
+  </header>
+  <main class="board" id="board"></main>
+
+<script>
+function setAccent(c){document.body.style.setProperty('--accent', c);}
+const SB = `<div class="statusbar"><span>9:41</span><span class="sigs"><span class="bars"><span></span><span></span><span></span><span></span></span><span class="wifi"></span><span class="batt"></span></span></div>`;
+const ICON = {
+  meal:'<svg viewBox="0 0 24 24"><path d="M4 11.5h16a8 8 0 0 1-16 0Z"/><path d="M2.5 11.5h19"/><path d="M8 4c-1 1.2-1 2.4 0 3.6M12 4c-1 1.2-1 2.4 0 3.6"/></svg>',
+  train:'<svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>',
+  weight:'<svg viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M4 17l4.5-5L13 15l7-8"/></svg>',
+  me:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+  plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+};
+const tabbar=(a)=>{const t=(k,l,i)=>`<a class="tab ${a==i?'active':''}"><span class="ic">${ICON[k]}</span><span>${l}</span></a>`;
+  return `<nav class="tabbar glass">${t('meal','食事',0)}${t('train','トレーニング',1)}${t('weight','体重',2)}${t('me','マイページ',3)}</nav>`;};
+const navbar=(title,back=true,action='')=>`<div class="navbar glass"><div class="nb"><div class="side">${back?'<span class="back">‹ 戻る</span>':''}</div><div class="ttl">${title}</div><div class="side r">${action}</div></div></div>`;
+const phone=(cap,inner,{wall=false,fab=false}={})=>`<figure><div class="phone"><div class="screen ${wall?'wall':''}">${SB}${inner}${fab?`<div class="fab">${ICON.plus}</div>`:''}<div class="home-ind"></div></div></div><figcaption>${cap}</figcaption></figure>`;
+
+/* 1. ログイン */
+const login = phone('ログイン', `<div class="content center"><div class="pad" style="text-align:center">
+  <div class="logo">${ICON.train}</div>
+  <div style="font-size:25px;font-weight:800;letter-spacing:-.3px">musclead</div>
+  <div class="muted small" style="margin-top:6px">筋トレ・食事・体重を一元管理</div>
+  <div style="height:34px"></div>
+  <div style="text-align:left">
+    <label class="label">メールアドレス</label><div class="input ph">you@example.com</div>
+    <div class="spacer"></div>
+    <label class="label">パスワード</label><div class="input ph">••••••••</div>
+    <div style="height:22px"></div>
+    <div class="btn btn-primary btn-block">ログイン</div>
+    <div style="height:16px;text-align:center"></div>
+    <div style="text-align:center;font-size:14px;color:var(--accent);font-weight:600">アカウントを作成</div>
+  </div></div></div>`, {wall:true});
+
+/* 2. 食事 */
+const mealRow=(th,type,name,time,kcal,p,f,c)=>`<div class="row row-meal"><div class="thumb ${th}"></div>
+  <div class="meta"><div class="t">${name}</div><div class="small muted">${time} ・ <span class="badge">${type}</span></div></div>
+  <div style="text-align:right"><div style="font-weight:700">${kcal}<span class="xsmall muted"> kcal</span></div><div class="xsmall muted">P${p} F${f} C${c}</div></div></div>`;
+const meals = phone('食事ログ', `<div class="content tab">
+  <div class="largetitle">食事<span class="date">6月17日 (火)</span></div>
+  <div class="pad">
+    <div class="card">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between">
+        <div><div class="small muted">合計</div><div class="kcal">1,840<span style="font-size:15px;font-weight:600;color:var(--muted)"> / 2,200 kcal</span></div></div>
+        <span class="badge">あと360</span></div>
+      <div class="track" style="margin-top:12px"><i style="width:84%;background:var(--accent)"></i></div>
+      <div class="pfc">
+        <div class="r"><span>タンパク質</span><div class="track"><i style="width:78%;background:var(--macro-p)"></i></div><b>118g</b></div>
+        <div class="r"><span>脂質</span><div class="track"><i style="width:62%;background:var(--macro-f)"></i></div><b>52g</b></div>
+        <div class="r"><span>炭水化物</span><div class="track"><i style="width:70%;background:var(--macro-c)"></i></div><b>205g</b></div>
+      </div>
+    </div>
+    <div class="sec-title">今日の記録</div>
+    <div class="box">${mealRow('','朝食','オートミール・バナナ・卵','07:30',420,28,9,58)}${mealRow('b','昼食','鶏胸肉・玄米・ブロッコリー','12:40',640,52,12,70)}${mealRow('c','間食','プロテイン・ナッツ','16:10',280,28,14,12)}</div>
+  </div></div>${tabbar(0)}`, {fab:true});
+
+/* 3. トレーニング */
+const trRow=(d,wd,dur,exs)=>`<div class="row"><div class="meta" style="flex:1">
+  <div style="font-weight:700;font-size:14px">${d} <span class="muted" style="font-weight:500">(${wd})</span></div>
+  <div class="small muted" style="margin-top:2px">${exs}</div></div>
+  <div class="small muted" style="text-align:right">${dur}</div><span class="chev">›</span></div>`;
+const trainings = phone('トレーニング一覧', `<div class="content tab">
+  <div class="largetitle">トレーニング</div>
+  <div class="pad">
+    <div style="display:flex;gap:10px">
+      <div class="btn btn-primary" style="flex:1">＋ 新規記録</div>
+      <div class="btn btn-glass glass" style="flex:1">ルーティンから</div></div>
+    <div class="sec-title">履歴</div>
+    <div class="box">
+      ${trRow('6/16','月','52分','ベンチプレス・インクラインDB・ディップス')}
+      ${trRow('6/14','土','61分','スクワット・レッグプレス・カーフ')}
+      ${trRow('6/12','木','47分','デッドリフト・懸垂・ロウ')}
+      ${trRow('6/10','火','55分','ショルダープレス・サイドレイズ')}
+    </div>
+  </div></div>${tabbar(1)}`, {fab:true});
+
+/* 4. トレーニング詳細 */
+const setR=(n,w,r,best)=>`<tr class="${best?'best':''}"><td class="n">${n}</td><td><b>${w} kg</b></td><td style="text-align:right">${r} 回</td></tr>`;
+const exBlock=(name,best,rows)=>`<div class="card" style="margin-top:12px"><div class="ex-head"><h4>${name}</h4>${best?'<span class="badge gold">自己ベスト</span>':''}</div>
+  <table class="sets"><tr><th style="width:34px">#</th><th>重量</th><th style="text-align:right">回数</th></tr>${rows}</table></div>`;
+const trainDetail = phone('トレーニング詳細 / 記録', navbar('6/16 の記録', true, '<span class="ico-btn">✏️</span>') + `<div class="content pushed"><div class="pad">
+  <div class="card" style="display:flex;align-items:center"><div class="stat3">
+    <div><b>52<span style="font-size:12px">分</span></b><span>時間</span></div><div class="vline"></div>
+    <div><b>3</b><span>種目</span></div></div></div>
+  <div class="small muted" style="padding:12px 4px 0">メモ: 胸の日。フォーム意識できた。</div>
+  ${exBlock('ベンチプレス',true,setR(1,'60',10)+setR(2,'65',8)+setR(3,'70',6,true))}
+  ${exBlock('インクラインDB',false,setR(1,'22',12)+setR(2,'24',10)+setR(3,'24',9))}
+  ${exBlock('ディップス',false,setR(1,'自重',15)+setR(2,'自重',12))}
+</div></div>`);
+
+/* 5. 体重 */
+const pts="20,38 48,50 76,46 104,66 132,78 160,74 188,94 216,106 244,102 272,122 300,130";
+const weight = phone('体重・グラフ', `<div class="content tab">
+  <div class="largetitle">体重</div>
+  <div class="pad">
+    <div class="card">
+      <div style="display:flex;align-items:flex-end;gap:10px">
+        <div class="kcal" style="font-size:34px">72.5<span style="font-size:16px;font-weight:600;color:var(--muted)"> kg</span></div>
+        <div class="delta" style="padding-bottom:6px">▼ 0.2 kg</div></div>
+      <div class="small muted" style="margin-top:2px">体脂肪 18.2% ・ 骨格筋 33.1kg</div>
+      <svg class="chart" viewBox="0 0 320 160" style="margin-top:10px">
+        <g stroke="var(--hair)" stroke-width="1"><line x1="20" y1="30" x2="300" y2="30"/><line x1="20" y1="70" x2="300" y2="70"/><line x1="20" y1="110" x2="300" y2="110"/><line x1="20" y1="150" x2="300" y2="150"/></g>
+        <polyline points="20,160 ${pts} 300,160" fill="var(--accent)" opacity="0.10" stroke="none"/>
+        <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="300" cy="130" r="4.5" fill="var(--accent)"/><circle cx="300" cy="130" r="9" fill="var(--accent)" opacity="0.16"/></svg>
+      <div class="xsmall muted" style="display:flex;justify-content:space-between"><span>5/18</span><span>6/2</span><span>6/17</span></div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="btn btn-primary btn-block">＋ 体重を記録</div>
+    <div class="sec-title">最近の記録</div>
+    <div class="box">
+      <div class="row"><div class="meta" style="flex:1"><div style="font-weight:600">6/17 (火)</div><div class="xsmall muted">体脂肪 18.2%</div></div><div style="font-weight:700">72.5 kg</div><span class="delta xsmall" style="width:48px;text-align:right">▼0.2</span></div>
+      <div class="row"><div class="meta" style="flex:1"><div style="font-weight:600">6/16 (月)</div><div class="xsmall muted">体脂肪 18.4%</div></div><div style="font-weight:700">72.7 kg</div><span class="delta xsmall" style="width:48px;text-align:right">▼0.5</span></div>
+      <div class="row"><div class="meta" style="flex:1"><div style="font-weight:600">6/14 (土)</div><div class="xsmall muted">体脂肪 18.6%</div></div><div style="font-weight:700">73.2 kg</div><span class="delta xsmall" style="width:48px;text-align:right">▲0.1</span></div>
+    </div>
+  </div></div>${tabbar(2)}`);
+
+/* 6. マイページ */
+const setRow=(label,right,danger)=>`<div class="row">${danger?`<span style="color:var(--ink);font-weight:600;text-align:center;flex:1">${label}</span>`:`<span style="font-weight:500">${label}</span>${right?`<span class="muted small" style="margin-left:auto">${right}</span>`:''}<span class="chev">›</span>`}</div>`;
+const profile = phone('マイページ / 設定', `<div class="content tab">
+  <div class="largetitle">マイページ</div>
+  <div class="pad">
+    <div class="card" style="display:flex;align-items:center;gap:14px"><div class="avatar">山</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:16px">山田 太郎</div><div class="small muted">yamada@example.com</div></div>
+      <span class="badge">Free</span></div>
+    <div class="sec-title">アカウント</div>
+    <div class="box">${setRow('プロフィール編集')}${setRow('外観','システム')}${setRow('プラン','Free')}</div>
+    <div class="sec-title">その他</div>
+    <div class="box">${setRow('利用規約')}${setRow('プライバシーポリシー')}${setRow('バージョン','1.0.0 (1)')}</div>
+    <div style="height:16px"></div>
+    <div class="box">${setRow('ログアウト','',true)}</div>
+  </div></div>${tabbar(3)}`);
+
+document.getElementById('board').innerHTML = login+meals+trainings+trainDetail+weight+profile;
+</script>
+</body>
+</html>
