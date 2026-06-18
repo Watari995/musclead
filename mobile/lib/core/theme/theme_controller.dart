@@ -52,4 +52,14 @@ class ThemeModeController extends Notifier<ThemeMode> {
   ThemeMode build() => ThemeMode.system;
 
   void set(ThemeMode mode) => state = mode;
+
+  /// サーバーの preferences.theme（'system' / 'light' / 'dark'）から復元する。
+  /// 外観はローカル保存しないため、起動時に必ずサーバー値へ同期する。
+  void hydrate(String theme) {
+    state = switch (theme) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
+  }
 }
