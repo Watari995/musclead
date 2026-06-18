@@ -90,18 +90,12 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final exList = ref.read(exercisesProvider).asData?.value ?? [];
     final names = {for (final e in exList) e.id: e.name};
     for (final ex in training.exercises) {
-      final draft = _ExerciseDraft(
-        ex.exerciseId,
-        names[ex.exerciseId] ?? '種目',
-      );
+      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? '種目');
       draft.sets.first.dispose();
       draft.sets.clear();
       for (final s in ex.sets) {
         draft.sets.add(
-          _SetDraft(
-            weight: s.weightKg.toString(),
-            reps: s.reps.toString(),
-          ),
+          _SetDraft(weight: s.weightKg.toString(), reps: s.reps.toString()),
         );
       }
       if (draft.sets.isEmpty) draft.sets.add(_SetDraft());
@@ -204,8 +198,10 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       ref.invalidate(trainingsProvider);
       if (mounted) {
         if (_isEditing) {
-          Navigator.of(context, rootNavigator: true)
-              .popUntil((route) => route.isFirst);
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).popUntil((route) => route.isFirst);
         } else {
           context.go('/trainings');
         }
@@ -391,10 +387,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       child: Text.rich(
         TextSpan(
           children: [
-            TextSpan(
-              text: '★ ',
-              style: TextStyle(color: t.gold),
-            ),
+            TextSpan(text: '★ ', style: TextStyle(color: t.gold)),
             TextSpan(
               text: '最高記録 ',
               style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
@@ -551,29 +544,34 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
                   maxHeight: MediaQuery.of(context).size.height * 0.45,
                 ),
                 child: exercises.when(
-                  data: (list) => list.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Text('種目がありません。上で作成してください'),
-                        )
-                      : ListView(
-                          shrinkWrap: true,
-                          children: [
-                            for (final ex in list)
-                              ListTile(
-                                title: Text(ex.name),
-                                onTap: () => Navigator.of(context).pop(ex),
+                  data:
+                      (list) =>
+                          list.isEmpty
+                              ? const Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Text('種目がありません。上で作成してください'),
+                              )
+                              : ListView(
+                                shrinkWrap: true,
+                                children: [
+                                  for (final ex in list)
+                                    ListTile(
+                                      title: Text(ex.name),
+                                      onTap:
+                                          () => Navigator.of(context).pop(ex),
+                                    ),
+                                ],
                               ),
-                          ],
-                        ),
-                  loading: () => const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Text('読み込みに失敗しました'),
-                  ),
+                  loading:
+                      () => const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                  error:
+                      (e, _) => const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Text('読み込みに失敗しました'),
+                      ),
                 ),
               ),
             ],
