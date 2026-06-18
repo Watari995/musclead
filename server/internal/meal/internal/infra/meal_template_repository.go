@@ -3,6 +3,7 @@ package mealinfra
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	mealdomain "github.com/Watari995/musclead/internal/meal/internal/domain"
 	"github.com/Watari995/musclead/internal/pagination"
@@ -46,6 +47,9 @@ func (r *mealTemplateRepository) FindByIDAndUserID(ctx context.Context, id value
 	}
 	var row MealTemplateModel
 	err = q.SelectOne(&row, "SELECT id, user_id, name, display_order, meal_type, calories, protein_g, fat_g, carbohydrate_g, created_at, updated_at FROM meal_templates WHERE id = ? AND user_id = ?", bytes, userIDBytes)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}
