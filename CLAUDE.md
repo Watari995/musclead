@@ -1,6 +1,6 @@
 # musclead — Project Context
 
-> 筋トレ・食事・体重 一元管理 SaaS。 SODA入社準備のため、 バックエンドは Go(net/http REST + OpenAPI/swag)+ sqlc + DDD、 iOS は Flutter で実装。
+> 筋トレ・食事・体重 一元管理 SaaS。 SODA入社準備のため、 バックエンドは Go(net/http REST + OpenAPI/swag)+ gorp + DDD、 iOS は Flutter で実装。
 
 ---
 
@@ -8,7 +8,7 @@
 
 - [ドメインモデル](docs/domain-model.md)
 - [ADR](docs/adr/)（iOS=Flutter 採用: [ADR-0021](docs/adr/0021-adopt-flutter-for-ios.md)）
-- iOS アプリ: `mobile/`（Flutter。 実装は AI 担当。 UI プレビュー: `mobile/preview/index.html`）
+- iOS アプリ: `mobile/`（Flutter。 実装は AI 担当。 **v1.0.0 App Store 審査中** as of 2026-06-18）
 
 ---
 
