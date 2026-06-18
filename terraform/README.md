@@ -1,7 +1,7 @@
 # musclead infrastructure (Terraform)
 
 musclead を AWS にデプロイするための Terraform プロジェクト。 設計判断の
-背景は [ADR 0007](../docs/adr/0007-infra-mvp-and-monorepo.md) を参照。
+背景は [ADR 0007](../docs/adr/0007-infra-mvp-and-monorepo.md) を参照
 
 ## 構成サマリ
 
