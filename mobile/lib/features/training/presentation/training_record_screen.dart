@@ -90,7 +90,10 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final exList = ref.read(exercisesProvider).asData?.value ?? [];
     final names = {for (final e in exList) e.id: e.name};
     for (final ex in training.exercises) {
-      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? '種目');
+      final draft = _ExerciseDraft(
+        ex.exerciseId,
+        names[ex.exerciseId] ?? '種目',
+      );
       draft.sets.first.dispose();
       draft.sets.clear();
       for (final s in ex.sets) {
