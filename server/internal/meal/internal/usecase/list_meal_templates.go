@@ -9,29 +9,29 @@ import (
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
-type ListMealTemplateInput struct {
+type ListMealTemplatesInput struct {
 	UserID valueobject.UserID
 	Limit  int
 	Offset int
 }
 
-type ListMealTemplateOutput struct {
+type ListMealTemplatesOutput struct {
 	MealTemplates []*mealdomain.MealTemplate
 	Pagination    pagination.OffsetPaginator
 }
 
-type ListMealTemplate struct {
+type ListMealTemplates struct {
 	mealTemplateRepo mealdomain.MealTemplateRepository
 }
 
-func (uc *ListMealTemplate) Execute(ctx context.Context, input ListMealTemplateInput) (*ListMealTemplateOutput, error) {
+func (uc *ListMealTemplates) Execute(ctx context.Context, input ListMealTemplatesInput) (*ListMealTemplatesOutput, error) {
 	mealTemplates, paginator, err := uc.mealTemplateRepo.FindAllByUserIDWithOffsetPagination(ctx, input.UserID, input.Limit, input.Offset)
 	if err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
-	return &ListMealTemplateOutput{MealTemplates: mealTemplates, Pagination: paginator}, nil
+	return &ListMealTemplatesOutput{MealTemplates: mealTemplates, Pagination: paginator}, nil
 }
 
-func NewListMealTemplate(mealTemplateRepo mealdomain.MealTemplateRepository) *ListMealTemplate {
-	return &ListMealTemplate{mealTemplateRepo: mealTemplateRepo}
+func NewListMealTemplates(mealTemplateRepo mealdomain.MealTemplateRepository) *ListMealTemplates {
+	return &ListMealTemplates{mealTemplateRepo: mealTemplateRepo}
 }
