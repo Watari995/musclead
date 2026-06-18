@@ -34,6 +34,24 @@ ON DUPLICATE KEY UPDATE
     updated_at = VALUES(updated_at)
 `
 
+func (r *mealTemplateRepository) FindByIDAndUserID(ctx context.Context, id valueobject.MealTemplateID, userID valueobject.UserID) (*mealdomain.MealTemplate, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := id.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	var row MealTemplateModel
+	err = q.SelectOne(&row, "SELECT id, user_id, name, display_order, meal_type, calories, protein_g, fat_g, carbohydrate_g, created_at, updated_at FROM meal_templates WHERE id = ? AND user_id = ?", bytes, userIDBytes)
+	if err != nil {
+		return nil, err
+	}
+	return toMealTemplate(row)
+}
+
 func (r *mealTemplateRepository) FindAllByUserID(ctx context.Context, userID valueobject.UserID) ([]*mealdomain.MealTemplate, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := userID.Bytes()
@@ -41,7 +59,7 @@ func (r *mealTemplateRepository) FindAllByUserID(ctx context.Context, userID val
 		return nil, err
 	}
 	var mealTemplateRows []MealTemplateModel
-	_, err = q.Select(&mealTemplateRows, "SELECT id, user_id, name, display_order, meal_type, calories, protein_g, fat_g, carbohydrate_g, created_at, updated_at FROM meal_templates WHERE user_id = ? ORDER BY display_order DESC, created_at DESC", bytes)
+	_, err = q.Select(&mealTemplateRows, "SELECT id, user_id, name, display_order, meal_type, calories, protein_g, fat_g, carbohydrate_g, created_at, updated_at FROM meal_templates WHERE user_id = ? ORDER BY display_order ASC, created_at ASC", bytes)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +82,7 @@ func (r *mealTemplateRepository) FindAllByUserIDWithOffsetPagination(ctx context
 	}
 
 	var mealTemplateRows []MealTemplateModel
-	_, err = q.Select(&mealTemplateRows, "SELECT id, user_id, name, display_order, meal_type, calories, protein_g, fat_g, carbohydrate_g, created_at, updated_at FROM meal_templates WHERE user_id = ? ORDER BY display_order DESC, created_at DESC LIMIT ? OFFSET ?", bytes, int32(limit), int32(offset))
+	_, err = q.Select(&mealTemplateRows, "SELECT id, user_id, name, display_order, meal_type, calories, protein_g, fat_g, carbohydrate_g, created_at, updated_at FROM meal_templates WHERE user_id = ? ORDER BY display_order ASC, created_at ASC LIMIT ? OFFSET ?", bytes, int32(limit), int32(offset))
 	if err != nil {
 		return nil, pagination.OffsetPaginator{}, err
 	}
