@@ -1,0 +1,25 @@
+name: TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'バージョン番号 (例: 1.0.1)'
+        required: true
+        type: string
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "mobile-v${{ inputs.version }}"
+          git push origin "mobile-v${{ inputs.version }}"
