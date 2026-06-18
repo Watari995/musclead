@@ -61,7 +61,7 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '長押しで並び替え',
+                        '右の ☰ をドラッグで並び替え',
                         style: TextStyle(
                           fontSize: 12,
                           color: context.tokens.muted,
@@ -75,7 +75,10 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                     itemCount: items.length,
                     onReorder: _onReorder,
-                    itemBuilder: (context, i) => _tile(items[i]),
+                    buildDefaultDragHandles: false,
+                    proxyDecorator: (child, index, animation) =>
+                        Material(color: Colors.transparent, child: child),
+                    itemBuilder: (context, i) => _tile(items[i], i),
                   ),
                 ),
               ],
@@ -106,30 +109,38 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
         });
   }
 
-  Widget _tile(ExerciseDto ex) {
+  Widget _tile(ExerciseDto ex, int index) {
     final t = context.tokens;
-    return Container(
+    return Padding(
       key: ValueKey(ex.id),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: t.border),
-      ),
-      child: ListTile(
-        title: Text(
-          ex.name,
-          style: const TextStyle(fontWeight: FontWeight.w500),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: t.border),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(Icons.delete_outline, size: 20, color: t.subtle),
-              onPressed: () => _delete(ex),
-            ),
-            Icon(Icons.drag_handle, color: t.subtle),
-          ],
+        child: ListTile(
+          title: Text(
+            ex.name,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.delete_outline, size: 20, color: t.subtle),
+                onPressed: () => _delete(ex),
+              ),
+              ReorderableDragStartListener(
+                index: index,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(Icons.drag_handle, color: t.subtle),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

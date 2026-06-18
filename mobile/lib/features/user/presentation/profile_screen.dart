@@ -339,6 +339,9 @@ class _Avatar extends StatelessWidget {
     final t = context.tokens;
     final url = user.profileImageUrl;
     final initial = user.name.isNotEmpty ? user.name.characters.first : '?';
+    // 読み込み中の中立プレースホルダ（色付きイニシャルを出さないことでチラつきを防ぐ）。
+    Widget placeholder() => Container(width: 52, height: 52, color: t.border);
+    // 通常はサーバーが必ずデフォルト画像 URL を返すため、これは読込失敗時のみ表示。
     Widget fallback() => Container(
       width: 52,
       height: 52,
@@ -366,7 +369,10 @@ class _Avatar extends StatelessWidget {
                     width: 52,
                     height: 52,
                     fit: BoxFit.cover,
-                    placeholder: (_, _) => fallback(),
+                    // フェードを無効化し、キャッシュ済みなら即時表示（チラつき防止）。
+                    fadeInDuration: Duration.zero,
+                    fadeOutDuration: Duration.zero,
+                    placeholder: (_, _) => placeholder(),
                     errorWidget: (_, _, _) => fallback(),
                   )
                 : fallback(),

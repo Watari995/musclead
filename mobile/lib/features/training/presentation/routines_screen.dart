@@ -56,7 +56,10 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
               padding: const EdgeInsets.all(16),
               itemCount: items.length,
               onReorder: _onReorder,
-              itemBuilder: (context, i) => _tile(items[i]),
+              buildDefaultDragHandles: false,
+              proxyDecorator: (child, index, animation) =>
+                  Material(color: Colors.transparent, child: child),
+              itemBuilder: (context, i) => _tile(items[i], i),
             );
           },
         ),
@@ -84,44 +87,52 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
         });
   }
 
-  Widget _tile(RoutineDto r) {
+  Widget _tile(RoutineDto r, int index) {
     final t = context.tokens;
-    return Container(
+    return Padding(
       key: ValueKey(r.id),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: t.border),
-      ),
-      child: ListTile(
-        onTap: () => Navigator.of(context, rootNavigator: true).push(
-          MaterialPageRoute<void>(
-            builder: (_) => TrainingRecordScreen(
-              initialExercises: [
-                for (final e in r.routineExercises)
-                  (exerciseId: e.exerciseId, name: e.exerciseName ?? '種目'),
-              ],
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: t.border),
+        ),
+        child: ListTile(
+          onTap: () => Navigator.of(context, rootNavigator: true).push(
+            MaterialPageRoute<void>(
+              builder: (_) => TrainingRecordScreen(
+                initialExercises: [
+                  for (final e in r.routineExercises)
+                    (exerciseId: e.exerciseId, name: e.exerciseName ?? '種目'),
+                ],
+              ),
             ),
           ),
-        ),
-        title: Text(
-          r.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          '${r.routineExercises.length} 種目 ・ タップで記録開始',
-          style: TextStyle(fontSize: 12, color: t.muted),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(Icons.delete_outline, size: 20, color: t.subtle),
-              onPressed: () => _delete(r),
-            ),
-            Icon(Icons.drag_handle, color: t.subtle),
-          ],
+          title: Text(
+            r.name,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            '${r.routineExercises.length} 種目 ・ タップで記録開始',
+            style: TextStyle(fontSize: 12, color: t.muted),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.delete_outline, size: 20, color: t.subtle),
+                onPressed: () => _delete(r),
+              ),
+              ReorderableDragStartListener(
+                index: index,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(Icons.drag_handle, color: t.subtle),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
