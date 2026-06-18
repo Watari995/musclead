@@ -32,8 +32,7 @@ class TrainingDetailScreen extends ConsumerWidget {
             icon: const Icon(Icons.edit_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) =>
-                    TrainingRecordScreen(editingTraining: training),
+                builder: (_) => TrainingRecordScreen(editingTraining: training),
               ),
             ),
           ),

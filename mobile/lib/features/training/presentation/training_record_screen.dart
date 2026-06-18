@@ -94,7 +94,12 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       draft.sets.first.dispose();
       draft.sets.clear();
       for (final s in ex.sets) {
-        draft.sets.add(_SetDraft(weight: s.weightKg.toString(), reps: s.reps.toString()));
+        draft.sets.add(
+          _SetDraft(
+            weight: s.weightKg.toString(),
+            reps: s.reps.toString(),
+          ),
+        );
       }
       if (draft.sets.isEmpty) draft.sets.add(_SetDraft());
       draft.memo.text = ex.memo ?? '';
