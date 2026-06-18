@@ -121,6 +121,10 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
           border: Border.all(color: t.border),
         ),
         child: ListTile(
+          // 波紋(ink)を角丸にクリップし、長押し時に四角い角が出るのを防ぐ。
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
           title: Text(
             ex.name,
             style: const TextStyle(fontWeight: FontWeight.w500),
