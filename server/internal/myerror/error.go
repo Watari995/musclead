@@ -186,6 +186,14 @@ func NewMealNotFoundError() MyError {
 	}
 }
 
+func NewMealTemplateNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.MealTemplate.NotFoundError,
+	}
+}
+
 func NewTrainingNotFoundError() MyError {
 	return &myError{
 		status:      http.StatusNotFound,

@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { RecordMealRequest } from "@/shared/api/client";
 import {
   useRecordMealMutation,
   useUploadMealPhotoMutation,
 } from "@/features/meal/api/meals";
 import { toLocalInput } from "@/features/meal/model/meal";
+import type { MealTemplate } from "@/features/meal/model/meal_template";
 import { Button, Card, ErrorText, Label, NumberField, TextInput } from "@/shared/ui";
 
 const MAX_PHOTOS = 5;
@@ -17,8 +18,28 @@ type LocalPhoto = {
   previewURL: string;
 };
 
-export function RecordMealForm() {
+type Props = {
+  prefill?: MealTemplate | null;
+  onPrefillConsumed?: () => void;
+};
+
+export function RecordMealForm({ prefill, onPrefillConsumed }: Props) {
   const [form, setForm] = useState<RecordMealRequest>(initialForm);
+
+  useEffect(() => {
+    if (!prefill) return;
+    setForm((prev) => ({
+      ...initialForm(),
+      meal_type: prefill.mealType,
+      eaten_at: prev.eaten_at,
+      calories: prefill.calories,
+      protein_g: parseFloat(prefill.proteinG) || undefined,
+      fat_g: parseFloat(prefill.fatG) || undefined,
+      carbohydrate_g: parseFloat(prefill.carbohydrateG) || undefined,
+    }));
+    onPrefillConsumed?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill]);
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +80,7 @@ export function RecordMealForm() {
     setPhotos(photos.filter((_, i) => i !== idx));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setUploadError(null);
 

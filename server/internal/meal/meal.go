@@ -20,10 +20,12 @@ type Module struct {
 }
 
 func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) *Module {
-	// repositoryを作成する
 	dbmap.AddTableWithName(mealinfra.MealModel{}, "meals").SetKeys(false, "ID")
 	dbmap.AddTableWithName(mealinfra.MealPhotoModel{}, "meal_photos").SetKeys(false, "ID")
+	dbmap.AddTableWithName(mealinfra.MealTemplateModel{}, "meal_templates").SetKeys(false, "ID")
+
 	repo := mealinfra.NewMealRepository(dbmap)
+	templateRepo := mealinfra.NewMealTemplateRepository(dbmap)
 	txManager := dbtx.NewTransactionManager(dbmap)
 
 	record := mealusecase.NewRecordMeal(repo, txManager)
@@ -32,7 +34,18 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	delete := mealusecase.NewDeleteMealByID(repo, storageClient)
 	list := mealusecase.NewListMeals(repo)
 	generateMealPhotoImagePresignedURL := mealusecase.NewGenerateMealPhotoImagePresignedURL(storageClient)
+
+	createTemplate := mealusecase.NewCreateMealTemplate(templateRepo)
+	listTemplates := mealusecase.NewListMealTemplates(templateRepo)
+	updateTemplate := mealusecase.NewUpdateMealTemplate(templateRepo)
+	deleteTemplate := mealusecase.NewDeleteMealTemplate(templateRepo)
+	reorderTemplate := mealusecase.NewReorderMealTemplate(templateRepo, txManager)
+
 	return &Module{
-		Handler: mealhandler.New(urlBuilder, record, find, update, delete, list, generateMealPhotoImagePresignedURL),
+		Handler: mealhandler.New(
+			urlBuilder,
+			record, find, update, delete, list, generateMealPhotoImagePresignedURL,
+			listTemplates, createTemplate, updateTemplate, deleteTemplate, reorderTemplate,
+		),
 	}
 }

@@ -146,7 +146,7 @@ func (r *mealRepository) Save(ctx context.Context, meal *mealdomain.Meal) error 
 		}
 		if _, err := q.Exec(
 			"INSERT INTO meal_photos (id, meal_id, image_path, display_order, created_at) VALUES (?, ?, ?, ?, ?)",
-			mealPhotoID, bytes, photo.ImagePath, int32(photo.DisplayOrder), time.Now(),
+			mealPhotoID, bytes, photo.ImagePath, photo.DisplayOrder, time.Now(),
 		); err != nil {
 			return err
 		}
@@ -187,7 +187,7 @@ func toPhotoSpec(photos []MealPhotoModel) []mealdomain.PhotoSpec {
 	return lo.Map(photos, func(p MealPhotoModel, _ int) mealdomain.PhotoSpec {
 		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
-			DisplayOrder: int(p.DisplayOrder),
+			DisplayOrder: p.DisplayOrder,
 		}
 	})
 }
@@ -205,7 +205,7 @@ func toMeal(row MealModel, photos []MealPhotoModel) (*mealdomain.Meal, error) {
 	if err != nil {
 		return nil, err
 	}
-	calories, err := valueobject.NewNonNegativeInt(int(row.Calories))
+	calories, err := valueobject.NewNonNegativeInt(row.Calories)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +261,7 @@ func buildUpsertMealParams(meal *mealdomain.Meal) ([]any, error) {
 		userIDBytes,
 		meal.EatenAt(),
 		meal.MealType().Value(),
-		int32(meal.Calories().Value()),
+		meal.Calories().Value(),
 		proteinG,
 		fatG,
 		carbohydrateG,
