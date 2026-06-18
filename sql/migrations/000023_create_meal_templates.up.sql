@@ -12,7 +12,7 @@ CREATE TABLE meal_templates (
   updated_at     DATETIME(6)   NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
                                         ON UPDATE CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
-  KEY idx_meal_templates_user (user_id, display_order ASC, created_at ASC),
+  KEY idx_meal_templates_user (user_id, display_order DESC, created_at DESC),
   CONSTRAINT fk_meal_templates_user_id
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB
