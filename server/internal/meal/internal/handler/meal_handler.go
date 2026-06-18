@@ -23,6 +23,11 @@ type MealHandler struct {
 	delete                             *mealusecase.DeleteMealByID
 	list                               *mealusecase.ListMeals
 	generateMealPhotoImagePresignedURL *mealusecase.GenerateMealPhotoImagePresignedURL
+	listMealTemplates                  *mealusecase.ListMealTemplates
+	createMealTemplate                 *mealusecase.CreateMealTemplate
+	updateMealTemplate                 *mealusecase.UpdateMealTemplate
+	deleteMealTemplate                 *mealusecase.DeleteMealTemplate
+	reorderMealTemplates               *mealusecase.ReorderMealTemplate
 }
 
 func New(
@@ -33,6 +38,11 @@ func New(
 	delete *mealusecase.DeleteMealByID,
 	list *mealusecase.ListMeals,
 	generateMealPhotoImagePresignedURL *mealusecase.GenerateMealPhotoImagePresignedURL,
+	listMealTemplates *mealusecase.ListMealTemplates,
+	createMealTemplate *mealusecase.CreateMealTemplate,
+	updateMealTemplate *mealusecase.UpdateMealTemplate,
+	deleteMealTemplate *mealusecase.DeleteMealTemplate,
+	reorderMealTemplates *mealusecase.ReorderMealTemplate,
 ) http.Handler {
 	h := &MealHandler{
 		urlBuilder:                         urlBuilder,
@@ -42,6 +52,11 @@ func New(
 		delete:                             delete,
 		list:                               list,
 		generateMealPhotoImagePresignedURL: generateMealPhotoImagePresignedURL,
+		listMealTemplates:                  listMealTemplates,
+		createMealTemplate:                 createMealTemplate,
+		updateMealTemplate:                 updateMealTemplate,
+		deleteMealTemplate:                 deleteMealTemplate,
+		reorderMealTemplates:               reorderMealTemplates,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /meals", h.Record)
@@ -50,6 +65,11 @@ func New(
 	mux.HandleFunc("DELETE /meals/{id}", h.Delete)
 	mux.HandleFunc("GET /meals", h.List)
 	mux.HandleFunc("POST /meals/photos/presigned-url", h.GenerateMealPhotoImagePresignedURL)
+	mux.HandleFunc("GET /meal_templates", h.ListMealTemplates)
+	mux.HandleFunc("POST /meal_templates", h.CreateMealTemplate)
+	mux.HandleFunc("PUT /meal_templates/{id}", h.UpdateMealTemplate)
+	mux.HandleFunc("DELETE /meal_templates/{id}", h.DeleteMealTemplate)
+	mux.HandleFunc("POST /meal_templates/reorder", h.ReorderMealTemplates)
 	return mux
 }
 
@@ -393,3 +413,41 @@ func (h *MealHandler) GenerateMealPhotoImagePresignedURL(w http.ResponseWriter, 
 		Path: output.Path,
 	})
 }
+
+// ListMealTemplates godoc
+//
+// @Summary 食事テンプレート一覧
+// @Tags meal_templates
+// @Produce json
+// @Security BearerAuth
+// @Param limit query int false "1ページの件数 (default: 20, max: 100)"
+// @Param offset query int false "開始位置 (default: 0)"
+// @Success 200 {object} mealdto.ListMealTemplatesResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /meal_templates [get]
+func (h *MealHandler) ListMealTemplates(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	limit, offset := httpx.ParseOffsetPagination(r)
+	input := mealusecase.ListMealTemplatesInput{
+		UserID: userID,
+		Limit:  limit,
+		Offset: offset,
+	}
+	output, err := h.listMealTemplates.Execute(r.Context(), input)
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	response := mealdto.ListMealTemplatesResponse{
+		MealTemplates: lo.Map(output.MealTemplates, func(m *mealdomain.MealTemplate, _ int) mealdto.MealTemplateDTO {
+			return mealdto.NewMealTemplateDTOFromEntity(m)
+		}),
+		Pagination: shareddto.NewPaginationDTO(output.Pagination),
+	}
+	httpx.WriteJSON(w, http.StatusOK, response)
+}
+

@@ -205,6 +205,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// meals
 	mux.Handle("/meals", authModule.Middleware(mealModule.Handler))
 	mux.Handle("/meals/", authModule.Middleware(mealModule.Handler))
+	// meal_templates
+	mux.Handle("/meal_templates", authModule.Middleware(mealModule.Handler))
+	mux.Handle("/meal_templates/", authModule.Middleware(mealModule.Handler))
 	// trainings
 	mux.Handle("/trainings", authModule.Middleware(trainingModule.TrainingHandler))
 	mux.Handle("/trainings/", authModule.Middleware(trainingModule.TrainingHandler))
