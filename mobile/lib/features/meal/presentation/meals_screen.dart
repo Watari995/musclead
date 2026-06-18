@@ -12,6 +12,7 @@ import '../../../core/widgets/tab_page.dart';
 import '../data/meal_dtos.dart';
 import '../data/meal_repository.dart';
 import 'meal_record_sheet.dart';
+import 'meal_template_sheet.dart';
 
 class MealsScreen extends ConsumerWidget {
   const MealsScreen({super.key});
@@ -22,9 +23,24 @@ class MealsScreen extends ConsumerWidget {
     return TabPage(
       title: '食事',
       subtitle: dateJpLong(DateTime.now()),
-      trailing: IconButton(
-        icon: Icon(Icons.add, color: context.tokens.accent),
-        onPressed: () => showMealRecordSheet(context),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.bookmark_outline, color: context.tokens.accent),
+            tooltip: 'テンプレートから記録',
+            onPressed: () async {
+              final template = await showMealTemplateSheet(context);
+              if (template != null && context.mounted) {
+                showMealRecordSheet(context, fromTemplate: template);
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.add, color: context.tokens.accent),
+            onPressed: () => showMealRecordSheet(context),
+          ),
+        ],
       ),
       onRefresh: () => ref.refresh(mealsProvider.future),
       children: [

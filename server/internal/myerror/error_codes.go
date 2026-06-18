@@ -24,6 +24,10 @@ type mealErrors struct {
 	NotFoundError ErrorCode
 }
 
+type mealTemplateErrors struct {
+	NotFoundError ErrorCode
+}
+
 type trainingErrors struct {
 	NotFoundError                  ErrorCode
 	ExerciseNotFoundError          ErrorCode
@@ -54,6 +58,7 @@ var ErrorCodes = struct {
 	General           generalErrors
 	User              userErrors
 	Meal              mealErrors
+	MealTemplate      mealTemplateErrors
 	Training          trainingErrors
 	Weight            weightErrors
 	SubscriptionOrder subscriptionOrderErrors
@@ -78,6 +83,9 @@ var ErrorCodes = struct {
 	},
 	Meal: mealErrors{
 		NotFoundError: "meal.not_found_error",
+	},
+	MealTemplate: mealTemplateErrors{
+		NotFoundError: "meal_template.not_found_error",
 	},
 	Training: trainingErrors{
 		NotFoundError:                  "training.not_found_error",
