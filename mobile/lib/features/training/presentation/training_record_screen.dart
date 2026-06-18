@@ -28,8 +28,8 @@ class _SetDraft {
 class _ExerciseDraft {
   _ExerciseDraft(this.exerciseId, this.name);
 
-  final String exerciseId;
-  final String name;
+  String exerciseId;
+  String name;
   final List<_SetDraft> sets = [_SetDraft()];
   final TextEditingController memo = TextEditingController();
 
@@ -106,9 +106,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   void _addSet(int i) => setState(() {
     final sets = _exercises[i].sets;
     final last = sets.isNotEmpty ? sets.last : null;
-    sets.add(
-      _SetDraft(weight: last?.weight.text ?? '', reps: last?.reps.text ?? ''),
-    );
+    // kg は引き継ぐが、回数は引き継がない。
+    sets.add(_SetDraft(weight: last?.weight.text ?? ''));
   });
 
   void _removeSet(int ei, int si) => setState(() {
@@ -178,6 +177,22 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       builder: (_) => const _ExercisePicker(),
     );
     if (selected != null) _addExercise(selected);
+  }
+
+  /// 既存カードの種目を別の種目に切り替える（入力済みのセットは保持）。
+  Future<void> _switchExercise(int i) async {
+    final selected = await showModalBottomSheet<ExerciseDto>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => const _ExercisePicker(),
+    );
+    if (selected == null) return;
+    setState(() {
+      _exercises[i].exerciseId = selected.id;
+      _exercises[i].name = selected.name;
+    });
+    _loadBestSets();
   }
 
   @override
@@ -265,11 +280,27 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    e.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                  child: InkWell(
+                    onTap: () => _switchExercise(i),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              e.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.unfold_more, size: 16, color: t.subtle),
+                        ],
+                      ),
                     ),
                   ),
                 ),

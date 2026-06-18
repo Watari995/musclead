@@ -26,6 +26,12 @@ class TrainingDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('${mdWeekday(training.startedAt)} の記録'),
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _confirmDelete(context, ref),
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView(
@@ -75,6 +81,38 @@ class TrainingDetailScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('記録を削除'),
+        content: const Text('このトレーニング記録を削除します。よろしいですか？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('削除する', style: TextStyle(color: context.tokens.accent)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref.read(trainingRepositoryProvider).deleteTraining(training.id);
+      ref.invalidate(trainingsProvider);
+      if (context.mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+      }
+    }
   }
 
   Widget _stat(BuildContext context, String value, String unit, String label) {
