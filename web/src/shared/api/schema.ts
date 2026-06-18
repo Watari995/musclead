@@ -607,6 +607,275 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/meal_templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 食事テンプレート一覧 */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 1ページの件数 (default: 20, max: 100) */
+                    limit?: number;
+                    /** @description 開始位置 (default: 0) */
+                    offset?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.ListMealTemplatesResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** 食事テンプレート作成 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description テンプレート作成 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.UpsertMealTemplateRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.UpsertMealTemplateResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meal_templates/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 食事テンプレート並び替え */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description 並び替え後のID順 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.ReorderMealTemplatesRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/meal_templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 食事テンプレート更新 */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 対象 MealTemplateID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            /** @description 更新内容 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.UpsertMealTemplateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.UpsertMealTemplateResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** 食事テンプレート削除 */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 対象 MealTemplateID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "*/*": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/meals": {
         parameters: {
             query?: never;
@@ -2349,6 +2618,10 @@ export interface components {
             path?: string;
             url?: string;
         };
+        "github_com_Watari995_musclead_internal_meal_dto.ListMealTemplatesResponse": {
+            meal_templates?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealTemplateDTO"][];
+            pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
+        };
         "github_com_Watari995_musclead_internal_meal_dto.ListMealsResponse": {
             meals?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealDTO"][];
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
@@ -2371,6 +2644,19 @@ export interface components {
             display_order?: number;
             image_path?: string;
         };
+        "github_com_Watari995_musclead_internal_meal_dto.MealTemplateDTO": {
+            calories?: number;
+            carbohydrate_g?: string;
+            created_at?: string;
+            display_order?: number;
+            fat_g?: string;
+            id?: string;
+            meal_type?: string;
+            name?: string;
+            protein_g?: string;
+            updated_at?: string;
+            user_id?: string;
+        };
         "github_com_Watari995_musclead_internal_meal_dto.PhotoDTO": {
             display_order?: number;
             image_url?: string;
@@ -2388,6 +2674,9 @@ export interface components {
         "github_com_Watari995_musclead_internal_meal_dto.RecordMealResponse": {
             meal_id?: string;
         };
+        "github_com_Watari995_musclead_internal_meal_dto.ReorderMealTemplatesRequest": {
+            meal_template_ids?: string[];
+        };
         "github_com_Watari995_musclead_internal_meal_dto.UpdateMealRequest": {
             calories?: number;
             carbohydrate_g?: number;
@@ -2400,6 +2689,17 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_meal_dto.UpdateMealResponse": {
             meal_id?: string;
+        };
+        "github_com_Watari995_musclead_internal_meal_dto.UpsertMealTemplateRequest": {
+            calories?: number;
+            carbohydrate_g?: number;
+            fat_g?: number;
+            meal_type?: string;
+            name?: string;
+            protein_g?: number;
+        };
+        "github_com_Watari995_musclead_internal_meal_dto.UpsertMealTemplateResponse": {
+            meal_template_id?: string;
         };
         "github_com_Watari995_musclead_internal_purchase_dto.CreatePortalSessionResponse": {
             portal_url?: string;
