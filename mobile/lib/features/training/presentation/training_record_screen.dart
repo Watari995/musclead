@@ -12,8 +12,13 @@ import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
 
 class _SetDraft {
-  final weight = TextEditingController();
-  final reps = TextEditingController();
+  _SetDraft({String weight = '', String reps = ''})
+    : weight = TextEditingController(text: weight),
+      reps = TextEditingController(text: reps);
+
+  final TextEditingController weight;
+  final TextEditingController reps;
+
   void dispose() {
     weight.dispose();
     reps.dispose();
@@ -22,13 +27,17 @@ class _SetDraft {
 
 class _ExerciseDraft {
   _ExerciseDraft(this.exerciseId, this.name);
+
   final String exerciseId;
   final String name;
   final List<_SetDraft> sets = [_SetDraft()];
+  final TextEditingController memo = TextEditingController();
+
   void dispose() {
     for (final s in sets) {
       s.dispose();
     }
+    memo.dispose();
   }
 }
 
@@ -47,6 +56,8 @@ class TrainingRecordScreen extends ConsumerStatefulWidget {
 class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   final DateTime _startedAt = DateTime.now();
   final List<_ExerciseDraft> _exercises = [];
+  final TextEditingController _memo = TextEditingController();
+  Map<String, BestSetDto> _bestSets = {};
   bool _saving = false;
   String? _error;
 
@@ -56,6 +67,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     for (final e in widget.initialExercises) {
       _exercises.add(_ExerciseDraft(e.exerciseId, e.name));
     }
+    if (_exercises.isNotEmpty) _loadBestSets();
   }
 
   @override
@@ -63,12 +75,26 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     for (final e in _exercises) {
       e.dispose();
     }
+    _memo.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadBestSets() async {
+    final ids = _exercises.map((e) => e.exerciseId).toList();
+    if (ids.isEmpty) return;
+    try {
+      final list = await ref.read(trainingRepositoryProvider).bestSets(ids);
+      if (!mounted) return;
+      setState(() => _bestSets = {for (final b in list) b.exerciseId: b});
+    } catch (_) {
+      // 自己ベストは取得できなくても致命的でないため無視
+    }
   }
 
   void _addExercise(ExerciseDto ex) {
     if (_exercises.any((e) => e.exerciseId == ex.id)) return;
     setState(() => _exercises.add(_ExerciseDraft(ex.id, ex.name)));
+    _loadBestSets();
   }
 
   void _removeExercise(int i) => setState(() {
@@ -76,7 +102,14 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     _exercises.removeAt(i);
   });
 
-  void _addSet(int i) => setState(() => _exercises[i].sets.add(_SetDraft()));
+  /// セット追加時は直前セットの kg / 回数 を引き継ぐ。
+  void _addSet(int i) => setState(() {
+    final sets = _exercises[i].sets;
+    final last = sets.isNotEmpty ? sets.last : null;
+    sets.add(
+      _SetDraft(weight: last?.weight.text ?? '', reps: last?.reps.text ?? ''),
+    );
+  });
 
   void _removeSet(int ei, int si) => setState(() {
     _exercises[ei].sets[si].dispose();
@@ -102,6 +135,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         RecordTrainingExerciseRequest(
           exerciseId: e.exerciseId,
           displayOrder: i,
+          memo: e.memo.text.trim().isEmpty ? null : e.memo.text.trim(),
           sets: sets,
         ),
       );
@@ -121,6 +155,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             RecordTrainingRequest(
               startedAt: _startedAt,
               endedAt: DateTime.now(),
+              memo: _memo.text.trim().isEmpty ? null : _memo.text.trim(),
               exercises: reqExercises,
             ),
           );
@@ -165,6 +200,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               variant: AppButtonVariant.glass,
               onPressed: _pickExercise,
             ),
+            const SizedBox(height: 12),
+            _overallMemoCard(),
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: TextStyle(color: t.accent, fontSize: 13)),
@@ -182,9 +219,43 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
+  Widget _overallMemoCard() {
+    final t = context.tokens;
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 15),
+          childrenPadding: const EdgeInsets.fromLTRB(15, 0, 15, 14),
+          title: Text(
+            'メモ（全体）',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: t.muted,
+              fontSize: 14,
+            ),
+          ),
+          children: [
+            TextField(
+              controller: _memo,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText: '今日のコンディション など',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _exerciseCard(int i) {
     final e = _exercises[i];
     final t = context.tokens;
+    final best = _bestSets[e.exerciseId];
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: AppCard(
@@ -208,6 +279,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                 ),
               ],
             ),
+            if (best != null) _bestSetLine(best),
+            const SizedBox(height: 4),
             for (var si = 0; si < e.sets.length; si++) _setRow(i, si),
             Align(
               alignment: Alignment.centerLeft,
@@ -217,8 +290,60 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                 label: const Text('セット追加'),
               ),
             ),
+            _exerciseMemo(e),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _bestSetLine(BestSetDto best) {
+    final t = context.tokens;
+    final d = best.performedAt?.toLocal();
+    final date = d == null ? '' : ' (${d.year}/${d.month}/${d.day})';
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 4),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '★ ',
+              style: TextStyle(color: t.gold),
+            ),
+            TextSpan(
+              text: '最高記録 ',
+              style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
+            ),
+            TextSpan(
+              text: '${best.weightKg}kg × ${best.reps}回$date',
+              style: TextStyle(color: t.muted),
+            ),
+          ],
+        ),
+        style: const TextStyle(fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _exerciseMemo(_ExerciseDraft e) {
+    final t = context.tokens;
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        title: Text('メモ', style: TextStyle(fontSize: 13, color: t.muted)),
+        children: [
+          TextField(
+            controller: e.memo,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              hintText: 'フォーム・感覚 など',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ],
       ),
     );
   }

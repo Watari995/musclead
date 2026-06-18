@@ -67,7 +67,15 @@ class AppButton extends StatelessWidget {
       child: InkWell(
         onTap: enabled ? onPressed : null,
         borderRadius: BorderRadius.circular(14),
-        child: SizedBox(height: 48, child: Center(child: content)),
+        child: SizedBox(
+          height: 48,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: content,
+            ),
+          ),
+        ),
       ),
     );
 

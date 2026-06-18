@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,28 +21,34 @@ class UserRepository {
   Future<void> deleteAccount(String userId) =>
       guardApi(() => _dio.delete<void>('/users/$userId'));
 
-  /// テーマ設定の更新（Patch-string: set + value）。
-  Future<void> updateTheme(String theme) => guardApi(() async {
-    await _dio.patch<Map<String, dynamic>>(
-      '/users/me/preferences',
-      data: {
-        'theme': {'set': true, 'value': theme},
-      },
-    );
-  });
+  /// テーマ設定の更新。サーバの Patch[T] は plain 値を受ける（{theme:"dark"}）。
+  Future<void> updateTheme(String theme) => guardApi(
+    () => _dio.patch<void>('/users/me/preferences', data: {'theme': theme}),
+  );
 
-  Future<({String uploadUrl, String path})> profileImagePresignedUrl(
-    String contentType,
-  ) => guardApi(() async {
-    final res = await _dio.post<Map<String, dynamic>>(
-      '/users/me/profile-image/presigned-url',
-      data: {'content_type': contentType},
-    );
-    return (
-      uploadUrl: res.data!['url'] as String,
-      path: res.data!['path'] as String,
-    );
-  });
+  /// プロフィール画像アップロード:
+  /// 1) presigned URL 取得 → 2) 署名URLへ直接 PUT → 3) PATCH /users/me で path 紐付け。
+  Future<void> uploadProfileImage(Uint8List bytes, String contentType) =>
+      guardApi(() async {
+        final presigned = await _dio.post<Map<String, dynamic>>(
+          '/users/me/profile-image/presigned-url',
+          data: {'content_type': contentType},
+        );
+        final url = presigned.data!['url'] as String;
+        final path = presigned.data!['path'] as String;
+        // 署名済み URL へ直接 PUT（認証 interceptor を通さない素の Dio）。
+        await Dio().put<void>(
+          url,
+          data: Stream<List<int>>.fromIterable([bytes]),
+          options: Options(
+            headers: {
+              Headers.contentTypeHeader: contentType,
+              Headers.contentLengthHeader: bytes.length,
+            },
+          ),
+        );
+        await _dio.patch<void>('/users/me', data: {'profile_image_path': path});
+      });
 }
 
 final userRepositoryProvider = Provider<UserRepository>(

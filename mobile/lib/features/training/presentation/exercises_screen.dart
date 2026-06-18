@@ -3,66 +3,80 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_repository.dart';
 
-/// 種目の管理（一覧 / 追加 / 削除）。
-class ExercisesScreen extends ConsumerWidget {
+/// 種目の管理（一覧 / 追加 / 削除 / 並び替え）。
+class ExercisesScreen extends ConsumerStatefulWidget {
   const ExercisesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final exercises = ref.watch(exercisesProvider);
+  ConsumerState<ExercisesScreen> createState() => _ExercisesScreenState();
+}
+
+class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
+  List<ExerciseDto>? _items;
+
+  bool _sameIds(List<ExerciseDto> a, List<ExerciseDto> b) {
+    if (a.length != b.length) return false;
+    final ids = b.map((e) => e.id).toSet();
+    return a.every((e) => ids.contains(e.id));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final async = ref.watch(exercisesProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('種目'),
         backgroundColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _createDialog(context, ref),
-          ),
+          IconButton(icon: const Icon(Icons.add), onPressed: _createDialog),
         ],
       ),
       body: SafeArea(
         child: AsyncValueView<List<ExerciseDto>>(
-          value: exercises,
+          value: async,
           onRetry: () => ref.invalidate(exercisesProvider),
           data: (list) {
-            if (list.isEmpty) {
+            // 種目の集合が変わったら（追加/削除）ローカルを再同期。
+            if (_items == null || !_sameIds(_items!, list)) {
+              _items = List.of(list);
+            }
+            final items = _items!;
+            if (items.isEmpty) {
               return const Center(child: Text('種目がありません。右上の + で追加'));
             }
-            return ListView(
-              padding: const EdgeInsets.all(16),
+            return Column(
               children: [
-                AppListBox(
-                  children: [
-                    for (final ex in list)
-                      AppListRow(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                ex.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.delete_outline,
-                                size: 20,
-                                color: context.tokens.subtle,
-                              ),
-                              onPressed: () => _delete(context, ref, ex),
-                            ),
-                          ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 2),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.swap_vert,
+                        size: 16,
+                        color: context.tokens.subtle,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '長押しで並び替え',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.tokens.muted,
                         ),
                       ),
-                  ],
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ReorderableListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    itemCount: items.length,
+                    onReorder: _onReorder,
+                    itemBuilder: (context, i) => _tile(items[i]),
+                  ),
                 ),
               ],
             );
@@ -72,7 +86,56 @@ class ExercisesScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _createDialog(BuildContext context, WidgetRef ref) async {
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      final items = _items!;
+      var target = newIndex;
+      if (target > oldIndex) target -= 1;
+      final moved = items.removeAt(oldIndex);
+      items.insert(target, moved);
+    });
+    ref
+        .read(trainingRepositoryProvider)
+        .reorderExercises(_items!.map((e) => e.id).toList())
+        .catchError((Object _) {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('並び替えの保存に失敗しました')));
+          }
+        });
+  }
+
+  Widget _tile(ExerciseDto ex) {
+    final t = context.tokens;
+    return Container(
+      key: ValueKey(ex.id),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: t.border),
+      ),
+      child: ListTile(
+        title: Text(
+          ex.name,
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.delete_outline, size: 20, color: t.subtle),
+              onPressed: () => _delete(ex),
+            ),
+            Icon(Icons.drag_handle, color: t.subtle),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _createDialog() async {
     final controller = TextEditingController();
     final name = await showDialog<String>(
       context: context,
@@ -101,13 +164,13 @@ class ExercisesScreen extends ConsumerWidget {
       await ref.read(trainingRepositoryProvider).createExercise(name);
       ref.invalidate(exercisesProvider);
     } on Failure catch (f) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(f.message)));
       }
     } catch (_) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('追加に失敗しました')));
@@ -115,22 +178,18 @@ class ExercisesScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _delete(
-    BuildContext context,
-    WidgetRef ref,
-    ExerciseDto ex,
-  ) async {
+  Future<void> _delete(ExerciseDto ex) async {
     try {
       await ref.read(trainingRepositoryProvider).deleteExercise(ex.id);
       ref.invalidate(exercisesProvider);
     } on Failure catch (f) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(f.message)));
       }
     } catch (_) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));

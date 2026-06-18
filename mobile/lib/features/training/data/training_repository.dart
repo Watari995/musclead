@@ -45,6 +45,26 @@ class TrainingRepository {
   Future<void> deleteExercise(String id) =>
       guardApi(() => _dio.delete<void>('/exercises/$id'));
 
+  /// 複数種目の自己ベスト。exercise_ids は repeat 形式で渡す。
+  Future<List<BestSetDto>> bestSets(List<String> exerciseIds) =>
+      guardApi(() async {
+        if (exerciseIds.isEmpty) return <BestSetDto>[];
+        final res = await _dio.get<Map<String, dynamic>>(
+          '/exercises/best-sets',
+          queryParameters: {'exercise_ids': exerciseIds},
+          options: Options(listFormat: ListFormat.multi),
+        );
+        return ListBestSetsResponse.fromJson(res.data!).bestSets;
+      });
+
+  /// 種目マスタを渡した順に並び替える。
+  Future<void> reorderExercises(List<String> exerciseIds) => guardApi(
+    () => _dio.post<void>(
+      '/exercises/reorder',
+      data: {'exercise_ids': exerciseIds},
+    ),
+  );
+
   // --- Routines ---
   Future<List<RoutineDto>> listRoutines({int limit = 100, int offset = 0}) =>
       guardApi(() async {

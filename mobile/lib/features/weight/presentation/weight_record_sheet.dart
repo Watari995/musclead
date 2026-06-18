@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/number_stepper.dart';
 import '../data/weight_dtos.dart';
 import '../data/weight_repository.dart';
 
@@ -25,12 +25,22 @@ class _WeightRecordSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final weight = useTextEditingController();
-    final bodyFat = useTextEditingController();
-    final muscle = useTextEditingController();
+    final t = context.tokens;
+    // 直近の記録を初期値にして ± だけで入力完了できるようにする。
+    final list = ref.read(weightsProvider).asData?.value ?? const <WeightDto>[];
+    final last = list.isNotEmpty ? list.first : null;
+
+    final weight = useTextEditingController(
+      text: last?.weightKg.toString() ?? '',
+    );
+    final bodyFat = useTextEditingController(
+      text: last?.bodyFatPercentage?.toString() ?? '',
+    );
+    final muscle = useTextEditingController(
+      text: last?.skeletalMuscleKg?.toString() ?? '',
+    );
     final loading = useState(false);
     final error = useState<String?>(null);
-    final t = context.tokens;
 
     Future<void> submit() async {
       final w = Decimal.tryParse(weight.text.trim());
@@ -62,8 +72,6 @@ class _WeightRecordSheet extends HookConsumerWidget {
       }
     }
 
-    const numeric = TextInputType.numberWithOptions(decimal: true);
-
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -80,25 +88,19 @@ class _WeightRecordSheet extends HookConsumerWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 18),
-              AppTextField(
-                label: '体重 (kg)',
-                controller: weight,
-                hint: '72.5',
-                keyboardType: numeric,
-              ),
+              NumberStepper(label: '体重 (kg)', controller: weight, hint: '72.5'),
               const SizedBox(height: 14),
-              AppTextField(
+              NumberStepper(
                 label: '体脂肪率 (%) ・任意',
                 controller: bodyFat,
+                max: 100,
                 hint: '18.2',
-                keyboardType: numeric,
               ),
               const SizedBox(height: 14),
-              AppTextField(
+              NumberStepper(
                 label: '骨格筋量 (kg) ・任意',
                 controller: muscle,
                 hint: '33.1',
-                keyboardType: numeric,
               ),
               if (error.value != null) ...[
                 const SizedBox(height: 12),
