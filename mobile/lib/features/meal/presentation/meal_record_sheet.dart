@@ -8,38 +8,52 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../data/meal_dtos.dart';
 import '../data/meal_repository.dart';
+import '../data/meal_template_dtos.dart';
 
 const _mealTypes = ['朝食', '昼食', '夕食', '間食'];
 
-/// 食事記録のモーダルボトムシート。[existing] を渡すと編集モード。
-Future<void> showMealRecordSheet(BuildContext context, {MealDto? existing}) {
+/// 食事記録のモーダルボトムシート。[existing] を渡すと編集モード。[fromTemplate] を渡すとプリフィルモード。
+Future<void> showMealRecordSheet(
+  BuildContext context, {
+  MealDto? existing,
+  MealTemplateDto? fromTemplate,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => _MealRecordSheet(existing: existing),
+    builder: (_) =>
+        _MealRecordSheet(existing: existing, fromTemplate: fromTemplate),
   );
 }
 
 class _MealRecordSheet extends HookConsumerWidget {
-  const _MealRecordSheet({this.existing});
+  const _MealRecordSheet({this.existing, this.fromTemplate});
 
   final MealDto? existing;
+  final MealTemplateDto? fromTemplate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final edit = existing;
+    final tpl = fromTemplate;
     final isEdit = edit != null;
-    final type = useState(edit?.mealType ?? '朝食');
+    final type = useState(edit?.mealType ?? tpl?.mealType ?? '朝食');
     final calories = useTextEditingController(
-      text: edit != null ? '${edit.calories}' : '',
+      text: edit != null
+          ? '${edit.calories}'
+          : tpl != null
+          ? '${tpl.calories}'
+          : '',
     );
     final protein = useTextEditingController(
-      text: edit?.proteinG?.toString() ?? '',
+      text: edit?.proteinG?.toString() ?? tpl?.proteinG ?? '',
     );
-    final fat = useTextEditingController(text: edit?.fatG?.toString() ?? '');
+    final fat = useTextEditingController(
+      text: edit?.fatG?.toString() ?? tpl?.fatG ?? '',
+    );
     final carb = useTextEditingController(
-      text: edit?.carbohydrateG?.toString() ?? '',
+      text: edit?.carbohydrateG?.toString() ?? tpl?.carbohydrateG ?? '',
     );
     final memo = useTextEditingController(text: edit?.memo ?? '');
     final loading = useState(false);
