@@ -10,7 +10,7 @@ type MealModel struct {
 	UserID        []byte         `db:"user_id"`
 	EatenAt       time.Time      `db:"eaten_at"`
 	MealType      string         `db:"meal_type"`
-	Calories      int32          `db:"calories"`
+	Calories      int          `db:"calories"`
 	ProteinG      sql.NullString `db:"protein_g"`
 	FatG          sql.NullString `db:"fat_g"`
 	CarbohydrateG sql.NullString `db:"carbohydrate_g"`
@@ -23,6 +23,6 @@ type MealPhotoModel struct {
 	ID           []byte    `db:"id"`
 	MealID       []byte    `db:"meal_id"`
 	ImagePath    string    `db:"image_path"`
-	DisplayOrder int32     `db:"display_order"`
+	DisplayOrder int     `db:"display_order"`
 	CreatedAt    time.Time `db:"created_at"`
 }
