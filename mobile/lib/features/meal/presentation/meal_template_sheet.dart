@@ -70,7 +70,7 @@ class _MealTemplateSheet extends ConsumerWidget {
                   return ListView.separated(
                     controller: scrollController,
                     itemCount: list.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, i) => _TemplateRow(
                       template: list[i],
                       onTap: () => Navigator.of(context).pop(list[i]),
