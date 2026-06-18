@@ -23,10 +23,9 @@ class MealTemplateRepository {
     () => _dio.post<void>('/meal_templates', data: request.toJson()),
   );
 
-  Future<void> update(String id, UpsertMealTemplateRequest request) =>
-      guardApi(
-        () => _dio.put<void>('/meal_templates/$id', data: request.toJson()),
-      );
+  Future<void> update(String id, UpsertMealTemplateRequest request) => guardApi(
+    () => _dio.put<void>('/meal_templates/$id', data: request.toJson()),
+  );
 
   Future<void> delete(String id) =>
       guardApi(() => _dio.delete<void>('/meal_templates/$id'));

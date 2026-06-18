@@ -133,10 +133,7 @@ class _TemplateRow extends ConsumerWidget {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text(
-                        '削除',
-                        style: TextStyle(color: t.accent),
-                      ),
+                      child: Text('削除', style: TextStyle(color: t.accent)),
                     ),
                   ],
                 ),
@@ -156,10 +153,7 @@ class _TemplateRow extends ConsumerWidget {
 }
 
 /// テンプレート作成シート
-Future<void> showCreateTemplateSheet(
-  BuildContext context,
-  WidgetRef outerRef,
-) {
+Future<void> showCreateTemplateSheet(BuildContext context, WidgetRef outerRef) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -198,16 +192,18 @@ class _CreateTemplateSheet extends HookConsumerWidget {
       loading.value = true;
       error.value = null;
       try {
-        await ref.read(mealTemplateRepositoryProvider).create(
-          UpsertMealTemplateRequest(
-            name: name.text.trim(),
-            mealType: type.value,
-            calories: kcal,
-            proteinG: double.tryParse(protein.text.trim()),
-            fatG: double.tryParse(fat.text.trim()),
-            carbohydrateG: double.tryParse(carb.text.trim()),
-          ),
-        );
+        await ref
+            .read(mealTemplateRepositoryProvider)
+            .create(
+              UpsertMealTemplateRequest(
+                name: name.text.trim(),
+                mealType: type.value,
+                calories: kcal,
+                proteinG: double.tryParse(protein.text.trim()),
+                fatG: double.tryParse(fat.text.trim()),
+                carbohydrateG: double.tryParse(carb.text.trim()),
+              ),
+            );
         outerRef.invalidate(mealTemplatesProvider);
         if (context.mounted) Navigator.of(context).pop();
       } on Failure catch (f) {
