@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
+	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	paymentinfra "github.com/Watari995/musclead/internal/payment/internal/infra"
 	paymentusecase "github.com/Watari995/musclead/internal/payment/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -35,7 +36,9 @@ type Config struct {
 	StripeCancelURL            string
 	StripeWebhookSigningSecret string
 	StripePortalReturnURL      string
-	SQSQueueURL                string // outbox relay の送信先。 空なら relay 無効 (ローカル等)
+	SQSQueueURL                string // (旧) SQS relay の送信先。 ResendAPIKey 未設定時のフォールバック
+	ResendAPIKey               string // 設定時は Resend で直接メール送信 (SQS/Lambda/SES 不要)
+	MailFromAddress            string // メール送信元 (例: no-reply@musclead.com)
 }
 
 // NewModule は payment module を初期化する。 Composition Root (cmd/server/main.go) から呼ぶ。
@@ -72,7 +75,18 @@ func NewModule(dbmap *gorp.DbMap, cfg Config, userQuery userpublicfunctions.User
 
 	parseWebhookEvent := paymentusecase.NewParseWebhookEvent(stripeClient)
 
-	publisher := paymentinfra.NewSQSPublisher(sqsClient, cfg.SQSQueueURL)
+	// メール配信経路: Resend (直接送信) を優先。 未設定なら旧 SQS relay にフォールバック。
+	// どちらも未設定 (ローカル等) なら relay 無効。
+	var publisher paymentdomain.Publisher
+	relayEnabled := true
+	switch {
+	case cfg.ResendAPIKey != "":
+		publisher = paymentinfra.NewEmailPublisher(paymentinfra.NewResendMailer(cfg.ResendAPIKey, cfg.MailFromAddress))
+	case cfg.SQSQueueURL != "":
+		publisher = paymentinfra.NewSQSPublisher(sqsClient, cfg.SQSQueueURL)
+	default:
+		relayEnabled = false
+	}
 	relayOutbox := paymentusecase.NewRelayOutbox(outboxEventRepo, paymentRepo, userQuery, publisher)
 
 	return &Module{
@@ -81,7 +95,7 @@ func NewModule(dbmap *gorp.DbMap, cfg Config, userQuery userpublicfunctions.User
 		query:          paymentQuery{}, // 今後追加する場合はここに追記
 		processor:      parseWebhookEvent,
 		relayOutbox:    relayOutbox,
-		relayEnabled:   cfg.SQSQueueURL != "",
+		relayEnabled:   relayEnabled,
 	}
 }
 

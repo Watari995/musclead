@@ -17,11 +17,12 @@ type RoutineExerciseSpec struct {
 }
 
 type Routine struct {
-	id        valueobject.RoutineID
-	userID    valueobject.UserID
-	name      valueobject.String50
-	createdAt time.Time
-	updatedAt time.Time
+	id           valueobject.RoutineID
+	userID       valueobject.UserID
+	name         valueobject.String50
+	displayOrder valueobject.NonNegativeInt
+	createdAt    time.Time
+	updatedAt    time.Time
 
 	exercises []*RoutineExercise
 }
@@ -38,6 +39,15 @@ func (r *Routine) Name() valueobject.String50 {
 	return r.name
 }
 
+func (r *Routine) DisplayOrder() valueobject.NonNegativeInt {
+	return r.displayOrder
+}
+
+func (r *Routine) SetDisplayOrder(displayOrder valueobject.NonNegativeInt) {
+	r.displayOrder = displayOrder
+	r.updatedAt = time.Now()
+}
+
 func (r *Routine) CreatedAt() time.Time {
 	return r.createdAt
 }
@@ -50,16 +60,17 @@ func (r *Routine) Exercises() []*RoutineExercise {
 	return r.exercises
 }
 
-func CreateRoutine(spec RoutineSpec, userID valueobject.UserID) *Routine {
+func CreateRoutine(spec RoutineSpec, userID valueobject.UserID, displayOrder valueobject.NonNegativeInt) *Routine {
 	now := time.Now()
 	routineID := valueobject.NewPrimaryID[valueobject.RoutineID]()
 	return &Routine{
-		id:        routineID,
-		userID:    userID,
-		name:      spec.Name,
-		createdAt: now,
-		updatedAt: now,
-		exercises: rebuildRoutineExercises(routineID, spec.Exercises),
+		id:           routineID,
+		userID:       userID,
+		name:         spec.Name,
+		displayOrder: displayOrder,
+		createdAt:    now,
+		updatedAt:    now,
+		exercises:    rebuildRoutineExercises(routineID, spec.Exercises),
 	}
 }
 
@@ -73,17 +84,19 @@ func NewRoutine(
 	id valueobject.RoutineID,
 	userID valueobject.UserID,
 	name valueobject.String50,
+	displayOrder valueobject.NonNegativeInt,
 	createdAt time.Time,
 	updatedAt time.Time,
 	exercises []*RoutineExercise,
 ) *Routine {
 	return &Routine{
-		id:        id,
-		userID:    userID,
-		name:      name,
-		createdAt: createdAt,
-		updatedAt: updatedAt,
-		exercises: exercises,
+		id:           id,
+		userID:       userID,
+		name:         name,
+		displayOrder: displayOrder,
+		createdAt:    createdAt,
+		updatedAt:    updatedAt,
+		exercises:    exercises,
 	}
 }
 

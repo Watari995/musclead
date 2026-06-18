@@ -41,8 +41,17 @@ func (uc *CreateRoutine) Execute(ctx context.Context, input CreateRoutineInput) 
 			return nil, myerror.NewRoutineLimitReachedError()
 		}
 	}
+	// 末尾に並べるため次の表示順を採番する
+	next, err := uc.routineRepo.NextDisplayOrder(ctx, input.UserID)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	displayOrder, err := valueobject.NewNonNegativeInt(next)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
 	// 作成
-	routine := trainingdomain.CreateRoutine(input.RoutineSpec, input.UserID)
+	routine := trainingdomain.CreateRoutine(input.RoutineSpec, input.UserID, *displayOrder)
 	if err := uc.routineRepo.Save(ctx, routine); err != nil {
 		if myerror.IsCode(err, myerror.ErrorCodes.Training.RoutineNameAlreadyExistsError) {
 			return nil, err

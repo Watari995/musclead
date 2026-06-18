@@ -3,6 +3,7 @@ package sharedstorage
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
@@ -18,8 +19,7 @@ type s3Client struct {
 }
 
 type s3URLBuilder struct {
-	region string
-	bucket string
+	publicBaseURL string
 }
 
 func NewS3Client(client *s3.Client, bucket string) shareddomain.StorageClient {
@@ -30,8 +30,13 @@ func NewS3Client(client *s3.Client, bucket string) shareddomain.StorageClient {
 	}
 }
 
-func NewS3URLBuilder(region, bucket string) shareddomain.URLBuilder {
-	return &s3URLBuilder{region: region, bucket: bucket}
+// NewS3URLBuilder は画像の公開 URL を組み立てる。
+// publicBaseURL は公開エンドポイントのベース(末尾スラッシュは任意):
+//
+//	AWS S3: https://<bucket>.s3.<region>.amazonaws.com
+//	R2:     https://<公開ドメイン> もしくは https://pub-xxxx.r2.dev
+func NewS3URLBuilder(publicBaseURL string) shareddomain.URLBuilder {
+	return &s3URLBuilder{publicBaseURL: strings.TrimRight(publicBaseURL, "/")}
 }
 
 func (c *s3Client) GeneratePutURL(ctx context.Context,
@@ -78,5 +83,5 @@ func (c *s3Client) DeleteObject(ctx context.Context, key string) error {
 }
 
 func (b *s3URLBuilder) BuildPublicURL(path string) string {
-	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", b.bucket, b.region, path)
+	return fmt.Sprintf("%s/%s", b.publicBaseURL, path)
 }

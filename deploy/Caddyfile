@@ -1,0 +1,12 @@
+# api.musclead.com の TLS 証明書を自動取得し、server コンテナへ転送する。
+#
+# 前提: api.musclead.com の DNS がこの VM のグローバル IP を指していて、
+#       VM の 80/443 が開いていること。これが満たされると Caddy が
+#       Let's Encrypt で証明書を自動取得・更新する(設定不要)。
+#
+# DNS 切替前にローカル確認したい場合は、下を一時的にコメントアウトし
+# `:80 { reverse_proxy server:8080 }` で HTTP 直アクセスして試す。
+
+api.musclead.com {
+	reverse_proxy server:8080
+}
