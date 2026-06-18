@@ -25,6 +25,11 @@ class TrainingRepository {
   Future<void> recordTraining(RecordTrainingRequest request) =>
       guardApi(() => _dio.post<void>('/trainings', data: request.toJson()));
 
+  Future<void> updateTraining(String id, RecordTrainingRequest request) =>
+      guardApi(
+        () => _dio.put<void>('/trainings/$id', data: request.toJson()),
+      );
+
   Future<void> deleteTraining(String id) =>
       guardApi(() => _dio.delete<void>('/trainings/$id'));
 

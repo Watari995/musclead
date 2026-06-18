@@ -42,11 +42,19 @@ class _ExerciseDraft {
 }
 
 /// トレーニング記録画面（Training > 種目 > セット の入れ子を入力して保存）。
+/// [editingTraining] を渡すと既存記録の編集モードになる。
 class TrainingRecordScreen extends ConsumerStatefulWidget {
-  const TrainingRecordScreen({super.key, this.initialExercises = const []});
+  const TrainingRecordScreen({
+    super.key,
+    this.initialExercises = const [],
+    this.editingTraining,
+  });
 
   /// ルーティンから開始する場合の初期種目（exerciseId + 表示名）。
   final List<({String exerciseId, String name})> initialExercises;
+
+  /// 編集モード時の既存トレーニングデータ。
+  final TrainingDto? editingTraining;
 
   @override
   ConsumerState<TrainingRecordScreen> createState() =>
@@ -54,20 +62,44 @@ class TrainingRecordScreen extends ConsumerStatefulWidget {
 }
 
 class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
-  final DateTime _startedAt = DateTime.now();
+  late DateTime _startedAt;
   final List<_ExerciseDraft> _exercises = [];
   final TextEditingController _memo = TextEditingController();
   Map<String, BestSetDto> _bestSets = {};
   bool _saving = false;
   String? _error;
 
+  bool get _isEditing => widget.editingTraining != null;
+
   @override
   void initState() {
     super.initState();
-    for (final e in widget.initialExercises) {
-      _exercises.add(_ExerciseDraft(e.exerciseId, e.name));
+    _startedAt = widget.editingTraining?.startedAt ?? DateTime.now();
+    if (_isEditing) {
+      _initFromTraining(widget.editingTraining!);
+    } else {
+      for (final e in widget.initialExercises) {
+        _exercises.add(_ExerciseDraft(e.exerciseId, e.name));
+      }
     }
     if (_exercises.isNotEmpty) _loadBestSets();
+  }
+
+  void _initFromTraining(TrainingDto training) {
+    _memo.text = training.memo ?? '';
+    final exList = ref.read(exercisesProvider).asData?.value ?? [];
+    final names = {for (final e in exList) e.id: e.name};
+    for (final ex in training.exercises) {
+      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? '種目');
+      draft.sets.first.dispose();
+      draft.sets.clear();
+      for (final s in ex.sets) {
+        draft.sets.add(_SetDraft(weight: s.weightKg.toString(), reps: s.reps.toString()));
+      }
+      if (draft.sets.isEmpty) draft.sets.add(_SetDraft());
+      draft.memo.text = ex.memo ?? '';
+      _exercises.add(draft);
+    }
   }
 
   @override
@@ -148,18 +180,28 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       _error = null;
     });
     try {
-      await ref
-          .read(trainingRepositoryProvider)
-          .recordTraining(
-            RecordTrainingRequest(
-              startedAt: _startedAt,
-              endedAt: DateTime.now(),
-              memo: _memo.text.trim().isEmpty ? null : _memo.text.trim(),
-              exercises: reqExercises,
-            ),
-          );
+      final req = RecordTrainingRequest(
+        startedAt: _startedAt,
+        endedAt: _isEditing ? widget.editingTraining!.endedAt : DateTime.now(),
+        memo: _memo.text.trim().isEmpty ? null : _memo.text.trim(),
+        exercises: reqExercises,
+      );
+      if (_isEditing) {
+        await ref
+            .read(trainingRepositoryProvider)
+            .updateTraining(widget.editingTraining!.id, req);
+      } else {
+        await ref.read(trainingRepositoryProvider).recordTraining(req);
+      }
       ref.invalidate(trainingsProvider);
-      if (mounted) context.go('/trainings');
+      if (mounted) {
+        if (_isEditing) {
+          Navigator.of(context, rootNavigator: true)
+              .popUntil((route) => route.isFirst);
+        } else {
+          context.go('/trainings');
+        }
+      }
     } on Failure catch (f) {
       setState(() => _error = f.message);
     } catch (_) {
@@ -200,7 +242,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final t = context.tokens;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('トレーニング記録'),
+        title: Text(_isEditing ? '記録を編集' : 'トレーニング記録'),
         backgroundColor: Colors.transparent,
       ),
       body: GestureDetector(
