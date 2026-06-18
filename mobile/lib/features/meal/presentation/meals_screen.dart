@@ -171,6 +171,7 @@ class _MealRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return AppListRow(
+      onTap: () => showMealRecordSheet(context, existing: meal),
       child: Row(
         children: [
           Expanded(

@@ -11,27 +11,37 @@ import '../data/meal_repository.dart';
 
 const _mealTypes = ['朝食', '昼食', '夕食', '間食'];
 
-/// 食事記録のモーダルボトムシートを開く。
-Future<void> showMealRecordSheet(BuildContext context) {
+/// 食事記録のモーダルボトムシート。[existing] を渡すと編集モード。
+Future<void> showMealRecordSheet(BuildContext context, {MealDto? existing}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => const _MealRecordSheet(),
+    builder: (_) => _MealRecordSheet(existing: existing),
   );
 }
 
 class _MealRecordSheet extends HookConsumerWidget {
-  const _MealRecordSheet();
+  const _MealRecordSheet({this.existing});
+
+  final MealDto? existing;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final type = useState('朝食');
-    final calories = useTextEditingController();
-    final protein = useTextEditingController();
-    final fat = useTextEditingController();
-    final carb = useTextEditingController();
-    final memo = useTextEditingController();
+    final edit = existing;
+    final isEdit = edit != null;
+    final type = useState(edit?.mealType ?? '朝食');
+    final calories = useTextEditingController(
+      text: edit != null ? '${edit.calories}' : '',
+    );
+    final protein = useTextEditingController(
+      text: edit?.proteinG?.toString() ?? '',
+    );
+    final fat = useTextEditingController(text: edit?.fatG?.toString() ?? '');
+    final carb = useTextEditingController(
+      text: edit?.carbohydrateG?.toString() ?? '',
+    );
+    final memo = useTextEditingController(text: edit?.memo ?? '');
     final loading = useState(false);
     final error = useState<String?>(null);
     final t = context.tokens;
@@ -44,28 +54,42 @@ class _MealRecordSheet extends HookConsumerWidget {
       }
       loading.value = true;
       error.value = null;
+      final req = RecordMealRequest(
+        eatenAt: edit?.eatenAt ?? DateTime.now(),
+        mealType: type.value,
+        calories: kcal,
+        proteinG: double.tryParse(protein.text.trim()),
+        fatG: double.tryParse(fat.text.trim()),
+        carbohydrateG: double.tryParse(carb.text.trim()),
+        memo: memo.text.trim().isEmpty ? null : memo.text.trim(),
+      );
       try {
-        await ref
-            .read(mealRepositoryProvider)
-            .record(
-              RecordMealRequest(
-                eatenAt: DateTime.now(),
-                mealType: type.value,
-                calories: kcal,
-                proteinG: double.tryParse(protein.text.trim()),
-                fatG: double.tryParse(fat.text.trim()),
-                carbohydrateG: double.tryParse(carb.text.trim()),
-                memo: memo.text.trim().isEmpty ? null : memo.text.trim(),
-              ),
-            );
+        final repo = ref.read(mealRepositoryProvider);
+        if (isEdit) {
+          await repo.update(edit.id, req);
+        } else {
+          await repo.record(req);
+        }
         ref.invalidate(mealsProvider);
         if (context.mounted) Navigator.of(context).pop();
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = '記録に失敗しました';
+        error.value = '保存に失敗しました';
       } finally {
         if (context.mounted) loading.value = false;
+      }
+    }
+
+    Future<void> deleteMeal() async {
+      loading.value = true;
+      try {
+        await ref.read(mealRepositoryProvider).delete(edit!.id);
+        ref.invalidate(mealsProvider);
+        if (context.mounted) Navigator.of(context).pop();
+      } catch (_) {
+        error.value = '削除に失敗しました';
+        loading.value = false;
       }
     }
 
@@ -82,9 +106,12 @@ class _MealRecordSheet extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '食事を記録',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              Text(
+                isEdit ? '食事を編集' : '食事を記録',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 16),
               Wrap(
@@ -153,10 +180,18 @@ class _MealRecordSheet extends HookConsumerWidget {
               ],
               const SizedBox(height: 20),
               AppButton(
-                label: '記録する',
+                label: isEdit ? '更新する' : '記録する',
                 loading: loading.value,
                 onPressed: submit,
               ),
+              if (isEdit) ...[
+                const SizedBox(height: 8),
+                AppButton(
+                  label: 'この記録を削除',
+                  variant: AppButtonVariant.text,
+                  onPressed: loading.value ? null : deleteMeal,
+                ),
+              ],
             ],
           ),
         ),

@@ -28,7 +28,7 @@ workflows:
       - name: Flutter dependencies
         script: flutter pub get
       - name: Generate code (build_runner)
-        script: dart run build_runner build
+        script: dart run build_runner build --delete-conflicting-outputs
       - name: Analyze & test
         script: |
           flutter analyze
@@ -41,8 +41,10 @@ workflows:
           xcode-project use-profiles
       - name: Build IPA
         script: |
+          # ビルド番号は Codemagic のビルドカウンタで毎回ユニークにする（TestFlight 要件）。
           flutter build ipa --release \
             --dart-define=FLAVOR=prod \
+            --build-number=$BUILD_NUMBER \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
@@ -50,4 +52,17 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
+        # まず TestFlight に配信。
         submit_to_testflight: true
+        # 外部テスターへ配るなら、ASC で作成済みのグループ名を指定（任意）。
+        # beta_groups:
+        #   - "musclead beta"
+        # そのまま App Store 審査へ提出する。
+        # ※ 初回は ASC でスクショ・説明文・プライバシー・年齢レーティング等を
+        #    一度入力しておかないと提出は失敗する（メタデータ未整備のため）。
+        submit_to_app_store: true
+        # 審査通過後の公開方法。AFTER_APPROVAL=承認され次第自動公開。
+        # 手動で公開ボタンを押したい場合は MANUAL に変更。
+        release_type: AFTER_APPROVAL
+        # 審査待ちの旧バージョンがあれば取り下げてから提出。
+        cancel_previous_submissions: true

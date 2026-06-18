@@ -1,19 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/core_providers.dart';
 import 'app_tokens.dart';
 
-/// アクセントカラー。1 つのソースから全テーマを駆動（後から差し替え可能）。
-/// 既定はブランド赤。`ref.read(accentProvider.notifier).set(color)` で全画面に即反映。
+/// 設定画面で選べるアクセント候補（プレビューのスウォッチ準拠）。
+const List<Color> kAccentPresets = [
+  kBrandAccent, // ブランド赤
+  Color(0xFF0A84FF), // ブルー
+  Color(0xFF00BCD4), // ターコイズ
+  Color(0xFF30C759), // グリーン
+  Color(0xFFFF9F0A), // オレンジ
+  Color(0xFFBF5AF2), // パープル
+];
+
+/// アクセントカラー。1 トークンで全テーマを駆動し、secure storage に永続化する。
 final accentProvider = NotifierProvider<AccentController, Color>(
   AccentController.new,
 );
 
 class AccentController extends Notifier<Color> {
-  @override
-  Color build() => kBrandAccent;
+  static const _key = 'accent_color';
 
-  void set(Color color) => state = color;
+  @override
+  Color build() {
+    _load();
+    return kBrandAccent;
+  }
+
+  Future<void> _load() async {
+    final v = await ref.read(secureStorageProvider).read(key: _key);
+    final parsed = v == null ? null : int.tryParse(v);
+    if (parsed != null) state = Color(parsed);
+  }
+
+  Future<void> set(Color color) async {
+    state = color;
+    await ref
+        .read(secureStorageProvider)
+        .write(key: _key, value: color.toARGB32().toString());
+  }
 }
 
 /// ライト/ダーク/システム。ユーザー設定（preferences.theme）と同期させる。
@@ -26,4 +52,14 @@ class ThemeModeController extends Notifier<ThemeMode> {
   ThemeMode build() => ThemeMode.system;
 
   void set(ThemeMode mode) => state = mode;
+
+  /// サーバーの preferences.theme（'system' / 'light' / 'dark'）から復元する。
+  /// 外観はローカル保存しないため、起動時に必ずサーバー値へ同期する。
+  void hydrate(String theme) {
+    state = switch (theme) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
+  }
 }

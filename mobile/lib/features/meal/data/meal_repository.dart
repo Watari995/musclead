@@ -22,6 +22,9 @@ class MealRepository {
   Future<void> record(RecordMealRequest request) =>
       guardApi(() => _dio.post<void>('/meals', data: request.toJson()));
 
+  Future<void> update(String id, RecordMealRequest request) =>
+      guardApi(() => _dio.put<void>('/meals/$id', data: request.toJson()));
+
   Future<void> delete(String id) =>
       guardApi(() => _dio.delete<void>('/meals/$id'));
 }
