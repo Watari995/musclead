@@ -1,16 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useMealsQuery } from "@/features/meal/api/meals";
 import { MealRow } from "@/features/meal/ui/MealRow";
 import { RecordMealForm } from "@/features/meal/ui/RecordMealForm";
+import { MealTemplateSection } from "@/features/meal/ui/MealTemplateSection";
+import type { MealTemplate } from "@/features/meal/model/meal_template";
 import { Card, ErrorText, SectionTitle } from "@/shared/ui";
 
 export default function MealsPage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
+  const [prefill, setPrefill] = useState<MealTemplate | null>(null);
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -43,9 +46,15 @@ export default function MealsPage() {
           </ul>
         )}
       </section>
-      <aside>
-        <SectionTitle>食事を記録</SectionTitle>
-        <RecordMealForm />
+      <aside className="space-y-6">
+        <div>
+          <SectionTitle>食事を記録</SectionTitle>
+          <RecordMealForm
+            prefill={prefill}
+            onPrefillConsumed={() => setPrefill(null)}
+          />
+        </div>
+        <MealTemplateSection onSelect={setPrefill} />
       </aside>
     </div>
   );
