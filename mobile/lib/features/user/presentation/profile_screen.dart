@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/theme_controller.dart';
-import '../../../core/widgets/app_badge.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../../auth/application/auth_controller.dart';
-import '../../subscription/data/subscription_repository.dart';
 import '../data/user_dtos.dart';
 import '../data/user_repository.dart';
 
@@ -24,7 +21,6 @@ class ProfileScreen extends ConsumerWidget {
       title: 'マイページ',
       onRefresh: () async {
         ref.invalidate(meProvider);
-        ref.invalidate(subscriptionProvider);
       },
       children: [
         AsyncValueView<MeResponse>(
@@ -45,8 +41,6 @@ class _ProfileBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final sub = ref.watch(subscriptionProvider);
-    final isPro = sub.asData?.value.isPro ?? false;
     final mode = ref.watch(themeModeProvider);
 
     return Column(
@@ -86,10 +80,6 @@ class _ProfileBody extends ConsumerWidget {
                   ],
                 ),
               ),
-              AppBadge(
-                isPro ? 'Pro' : 'Free',
-                tone: isPro ? BadgeTone.accent : BadgeTone.neutral,
-              ),
             ],
           ),
         ),
@@ -99,10 +89,6 @@ class _ProfileBody extends ConsumerWidget {
             AppListRow(
               onTap: () => _showThemeSheet(context, ref, mode),
               child: _row(context, '外観', value: _modeLabel(mode)),
-            ),
-            AppListRow(
-              onTap: () => context.push('/plan'),
-              child: _row(context, 'プラン', value: isPro ? 'Pro' : 'Free'),
             ),
           ],
         ),
