@@ -80,6 +80,12 @@ class TrainingRepository {
 
   Future<void> deleteRoutine(String id) =>
       guardApi(() => _dio.delete<void>('/routines/$id'));
+
+  /// ルーティンを渡した順に並び替える。
+  Future<void> reorderRoutines(List<String> routineIds) => guardApi(
+    () =>
+        _dio.post<void>('/routines/reorder', data: {'routine_ids': routineIds}),
+  );
 }
 
 final trainingRepositoryProvider = Provider<TrainingRepository>(
