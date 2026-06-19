@@ -80,9 +80,9 @@ class _TrainingRow extends StatelessWidget {
 
   final TrainingDto training;
 
-  String _duration() {
+  String? _duration() {
     final end = training.endedAt;
-    if (end == null) return '進行中';
+    if (end == null) return null;
     final mins = end.difference(training.startedAt).inMinutes;
     return '$mins分';
   }
@@ -118,7 +118,8 @@ class _TrainingRow extends StatelessWidget {
               ],
             ),
           ),
-          Text(_duration(), style: TextStyle(fontSize: 12, color: t.muted)),
+          if (_duration() != null)
+            Text(_duration()!, style: TextStyle(fontSize: 12, color: t.muted)),
           const SizedBox(width: 6),
           Icon(Icons.chevron_right, color: t.subtle),
         ],

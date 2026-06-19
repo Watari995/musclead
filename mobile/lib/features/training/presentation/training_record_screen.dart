@@ -63,6 +63,7 @@ class TrainingRecordScreen extends ConsumerStatefulWidget {
 
 class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   late DateTime _startedAt;
+  DateTime? _endedAt;
   final List<_ExerciseDraft> _exercises = [];
   final TextEditingController _memo = TextEditingController();
   Map<String, BestSetDto> _bestSets = {};
@@ -75,6 +76,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   void initState() {
     super.initState();
     _startedAt = widget.editingTraining?.startedAt ?? DateTime.now();
+    _endedAt = widget.editingTraining?.endedAt;
     if (_isEditing) {
       _initFromTraining(widget.editingTraining!);
     } else {
@@ -184,7 +186,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     try {
       final req = RecordTrainingRequest(
         startedAt: _startedAt,
-        endedAt: _isEditing ? widget.editingTraining!.endedAt : DateTime.now(),
+        endedAt: _endedAt,
         memo: _memo.text.trim().isEmpty ? null : _memo.text.trim(),
         exercises: reqExercises,
       );
@@ -266,6 +268,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               ),
               const SizedBox(height: 12),
               _overallMemoCard(),
+              const SizedBox(height: 12),
+              _endedAtCard(),
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Text(_error!, style: TextStyle(color: t.accent, fontSize: 13)),
@@ -312,6 +316,61 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _endedAtCard() {
+    final t = context.tokens;
+    final label = _endedAt == null
+        ? '終了時刻を入力'
+        : '終了 ${_endedAt!.toLocal().hour.toString().padLeft(2, '0')}:${_endedAt!.toLocal().minute.toString().padLeft(2, '0')}';
+    return AppCard(
+      child: InkWell(
+        onTap: () async {
+          final now = DateTime.now();
+          final initial = _endedAt ?? now;
+          final picked = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay(hour: initial.hour, minute: initial.minute),
+          );
+          if (picked == null) return;
+          final base = _endedAt ?? now;
+          setState(() {
+            _endedAt = DateTime(
+              base.year,
+              base.month,
+              base.day,
+              picked.hour,
+              picked.minute,
+            );
+          });
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+          child: Row(
+            children: [
+              Icon(Icons.timer_off_outlined, size: 18, color: t.muted),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: _endedAt == null ? t.muted : null,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              if (_endedAt != null)
+                GestureDetector(
+                  onTap: () => setState(() => _endedAt = null),
+                  child: Icon(Icons.close, size: 16, color: t.subtle),
+                ),
+            ],
+          ),
         ),
       ),
     );
