@@ -42,16 +42,6 @@ jobs:
           api-private-key: ${{ secrets.ASC_KEY_P8 }}
           profile-type: IOS_APP_STORE
 
-      - name: Get provisioning profile UUID
-        run: |
-          for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-            uuid=$(security cms -D -i "$f" 2>/dev/null | plutil -extract UUID raw -)
-            name=$(security cms -D -i "$f" 2>/dev/null | plutil -extract Name raw -)
-            echo "Found: UUID=$uuid Name=$name"
-            if echo "$name" | grep -q "com.musclead.musclead"; then
-              echo "PROFILE_UUID=$uuid" >> "$GITHUB_ENV"
-            fi
-          done
 
       - name: Set up App Store Connect API key
         env:
@@ -85,9 +75,7 @@ jobs:
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE="$PROFILE_UUID" \
+            CODE_SIGN_STYLE=Automatic \
             DEVELOPMENT_TEAM=44675MS8C4
 
       - name: xcodebuild export IPA
