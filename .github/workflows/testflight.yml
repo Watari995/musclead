@@ -39,7 +39,7 @@ jobs:
           bundle-id: com.musclead.musclead
           issuer-id: ${{ secrets.ASC_ISSUER_ID }}
           api-key-id: ${{ secrets.ASC_KEY_ID }}
-          api-private-key: ${{ secrets.ASC_KEY_BASE64 }}
+          api-private-key: ${{ secrets.ASC_KEY_P8 }}
           profile-type: IOS_APP_STORE
 
       - name: Set up App Store Connect API key
