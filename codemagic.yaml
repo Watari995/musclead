@@ -18,6 +18,8 @@ workflows:
       vars:
         BUNDLE_ID: "com.musclead.musclead"
         APP_STORE_APPLE_ID: "0000000000" # App Store Connect のアプリ Apple ID に置換
+      # Codemagic UI の Environment variables に SENTRY_DSN を追加すること
+      # (Group: app_store_connect または単独で設定)
     triggering:
       events:
         - tag
@@ -44,6 +46,7 @@ workflows:
           # ビルド番号は Codemagic のビルドカウンタで毎回ユニークにする（TestFlight 要件）。
           flutter build ipa --release \
             --dart-define=FLAVOR=prod \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN \
             --build-number=$BUILD_NUMBER \
             --export-options-plist=/Users/builder/export_options.plist
     artifacts:
