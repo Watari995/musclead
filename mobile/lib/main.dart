@@ -15,8 +15,10 @@ Future<void> main() async {
     (options) {
       options.dsn = _sentryDsn;
       options.tracesSampleRate = 1.0;
-      options.environment =
-          const String.fromEnvironment('FLAVOR', defaultValue: 'dev');
+      options.environment = const String.fromEnvironment(
+        'FLAVOR',
+        defaultValue: 'dev',
+      );
     },
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
