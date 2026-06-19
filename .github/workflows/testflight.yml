@@ -57,10 +57,13 @@ jobs:
 
       - name: Flutter build iOS (no codesign)
         working-directory: mobile
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           fvm flutter build ios --release \
             --build-name="${{ inputs.version }}" \
             --build-number=${{ github.run_number }} \
+            --dart-define=SENTRY_DSN=$SENTRY_DSN \
             --no-codesign
 
       - name: xcodebuild archive
