@@ -359,7 +359,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: _endedAt == null ? t.muted : t.foreground,
+                    color: _endedAt == null ? t.muted : null,
                     fontSize: 14,
                   ),
                 ),
