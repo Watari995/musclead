@@ -138,11 +138,19 @@ class _TemplateRow extends ConsumerWidget {
                   ],
                 ),
               );
-              if (confirmed == true) {
-                await ref
-                    .read(mealTemplateRepositoryProvider)
-                    .delete(template.id);
-                ref.invalidate(mealTemplatesProvider);
+              if (confirmed == true && context.mounted) {
+                try {
+                  await ref
+                      .read(mealTemplateRepositoryProvider)
+                      .delete(template.id);
+                  ref.invalidate(mealTemplatesProvider);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('削除に失敗しました')),
+                    );
+                  }
+                }
               }
             },
           ),
