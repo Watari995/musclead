@@ -146,9 +146,9 @@ class _TemplateRow extends ConsumerWidget {
                   ref.invalidate(mealTemplatesProvider);
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('削除に失敗しました')),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
                   }
                 }
               }
