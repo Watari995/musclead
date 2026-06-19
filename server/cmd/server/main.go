@@ -44,6 +44,8 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
+	"github.com/getsentry/sentry-go"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/go-gorp/gorp/v3"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -89,6 +91,15 @@ func run() error {
 		Db:      db,
 		Dialect: gorp.MySQLDialect{Engine: "InnoDB", Encoding: "UTF8MB4"},
 	}
+	// sentry の初期化
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              os.Getenv("SENTRY_DSN"),
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		return fmt.Errorf("sentry init: %w", err)
+	}
+	defer sentry.Flush(2 * time.Second)
+
 	// S3 Clientを作成
 	awsCfg, err := awsconfig.LoadDefaultConfig(context.Background())
 	if err != nil {
@@ -225,7 +236,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
 	// billing (Stripe Webhook、 auth middleware なし)
 	mux.Handle("/billing/", billingModule.Handler)
-	return httpx.CORSMiddleware(mux), paymentModule
+
+	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
+	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule
 }
 
 // healthHandler はサーバー稼働確認用のシンプルなヘルスチェック。

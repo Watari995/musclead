@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Watari995/musclead/internal/myerror"
+	"github.com/getsentry/sentry-go"
 )
 
 type ErrorResponse struct {
@@ -19,6 +20,9 @@ type ErrorDetail struct {
 
 func WriteError(w http.ResponseWriter, err error) {
 	if myErr, ok := errors.AsType[myerror.MyError](err); ok {
+		if myErr.Status() >= http.StatusInternalServerError {
+			sentry.CaptureException(err)
+		}
 		WriteJSON(w, myErr.Status(), ErrorResponse{
 			Error: ErrorDetail{
 				Code:    string(myErr.Code()),
@@ -29,6 +33,7 @@ func WriteError(w http.ResponseWriter, err error) {
 		return
 	}
 	// それ以外ならinternal server error
+	sentry.CaptureException(err)
 	WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
 		Error: ErrorDetail{
 			Code: string(myerror.ErrorCodes.General.InternalError),

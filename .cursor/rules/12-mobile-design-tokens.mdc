@@ -1,0 +1,46 @@
+---
+description: Flutter mobile の AppTokens 定義と使い方
+globs: mobile/**/*.dart
+alwaysApply: true
+---
+
+# Mobile Design Tokens (AppTokens)
+
+`AppTokens`（`mobile/lib/core/theme/app_tokens.dart`）に定義されているプロパティは以下のみ。
+**存在しないプロパティを使うと `flutter analyze` がエラーになる。**
+
+| プロパティ | 用途 |
+|---|---|
+| `accent` | ブランドカラー（赤系） |
+| `accentWeak` | accent の薄版 |
+| `gold` | ゴールド（自己ベスト等） |
+| `goldWeak` | gold の薄版 |
+| `macroP` | タンパク質カラー |
+| `macroF` | 脂質カラー |
+| `macroC` | 炭水化物カラー |
+| `border` | ボーダー |
+| `hairline` | 細線 |
+| `muted` | 補助テキスト色 |
+| `subtle` | さらに薄い補助色 |
+| `glassTint` | ガラス背景色 |
+| `glassBorder` | ガラスボーダー |
+| `glassHighlight` | ガラスハイライト |
+
+## NG パターン
+
+```dart
+// NG: foreground / onSurface / text / primary は AppTokens に存在しない
+color: t.foreground
+color: t.onSurface
+color: t.text
+```
+
+## テーマデフォルト色を使いたい場合
+
+```dart
+// テキストのデフォルト色 → color を省略（null）
+style: TextStyle(fontWeight: FontWeight.w600)  // color 指定なし
+
+// 明示的に取得したい場合
+color: Theme.of(context).colorScheme.onSurface
+```
