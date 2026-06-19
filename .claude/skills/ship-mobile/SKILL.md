@@ -1,14 +1,14 @@
 ---
 name: ship-mobile
-description: musclead iOS(Flutter)の TestFlight 配信 + App Store 審査提出を自動化。 バージョン採番 → pubspec 反映 → PR → mobile-v* タグ push で Codemagic を起動し、 TestFlight 配信と審査提出まで通す。
+description: musclead iOS(Flutter)の TestFlight 配信 + App Store 審査提出を自動化。 バージョン採番 → pubspec 反映 → PR → GitHub Actions (testflight.yml) 手動実行 までを担当。
 argument-hint: [version 例 1.0.1 (省略時は最新タグから patch+1) | --tag-only]
 ---
 
 # ship-mobile — iOS リリース 自動化
 
-`mobile-v*` タグの push をトリガに Codemagic(`codemagic.yaml` の `ios-testflight`)が
-**ビルド → 署名 → TestFlight 配信 → App Store 審査提出(`submit_to_app_store`)** を実行する。
-このスキルはその「トリガを正しく作る」までを担当する。 配信・審査提出そのものは Codemagic 側。
+`.github/workflows/testflight.yml` を `workflow_dispatch` で手動実行することで
+**ビルド → 署名 → TestFlight 配信 → App Store 審査提出** を実行する。
+このスキルはその「バージョン採番 → pubspec 更新 → main へのマージ」までを担当する。
 
 | arg | 実行内容 |
 |---|---|
@@ -22,11 +22,10 @@ argument-hint: [version 例 1.0.1 (省略時は最新タグから patch+1) | --t
 
 このスキルが成立する前提。 不足を見つけたら即停止して user に伝える。
 
-- **Codemagic UI 側**: App Store Connect API キー連携(名前 `musclead_asc`)+ 環境変数グループ `app_store_connect` 設定済み(`codemagic.yaml` 冒頭コメント参照)
+- **GitHub Secrets**: `IOS_DIST_CERT_BASE64` / `IOS_DIST_CERT_PASSWORD` / `IOS_PROFILE_BASE64` / `ASC_KEY_ID` / `ASC_KEY_BASE64` / `ASC_ISSUER_ID` / `SENTRY_DSN` が設定済み
 - **App Store Connect 側**: アプリレコード作成済み、 **初回リリースのメタデータ(スクショ・説明文・プライバシー・年齢レーティング・輸出コンプライアンス)が一度入力済み**
-  - これが無いと `submit_to_app_store` は失敗する。 2 回目以降の提出はメタデータが流用されるので自動で通る
-- branch 戦略は `ship` と同じ: `feature/* → develop → main`、 タグは **main の merge commit** に打つ
-- ビルド番号は Codemagic が `$BUILD_NUMBER` で自動採番するため pubspec の `+N` は触らない(version 名のみ更新)
+  - これが無いと審査提出は失敗する。 2 回目以降の提出はメタデータが流用される
+- branch 戦略は `ship` と同じ: `feature/* → develop → main`
 
 ---
 
@@ -55,6 +54,7 @@ argument-hint: [version 例 1.0.1 (省略時は最新タグから patch+1) | --t
 
 1. feature ブランチに居なければ作る(例 `chore/mobile-release-vX.Y.Z`)
 2. `mobile/pubspec.yaml` の `version:` 行を `X.Y.Z+<現状のビルド番号>` に更新(version 名のみ変更)
+   - ビルド番号は GitHub Actions の `${{ github.run_number }}` で自動採番されるため `+N` は触らない
 3. commit + push(feature branch への push は委任ルールで確認不要)
    ```bash
    git add mobile/pubspec.yaml
@@ -63,40 +63,35 @@ argument-hint: [version 例 1.0.1 (省略時は最新タグから patch+1) | --t
    ```
 4. develop へ PR(`--squash --delete-branch`)→ CI 通過待ち → merge
 5. develop → main の deploy PR(`--merge`)→ CI 通過待ち → merge
-   （`ship` Phase A/B と同じ手順。 mobile のみの変更なら deploy PR の本文は簡潔で良い）
 6. `git checkout main && git pull --ff-only` で merge commit を取得
 
 ---
 
-## Phase C — タグ push で Codemagic 起動
+## Phase C — GitHub Actions で TestFlight 配信
 
-1. **annotated タグを main の HEAD(merge commit)に打つ**
+1. **`testflight.yml` を workflow_dispatch で実行**
    ```bash
-   git tag -a mobile-vX.Y.Z -m "iOS vX.Y.Z — <短い要約>"
-   git push origin mobile-vX.Y.Z
+   gh workflow run testflight.yml --field version=X.Y.Z
    ```
-   → これで Codemagic の `ios-testflight` workflow が起動する。
 
-2. user に伝える: 「タグ push 済み。 Codemagic でビルド → TestFlight 配信 → 審査提出が走る」
-   - Codemagic ダッシュボードでビルド進捗を確認(このスキルからは監視しない。 API トークン連携があれば将来自動化可)
+2. user に伝える: 「GitHub Actions の testflight.yml を起動しました。ビルド → TestFlight 配信 → 審査提出が走ります」
+   - Actions タブでビルド進捗を確認
 
 ---
 
 ## Phase D — 結果の確認(手動ポイントの明示)
 
-Codemagic 完了後の確認観点を user に案内する(スキルは状態を断定しない):
+GitHub Actions 完了後の確認観点を user に案内する(スキルは状態を断定しない):
 
-- **TestFlight**: ASC → TestFlight に新ビルド(version X.Y.Z / build = Codemagic のビルド番号)が出たか
+- **TestFlight**: ASC → TestFlight に新ビルド(version X.Y.Z / build = run_number)が出たか
 - **審査提出**: ASC → App Store の当該バージョンが「審査待ち(Waiting for Review)」になったか
-  - もし「メタデータ不備」で提出失敗していたら、 不足項目を ASC で埋めて再タグ(または ASC で手動提出)
-- `release_type` は `codemagic.yaml` で `AFTER_APPROVAL`(承認後 自動公開)。 手動公開にしたい場合は `MANUAL` に変更
+  - もし「メタデータ不備」で提出失敗していたら、 不足項目を ASC で埋めて再実行
 
 ---
 
 ## エラー時の挙動
 
-- analyze / test / CI / push のいずれかが失敗したら **即停止して user に報告**。 自己判断で revert / force push / タグ移動はしない
-- タグ名が既存と衝突したら停止して次の空きバージョンを user に確認(打ち直しの強制移動はしない)
+- analyze / test / CI / push のいずれかが失敗したら **即停止して user に報告**。 自己判断で revert / force push はしない
 - destructive な操作は git memory(`feedback_ask_before_acting.md`)に従い必ず確認
 
 ---
@@ -104,5 +99,5 @@ Codemagic 完了後の確認観点を user に案内する(スキルは状態を
 ## 簡易チェックリスト(冒頭で確認)
 
 - [ ] 引数の version 指定有無(無ければ最新 `mobile-v*` から採番)
-- [ ] 前提(Codemagic 連携 / ASC メタデータ)が整っているか。 初回提出が未実施なら user に確認
+- [ ] 前提(GitHub Secrets / ASC メタデータ)が整っているか。 初回提出が未実施なら user に確認
 - [ ] 現在ブランチ(feature から A→B→C か、 `--tag-only` で main に C のみか)
