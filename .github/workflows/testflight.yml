@@ -22,6 +22,22 @@ jobs:
         working-directory: mobile
         run: fvm dart run build_runner build --delete-conflicting-outputs
 
+      - name: Set up signing keychain
+        env:
+          CERT_BASE64: ${{ secrets.IOS_DIST_CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH=/tmp/ci-signing.keychain
+          KEYCHAIN_PASS=ci_temp_$(date +%s)
+          security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
+          security set-keychain-settings -t 3600 -u "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
+          echo "$CERT_BASE64" | base64 --decode > /tmp/ci-cert.p12
+          security import /tmp/ci-cert.p12 -k "$KEYCHAIN_PATH" -P "$CERT_PASSWORD" -A -T /usr/bin/codesign
+          rm /tmp/ci-cert.p12
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | xargs)
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASS" "$KEYCHAIN_PATH"
+
       - name: Install provisioning profile
         env:
           PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
@@ -87,3 +103,10 @@ jobs:
             --file /tmp/musclead-ipa/*.ipa \
             --apiKey "$ASC_KEY_ID" \
             --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Clean up
+        if: always()
+        run: |
+          security delete-keychain /tmp/ci-signing.keychain 2>/dev/null || true
+          rm -f /tmp/musclead-ipa/*.ipa
+          rm -rf /tmp/musclead.xcarchive
