@@ -10,8 +10,11 @@ part 'meal_dtos.g.dart';
 
 @freezed
 abstract class PhotoDto with _$PhotoDto {
-  const factory PhotoDto({@Default(0) int displayOrder, String? imageUrl}) =
-      _PhotoDto;
+  const factory PhotoDto({
+    @Default(0) int displayOrder,
+    String? imagePath,
+    String? imageUrl,
+  }) = _PhotoDto;
 
   factory PhotoDto.fromJson(Map<String, dynamic> json) =>
       _$PhotoDtoFromJson(json);
