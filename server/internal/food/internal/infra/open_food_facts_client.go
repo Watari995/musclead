@@ -115,12 +115,9 @@ func toFoodProductFromResponse(barcode valueobject.Barcode, resp openFoodFactsRe
 		return nil, err
 	}
 
-	registerSource, err := valueobject.NewFoodProductRegisterSourceFromCode(valueobject.FoodProductRegisterSourceOpenFoodFacts)
-	if err != nil {
-		return nil, err
-	}
+	registerSource := valueobject.NewFoodProductRegisterSourceFromCode(valueobject.FoodProductRegisterSourceOpenFoodFacts)
 
-	return fooddomain.CreateFoodProduct(&barcode, *name, *calories, proteinG, fatG, carbohydrateG, *registerSource), nil
+	return fooddomain.CreateFoodProduct(&barcode, *name, *calories, proteinG, fatG, carbohydrateG, registerSource), nil
 }
 
 // optionalDecimal は serving 値を優先し、0 なら per100g を使う。両方 0 なら nil を返す。
