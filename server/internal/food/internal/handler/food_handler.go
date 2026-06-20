@@ -49,7 +49,7 @@ func New(
 // @Produce json
 // @Security BearerAuth
 // @Param q query string true "食品名"
-// @Success 200 {object} fooddto.SearchFoodProductsResponse
+// @Success 200 {object} fooddto.SearchByNameResponse
 // @Failure 400 {object} httpx.ErrorResponse
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /food_products [get]
