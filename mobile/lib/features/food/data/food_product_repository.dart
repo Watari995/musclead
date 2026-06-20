@@ -10,14 +10,13 @@ class FoodProductRepository {
   FoodProductRepository(this._dio);
   final Dio _dio;
 
-  Future<List<FoodProductDto>> searchByName(String name) =>
-      guardApi(() async {
-        final res = await _dio.get<Map<String, dynamic>>(
-          '/food_products',
-          queryParameters: {'q': name},
-        );
-        return SearchFoodProductsResponse.fromJson(res.data!).foodProducts;
-      });
+  Future<List<FoodProductDto>> searchByName(String name) => guardApi(() async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      '/food_products',
+      queryParameters: {'q': name},
+    );
+    return SearchFoodProductsResponse.fromJson(res.data!).foodProducts;
+  });
 
   Future<List<FoodProductDto>> searchByBarcode(String barcode) async {
     try {
@@ -33,14 +32,13 @@ class FoodProductRepository {
     }
   }
 
-  Future<String> create(CreateFoodProductRequest request) =>
-      guardApi(() async {
-        final res = await _dio.post<Map<String, dynamic>>(
-          '/food_products',
-          data: request.toJson(),
-        );
-        return CreateFoodProductResponse.fromJson(res.data!).foodProductId ?? '';
-      });
+  Future<String> create(CreateFoodProductRequest request) => guardApi(() async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/food_products',
+      data: request.toJson(),
+    );
+    return CreateFoodProductResponse.fromJson(res.data!).foodProductId ?? '';
+  });
 }
 
 final foodProductRepositoryProvider = Provider<FoodProductRepository>(
