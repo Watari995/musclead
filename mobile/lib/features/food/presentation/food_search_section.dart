@@ -48,8 +48,9 @@ class FoodSearchSection extends HookConsumerWidget {
       isLoading.value = true;
       error.value = null;
       try {
-        results.value =
-            await ref.read(foodProductRepositoryProvider).searchByName(query);
+        results.value = await ref
+            .read(foodProductRepositoryProvider)
+            .searchByName(query);
         isFetched.value = true;
       } on Failure catch (f) {
         error.value = f.message;
@@ -123,7 +124,8 @@ class FoodSearchSection extends HookConsumerWidget {
       }
     }
 
-    final showEmpty = isFetched.value &&
+    final showEmpty =
+        isFetched.value &&
         !isLoading.value &&
         results.value.isEmpty &&
         (mode.value == _SearchMode.name
@@ -194,10 +196,7 @@ class FoodSearchSection extends HookConsumerWidget {
 
         if (error.value != null) ...[
           const SizedBox(height: 8),
-          Text(
-            error.value!,
-            style: TextStyle(color: t.accent, fontSize: 13),
-          ),
+          Text(error.value!, style: TextStyle(color: t.accent, fontSize: 13)),
         ],
 
         if (results.value.isNotEmpty) ...[
@@ -323,7 +322,8 @@ class _ResultRow extends StatelessWidget {
                       '${food.calories} kcal',
                       if (food.proteinG != null) 'P ${food.proteinG}g',
                       if (food.fatG != null) 'F ${food.fatG}g',
-                      if (food.carbohydrateG != null) 'C ${food.carbohydrateG}g',
+                      if (food.carbohydrateG != null)
+                        'C ${food.carbohydrateG}g',
                     ].join(' · '),
                     style: TextStyle(color: t.muted, fontSize: 12),
                   ),
