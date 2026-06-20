@@ -3,6 +3,7 @@ import type { MealDTO } from "@/shared/api/client";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
 export type MealPhoto = {
+  imagePath: string;
   imageURL: string;
   displayOrder: number;
 };
@@ -31,6 +32,7 @@ export function toMeal(dto: MealDTO): Meal {
     memo: dto.memo ?? "",
     photos: (dto.photos ?? [])
       .map((p) => ({
+        imagePath: p.image_path ?? "",
         imageURL: p.image_url ?? "",
         displayOrder: p.display_order ?? 0,
       }))
