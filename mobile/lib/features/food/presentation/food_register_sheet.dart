@@ -52,12 +52,18 @@ class _FoodRegisterSheet extends HookConsumerWidget {
       error.value = null;
       try {
         final req = CreateFoodProductRequest(
-          barcode: barcodeCtrl.text.trim().isEmpty ? null : barcodeCtrl.text.trim(),
+          barcode: barcodeCtrl.text.trim().isEmpty
+              ? null
+              : barcodeCtrl.text.trim(),
           name: nameCtrl.text.trim(),
           calories: kcal,
-          proteinG: proteinCtrl.text.trim().isEmpty ? null : proteinCtrl.text.trim(),
+          proteinG: proteinCtrl.text.trim().isEmpty
+              ? null
+              : proteinCtrl.text.trim(),
           fatG: fatCtrl.text.trim().isEmpty ? null : fatCtrl.text.trim(),
-          carbohydrateG: carbCtrl.text.trim().isEmpty ? null : carbCtrl.text.trim(),
+          carbohydrateG: carbCtrl.text.trim().isEmpty
+              ? null
+              : carbCtrl.text.trim(),
         );
         final id = await ref.read(foodProductRepositoryProvider).create(req);
         if (context.mounted) {
@@ -84,7 +90,9 @@ class _FoodRegisterSheet extends HookConsumerWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),

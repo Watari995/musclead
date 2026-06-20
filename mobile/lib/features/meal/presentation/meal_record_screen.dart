@@ -18,11 +18,7 @@ const _mealTypes = ['朝食', '昼食', '夕食', '間食'];
 
 /// 食事記録・編集ページ。[existing] を渡すと編集モード、[fromTemplate] でプリフィル。
 class MealRecordScreen extends HookConsumerWidget {
-  const MealRecordScreen({
-    super.key,
-    this.existing,
-    this.fromTemplate,
-  });
+  const MealRecordScreen({super.key, this.existing, this.fromTemplate});
 
   final MealDto? existing;
   final MealTemplateDto? fromTemplate;
@@ -99,7 +95,8 @@ class MealRecordScreen extends HookConsumerWidget {
       error.value = null;
 
       // 編集時は既存の写真パスを保持して渡す
-      final photos = edit?.photos
+      final photos =
+          edit?.photos
               .where((p) => p.imagePath != null)
               .map(
                 (p) => MealPhotoInput(
