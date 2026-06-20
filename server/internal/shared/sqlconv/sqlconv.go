@@ -75,6 +75,15 @@ func NewString1000FromNullString(s sql.NullString) (*valueobject.String1000, err
 	return valueobject.NewString1000(s.String)
 }
 
+// ─── barcode / Barcode ───────────────────────────────────
+
+func NewBarcodeFromNullString(s sql.NullString) (*valueobject.Barcode, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	return valueobject.NewBarcode(s.String)
+}
+
 // ─── decimal / NonNegativeDecimal ───────────────────────
 
 func DecimalFromNullString(s sql.NullString) (*decimal.Decimal, error) {

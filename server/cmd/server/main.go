@@ -28,6 +28,7 @@ import (
 	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/billing"
+	"github.com/Watari995/musclead/internal/food"
 	"github.com/Watari995/musclead/internal/meal"
 	"github.com/Watari995/musclead/internal/payment"
 	"github.com/Watari995/musclead/internal/purchase"
@@ -190,6 +191,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	userModule := user.NewModule(dbmap, storageClient, urlBuilder)
 	authModule := auth.NewModule(dbmap, userModule.UserCommand())
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
+	foodModule := food.NewModule(dbmap, &http.Client{Timeout: 10 * time.Second})
 	weightModule := weight.NewModule(dbmap, redisClient)
 	paymentModule := payment.NewModule(dbmap, payment.Config{
 		StripeAPIKey:               os.Getenv("STRIPE_SECRET_KEY"),
@@ -236,6 +238,10 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
 	// billing (Stripe Webhook、 auth middleware なし)
 	mux.Handle("/billing/", billingModule.Handler)
+
+	// food
+	mux.Handle("/food_products", authModule.Middleware(foodModule.Handler))
+	mux.Handle("/food_products/", authModule.Middleware(foodModule.Handler))
 
 	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
 	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule

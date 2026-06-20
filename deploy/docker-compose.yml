@@ -31,6 +31,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    ports:
+      - "127.0.0.1:3306:3306" # SSH トンネル経由の TablePlus 接続用(外部には非公開)
     # 外部公開しない(VM 内からのみ接続)
 
   server:

@@ -93,6 +93,7 @@ export type UpdatePreferencesResponse = UserDto<"UpdatePreferencesResponse">;
 
 export type MealDTO = MealDto<"MealDTO">;
 export type RecordMealRequest = MealDto<"RecordMealRequest">;
+export type UpdateMealRequest = MealDto<"UpdateMealRequest">;
 export type ListMealsResponse = MealDto<"ListMealsResponse">;
 export type MealTemplateDTO = MealDto<"MealTemplateDTO">;
 export type ListMealTemplatesResponse = MealDto<"ListMealTemplatesResponse">;

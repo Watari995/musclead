@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
@@ -11,7 +12,6 @@ import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../data/meal_dtos.dart';
 import '../data/meal_repository.dart';
-import 'meal_record_sheet.dart';
 import 'meal_template_sheet.dart';
 
 class MealsScreen extends ConsumerWidget {
@@ -32,13 +32,14 @@ class MealsScreen extends ConsumerWidget {
             onPressed: () async {
               final template = await showMealTemplateSheet(context);
               if (template != null && context.mounted) {
-                showMealRecordSheet(context, fromTemplate: template);
+                // テンプレートから記録画面を開く（extra で渡す）
+                context.push('/meals/new', extra: template);
               }
             },
           ),
           IconButton(
             icon: Icon(Icons.add, color: context.tokens.accent),
-            onPressed: () => showMealRecordSheet(context),
+            onPressed: () => context.push('/meals/new'),
           ),
         ],
       ),
@@ -187,7 +188,7 @@ class _MealRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     return AppListRow(
-      onTap: () => showMealRecordSheet(context, existing: meal),
+      onTap: () => context.push('/meals/${meal.id}/edit', extra: meal),
       child: Row(
         children: [
           Expanded(
