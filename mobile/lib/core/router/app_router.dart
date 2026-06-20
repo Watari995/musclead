@@ -6,6 +6,9 @@ import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
+import '../../features/meal/data/meal_dtos.dart';
+import '../../features/meal/data/meal_template_dtos.dart';
+import '../../features/meal/presentation/meal_record_screen.dart';
 import '../../features/meal/presentation/meals_screen.dart';
 import '../../features/training/presentation/exercises_screen.dart';
 import '../../features/training/presentation/routine_create_screen.dart';
@@ -45,6 +48,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+      // 食事記録・編集はタブシェルの上にフルスクリーンで push する
+      GoRoute(
+        path: '/meals/new',
+        builder: (_, state) {
+          final extra = state.extra;
+          return MealRecordScreen(
+            fromTemplate: extra is MealTemplateDto ? extra : null,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/meals/:id/edit',
+        builder: (_, state) => MealRecordScreen(
+          existing: state.extra is MealDto ? state.extra as MealDto : null,
+        ),
+      ),
       // トレーニング記録はタブシェルの上にフルスクリーンで push する
       GoRoute(
         path: '/trainings/new',

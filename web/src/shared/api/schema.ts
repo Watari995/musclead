@@ -2659,6 +2659,7 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_meal_dto.PhotoDTO": {
             display_order?: number;
+            image_path?: string;
             image_url?: string;
         };
         "github_com_Watari995_musclead_internal_meal_dto.RecordMealRequest": {

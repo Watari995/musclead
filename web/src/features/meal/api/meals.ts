@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   apiClient,
   type RecordMealRequest,
+  type UpdateMealRequest,
 } from "@/shared/api/client";
 import { getAccessToken } from "@/shared/auth/access-token";
 import { toMeal, type Meal } from "../model/meal";
@@ -91,6 +92,38 @@ export function useUploadMealPhotoMutation() {
       }
 
       return { path };
+    },
+  });
+}
+
+export function useFindMealQuery(id: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: ["meals", id],
+    enabled,
+    queryFn: async (): Promise<Meal> => {
+      const { data, error, response } = await apiClient.GET("/meals/{id}", {
+        params: { path: { id } },
+      });
+      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      return toMeal(data!);
+    },
+  });
+}
+
+export function useUpdateMealMutation(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: UpdateMealRequest) => {
+      const { data, error, response } = await apiClient.PUT("/meals/{id}", {
+        params: { path: { id } },
+        body,
+      });
+      if (error) throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MEALS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["meals", id] });
     },
   });
 }

@@ -63,12 +63,14 @@ type GenerateMealPhotoImagePresignedURLResponse struct {
 // ─── Entity view ────────────────────────────────────────
 
 type PhotoDTO struct {
+	ImagePath    string `json:"image_path"`
 	ImageURL     string `json:"image_url"`
 	DisplayOrder int    `json:"display_order"`
 }
 
 func PhotoFromEntity(p mealdomain.PhotoSpec, urlBuilder shareddomain.URLBuilder) PhotoDTO {
 	return PhotoDTO{
+		ImagePath:    p.ImagePath,
 		ImageURL:     urlBuilder.BuildPublicURL(p.ImagePath),
 		DisplayOrder: p.DisplayOrder,
 	}

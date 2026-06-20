@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useDeleteMealMutation } from "@/features/meal/api/meals";
 import {
   formatMealDateTime,
@@ -68,18 +69,26 @@ export function MealRow({ meal }: { meal: Meal }) {
           </div>
         )}
       </div>
-      <button
-        type="button"
-        onClick={() => {
-          if (confirm(`${mealTypeLabel(meal.type)} の記録を削除しますか?`)) {
-            del.mutate(meal.id);
-          }
-        }}
-        disabled={del.isPending}
-        className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0"
-      >
-        削除
-      </button>
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        <Link
+          href={`/meals/${meal.id}/edit`}
+          className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+        >
+          編集
+        </Link>
+        <button
+          type="button"
+          onClick={() => {
+            if (confirm(`${mealTypeLabel(meal.type)} の記録を削除しますか?`)) {
+              del.mutate(meal.id);
+            }
+          }}
+          disabled={del.isPending}
+          className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] transition-colors"
+        >
+          削除
+        </button>
+      </div>
     </li>
   );
 }

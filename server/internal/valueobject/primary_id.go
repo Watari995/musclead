@@ -41,3 +41,4 @@ type OutboxEventID struct{ PrimaryIDBase }
 type SubscriptionOrderID struct{ PrimaryIDBase }
 type SubscriptionID struct{ PrimaryIDBase }
 type MealTemplateID struct{ PrimaryIDBase }
+type FoodProductID struct{ PrimaryIDBase }
