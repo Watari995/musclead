@@ -4,10 +4,8 @@ package foodusecase
 // 自社 DB になければ外部 API を呼び、ヒットした場合は DB にキャッシュして返す。
 // どちらもなければ not found エラーを返す。
 type SearchByBarcode struct {
-	// TODO: implement
 }
 
 func NewSearchByBarcode() *SearchByBarcode {
-	// TODO: implement
 	panic("not implemented")
 }
