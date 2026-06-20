@@ -24,6 +24,6 @@ func NewFoodProductRegisterSourceFromString(s string) (*FoodProductRegisterSourc
 	}
 }
 
-func NewFoodProductRegisterSourceFromCode(c FoodProductRegisterSourceCode) (*FoodProductRegisterSource, error) {
-	return &FoodProductRegisterSource{LiteralBase: LiteralBase[string]{v: string(c)}}, nil
+func NewFoodProductRegisterSourceFromCode(c FoodProductRegisterSourceCode) FoodProductRegisterSource {
+	return FoodProductRegisterSource{LiteralBase: LiteralBase[string]{v: string(c)}}
 }
