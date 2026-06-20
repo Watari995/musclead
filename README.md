@@ -36,7 +36,7 @@ You can't tell whether the scale moved because of muscle or because of yesterday
 
 | Platform | Status |
 |---|---|
-| **iOS (App Store)** | v1.0.0 審査中（2026-06-18 提出） |
+| **iOS (App Store)** | [配信中](https://apps.apple.com/jp/app/musclead/id6781308658) |
 | **Web** | https://app.musclead.com |
 
 <details>
