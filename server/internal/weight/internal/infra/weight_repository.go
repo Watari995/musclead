@@ -92,6 +92,20 @@ func (r *weightRepository) FindAllByUserIDWithOffsetPagination(ctx context.Conte
 	return result, paginator, nil
 }
 
+func (r *weightRepository) ExistsByUserIDAndMeasuredAt(ctx context.Context, userID valueobject.UserID, measuredAt time.Time) (bool, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return false, err
+	}
+	var exists bool
+	err = q.SelectOne(&exists, "SELECT EXISTS(SELECT 1 FROM weights WHERE user_id = ? AND measured_at = ?)", userIDBytes, measuredAt)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
 func (r *weightRepository) FindAllByUserIDAndPeriod(ctx context.Context, userID valueobject.UserID, from, to time.Time) ([]*weightdomain.Weight, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	userIDBytes, err := userID.Bytes()

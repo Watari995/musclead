@@ -1,4 +1,4 @@
-package weightpublicfunctions
+package publicfunctions
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 type WeightRecordInput struct {
-	UserID    valueobject.UserID
+	UserID     valueobject.UserID
 	WeightSpec weightdomain.WeightSpec
 }
 
@@ -20,5 +20,5 @@ type WeightCommand interface {
 
 // WeightQuery は weight モジュールが他モジュールに公開する読み取り操作。
 type WeightQuery interface {
-	ExistsByUserIDAndMeasuredAt(ctx context.Context, userID valueobject.UserID, measuredAt time.Time) (bool, error)
+	CheckIfExistsWeightByUserIDAndMeasuredAt(ctx context.Context, userID valueobject.UserID, measuredAt time.Time) (bool, error)
 }
