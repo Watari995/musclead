@@ -16,6 +16,7 @@ type TrainingSpec struct {
 	Memo      *valueobject.String1000
 	Exercises []TrainingExerciseSpec
 }
+
 type TrainingExerciseSpec struct {
 	ExerciseID   valueobject.ExerciseID
 	DisplayOrder valueobject.NonNegativeInt
