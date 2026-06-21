@@ -22,15 +22,12 @@ type FindTrainingByID struct {
 }
 
 func (uc *FindTrainingByID) Execute(ctx context.Context, input FindTrainingByIDInput) (*FindTrainingByIDOutput, error) {
-	training, err := uc.trainingRepo.FindByID(ctx, input.TrainingID)
+	training, err := uc.trainingRepo.FindByIDAndUserID(ctx, input.TrainingID, input.UserID)
 	if err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
 	if training == nil {
 		return nil, myerror.NewTrainingNotFoundError()
-	}
-	if training.UserID() != input.UserID {
-		return nil, myerror.NewPermissionError().SetMessage("training does not belong to the user")
 	}
 
 	return &FindTrainingByIDOutput{
