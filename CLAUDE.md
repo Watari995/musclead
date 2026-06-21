@@ -8,7 +8,7 @@
 
 - [ドメインモデル](docs/domain-model.md)
 - [ADR](docs/adr/)（iOS=Flutter 採用: [ADR-0021](docs/adr/0021-adopt-flutter-for-ios.md)）
-- iOS アプリ: `mobile/`（Flutter。 実装は AI 担当。 **v1.0.0 App Store 審査中** as of 2026-06-18）
+- iOS アプリ: `mobile/`（Flutter。 実装は AI 担当。 App Store 配信中）
 
 ---
 
