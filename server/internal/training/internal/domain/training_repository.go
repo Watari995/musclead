@@ -8,13 +8,13 @@ import (
 )
 
 type TrainingRepository interface {
-	Save(ctx context.Context, training *Training) error
-	FindByID(ctx context.Context, id valueobject.TrainingID) (*Training, error)
+	FindByIDAndUserID(ctx context.Context, id valueobject.TrainingID, userID valueobject.UserID) (*Training, error)
 	FindAllByUserIDWithOffsetPagination(
 		ctx context.Context,
 		userID valueobject.UserID,
 		limit int,
 		offset int,
 	) ([]*Training, pagination.OffsetPaginator, error)
+	Save(ctx context.Context, training *Training) error
 	DeleteByID(ctx context.Context, id valueobject.TrainingID) error
 }
