@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	trainingusecase "github.com/Wataris995/musclead/internal/training/internal/usecase"
-	"github.com/Wataris995/musclead/internal/valueobject"
+	trainingusecase "github.com/Watari995/musclead/internal/training/internal/usecase"
+	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

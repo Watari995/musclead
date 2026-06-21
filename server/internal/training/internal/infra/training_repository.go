@@ -122,17 +122,21 @@ func (r *trainingRepository) Save(ctx context.Context, training *trainingdomain.
 	return nil
 }
 
-// FindByID は集約全体を取り出す。 親 + 子一括 + 孫一括の 3 クエリ。
-func (r *trainingRepository) FindByID(ctx context.Context, id valueobject.TrainingID) (*trainingdomain.Training, error) {
+// FindByIDAndUserID は集約全体を取り出す。 親 + 子一括 + 孫一括の 3 クエリ。
+func (r *trainingRepository) FindByIDAndUserID(ctx context.Context, id valueobject.TrainingID, userID valueobject.UserID) (*trainingdomain.Training, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := id.Bytes()
 	if err != nil {
 		return nil, err
 	}
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
 	var row TrainingModel
 	err = q.SelectOne(&row,
-		"SELECT id, user_id, started_at, ended_at, memo, created_at, updated_at FROM trainings WHERE id = ?",
-		idBytes,
+		"SELECT id, user_id, started_at, ended_at, memo, created_at, updated_at FROM trainings WHERE id = ? AND user_id = ?",
+		idBytes, userIDBytes,
 	)
 	// 「見つからない」 は UseCase で nil 判定する設計
 	if errors.Is(err, sql.ErrNoRows) {

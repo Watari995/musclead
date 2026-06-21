@@ -18,15 +18,12 @@ type DeleteTrainingByID struct {
 }
 
 func (uc *DeleteTrainingByID) Execute(ctx context.Context, input DeleteTrainingByIDInput) error {
-	training, err := uc.trainingRepo.FindByID(ctx, input.TrainingID)
+	training, err := uc.trainingRepo.FindByIDAndUserID(ctx, input.TrainingID, input.UserID)
 	if err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
 	if training == nil {
 		return myerror.NewTrainingNotFoundError().SetMessage("training not found")
-	}
-	if training.UserID() != input.UserID {
-		return myerror.NewPermissionError().SetMessage("training does not belong to the user")
 	}
 
 	if err := uc.trainingRepo.DeleteByID(ctx, input.TrainingID); err != nil {
