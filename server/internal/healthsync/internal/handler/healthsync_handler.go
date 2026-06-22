@@ -10,12 +10,14 @@ import (
 type HealthSyncHandler struct {
 	buildAuthURL *healthsyncusecase.BuildAuthURL
 	connect      *healthsyncusecase.ConnectHealthPlanet
+	frontendURL  string
 }
 
-func New(buildAuthURL *healthsyncusecase.BuildAuthURL, connect *healthsyncusecase.ConnectHealthPlanet) http.Handler {
+func New(buildAuthURL *healthsyncusecase.BuildAuthURL, connect *healthsyncusecase.ConnectHealthPlanet, frontendURL string) http.Handler {
 	h := &HealthSyncHandler{
 		buildAuthURL: buildAuthURL,
 		connect:      connect,
+		frontendURL:  frontendURL,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /integrations/healthplanet/auth", h.Auth)
@@ -37,7 +39,7 @@ func (h *HealthSyncHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, authURL, http.StatusFound)
+	httpx.WriteJSON(w, http.StatusOK, map[string]string{"url": authURL})
 }
 
 func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
@@ -52,5 +54,5 @@ func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpx.WriteJSON(w, http.StatusOK, nil)
+	http.Redirect(w, r, h.frontendURL+"/settings/integrations?connected=true", http.StatusFound)
 }

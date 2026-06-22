@@ -27,6 +27,7 @@ func NewModule(
 	clientID string,
 	clientSecret string,
 	jwtSecret string,
+	frontendURL string,
 	weightCommand publicfunctions.WeightCommand,
 	weightQuery publicfunctions.WeightQuery,
 ) *Module {
@@ -41,7 +42,7 @@ func NewModule(
 	buildAuthURL := healthsyncusecase.NewBuildAuthURL(stateSigner, clientID)
 	sync := healthsyncusecase.NewSyncWeights(tokenRepo, client, client, weightCommand, weightQuery)
 
-	healthsyncHandler := healthsynchandler.New(buildAuthURL, connect)
+	healthsyncHandler := healthsynchandler.New(buildAuthURL, connect, frontendURL)
 
 	return &Module{
 		syncWeights: sync,

@@ -203,6 +203,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 		os.Getenv("HEALTH_PLANET_CLIENT_ID"),
 		os.Getenv("HEALTH_PLANET_CLIENT_SECRET"),
 		os.Getenv("JWT_SECRET"),
+		getenv("FRONTEND_URL", "http://localhost:3000"),
 		weightModule.WeightCommand(),
 		weightModule.WeightQuery(),
 	)
