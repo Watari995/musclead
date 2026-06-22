@@ -3,20 +3,12 @@
   "language": "en",
   "words": [
     "musclead",
-    "gorp",
-    "slog",
-    "dbmap",
     "healthplanet",
     "healthsync",
     "healthsyncusecase",
     "healthsyncinfra",
     "healthsynchandler",
-    "usecase",
-    "publicfunctions",
-    "Watari"
-  ],
-  "ignoreRegExpList": [
-    "\"github\\.com/[^\"]+\""
+    "publicfunctions"
   ],
   "ignorePaths": [
     "vendor/**",
