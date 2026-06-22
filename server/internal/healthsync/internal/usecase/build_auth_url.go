@@ -10,7 +10,7 @@ import (
 
 const (
 	healthPlanetAuthURL = "https://www.healthplanet.jp/oauth/auth"
-	redirectURI         = "https://api.musclead.com/integrations/healthplanet/callback"
+	callbackBase        = "https://api.musclead.com/integrations/healthplanet/callback"
 )
 
 type BuildAuthURLInput struct {
@@ -30,15 +30,14 @@ func NewBuildAuthURL(stateSigner healthsyncdomain.StateSigner, clientID string) 
 }
 
 func (uc *BuildAuthURL) Execute(input BuildAuthURLInput) (string, error) {
-	state, err := uc.stateSigner.Sign(input.UserID)
+	token, err := uc.stateSigner.Sign(input.UserID)
 	if err != nil {
 		return "", err
 	}
 	params := url.Values{}
 	params.Set("client_id", uc.clientID)
-	params.Set("redirect_uri", redirectURI)
+	params.Set("redirect_uri", callbackBase+"/"+token)
 	params.Set("scope", "innerscan")
 	params.Set("response_type", "code")
-	params.Set("state", state)
 	return fmt.Sprintf("%s?%s", healthPlanetAuthURL, params.Encode()), nil
 }
