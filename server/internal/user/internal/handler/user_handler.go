@@ -101,6 +101,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid name"))
 		return
 	}
+
 	email, err := valueobject.NewEmail(req.Email)
 	if err != nil {
 		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid email"))
