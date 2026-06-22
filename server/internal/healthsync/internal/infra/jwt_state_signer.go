@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	healthsyncdomain "github.com/Wataru995/musclead/internal/healthsync/internal/domain"
-	"github.com/Wataru995/musclead/internal/valueobject"
+	healthsyncdomain "github.com/Watari995/musclead/internal/healthsync/internal/domain"
+	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/golang-jwt/jwt/v5"
 )
 
