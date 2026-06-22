@@ -5,37 +5,42 @@ import (
 
 	healthsyncdomain "github.com/Watari995/musclead/internal/healthsync/internal/domain"
 	"github.com/Watari995/musclead/internal/myerror"
-	"github.com/Watari995/musclead/internal/valueobject"
 )
 
 type ConnectHealthPlanetInput struct {
-	UserID valueobject.UserID
-	// HealthPlanet の OAuth callback で受け取る認可コード
-	Code string
+	State string
+	Code  string
 }
 
 type ConnectHealthPlanet struct {
 	tokenRepo      healthsyncdomain.TokenRepository
 	tokenExchanger healthsyncdomain.TokenExchanger
+	stateSigner    healthsyncdomain.StateSigner
 }
 
 func NewConnectHealthPlanet(
 	tokenRepo healthsyncdomain.TokenRepository,
 	tokenExchanger healthsyncdomain.TokenExchanger,
+	stateSigner healthsyncdomain.StateSigner,
 ) *ConnectHealthPlanet {
 	return &ConnectHealthPlanet{
 		tokenRepo:      tokenRepo,
 		tokenExchanger: tokenExchanger,
+		stateSigner:    stateSigner,
 	}
 }
 
 func (uc *ConnectHealthPlanet) Execute(ctx context.Context, input ConnectHealthPlanetInput) error {
+	userID, err := uc.stateSigner.Verify(input.State)
+	if err != nil {
+		return err
+	}
 	accessToken, refreshToken, expiresAt, err := uc.tokenExchanger.ExchangeCode(ctx, input.Code)
 	if err != nil {
 		return err
 	}
 
-	existing, err := uc.tokenRepo.FindByUserID(ctx, input.UserID)
+	existing, err := uc.tokenRepo.FindByUserID(ctx, userID)
 	if err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
@@ -46,7 +51,7 @@ func (uc *ConnectHealthPlanet) Execute(ctx context.Context, input ConnectHealthP
 		token.UpdateTokens(accessToken, refreshToken, expiresAt)
 	} else {
 		token = healthsyncdomain.CreateToken(
-			input.UserID,
+			userID,
 			accessToken,
 			refreshToken,
 			expiresAt,

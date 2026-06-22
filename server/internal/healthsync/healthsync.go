@@ -26,6 +26,7 @@ func NewModule(
 	httpClint *http.Client,
 	clientID string,
 	clientSecret string,
+	jwtSecret string,
 	weightCommand publicfunctions.WeightCommand,
 	weightQuery publicfunctions.WeightQuery,
 ) *Module {
@@ -33,12 +34,14 @@ func NewModule(
 	dbmap.AddTableWithName(healthsyncinfra.HealthPlanetTokenModel{}, "healthplanet_tokens").SetKeys(false, "id")
 	tokenRepo := healthsyncinfra.NewTokenRepository(dbmap)
 	client := healthsyncinfra.NewHealthPlanetClient(httpClint, clientID, clientSecret)
+	stateSigner := healthsyncinfra.NewJWTStateSigner(jwtSecret)
 
 	// use-case
-	connect := healthsyncusecase.NewConnectHealthPlanet(tokenRepo, client)
+	connect := healthsyncusecase.NewConnectHealthPlanet(tokenRepo, client, stateSigner)
+	buildAuthURL := healthsyncusecase.NewBuildAuthURL(stateSigner, clientID)
 	sync := healthsyncusecase.NewSyncWeights(tokenRepo, client, client, weightCommand, weightQuery)
 
-	healthsyncHandler := healthsynchandler.New(clientID, connect)
+	healthsyncHandler := healthsynchandler.New(buildAuthURL, connect)
 
 	return &Module{
 		syncWeights: sync,
