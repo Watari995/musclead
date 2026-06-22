@@ -35,12 +35,12 @@ type tokenResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 }
 
-func (c *HealthPlanetClient) ExchangeCode(ctx context.Context, code, redirectURI string) (accessToken, refreshToken string, expiresAt time.Time, err error) {
+func (c *HealthPlanetClient) ExchangeCode(ctx context.Context, code string) (accessToken, refreshToken string, expiresAt time.Time, err error) {
 	values := url.Values{}
 	values.Set("grant_type", "authorization_code")
 	values.Set("client_id", c.clientID)
 	values.Set("client_secret", c.clientSecret)
-	values.Set("redirect_uri", redirectURI)
+	values.Set("redirect_uri", "https://api.musclead.com/integrations/healthplanet/callback")
 	values.Set("code", code)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,

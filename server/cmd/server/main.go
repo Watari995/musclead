@@ -249,7 +249,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/weights/", authModule.Middleware(weightModule.Handler))
 	// healthsync
 	mux.Handle("/integrations/healthplanet/auth", authModule.Middleware(healthSyncModule.Handler))
-	mux.Handle("/integrations/healthplanet/callback/", healthSyncModule.Handler)
+	mux.Handle("/integrations/healthplanet/start", healthSyncModule.Handler)
+	mux.Handle("/integrations/healthplanet/callback", healthSyncModule.Handler)
 	// purchase
 	mux.Handle("/purchase", purchaseModule.Handler)
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
