@@ -21,7 +21,7 @@ func New(buildAuthURL *healthsyncusecase.BuildAuthURL, connect *healthsyncusecas
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /integrations/healthplanet/auth", h.Auth)
-	mux.HandleFunc("GET /integrations/healthplanet/callback", h.Connect)
+	mux.HandleFunc("GET /integrations/healthplanet/callback/{token}", h.Connect)
 	return mux
 }
 
@@ -43,11 +43,11 @@ func (h *HealthSyncHandler) Auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("token")
 	code := r.URL.Query().Get("code")
-	state := r.URL.Query().Get("state")
 
 	if err := h.connect.Execute(r.Context(), healthsyncusecase.ConnectHealthPlanetInput{
-		State: state,
+		Token: token,
 		Code:  code,
 	}); err != nil {
 		httpx.WriteError(w, err)
