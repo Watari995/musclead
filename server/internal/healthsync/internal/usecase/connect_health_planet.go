@@ -33,7 +33,7 @@ func NewConnectHealthPlanet(
 func (uc *ConnectHealthPlanet) Execute(ctx context.Context, input ConnectHealthPlanetInput) error {
 	userID, err := uc.stateSigner.Verify(input.State)
 	if err != nil {
-		return err
+		return myerror.NewUnauthorizedError().SetMessage("invalid state")
 	}
 	accessToken, refreshToken, expiresAt, err := uc.tokenExchanger.ExchangeCode(ctx, input.Code)
 	if err != nil {
