@@ -1,0 +1,17 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "allowCompoundWords": true,
+  "words": [
+    "musclead",
+    "gorp",
+    "slog",
+    "dbmap",
+    "healthplanet"
+  ],
+  "ignorePaths": [
+    "vendor/**",
+    "**/*.sum",
+    "**/*.mod"
+  ]
+}
