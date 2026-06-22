@@ -12,6 +12,7 @@ type WeightRepository interface {
 	FindByIDAndUserID(ctx context.Context, id valueobject.WeightID, userID valueobject.UserID) (*Weight, error)
 	FindAllByUserIDWithOffsetPagination(ctx context.Context, userID valueobject.UserID, limit int, offset int) ([]*Weight, pagination.OffsetPaginator, error)
 	FindAllByUserIDAndPeriod(ctx context.Context, userID valueobject.UserID, from, to time.Time) ([]*Weight, error)
+	ExistsByUserIDAndMeasuredAt(ctx context.Context, userID valueobject.UserID, measuredAt time.Time) (bool, error)
 	Save(ctx context.Context, weight *Weight) error
 	DeleteByID(ctx context.Context, id valueobject.WeightID) error
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Watari995/musclead/internal/weight/interface/publicfunctions"
 	weightdomain "github.com/Watari995/musclead/internal/weight/internal/domain"
 	weighthandler "github.com/Watari995/musclead/internal/weight/internal/handler"
 	weightinfra "github.com/Watari995/musclead/internal/weight/internal/infra"
@@ -15,7 +16,9 @@ import (
 )
 
 type Module struct {
-	Handler http.Handler
+	Handler       http.Handler
+	weightCommand publicfunctions.WeightCommand
+	weightQuery   publicfunctions.WeightQuery
 }
 
 func NewModule(dbmap *gorp.DbMap, redisClient *redis.Client) *Module {
@@ -36,8 +39,21 @@ func NewModule(dbmap *gorp.DbMap, redisClient *redis.Client) *Module {
 	update := weightusecase.NewUpdateWeight(repo, cache)
 	delete := weightusecase.NewDeleteWeightByID(repo, cache)
 	getTimeseries := weightusecase.NewGetWeightTimeseries(repo, cache)
+	checkIfExistsWeightByUserIDAndMeasuredAt := weightusecase.NewCheckIfExistsWeightByUserIDAndMeasuredAt(repo)
+	weightCommand := weightusecase.NewWeightCommand(record)
+	weightQuery := weightusecase.NewWeightQuery(checkIfExistsWeightByUserIDAndMeasuredAt)
 
 	return &Module{
-		Handler: weighthandler.New(record, find, list, update, delete, getTimeseries),
+		Handler:       weighthandler.New(record, find, list, update, delete, getTimeseries),
+		weightCommand: weightCommand,
+		weightQuery:   weightQuery,
 	}
+}
+
+func (m *Module) WeightCommand() publicfunctions.WeightCommand {
+	return m.weightCommand
+}
+
+func (m *Module) WeightQuery() publicfunctions.WeightQuery {
+	return m.weightQuery
 }
