@@ -5,12 +5,14 @@ import (
 	"time"
 
 	"github.com/Watari995/musclead/internal/valueobject"
-	weightdomain "github.com/Watari995/musclead/internal/weight/internal/domain"
 )
 
 type WeightRecordInput struct {
-	UserID     valueobject.UserID
-	WeightSpec weightdomain.WeightSpec
+	UserID            valueobject.UserID
+	WeightKg          valueobject.WeightKg
+	BodyFatPercentage *valueobject.Percentage
+	SkeletalMuscleKg  *valueobject.WeightKg
+	MeasuredAt        time.Time
 }
 
 // WeightCommand は weight モジュールが他モジュールに公開する書き込み操作。
