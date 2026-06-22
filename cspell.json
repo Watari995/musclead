@@ -1,13 +1,22 @@
 {
   "version": "0.2",
   "language": "en",
-  "allowCompoundWords": true,
   "words": [
     "musclead",
     "gorp",
     "slog",
     "dbmap",
-    "healthplanet"
+    "healthplanet",
+    "healthsync",
+    "healthsyncusecase",
+    "healthsyncinfra",
+    "healthsynchandler",
+    "usecase",
+    "publicfunctions",
+    "Watari"
+  ],
+  "ignoreRegExpList": [
+    "\"github\\.com/[^\"]+\""
   ],
   "ignorePaths": [
     "vendor/**",
