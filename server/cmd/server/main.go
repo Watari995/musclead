@@ -29,6 +29,7 @@ import (
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/billing"
 	"github.com/Watari995/musclead/internal/food"
+	"github.com/Watari995/musclead/internal/healthsync"
 	"github.com/Watari995/musclead/internal/meal"
 	"github.com/Watari995/musclead/internal/payment"
 	"github.com/Watari995/musclead/internal/purchase"
@@ -119,7 +120,7 @@ func run() error {
 	sqsClient := sqs.NewFromConfig(awsCfg)
 	redisClient := newRedisClient(context.Background())
 	slog.Info("redis client initialized", "type", fmt.Sprintf("%T", redisClient))
-	mux, paymentModule := newMux(dbmap, storageClient, urlBuilder, redisClient, sqsClient)
+	mux, paymentModule, healthSyncModule := newMux(dbmap, storageClient, urlBuilder, redisClient, sqsClient)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -132,6 +133,9 @@ func run() error {
 
 	// outbox relay worker を起動 (ctx Done で停止)。 SQS 未設定時は no-op。
 	go paymentModule.RunRelay(ctx)
+
+	// 体重同期のポーリングを起動
+	go healthSyncModule.RunSync(ctx)
 
 	errCh := make(chan error, 1)
 	go func() {
@@ -179,7 +183,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client, sqsClient *sqs.Client) (http.Handler, *payment.Module) {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client, sqsClient *sqs.Client) (http.Handler, *payment.Module, *healthsync.Module) {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -193,6 +197,14 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mealModule := meal.NewModule(dbmap, storageClient, urlBuilder)
 	foodModule := food.NewModule(dbmap, &http.Client{Timeout: 10 * time.Second})
 	weightModule := weight.NewModule(dbmap, redisClient)
+	healthSyncModule := healthsync.NewModule(
+		dbmap,
+		&http.Client{Timeout: 10 * time.Second},
+		os.Getenv("HEALTH_PLANET_CLIENT_ID"),
+		os.Getenv("HEALTH_PLANET_CLIENT_SECRET"),
+		weightModule.WeightCommand(),
+		weightModule.WeightQuery(),
+	)
 	paymentModule := payment.NewModule(dbmap, payment.Config{
 		StripeAPIKey:               os.Getenv("STRIPE_SECRET_KEY"),
 		StripeSuccessURL:           os.Getenv("STRIPE_SUCCESS_URL"),
@@ -233,6 +245,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// weights
 	mux.Handle("/weights", authModule.Middleware(weightModule.Handler))
 	mux.Handle("/weights/", authModule.Middleware(weightModule.Handler))
+	// healthsync
+	mux.Handle("/integrations/healthplanet", authModule.Middleware(healthSyncModule.Handler))
+	mux.Handle("/integrations/healthplanet/", authModule.Middleware(healthSyncModule.Handler))
 	// purchase
 	mux.Handle("/purchase", purchaseModule.Handler)
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))
@@ -244,7 +259,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/food_products/", authModule.Middleware(foodModule.Handler))
 
 	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
-	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule
+	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule, healthSyncModule
 }
 
 // healthHandler はサーバー稼働確認用のシンプルなヘルスチェック。
