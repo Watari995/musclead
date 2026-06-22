@@ -8,7 +8,7 @@ import (
 )
 
 type ConnectHealthPlanetInput struct {
-	State string
+	Token string
 	Code  string
 }
 
@@ -31,7 +31,7 @@ func NewConnectHealthPlanet(
 }
 
 func (uc *ConnectHealthPlanet) Execute(ctx context.Context, input ConnectHealthPlanetInput) error {
-	userID, err := uc.stateSigner.Verify(input.State)
+	userID, err := uc.stateSigner.Verify(input.Token)
 	if err != nil {
 		return myerror.NewUnauthorizedError().SetMessage("invalid state")
 	}
