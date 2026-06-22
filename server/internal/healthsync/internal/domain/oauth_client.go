@@ -8,7 +8,7 @@ import (
 // TokenExchanger は OAuth 認可コードをトークンに交換する。
 // connect_health_planet use case が依存する。
 type TokenExchanger interface {
-	ExchangeCode(ctx context.Context, code string) (accessToken, refreshToken string, expiresAt time.Time, err error)
+	ExchangeCode(ctx context.Context, code, redirectURI string) (accessToken, refreshToken string, expiresAt time.Time, err error)
 }
 
 // TokenRefresher はアクセストークンをリフレッシュする。

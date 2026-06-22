@@ -35,7 +35,8 @@ func (uc *ConnectHealthPlanet) Execute(ctx context.Context, input ConnectHealthP
 	if err != nil {
 		return myerror.NewUnauthorizedError().SetMessage("invalid state")
 	}
-	accessToken, refreshToken, expiresAt, err := uc.tokenExchanger.ExchangeCode(ctx, input.Code)
+	redirectURI := "https://api.musclead.com/integrations/healthplanet/callback/" + input.Token
+	accessToken, refreshToken, expiresAt, err := uc.tokenExchanger.ExchangeCode(ctx, input.Code, redirectURI)
 	if err != nil {
 		return err
 	}
