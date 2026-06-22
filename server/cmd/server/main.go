@@ -202,6 +202,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 		&http.Client{Timeout: 10 * time.Second},
 		os.Getenv("HEALTH_PLANET_CLIENT_ID"),
 		os.Getenv("HEALTH_PLANET_CLIENT_SECRET"),
+		os.Getenv("JWT_SECRET"),
+		getenv("FRONTEND_URL", "http://localhost:3000"),
 		weightModule.WeightCommand(),
 		weightModule.WeightQuery(),
 	)
@@ -246,8 +248,8 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	mux.Handle("/weights", authModule.Middleware(weightModule.Handler))
 	mux.Handle("/weights/", authModule.Middleware(weightModule.Handler))
 	// healthsync
-	mux.Handle("/integrations/healthplanet", authModule.Middleware(healthSyncModule.Handler))
-	mux.Handle("/integrations/healthplanet/", authModule.Middleware(healthSyncModule.Handler))
+	mux.Handle("/integrations/healthplanet/auth", authModule.Middleware(healthSyncModule.Handler))
+	mux.Handle("/integrations/healthplanet/callback", healthSyncModule.Handler)
 	// purchase
 	mux.Handle("/purchase", purchaseModule.Handler)
 	mux.Handle("/purchase/", authModule.Middleware(purchaseModule.Handler))

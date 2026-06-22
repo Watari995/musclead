@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/providers/core_providers.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/app_card.dart';
@@ -104,6 +106,15 @@ class _ProfileBody extends ConsumerWidget {
             ),
           ],
         ),
+        const SectionTitle('連携サービス'),
+        AppListBox(
+          children: [
+            AppListRow(
+              onTap: () => _connectHealthPlanet(context, ref),
+              child: _row(context, 'Tanita HealthPlanet'),
+            ),
+          ],
+        ),
         const SectionTitle('その他'),
         AppListBox(
           children: [
@@ -148,6 +159,24 @@ class _ProfileBody extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _connectHealthPlanet(BuildContext context, WidgetRef ref) async {
+    try {
+      final dio = ref.read(dioProvider);
+      final res = await dio.get<Map<String, dynamic>>(
+        '/integrations/healthplanet/auth',
+      );
+      final url = res.data?['url'] as String?;
+      if (url == null) throw Exception('url not found');
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('HealthPlanet 連携の開始に失敗しました')),
+        );
+      }
+    }
   }
 
   Future<void> _pickAndUpload(BuildContext context, WidgetRef ref) async {

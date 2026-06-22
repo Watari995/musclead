@@ -13,6 +13,7 @@ import { SectionTitle } from "@/shared/ui";
 // 再開時は下のコメントアウトを外すだけ (ページ自体は /settings/plan に存在)。
 const NAV = [
   { href: "/settings/appearance", label: "外観" },
+  { href: "/settings/integrations", label: "連携" },
   // { href: "/settings/plan", label: "プラン" },
   { href: "/settings/account", label: "アカウント" },
 ];

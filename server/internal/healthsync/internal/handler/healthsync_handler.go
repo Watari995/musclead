@@ -1,28 +1,23 @@
 package healthsynchandler
 
 import (
-	"fmt"
 	"net/http"
-	"net/url"
 
 	healthsyncusecase "github.com/Watari995/musclead/internal/healthsync/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/httpx"
 )
 
-const (
-	healthPlanetAuthURL = "https://www.healthplanet.jp/oauth/auth"
-	redirectURI         = "https://api.musclead.com/integrations/healthplanet/callback"
-)
-
 type HealthSyncHandler struct {
-	clientID string
-	connect  *healthsyncusecase.ConnectHealthPlanet
+	buildAuthURL *healthsyncusecase.BuildAuthURL
+	connect      *healthsyncusecase.ConnectHealthPlanet
+	frontendURL  string
 }
 
-func New(clientID string, connect *healthsyncusecase.ConnectHealthPlanet) http.Handler {
+func New(buildAuthURL *healthsyncusecase.BuildAuthURL, connect *healthsyncusecase.ConnectHealthPlanet, frontendURL string) http.Handler {
 	h := &HealthSyncHandler{
-		clientID: clientID,
-		connect:  connect,
+		buildAuthURL: buildAuthURL,
+		connect:      connect,
+		frontendURL:  frontendURL,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /integrations/healthplanet/auth", h.Auth)
@@ -31,32 +26,33 @@ func New(clientID string, connect *healthsyncusecase.ConnectHealthPlanet) http.H
 }
 
 func (h *HealthSyncHandler) Auth(w http.ResponseWriter, r *http.Request) {
-	params := url.Values{}
-	params.Set("client_id", h.clientID)
-	params.Set("redirect_uri", redirectURI)
-	params.Set("scope", "innerscan")
-	params.Set("response_type", "code")
-
-	authURL := fmt.Sprintf("%s?%s", healthPlanetAuthURL, params.Encode())
-	http.Redirect(w, r, authURL, http.StatusFound)
-}
-
-func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
-	code := r.URL.Query().Get("code")
-
 	userID, err := httpx.UserIDFromContext(r.Context())
 	if err != nil {
 		httpx.WriteError(w, err)
 		return
 	}
+	authURL, err := h.buildAuthURL.Execute(healthsyncusecase.BuildAuthURLInput{
+		UserID: userID,
+	})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, map[string]string{"url": authURL})
+}
+
+func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	state := r.URL.Query().Get("state")
 
 	if err := h.connect.Execute(r.Context(), healthsyncusecase.ConnectHealthPlanetInput{
-		UserID: userID,
-		Code:   code,
+		State: state,
+		Code:  code,
 	}); err != nil {
 		httpx.WriteError(w, err)
 		return
 	}
 
-	httpx.WriteJSON(w, http.StatusOK, nil)
+	http.Redirect(w, r, h.frontendURL+"/settings/integrations?connected=true", http.StatusFound)
 }
