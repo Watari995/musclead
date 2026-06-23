@@ -1,19 +1,23 @@
 {
-  "version": "0.2",
-  "language": "en",
-  "import": ["~/.cspell.json"],
-  "words": [
-    "musclead",
-    "healthplanet",
-    "healthsync",
-    "healthsyncusecase",
-    "healthsyncinfra",
-    "healthsynchandler",
-    "publicfunctions"
-  ],
-  "ignorePaths": [
-    "vendor/**",
-    "**/*.sum",
-    "**/*.mod"
-  ]
+    "version": "0.2",
+    "words": [
+        "healthplanet",
+        "healthsync",
+        "healthsynchandler",
+        "healthsyncinfra",
+        "healthsyncusecase",
+        "musclead",
+        "publicfunctions",
+        "trainingdomain",
+        "valueobject"
+    ],
+    "language": "en",
+    "ignorePaths": [
+        "vendor/**",
+        "**/*.sum",
+        "**/*.mod"
+    ],
+    "import": [
+        "~/.cspell.json"
+    ]
 }
