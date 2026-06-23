@@ -142,11 +142,13 @@ class _ProfileBody extends ConsumerWidget {
               child: _row(
                 context,
                 'バージョン',
-                value: ref.watch(_appVersionProvider).when(
-                  data: (v) => v,
-                  loading: () => '...',
-                  error: (e, _) => '-',
-                ),
+                value: ref
+                    .watch(_appVersionProvider)
+                    .when(
+                      data: (v) => v,
+                      loading: () => '...',
+                      error: (e, _) => '-',
+                    ),
                 chevron: false,
               ),
             ),
