@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -29,11 +30,23 @@ func (uc *GetExerciseBestSetTimeseries) Execute(ctx context.Context, input GetEx
 	// TODO: weight の GetWeightTimeseries.Execute と同じパターンで実装する。
 	//
 	// 1. cache.FindByPeriod を呼ぶ。hit=true なら即返す。
+	bestSets, hit, err := uc.cache.FindByPeriod(ctx, input.UserID, input.ExerciseID, input.From, input.To)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	if err == nil && hit {
+		return &GetExerciseBestSetTimeseriesOutput{BestSets: bestSets}, nil
+	}
 	// 2. キャッシュミス（hit=false）または error の場合は exerciseRecordQueryService.FindBestSetTimeseriesByExerciseID で DB から取得。
+	bestSets, err = uc.exerciseRecordQueryService.FindBestSetTimeseriesByExerciseID(ctx, input.UserID, input.ExerciseID, input.From, input.To)
+	if err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
 	// 3. DB 取得後、goroutine で populateBestSetCache を呼んでキャッシュを非同期 populate する。
 	//    （caller の ctx はレスポンス後にキャンセルされるため context.Background() を使う）
+	go populateBestSetCache(uc.cache, bestSets)
 	// 4. output を返す。
-	panic("not implemented")
+	return &GetExerciseBestSetTimeseriesOutput{BestSets: bestSets}, nil
 }
 
 func populateBestSetCache(cache trainingdomain.ExerciseBestSetTimeseriesCache, bestSets []*trainingdomain.BestSetView) {
@@ -59,4 +72,3 @@ func NewGetExerciseBestSetTimeseries(
 		cache:                      cache,
 	}
 }
-

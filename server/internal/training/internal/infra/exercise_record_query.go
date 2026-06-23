@@ -105,29 +105,58 @@ func (s *exerciseRecordQueryService) FindBestSetsByExerciseIDs(ctx context.Conte
 	return result, nil
 }
 
+func buildFindBestSetsByExerciseIDSQL() string {
+	return `
+	SELECT weight_kg, reps, started_at, id, exercise_id
+	FROM (
+		SELECT
+			ts.weight_kg AS weight_kg,
+			ts.reps AS reps,
+			t.started_at AS started_at,
+			t.id AS id,
+			te.exercise_id AS exercise_id,
+			ROW_NUMBER() OVER (
+				PARTITION BY t.id --セッション単位でベストを選ぶ
+				ORDER BY ts.weight_kg DESC, ts.reps DESC
+			) AS rn
+			FROM training_sets ts
+			JOIN training_exercises te ON ts.training_exercise_id = te.id
+			JOIN trainings t ON te.training_id = t.id
+			WHERE t.user_id = ? AND te.exercise_id = ?
+			AND t.started_at BETWEEN ? AND ?
+	) ranked
+	WHERE ranked.rn = 1
+	ORDER BY started_at ASC
+	`
+}
+
 func (s *exerciseRecordQueryService) FindBestSetTimeseriesByExerciseID(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID, from, to time.Time) ([]*trainingdomain.BestSetView, error) {
-	// TODO: buildFindBestSetsByExerciseIDsSQL を参考に、以下の SQL を実行する。
-	//
-	// SELECT weight_kg, reps, started_at, id, exercise_id
-	// FROM (
-	//   SELECT
-	//     ts.weight_kg, ts.reps, t.started_at, t.id, te.exercise_id,
-	//     ROW_NUMBER() OVER (
-	//       PARTITION BY t.id                         -- セッション単位でベストを選ぶ
-	//       ORDER BY ts.weight_kg DESC, ts.reps DESC
-	//     ) AS rn
-	//   FROM training_sets ts
-	//   JOIN training_exercises te ON ts.training_exercise_id = te.id
-	//   JOIN trainings t ON te.training_id = t.id
-	//   WHERE t.user_id = ? AND te.exercise_id = ?
-	//     AND t.started_at BETWEEN ? AND ?
-	// ) ranked
-	// WHERE rn = 1
-	// ORDER BY started_at ASC
-	//
-	// row struct は bestSetsByExerciseIDsRow を再利用できる。
-	// 変換は toBestSetViewFromRow を使う。
-	panic("not implemented")
+	q := dbtx.Querier(ctx, s.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	exerciseIDBytes, err := exerciseID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlStr := buildFindBestSetsByExerciseIDSQL()
+
+	var rows []bestSetsByExerciseIDsRow
+	if _, err = q.Select(&rows, sqlStr, userIDBytes, exerciseIDBytes, from, to); err != nil {
+		return nil, err
+	}
+
+	result := make([]*trainingdomain.BestSetView, 0, len(rows))
+	for _, row := range rows {
+		bestSet, err := toBestSetViewFromRow(row)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, bestSet)
+	}
+	return result, nil
 }
 
 func toBestSetViewFromRow(row bestSetsByExerciseIDsRow) (*trainingdomain.BestSetView, error) {

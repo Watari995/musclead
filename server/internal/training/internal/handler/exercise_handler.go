@@ -3,6 +3,7 @@ package traininghandler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
@@ -15,14 +16,14 @@ import (
 )
 
 type ExerciseHandler struct {
-	find                    *trainingusecase.FindExerciseByID
-	findBestSets            *trainingusecase.FindBestSetsByExerciseIDs
-	getBestSetTimeseries    *trainingusecase.GetExerciseBestSetTimeseries
-	list                    *trainingusecase.ListExercises
-	create                  *trainingusecase.CreateExercise
-	update                  *trainingusecase.UpdateExercise
-	delete                  *trainingusecase.DeleteExerciseByID
-	reorder                 *trainingusecase.ReorderExercises
+	find                 *trainingusecase.FindExerciseByID
+	findBestSets         *trainingusecase.FindBestSetsByExerciseIDs
+	getBestSetTimeseries *trainingusecase.GetExerciseBestSetTimeseries
+	list                 *trainingusecase.ListExercises
+	create               *trainingusecase.CreateExercise
+	update               *trainingusecase.UpdateExercise
+	delete               *trainingusecase.DeleteExerciseByID
+	reorder              *trainingusecase.ReorderExercises
 }
 
 func NewExerciseHandler(
@@ -322,14 +323,50 @@ func (h *ExerciseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} httpx.ErrorResponse
 // @Router /exercises/{id}/best-set-timeseries [get]
 func (h *ExerciseHandler) GetBestSetTimeseries(w http.ResponseWriter, r *http.Request) {
-	// TODO: weight の GetTimeseries ハンドラ（weight_handler.go）と同じパターンで実装する。
-	//
-	// 1. userID を httpx.UserIDFromContext から取得
-	// 2. path value "id" を ExerciseID にパース
-	// 3. query param "period" を valueobject.NewPeriodFromString でパース
-	// 4. query param "before" を time.Parse(time.RFC3339, ...) でパース（省略時は time.Now()）
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exerciseID"))
+		return
+	}
+	period, err := valueobject.NewPeriodFromString(r.URL.Query().Get("period"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid period"))
+		return
+	}
+	before := time.Now()
+	if s := r.URL.Query().Get("before"); s != "" {
+		before, err = time.Parse(time.RFC3339, s)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid before"))
+			return
+		}
+	}
 	// 5. from = before.Add(-period.Duration())
+	from := before.Add(-period.Duration())
 	// 6. getBestSetTimeseries.Execute を呼ぶ
+	output, err := h.getBestSetTimeseries.Execute(r.Context(), trainingusecase.GetExerciseBestSetTimeseriesInput{
+		UserID:     userID,
+		ExerciseID: *exerciseID,
+		From:       from,
+		To:         before,
+	})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
 	// 7. lo.Map で BestSetTimeseriesDataPointDTO に変換して BestSetTimeseriesResponse を返す
-	panic("not implemented")
+	resp := trainingdto.BestSetTimeseriesResponse{
+		Period:     period.String(),
+		ExerciseID: exerciseID.Value(),
+		DataPoints: lo.Map(output.BestSets, func(bestSet *trainingdomain.BestSetView, _ int) trainingdto.BestSetTimeseriesDataPointDTO {
+			return trainingdto.BestSetTimeseriesDataPointFromData(bestSet)
+		}),
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, resp)
 }
