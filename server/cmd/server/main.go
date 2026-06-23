@@ -222,9 +222,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	}
 	purchaseModule := purchase.NewModule(dbmap, paymentModule.Command(), userModule.UserQuery(), priceIDByPlan)
 	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
-	// TODO: redisClient を渡して Redis キャッシュを有効にする。
-	//       weight.NewModule に倣い、環境変数 REDIS_URL から redis.Client を初期化して渡すこと。
-	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery(), nil)
+	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery(), redisClient)
 
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
