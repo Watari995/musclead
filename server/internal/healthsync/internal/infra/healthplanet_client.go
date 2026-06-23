@@ -17,6 +17,10 @@ import (
 
 const healthPlanetBaseURL = "https://www.healthplanet.jp"
 
+// jst は HealthPlanet API が JST 基準で日時を解釈するため、パッケージ全体で共有する。
+// "Asia/Tokyo" は Go 標準 tzdata に含まれており失敗しない。
+var jst, _ = time.LoadLocation("Asia/Tokyo")
+
 type HealthPlanetClient struct {
 	httpClient   *http.Client
 	clientID     string
@@ -141,8 +145,8 @@ func (c *HealthPlanetClient) FetchMetrics(ctx context.Context, accessToken strin
 	values := url.Values{}
 	values.Set("access_token", accessToken)
 	values.Set("date", "1")
-	values.Set("from", from.Format("20060102150405"))
-	values.Set("to", to.Format("20060102150405"))
+	values.Set("from", from.In(jst).Format("20060102150405"))
+	values.Set("to", to.In(jst).Format("20060102150405"))
 	values.Set("tag", "6021,6022,6023")
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,
@@ -173,11 +177,6 @@ func (c *HealthPlanetClient) FetchMetrics(ctx context.Context, accessToken strin
 }
 
 func toBodyMetrics(entries []innerscanEntry) ([]healthsyncdomain.BodyMetrics, error) {
-	jst, err := time.LoadLocation("Asia/Tokyo")
-	if err != nil {
-		return nil, err
-	}
-
 	metricsMap := map[string]*healthsyncdomain.BodyMetrics{}
 	order := []string{}
 
