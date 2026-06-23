@@ -1,6 +1,7 @@
 package healthsynchandler
 
 import (
+	"log/slog"
 	"net/http"
 	"net/url"
 
@@ -89,7 +90,8 @@ func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
 		Token: cookie.Value,
 		Code:  code,
 	}); err != nil {
-		httpx.WriteError(w, err)
+		slog.Error("healthplanet connect failed", "err", err)
+		http.Redirect(w, r, h.frontendURL+"/settings/integrations?error=connection_failed", http.StatusFound)
 		return
 	}
 	http.Redirect(w, r, h.frontendURL+"/settings/integrations?connected=true", http.StatusFound)
