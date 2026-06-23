@@ -26,8 +26,7 @@ class ExerciseRecordsScreen extends ConsumerStatefulWidget {
       _ExerciseRecordsScreenState();
 }
 
-class _ExerciseRecordsScreenState
-    extends ConsumerState<ExerciseRecordsScreen> {
+class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
   String? _selectedExerciseId;
   String _period = '1month';
 
@@ -157,8 +156,9 @@ class _PeriodSelector extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w700
+                        : FontWeight.normal,
                     color: isSelected ? Colors.white : t.muted,
                   ),
                 ),
@@ -172,10 +172,7 @@ class _PeriodSelector extends StatelessWidget {
 }
 
 class _TimeseriesBody extends ConsumerWidget {
-  const _TimeseriesBody({
-    required this.exerciseId,
-    required this.period,
-  });
+  const _TimeseriesBody({required this.exerciseId, required this.period});
 
   final String exerciseId;
   final String period;
@@ -300,10 +297,10 @@ class _WeightChart extends StatelessWidget {
                         show: dataPoints.length <= 12,
                         getDotPainter: (spot, xPercentage, bar, index) =>
                             FlDotCirclePainter(
-                          radius: 3,
-                          color: t.accent,
-                          strokeWidth: 0,
-                        ),
+                              radius: 3,
+                              color: t.accent,
+                              strokeWidth: 0,
+                            ),
                       ),
                       belowBarData: BarAreaData(
                         show: true,
@@ -336,8 +333,9 @@ class _RepsChart extends StatelessWidget {
               toY: dataPoints[i].reps.toDouble(),
               color: t.accent,
               width: dataPoints.length > 20 ? 4 : 12,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(3)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(3),
+              ),
             ),
           ],
         ),
@@ -352,10 +350,11 @@ class _RepsChart extends StatelessWidget {
             borderData: FlBorderData(show: false),
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
-                getTooltipItem: (group, groupIndex, rod, rodIndex) => BarTooltipItem(
-                  '${rod.toY.toInt()} reps\n${mdLabel(dataPoints[group.x].performedAt)}',
-                  const TextStyle(color: Colors.white, fontSize: 12),
-                ),
+                getTooltipItem: (group, groupIndex, rod, rodIndex) =>
+                    BarTooltipItem(
+                      '${rod.toY.toInt()} reps\n${mdLabel(dataPoints[group.x].performedAt)}',
+                      const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
               ),
             ),
             titlesData: FlTitlesData(

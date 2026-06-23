@@ -122,11 +122,12 @@ final routinesProvider = FutureProvider<List<RoutineDto>>(
   (ref) => ref.watch(trainingRepositoryProvider).listRoutines(),
 );
 
-final exerciseBestSetTimeseriesProvider = FutureProvider.family<
-  BestSetTimeseriesResponseDto,
-  (String exerciseId, String period)
->(
-  (ref, args) => ref
-      .watch(trainingRepositoryProvider)
-      .exerciseBestSetTimeseries(args.$1, period: args.$2),
-);
+final exerciseBestSetTimeseriesProvider =
+    FutureProvider.family<
+      BestSetTimeseriesResponseDto,
+      (String exerciseId, String period)
+    >(
+      (ref, args) => ref
+          .watch(trainingRepositoryProvider)
+          .exerciseBestSetTimeseries(args.$1, period: args.$2),
+    );

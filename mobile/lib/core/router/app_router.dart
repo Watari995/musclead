@@ -77,7 +77,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const TrainingRecordScreen(),
       ),
       GoRoute(path: '/exercises', builder: (_, _) => const ExercisesScreen()),
-      GoRoute(path: '/records', builder: (_, _) => const ExerciseRecordsScreen()),
+      GoRoute(
+        path: '/records',
+        builder: (_, _) => const ExerciseRecordsScreen(),
+      ),
       GoRoute(path: '/routines', builder: (_, _) => const RoutinesScreen()),
       GoRoute(
         path: '/routines/new',

@@ -81,7 +81,8 @@ abstract class BestSetTimeseriesDataPointDto
 }
 
 @freezed
-abstract class BestSetTimeseriesResponseDto with _$BestSetTimeseriesResponseDto {
+abstract class BestSetTimeseriesResponseDto
+    with _$BestSetTimeseriesResponseDto {
   const factory BestSetTimeseriesResponseDto({
     required String period,
     required String exerciseId,
