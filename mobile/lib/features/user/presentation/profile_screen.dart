@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/core_providers.dart';
@@ -15,10 +14,6 @@ import '../../../core/widgets/tab_page.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/user_dtos.dart';
 import '../data/user_repository.dart';
-
-final _packageInfoProvider = FutureProvider<PackageInfo>(
-  (_) => PackageInfo.fromPlatform(),
-);
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -64,7 +59,7 @@ class _ProfileBody extends ConsumerWidget {
     final t = context.tokens;
     final mode = ref.watch(themeModeProvider);
     final accent = ref.watch(accentProvider);
-    final versionText = ref.watch(_packageInfoProvider).when(
+    final versionText = ref.watch(packageInfoProvider).when(
       data: (info) => '${info.version} (${info.buildNumber})',
       loading: () => '...',
       error: (_, __) => '-',
