@@ -165,7 +165,6 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
           RecordTrainingSetRequest(setNumber: n++, weightKg: w, reps: r),
         );
       }
-      if (sets.isEmpty) continue;
       reqExercises.add(
         RecordTrainingExerciseRequest(
           exerciseId: e.exerciseId,
@@ -176,7 +175,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       );
     }
     if (reqExercises.isEmpty) {
-      setState(() => _error = '有効なセット（重量と回数）を1つ以上入力してください');
+      setState(() => _error = '種目を1つ以上追加してください');
       return;
     }
     setState(() {
