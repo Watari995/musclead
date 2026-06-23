@@ -2,6 +2,7 @@ package trainingusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
@@ -28,13 +29,17 @@ func (uc *DeleteTrainingByID) Execute(ctx context.Context, input DeleteTrainingB
 		return myerror.NewTrainingNotFoundError().SetMessage("training not found")
 	}
 
-	// TODO: 削除前に training.Exercises() から exerciseID を収集しておく。
-	//       DeleteByID 後にそれらに対して bestSetCache.Evict を呼ぶ。
-	//       evict はベストエフォート。slog.Warn でログ。
-
 	if err := uc.trainingRepo.DeleteByID(ctx, input.TrainingID); err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
+
+	// トレーニング削除後に種目キャッシュをevictする
+	for _, e := range training.Exercises() {
+		if err := uc.bestSetCache.Evict(ctx, input.UserID, e.ExerciseID()); err != nil {
+			slog.Warn("best set cache evict failed", "err", err)
+		}
+	}
+
 	return nil
 }
 

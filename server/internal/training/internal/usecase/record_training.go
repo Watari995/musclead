@@ -2,6 +2,7 @@ package trainingusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -37,10 +38,12 @@ func (uc *RecordTraining) Execute(ctx context.Context, input RecordTrainingInput
 		return nil, err
 	}
 
-	// TODO: training.Exercises() でセッション内の全種目を取り出し、
-	//       各 exercise.ExerciseID() に対して bestSetCache.Evict を呼ぶ。
-	//       evict はベストエフォートで OK（失敗してもトレーニング記録は成功扱い）。
-	//       slog.Warn でエラーをログに残すこと。
+	// トレーニング記録後に種目キャッシュをevictする
+	for _, e := range training.Exercises() {
+		if err := uc.bestSetCache.Evict(ctx, input.UserID, e.ExerciseID()); err != nil {
+			slog.Warn("best set cache evict failed", "err", err)
+		}
+	}
 
 	return &RecordTrainingOutput{TrainingID: training.ID()}, nil
 }
