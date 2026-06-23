@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -35,6 +37,16 @@ type tokenResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 }
 
+// noRedirectClient はリダイレクトを追従しない HTTP クライアント。
+// HealthPlanet のトークンエンドポイントはエラー時に callback へ 302 リダイレクトするため、
+// 追従すると最終的にフロントエンド HTML が返り JSON デコード失敗で 500 になる。
+var noRedirectClient = &http.Client{
+	Timeout: 10 * time.Second,
+	CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
+
 func (c *HealthPlanetClient) ExchangeCode(ctx context.Context, code string) (accessToken, refreshToken string, expiresAt time.Time, err error) {
 	values := url.Values{}
 	values.Set("grant_type", "authorization_code")
@@ -51,15 +63,24 @@ func (c *HealthPlanetClient) ExchangeCode(ctx context.Context, code string) (acc
 		return "", "", time.Time{}, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// RFC 6749 §2.3.1: Basic Auth でも client_id/secret を送る
+	req.SetBasicAuth(c.clientID, c.clientSecret)
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := noRedirectClient.Do(req)
 	if err != nil {
 		return "", "", time.Time{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", "", time.Time{}, fmt.Errorf("healthplanet code exchange: unexpected status %d", resp.StatusCode)
+		body, _ := io.ReadAll(resp.Body)
+		slog.Error("healthplanet code exchange failed",
+			"status", resp.StatusCode,
+			"location", resp.Header.Get("Location"),
+			"body", string(body),
+		)
+		return "", "", time.Time{}, fmt.Errorf("healthplanet code exchange: status %d location=%s body=%s",
+			resp.StatusCode, resp.Header.Get("Location"), string(body))
 	}
 
 	var result tokenResponse
