@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/data/api_guard.dart';
 import '../../../core/providers/core_providers.dart';
@@ -58,4 +59,8 @@ final userRepositoryProvider = Provider<UserRepository>(
 /// 現在ログイン中ユーザー（プロフィール + 設定）。
 final meProvider = FutureProvider<MeResponse>(
   (ref) => ref.watch(userRepositoryProvider).me(),
+);
+
+final packageInfoProvider = FutureProvider<PackageInfo>(
+  (ref) => PackageInfo.fromPlatform(),
 );

@@ -59,6 +59,13 @@ class _ProfileBody extends ConsumerWidget {
     final t = context.tokens;
     final mode = ref.watch(themeModeProvider);
     final accent = ref.watch(accentProvider);
+    final versionText = ref
+        .watch(packageInfoProvider)
+        .when(
+          data: (info) => '${info.version} (${info.buildNumber})',
+          loading: () => '...',
+          error: (_, _) => '-',
+        );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -133,7 +140,7 @@ class _ProfileBody extends ConsumerWidget {
         AppListBox(
           children: [
             AppListRow(
-              child: _row(context, 'バージョン', value: '1.0.0 (1)', chevron: false),
+              child: _row(context, 'バージョン', value: versionText, chevron: false),
             ),
           ],
         ),
