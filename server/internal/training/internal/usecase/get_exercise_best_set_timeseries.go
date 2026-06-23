@@ -44,12 +44,12 @@ func (uc *GetExerciseBestSetTimeseries) Execute(ctx context.Context, input GetEx
 	}
 	// 3. DB 取得後、goroutine で populateBestSetCache を呼んでキャッシュを非同期 populate する。
 	//    （caller の ctx はレスポンス後にキャンセルされるため context.Background() を使う）
-	go populateBestSetCache(uc.cache, bestSets)
+	go populateBestSetCache(uc.cache, input.UserID, bestSets)
 	// 4. output を返す。
 	return &GetExerciseBestSetTimeseriesOutput{BestSets: bestSets}, nil
 }
 
-func populateBestSetCache(cache trainingdomain.ExerciseBestSetTimeseriesCache, bestSets []*trainingdomain.BestSetView) {
+func populateBestSetCache(cache trainingdomain.ExerciseBestSetTimeseriesCache, userID valueobject.UserID, bestSets []*trainingdomain.BestSetView) {
 	defer func() {
 		if r := recover(); r != nil {
 			slog.Warn("best set cache populate panicked", "panic", r)
@@ -57,7 +57,7 @@ func populateBestSetCache(cache trainingdomain.ExerciseBestSetTimeseriesCache, b
 	}()
 	bgCtx := context.Background()
 	for _, b := range bestSets {
-		if err := cache.Save(bgCtx, b); err != nil {
+		if err := cache.Save(bgCtx, userID, b); err != nil {
 			slog.Warn("best set cache populate failed", "err", err, "trainingID", b.TrainingID.Value())
 		}
 	}

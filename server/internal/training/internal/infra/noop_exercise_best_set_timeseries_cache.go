@@ -20,7 +20,7 @@ func (c *NoOpExerciseBestSetTimeseriesCache) FindByPeriod(_ context.Context, _ v
 	return nil, false, nil
 }
 
-func (c *NoOpExerciseBestSetTimeseriesCache) Save(_ context.Context, _ *trainingdomain.BestSetView) error {
+func (c *NoOpExerciseBestSetTimeseriesCache) Save(_ context.Context, _ valueobject.UserID, _ *trainingdomain.BestSetView) error {
 	return nil
 }
 

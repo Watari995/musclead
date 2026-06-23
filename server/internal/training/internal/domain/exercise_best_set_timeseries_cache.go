@@ -18,7 +18,8 @@ type ExerciseBestSetTimeseriesCache interface {
 	FindByPeriod(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID, from, to time.Time) (bestSets []*BestSetView, hit bool, err error)
 	// Save は1件のデータポイントをキャッシュに追記し TTL をリセットする。
 	// GetExerciseBestSetTimeseries のキャッシュ populate で goroutine から呼ぶ。
-	Save(ctx context.Context, bestSet *BestSetView) error
+	// BestSetView に UserID がないため userID を別引数で受け取る。
+	Save(ctx context.Context, userID valueobject.UserID, bestSet *BestSetView) error
 	// Evict は指定種目のキャッシュ(idx + data)を全削除する。
 	// RecordTraining / UpdateTraining / DeleteTrainingByID の write 後に呼ぶ。
 	Evict(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID) error
