@@ -15,18 +15,20 @@ import (
 )
 
 type ExerciseHandler struct {
-	find         *trainingusecase.FindExerciseByID
-	findBestSets *trainingusecase.FindBestSetsByExerciseIDs
-	list         *trainingusecase.ListExercises
-	create       *trainingusecase.CreateExercise
-	update       *trainingusecase.UpdateExercise
-	delete       *trainingusecase.DeleteExerciseByID
-	reorder      *trainingusecase.ReorderExercises
+	find                    *trainingusecase.FindExerciseByID
+	findBestSets            *trainingusecase.FindBestSetsByExerciseIDs
+	getBestSetTimeseries    *trainingusecase.GetExerciseBestSetTimeseries
+	list                    *trainingusecase.ListExercises
+	create                  *trainingusecase.CreateExercise
+	update                  *trainingusecase.UpdateExercise
+	delete                  *trainingusecase.DeleteExerciseByID
+	reorder                 *trainingusecase.ReorderExercises
 }
 
 func NewExerciseHandler(
 	find *trainingusecase.FindExerciseByID,
 	findBestSets *trainingusecase.FindBestSetsByExerciseIDs,
+	getBestSetTimeseries *trainingusecase.GetExerciseBestSetTimeseries,
 	list *trainingusecase.ListExercises,
 	create *trainingusecase.CreateExercise,
 	update *trainingusecase.UpdateExercise,
@@ -34,17 +36,19 @@ func NewExerciseHandler(
 	reorder *trainingusecase.ReorderExercises,
 ) http.Handler {
 	h := &ExerciseHandler{
-		find:         find,
-		findBestSets: findBestSets,
-		list:         list,
-		create:       create,
-		update:       update,
-		delete:       delete,
-		reorder:      reorder,
+		find:                 find,
+		findBestSets:         findBestSets,
+		getBestSetTimeseries: getBestSetTimeseries,
+		list:                 list,
+		create:               create,
+		update:               update,
+		delete:               delete,
+		reorder:              reorder,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /exercises/{id}", h.Find)
 	mux.HandleFunc("GET /exercises/best-sets", h.FindBestSets)
+	mux.HandleFunc("GET /exercises/{id}/best-set-timeseries", h.GetBestSetTimeseries)
 	mux.HandleFunc("GET /exercises", h.List)
 	mux.HandleFunc("POST /exercises", h.Create)
 	mux.HandleFunc("POST /exercises/reorder", h.Reorder)
@@ -301,4 +305,31 @@ func (h *ExerciseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteNoContent(w)
+}
+
+// GetBestSetTimeseries godoc
+//
+// @Summary 種目のベストセット時系列取得
+// @Description 指定期間内のセッションごとのベストセット（最重量セット）を古い順で返す。
+// @Tags exercises
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 ExerciseID"
+// @Param period query string false "期間 (1week, 1month, 3months, halfyear, 1year)"
+// @Param before query string false "これ以前のデータを取得 (ISO 8601)"
+// @Success 200 {object} trainingdto.BestSetTimeseriesResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises/{id}/best-set-timeseries [get]
+func (h *ExerciseHandler) GetBestSetTimeseries(w http.ResponseWriter, r *http.Request) {
+	// TODO: weight の GetTimeseries ハンドラ（weight_handler.go）と同じパターンで実装する。
+	//
+	// 1. userID を httpx.UserIDFromContext から取得
+	// 2. path value "id" を ExerciseID にパース
+	// 3. query param "period" を valueobject.NewPeriodFromString でパース
+	// 4. query param "before" を time.Parse(time.RFC3339, ...) でパース（省略時は time.Now()）
+	// 5. from = before.Add(-period.Duration())
+	// 6. getBestSetTimeseries.Execute を呼ぶ
+	// 7. lo.Map で BestSetTimeseriesDataPointDTO に変換して BestSetTimeseriesResponse を返す
+	panic("not implemented")
 }

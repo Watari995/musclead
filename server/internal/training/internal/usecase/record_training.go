@@ -21,6 +21,8 @@ type RecordTrainingOutput struct {
 type RecordTraining struct {
 	trainingRepo trainingdomain.TrainingRepository
 	txManager    dbtx.TransactionManager
+	// bestSetCache はトレーニング記録後に種目キャッシュを evict するために使う。
+	bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache
 }
 
 func (uc *RecordTraining) Execute(ctx context.Context, input RecordTrainingInput) (*RecordTrainingOutput, error) {
@@ -34,12 +36,19 @@ func (uc *RecordTraining) Execute(ctx context.Context, input RecordTrainingInput
 	}); err != nil {
 		return nil, err
 	}
+
+	// TODO: training.Exercises() でセッション内の全種目を取り出し、
+	//       各 exercise.ExerciseID() に対して bestSetCache.Evict を呼ぶ。
+	//       evict はベストエフォートで OK（失敗してもトレーニング記録は成功扱い）。
+	//       slog.Warn でエラーをログに残すこと。
+
 	return &RecordTrainingOutput{TrainingID: training.ID()}, nil
 }
 
-func NewRecordTraining(trainingRepo trainingdomain.TrainingRepository, txManager dbtx.TransactionManager) *RecordTraining {
+func NewRecordTraining(trainingRepo trainingdomain.TrainingRepository, txManager dbtx.TransactionManager, bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache) *RecordTraining {
 	return &RecordTraining{
 		trainingRepo: trainingRepo,
 		txManager:    txManager,
+		bestSetCache: bestSetCache,
 	}
 }

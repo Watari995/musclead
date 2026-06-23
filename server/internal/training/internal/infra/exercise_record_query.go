@@ -105,6 +105,31 @@ func (s *exerciseRecordQueryService) FindBestSetsByExerciseIDs(ctx context.Conte
 	return result, nil
 }
 
+func (s *exerciseRecordQueryService) FindBestSetTimeseriesByExerciseID(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID, from, to time.Time) ([]*trainingdomain.BestSetView, error) {
+	// TODO: buildFindBestSetsByExerciseIDsSQL を参考に、以下の SQL を実行する。
+	//
+	// SELECT weight_kg, reps, started_at, id, exercise_id
+	// FROM (
+	//   SELECT
+	//     ts.weight_kg, ts.reps, t.started_at, t.id, te.exercise_id,
+	//     ROW_NUMBER() OVER (
+	//       PARTITION BY t.id                         -- セッション単位でベストを選ぶ
+	//       ORDER BY ts.weight_kg DESC, ts.reps DESC
+	//     ) AS rn
+	//   FROM training_sets ts
+	//   JOIN training_exercises te ON ts.training_exercise_id = te.id
+	//   JOIN trainings t ON te.training_id = t.id
+	//   WHERE t.user_id = ? AND te.exercise_id = ?
+	//     AND t.started_at BETWEEN ? AND ?
+	// ) ranked
+	// WHERE rn = 1
+	// ORDER BY started_at ASC
+	//
+	// row struct は bestSetsByExerciseIDsRow を再利用できる。
+	// 変換は toBestSetViewFromRow を使う。
+	panic("not implemented")
+}
+
 func toBestSetViewFromRow(row bestSetsByExerciseIDsRow) (*trainingdomain.BestSetView, error) {
 	weightKg, err := valueobject.NewNonNegativeDecimalFromString(row.WeightKg)
 	if err != nil {

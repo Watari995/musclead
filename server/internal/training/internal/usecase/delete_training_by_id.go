@@ -15,6 +15,8 @@ type DeleteTrainingByIDInput struct {
 
 type DeleteTrainingByID struct {
 	trainingRepo trainingdomain.TrainingRepository
+	// bestSetCache はトレーニング削除後に種目キャッシュを evict するために使う。
+	bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache
 }
 
 func (uc *DeleteTrainingByID) Execute(ctx context.Context, input DeleteTrainingByIDInput) error {
@@ -26,12 +28,16 @@ func (uc *DeleteTrainingByID) Execute(ctx context.Context, input DeleteTrainingB
 		return myerror.NewTrainingNotFoundError().SetMessage("training not found")
 	}
 
+	// TODO: 削除前に training.Exercises() から exerciseID を収集しておく。
+	//       DeleteByID 後にそれらに対して bestSetCache.Evict を呼ぶ。
+	//       evict はベストエフォート。slog.Warn でログ。
+
 	if err := uc.trainingRepo.DeleteByID(ctx, input.TrainingID); err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
 	return nil
 }
 
-func NewDeleteTrainingByID(trainingRepo trainingdomain.TrainingRepository) *DeleteTrainingByID {
-	return &DeleteTrainingByID{trainingRepo: trainingRepo}
+func NewDeleteTrainingByID(trainingRepo trainingdomain.TrainingRepository, bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache) *DeleteTrainingByID {
+	return &DeleteTrainingByID{trainingRepo: trainingRepo, bestSetCache: bestSetCache}
 }

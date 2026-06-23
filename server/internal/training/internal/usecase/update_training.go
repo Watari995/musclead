@@ -22,6 +22,8 @@ type UpdateTrainingOutput struct {
 type UpdateTraining struct {
 	trainingRepo trainingdomain.TrainingRepository
 	txManager    dbtx.TransactionManager
+	// bestSetCache はトレーニング更新後に種目キャッシュを evict するために使う。
+	bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache
 }
 
 func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput) (*UpdateTrainingOutput, error) {
@@ -32,6 +34,10 @@ func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput
 	if training == nil {
 		return nil, myerror.NewTrainingNotFoundError()
 	}
+
+	// TODO: 更新前の種目IDを収集する（preExerciseIDs）。
+	//       training.Exercises() から ExerciseID() を取り出す。
+
 	training.Update(input.TrainingSpec)
 	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
 		uc.trainingRepo.Save(txCtx, training)
@@ -40,12 +46,17 @@ func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
 
+	// TODO: 更新後の種目IDを収集し（postExerciseIDs）、preExerciseIDs と union して重複排除。
+	//       union した全 exerciseID に対して bestSetCache.Evict を呼ぶ。
+	//       evict はベストエフォート（失敗しても更新は成功扱い）。slog.Warn でログ。
+
 	return &UpdateTrainingOutput{TrainingID: training.ID()}, nil
 }
 
-func NewUpdateTraining(trainingRepo trainingdomain.TrainingRepository, txManager dbtx.TransactionManager) *UpdateTraining {
+func NewUpdateTraining(trainingRepo trainingdomain.TrainingRepository, txManager dbtx.TransactionManager, bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache) *UpdateTraining {
 	return &UpdateTraining{
 		trainingRepo: trainingRepo,
 		txManager:    txManager,
+		bestSetCache: bestSetCache,
 	}
 }
