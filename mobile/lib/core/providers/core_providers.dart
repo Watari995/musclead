@@ -29,6 +29,19 @@ final cookieJarProvider = Provider<CookieJar>(
   ),
 );
 
+/// OAuth callback で受け取った deep link URI を保持する。
+/// app.dart でセットし、各画面で listen して結果を表示する。
+final oauthCallbackProvider = NotifierProvider<OauthCallbackNotifier, Uri?>(
+  OauthCallbackNotifier.new,
+);
+
+class OauthCallbackNotifier extends Notifier<Uri?> {
+  @override
+  Uri? build() => null;
+
+  void set(Uri? uri) => state = uri;
+}
+
 /// 認証付き Dio。refresh と失敗時処理は controller を参照せず自己完結させ循環依存を避ける。
 final dioProvider = Provider<Dio>((ref) {
   final dio = buildDio(cookieJar: ref.watch(cookieJarProvider));
