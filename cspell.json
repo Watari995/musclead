@@ -5,6 +5,7 @@
         "InnoDB",
         "Pipeliner",
         "ZADD",
+        "foodinfra",
         "halfyear",
         "healthplanet",
         "healthsync",

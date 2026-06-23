@@ -8,7 +8,8 @@ import (
 const startBase = "https://api.musclead.com/integrations/healthplanet/start"
 
 type BuildAuthURLInput struct {
-	UserID valueobject.UserID
+	UserID      valueobject.UserID
+	RedirectURL string
 }
 
 type BuildAuthURL struct {
@@ -20,7 +21,7 @@ func NewBuildAuthURL(stateSigner healthsyncdomain.StateSigner) *BuildAuthURL {
 }
 
 func (uc *BuildAuthURL) Execute(input BuildAuthURLInput) (string, error) {
-	token, err := uc.stateSigner.Sign(input.UserID)
+	token, err := uc.stateSigner.Sign(input.UserID, input.RedirectURL)
 	if err != nil {
 		return "", err
 	}

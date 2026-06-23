@@ -43,7 +43,8 @@ func (h *HealthSyncHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	startURL, err := h.buildAuthURL.Execute(healthsyncusecase.BuildAuthURLInput{
-		UserID: userID,
+		UserID:      userID,
+		RedirectURL: r.URL.Query().Get("redirect_url"),
 	})
 	if err != nil {
 		httpx.WriteError(w, err)
@@ -86,13 +87,22 @@ func (h *HealthSyncHandler) Connect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	code := r.URL.Query().Get("code")
-	if err := h.connect.Execute(r.Context(), healthsyncusecase.ConnectHealthPlanetInput{
+	redirectURL, err := h.connect.Execute(r.Context(), healthsyncusecase.ConnectHealthPlanetInput{
 		Token: cookie.Value,
 		Code:  code,
-	}); err != nil {
+	})
+	if err != nil {
 		slog.Error("healthplanet connect failed", "err", err)
-		http.Redirect(w, r, h.frontendURL+"/settings/integrations?error=connection_failed", http.StatusFound)
+		target := h.frontendURL + "/settings/integrations?error=connection_failed"
+		if redirectURL != "" {
+			target = redirectURL + "?error=connection_failed"
+		}
+		http.Redirect(w, r, target, http.StatusFound)
 		return
 	}
-	http.Redirect(w, r, h.frontendURL+"/settings/integrations?connected=true", http.StatusFound)
+	target := h.frontendURL + "/settings/integrations?connected=true"
+	if redirectURL != "" {
+		target = redirectURL + "?connected=true"
+	}
+	http.Redirect(w, r, target, http.StatusFound)
 }

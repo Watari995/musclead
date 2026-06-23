@@ -20,6 +20,20 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<Uri?>(oauthCallbackProvider, (_, uri) {
+      if (uri == null || !context.mounted) return;
+      final connected = uri.queryParameters['connected'] == 'true';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            connected ? 'HealthPlanet を連携しました' : 'HealthPlanet 連携に失敗しました',
+          ),
+        ),
+      );
+      if (connected) ref.invalidate(meProvider);
+      ref.read(oauthCallbackProvider.notifier).set(null);
+    });
+
     final me = ref.watch(meProvider);
     return TabPage(
       title: 'マイページ',
@@ -166,6 +180,7 @@ class _ProfileBody extends ConsumerWidget {
       final dio = ref.read(dioProvider);
       final res = await dio.get<Map<String, dynamic>>(
         '/integrations/healthplanet/auth',
+        queryParameters: {'redirect_url': 'musclead://oauth/callback'},
       );
       final url = res.data?['url'] as String?;
       if (url == null) throw Exception('url not found');
