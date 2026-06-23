@@ -222,7 +222,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	}
 	purchaseModule := purchase.NewModule(dbmap, paymentModule.Command(), userModule.UserQuery(), priceIDByPlan)
 	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
-	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery())
+	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery(), redisClient)
 
 	// users
 	mux.Handle("/users", userModule.PublicHandler)

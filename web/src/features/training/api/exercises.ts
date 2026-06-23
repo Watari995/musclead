@@ -15,7 +15,37 @@ import {
   type UpsertExerciseRequest,
   type UpsertExerciseResponse,
 } from "@/shared/api/client";
+import { getAccessToken } from "@/shared/auth/access-token";
 import { toExercise, type Exercise } from "../model/exercise";
+
+function baseUrl(): string {
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+}
+
+function authHeaders(): HeadersInit {
+  const token = getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export type BestSetTimeseriesPeriod =
+  | "1week"
+  | "1month"
+  | "3months"
+  | "halfyear"
+  | "1year";
+
+export type BestSetTimeseriesDataPointDTO = {
+  performed_at: string;
+  weight_kg: string;
+  reps: number;
+  training_id: string;
+};
+
+export type BestSetTimeseriesResponseDTO = {
+  period: string;
+  exercise_id: string;
+  data_points: BestSetTimeseriesDataPointDTO[];
+};
 
 export const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 const EXERCISE_QUERY_KEY = (id: string) => ["exercise", id] as const;
@@ -195,6 +225,31 @@ export function useDeleteExerciseMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EXERCISES_QUERY_KEY });
+    },
+  });
+}
+
+export function useExerciseBestSetTimeseriesQuery(
+  exerciseId: string | null,
+  period: BestSetTimeseriesPeriod,
+  enabled: boolean = true,
+) {
+  return useQuery({
+    queryKey: ["exercises", "best-set-timeseries", exerciseId, period],
+    enabled: enabled && Boolean(exerciseId),
+    queryFn: async (): Promise<BestSetTimeseriesResponseDTO> => {
+      const params = new URLSearchParams({ period });
+      const res = await fetch(
+        `${baseUrl()}/exercises/${exerciseId}/best-set-timeseries?${params.toString()}`,
+        {
+          credentials: "include",
+          headers: { ...authHeaders() },
+        },
+      );
+      if (!res.ok) {
+        throw new Error(`failed to fetch exercise timeseries (HTTP ${res.status})`);
+      }
+      return (await res.json()) as BestSetTimeseriesResponseDTO;
     },
   });
 }

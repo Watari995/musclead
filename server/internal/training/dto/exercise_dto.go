@@ -65,3 +65,27 @@ func BestSetFromData(b *trainingdomain.BestSetView) BestSetDTO {
 type ListBestSetsResponse struct {
 	BestSets []BestSetDTO `json:"best_sets"`
 }
+
+// BestSetTimeseriesDataPointDTO は1セッション分のベストセットを表す時系列の1点。
+// BestSetDTO と同じフィールドだが、timeseries 文脈で名前を明確にしている。
+type BestSetTimeseriesDataPointDTO struct {
+	PerformedAt time.Time `json:"performed_at"`
+	WeightKg    string    `json:"weight_kg"`
+	Reps        int       `json:"reps"`
+	TrainingID  string    `json:"training_id"`
+}
+
+func BestSetTimeseriesDataPointFromData(b *trainingdomain.BestSetView) BestSetTimeseriesDataPointDTO {
+	return BestSetTimeseriesDataPointDTO{
+		PerformedAt: b.PerformedAt,
+		WeightKg:    b.WeightKg.String(),
+		Reps:        b.Reps.Value(),
+		TrainingID:  b.TrainingID.Value(),
+	}
+}
+
+type BestSetTimeseriesResponse struct {
+	Period     string                           `json:"period"`
+	ExerciseID string                           `json:"exercise_id"`
+	DataPoints []BestSetTimeseriesDataPointDTO  `json:"data_points"`
+}

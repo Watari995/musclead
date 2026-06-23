@@ -65,3 +65,30 @@ abstract class UpsertExerciseRequest with _$UpsertExerciseRequest {
   factory UpsertExerciseRequest.fromJson(Map<String, dynamic> json) =>
       _$UpsertExerciseRequestFromJson(json);
 }
+
+@freezed
+abstract class BestSetTimeseriesDataPointDto
+    with _$BestSetTimeseriesDataPointDto {
+  const factory BestSetTimeseriesDataPointDto({
+    @DecimalStringConverter() required Decimal weightKg,
+    required int reps,
+    required DateTime performedAt,
+    required String trainingId,
+  }) = _BestSetTimeseriesDataPointDto;
+
+  factory BestSetTimeseriesDataPointDto.fromJson(Map<String, dynamic> json) =>
+      _$BestSetTimeseriesDataPointDtoFromJson(json);
+}
+
+@freezed
+abstract class BestSetTimeseriesResponseDto with _$BestSetTimeseriesResponseDto {
+  const factory BestSetTimeseriesResponseDto({
+    required String period,
+    required String exerciseId,
+    @Default(<BestSetTimeseriesDataPointDto>[])
+    List<BestSetTimeseriesDataPointDto> dataPoints,
+  }) = _BestSetTimeseriesResponseDto;
+
+  factory BestSetTimeseriesResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$BestSetTimeseriesResponseDtoFromJson(json);
+}

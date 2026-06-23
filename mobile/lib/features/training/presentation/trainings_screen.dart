@@ -40,6 +40,15 @@ class TrainingsScreen extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: AppButton(
+                label: '記録',
+                icon: Icons.show_chart,
+                variant: AppButtonVariant.glass,
+                onPressed: () => context.push('/records'),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: AppButton(
                 label: 'ルーティン',
                 icon: Icons.list_alt,
                 variant: AppButtonVariant.glass,

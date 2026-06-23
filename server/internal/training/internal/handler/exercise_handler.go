@@ -3,6 +3,7 @@ package traininghandler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	shareddto "github.com/Watari995/musclead/internal/shared/dto"
@@ -15,18 +16,20 @@ import (
 )
 
 type ExerciseHandler struct {
-	find         *trainingusecase.FindExerciseByID
-	findBestSets *trainingusecase.FindBestSetsByExerciseIDs
-	list         *trainingusecase.ListExercises
-	create       *trainingusecase.CreateExercise
-	update       *trainingusecase.UpdateExercise
-	delete       *trainingusecase.DeleteExerciseByID
-	reorder      *trainingusecase.ReorderExercises
+	find                 *trainingusecase.FindExerciseByID
+	findBestSets         *trainingusecase.FindBestSetsByExerciseIDs
+	getBestSetTimeseries *trainingusecase.GetExerciseBestSetTimeseries
+	list                 *trainingusecase.ListExercises
+	create               *trainingusecase.CreateExercise
+	update               *trainingusecase.UpdateExercise
+	delete               *trainingusecase.DeleteExerciseByID
+	reorder              *trainingusecase.ReorderExercises
 }
 
 func NewExerciseHandler(
 	find *trainingusecase.FindExerciseByID,
 	findBestSets *trainingusecase.FindBestSetsByExerciseIDs,
+	getBestSetTimeseries *trainingusecase.GetExerciseBestSetTimeseries,
 	list *trainingusecase.ListExercises,
 	create *trainingusecase.CreateExercise,
 	update *trainingusecase.UpdateExercise,
@@ -34,17 +37,19 @@ func NewExerciseHandler(
 	reorder *trainingusecase.ReorderExercises,
 ) http.Handler {
 	h := &ExerciseHandler{
-		find:         find,
-		findBestSets: findBestSets,
-		list:         list,
-		create:       create,
-		update:       update,
-		delete:       delete,
-		reorder:      reorder,
+		find:                 find,
+		findBestSets:         findBestSets,
+		getBestSetTimeseries: getBestSetTimeseries,
+		list:                 list,
+		create:               create,
+		update:               update,
+		delete:               delete,
+		reorder:              reorder,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /exercises/{id}", h.Find)
 	mux.HandleFunc("GET /exercises/best-sets", h.FindBestSets)
+	mux.HandleFunc("GET /exercises/{id}/best-set-timeseries", h.GetBestSetTimeseries)
 	mux.HandleFunc("GET /exercises", h.List)
 	mux.HandleFunc("POST /exercises", h.Create)
 	mux.HandleFunc("POST /exercises/reorder", h.Reorder)
@@ -301,4 +306,67 @@ func (h *ExerciseHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteNoContent(w)
+}
+
+// GetBestSetTimeseries godoc
+//
+// @Summary 種目のベストセット時系列取得
+// @Description 指定期間内のセッションごとのベストセット（最重量セット）を古い順で返す。
+// @Tags exercises
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "対象 ExerciseID"
+// @Param period query string false "期間 (1week, 1month, 3months, halfyear, 1year)"
+// @Param before query string false "これ以前のデータを取得 (ISO 8601)"
+// @Success 200 {object} trainingdto.BestSetTimeseriesResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises/{id}/best-set-timeseries [get]
+func (h *ExerciseHandler) GetBestSetTimeseries(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	exerciseID, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](r.PathValue("id"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exerciseID"))
+		return
+	}
+	period, err := valueobject.NewPeriodFromString(r.URL.Query().Get("period"))
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid period"))
+		return
+	}
+	before := time.Now()
+	if s := r.URL.Query().Get("before"); s != "" {
+		before, err = time.Parse(time.RFC3339, s)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid before"))
+			return
+		}
+	}
+	// 5. from = before.Add(-period.Duration())
+	from := before.Add(-period.Duration())
+	// 6. getBestSetTimeseries.Execute を呼ぶ
+	output, err := h.getBestSetTimeseries.Execute(r.Context(), trainingusecase.GetExerciseBestSetTimeseriesInput{
+		UserID:     userID,
+		ExerciseID: *exerciseID,
+		From:       from,
+		To:         before,
+	})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	// 7. lo.Map で BestSetTimeseriesDataPointDTO に変換して BestSetTimeseriesResponse を返す
+	resp := trainingdto.BestSetTimeseriesResponse{
+		Period:     period.String(),
+		ExerciseID: exerciseID.Value(),
+		DataPoints: lo.Map(output.BestSets, func(bestSet *trainingdomain.BestSetView, _ int) trainingdto.BestSetTimeseriesDataPointDTO {
+			return trainingdto.BestSetTimeseriesDataPointFromData(bestSet)
+		}),
+	}
+
+	httpx.WriteJSON(w, http.StatusOK, resp)
 }
