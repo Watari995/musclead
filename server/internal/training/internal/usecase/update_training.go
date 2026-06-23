@@ -2,6 +2,7 @@ package trainingusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -35,10 +36,17 @@ func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput
 		return nil, myerror.NewTrainingNotFoundError()
 	}
 
-	// TODO: 更新前の種目IDを収集する（preExerciseIDs）。
-	//       training.Exercises() から ExerciseID() を取り出す。
+	preExerciseIds := make([]valueobject.ExerciseID, 0, len(training.Exercises()))
+	for _, e := range training.Exercises() {
+		preExerciseIds = append(preExerciseIds, e.ExerciseID())
+	}
 
 	training.Update(input.TrainingSpec)
+
+	postExerciseIds := make([]valueobject.ExerciseID, 0, len(training.Exercises()))
+	for _, e := range training.Exercises() {
+		postExerciseIds = append(postExerciseIds, e.ExerciseID())
+	}
 	if err := uc.txManager.Processing(ctx, func(txCtx context.Context) error {
 		uc.trainingRepo.Save(txCtx, training)
 		return nil
@@ -46,9 +54,18 @@ func (uc *UpdateTraining) Execute(ctx context.Context, input UpdateTrainingInput
 		return nil, myerror.NewInternalError().Wrap(err)
 	}
 
-	// TODO: 更新後の種目IDを収集し（postExerciseIDs）、preExerciseIDs と union して重複排除。
-	//       union した全 exerciseID に対して bestSetCache.Evict を呼ぶ。
-	//       evict はベストエフォート（失敗しても更新は成功扱い）。slog.Warn でログ。
+	uniqueExerciseIdsForEvict := make(map[valueobject.ExerciseID]struct{})
+	for _, eid := range preExerciseIds {
+		uniqueExerciseIdsForEvict[eid] = struct{}{}
+	}
+	for _, eid := range postExerciseIds {
+		uniqueExerciseIdsForEvict[eid] = struct{}{}
+	}
+	for eid := range uniqueExerciseIdsForEvict {
+		if err := uc.bestSetCache.Evict(ctx, input.UserID, eid); err != nil {
+			slog.Warn("best set cache evict failed", "err", err)
+		}
+	}
 
 	return &UpdateTrainingOutput{TrainingID: training.ID()}, nil
 }
