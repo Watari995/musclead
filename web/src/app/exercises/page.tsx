@@ -65,9 +65,17 @@ export default function ExercisesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <SectionTitle>種目マスタ</SectionTitle>
-        <Link href="/exercises/new">
-          <Button>+ 新しい種目</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/exercises/progress"
+            className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] px-3 py-2"
+          >
+            記録グラフ →
+          </Link>
+          <Link href="/exercises/new">
+            <Button>+ 新しい種目</Button>
+          </Link>
+        </div>
       </div>
 
       {query.isLoading && (

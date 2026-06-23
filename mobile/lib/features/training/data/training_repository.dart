@@ -71,6 +71,18 @@ class TrainingRepository {
     ),
   );
 
+  /// 種目のベストセット時系列を取得する。
+  Future<BestSetTimeseriesResponseDto> exerciseBestSetTimeseries(
+    String exerciseId, {
+    String period = '1month',
+  }) => guardApi(() async {
+    final res = await _dio.get<Map<String, dynamic>>(
+      '/exercises/$exerciseId/best-set-timeseries',
+      queryParameters: {'period': period},
+    );
+    return BestSetTimeseriesResponseDto.fromJson(res.data!);
+  });
+
   // --- Routines ---
   Future<List<RoutineDto>> listRoutines({int limit = 100, int offset = 0}) =>
       guardApi(() async {
@@ -108,4 +120,13 @@ final exercisesProvider = FutureProvider<List<ExerciseDto>>(
 
 final routinesProvider = FutureProvider<List<RoutineDto>>(
   (ref) => ref.watch(trainingRepositoryProvider).listRoutines(),
+);
+
+final exerciseBestSetTimeseriesProvider = FutureProvider.family<
+  BestSetTimeseriesResponseDto,
+  (String exerciseId, String period)
+>(
+  (ref, args) => ref
+      .watch(trainingRepositoryProvider)
+      .exerciseBestSetTimeseries(args.$1, period: args.$2),
 );
