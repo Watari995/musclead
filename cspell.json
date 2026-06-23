@@ -1,6 +1,11 @@
 {
     "version": "0.2",
     "words": [
+        "HSET",
+        "InnoDB",
+        "Pipeliner",
+        "ZADD",
+        "halfyear",
         "healthplanet",
         "healthsync",
         "healthsynchandler",
@@ -9,7 +14,10 @@
         "musclead",
         "publicfunctions",
         "trainingdomain",
-        "valueobject"
+        "valueobject",
+        "weightdomain",
+        "\u3059\u308b",
+        "\u3092"
     ],
     "language": "en",
     "ignorePaths": [
