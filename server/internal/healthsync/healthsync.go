@@ -39,10 +39,10 @@ func NewModule(
 
 	// use-case
 	connect := healthsyncusecase.NewConnectHealthPlanet(tokenRepo, client, stateSigner)
-	buildAuthURL := healthsyncusecase.NewBuildAuthURL(stateSigner, clientID)
+	buildAuthURL := healthsyncusecase.NewBuildAuthURL(stateSigner)
 	sync := healthsyncusecase.NewSyncWeights(tokenRepo, client, client, weightCommand, weightQuery)
 
-	healthsyncHandler := healthsynchandler.New(buildAuthURL, connect, frontendURL)
+	healthsyncHandler := healthsynchandler.New(buildAuthURL, connect, clientID, frontendURL)
 
 	return &Module{
 		syncWeights: sync,
