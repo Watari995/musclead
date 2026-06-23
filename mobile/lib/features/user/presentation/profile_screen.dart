@@ -138,12 +138,7 @@ class _ProfileBody extends ConsumerWidget {
         AppListBox(
           children: [
             AppListRow(
-              child: _row(
-                context,
-                'バージョン',
-                value: versionText,
-                chevron: false,
-              ),
+              child: _row(context, 'バージョン', value: versionText, chevron: false),
             ),
           ],
         ),
