@@ -10,6 +10,7 @@ import '../../features/meal/data/meal_dtos.dart';
 import '../../features/meal/data/meal_template_dtos.dart';
 import '../../features/meal/presentation/meal_record_screen.dart';
 import '../../features/meal/presentation/meals_screen.dart';
+import '../../features/training/presentation/exercise_records_screen.dart';
 import '../../features/training/presentation/exercises_screen.dart';
 import '../../features/training/presentation/routine_create_screen.dart';
 import '../../features/training/presentation/routines_screen.dart';
@@ -76,6 +77,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const TrainingRecordScreen(),
       ),
       GoRoute(path: '/exercises', builder: (_, _) => const ExercisesScreen()),
+      GoRoute(
+        path: '/records',
+        builder: (_, _) => const ExerciseRecordsScreen(),
+      ),
       GoRoute(path: '/routines', builder: (_, _) => const RoutinesScreen()),
       GoRoute(
         path: '/routines/new',

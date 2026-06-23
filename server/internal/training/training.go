@@ -4,13 +4,16 @@ package training
 
 import (
 	"net/http"
+	"time"
 
 	purchasepublicfunctions "github.com/Watari995/musclead/internal/purchase/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
 	traininghandler "github.com/Watari995/musclead/internal/training/internal/handler"
+	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	traininginfra "github.com/Watari995/musclead/internal/training/internal/infra"
 	trainingusecase "github.com/Watari995/musclead/internal/training/internal/usecase"
 	"github.com/go-gorp/gorp/v3"
+	"github.com/redis/go-redis/v9"
 )
 
 type Module struct {
@@ -19,7 +22,9 @@ type Module struct {
 	RoutineHandler  http.Handler
 }
 
-func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.SubscriptionQuery) *Module {
+// NewModule は training モジュールを初期化する。
+// redisClient が nil の場合は NoOp キャッシュを使う（ローカル開発用）。
+func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.SubscriptionQuery, redisClient *redis.Client) *Module {
 	// == repo ==
 	dbmap.AddTableWithName(traininginfra.TrainingModel{}, "trainings").SetKeys(false, "ID")
 	dbmap.AddTableWithName(traininginfra.TrainingExerciseModel{}, "training_exercises").SetKeys(false, "ID")
@@ -38,13 +43,22 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 
 	txManager := dbtx.NewTransactionManager(dbmap)
 
+	// == cache ==
+	// weight.NewModule と同じパターン。redisClient が nil のときは NoOp キャッシュを使う。
+	var bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache
+	if redisClient != nil {
+		bestSetCache = traininginfra.NewRedisExerciseBestSetTimeseriesCache(redisClient, 7*24*time.Hour)
+	} else {
+		bestSetCache = traininginfra.NewNoOpExerciseBestSetTimeseriesCache()
+	}
+
 	// == use-case ==
 	// training
 	findTraining := trainingusecase.NewFindTrainingByID(trainingRepo)
 	listTrainings := trainingusecase.NewListTraining(trainingRepo)
-	recordTraining := trainingusecase.NewRecordTraining(trainingRepo, txManager)
-	updateTraining := trainingusecase.NewUpdateTraining(trainingRepo, txManager)
-	deleteTraining := trainingusecase.NewDeleteTrainingByID(trainingRepo)
+	recordTraining := trainingusecase.NewRecordTraining(trainingRepo, txManager, bestSetCache)
+	updateTraining := trainingusecase.NewUpdateTraining(trainingRepo, txManager, bestSetCache)
+	deleteTraining := trainingusecase.NewDeleteTrainingByID(trainingRepo, bestSetCache)
 	// exercise
 	findExercise := trainingusecase.NewFindExerciseByID(exerciseRepo)
 	listExercises := trainingusecase.NewListExercises(exerciseRepo)
@@ -61,6 +75,11 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	reorderRoutines := trainingusecase.NewReorderRoutines(routineRepo, txManager)
 	// exercise record
 	findBestSets := trainingusecase.NewFindBestSetsByExerciseIDs(exerciseRecordQueryService)
+	getBestSetTimeseries := trainingusecase.NewGetExerciseBestSetTimeseries(exerciseRecordQueryService, bestSetCache)
 
-	return &Module{TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining), ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, findBestSets, listExercises, createExercise, updateExercise, deleteExercise, reorderExercises), RoutineHandler: traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine, reorderRoutines)}
+	return &Module{
+		TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining),
+		ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, findBestSets, getBestSetTimeseries, listExercises, createExercise, updateExercise, deleteExercise, reorderExercises),
+		RoutineHandler:  traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine, reorderRoutines),
+	}
 }

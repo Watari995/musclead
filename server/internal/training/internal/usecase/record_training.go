@@ -2,6 +2,7 @@ package trainingusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
@@ -21,6 +22,8 @@ type RecordTrainingOutput struct {
 type RecordTraining struct {
 	trainingRepo trainingdomain.TrainingRepository
 	txManager    dbtx.TransactionManager
+	// bestSetCache はトレーニング記録後に種目キャッシュを evict するために使う。
+	bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache
 }
 
 func (uc *RecordTraining) Execute(ctx context.Context, input RecordTrainingInput) (*RecordTrainingOutput, error) {
@@ -34,12 +37,21 @@ func (uc *RecordTraining) Execute(ctx context.Context, input RecordTrainingInput
 	}); err != nil {
 		return nil, err
 	}
+
+	// トレーニング記録後に種目キャッシュをevictする
+	for _, e := range training.Exercises() {
+		if err := uc.bestSetCache.Evict(ctx, input.UserID, e.ExerciseID()); err != nil {
+			slog.Warn("best set cache evict failed", "err", err)
+		}
+	}
+
 	return &RecordTrainingOutput{TrainingID: training.ID()}, nil
 }
 
-func NewRecordTraining(trainingRepo trainingdomain.TrainingRepository, txManager dbtx.TransactionManager) *RecordTraining {
+func NewRecordTraining(trainingRepo trainingdomain.TrainingRepository, txManager dbtx.TransactionManager, bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache) *RecordTraining {
 	return &RecordTraining{
 		trainingRepo: trainingRepo,
 		txManager:    txManager,
+		bestSetCache: bestSetCache,
 	}
 }

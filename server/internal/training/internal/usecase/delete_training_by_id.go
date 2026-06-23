@@ -2,6 +2,7 @@ package trainingusecase
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
@@ -15,6 +16,8 @@ type DeleteTrainingByIDInput struct {
 
 type DeleteTrainingByID struct {
 	trainingRepo trainingdomain.TrainingRepository
+	// bestSetCache はトレーニング削除後に種目キャッシュを evict するために使う。
+	bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache
 }
 
 func (uc *DeleteTrainingByID) Execute(ctx context.Context, input DeleteTrainingByIDInput) error {
@@ -29,9 +32,17 @@ func (uc *DeleteTrainingByID) Execute(ctx context.Context, input DeleteTrainingB
 	if err := uc.trainingRepo.DeleteByID(ctx, input.TrainingID); err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
+
+	// トレーニング削除後に種目キャッシュをevictする
+	for _, e := range training.Exercises() {
+		if err := uc.bestSetCache.Evict(ctx, input.UserID, e.ExerciseID()); err != nil {
+			slog.Warn("best set cache evict failed", "err", err)
+		}
+	}
+
 	return nil
 }
 
-func NewDeleteTrainingByID(trainingRepo trainingdomain.TrainingRepository) *DeleteTrainingByID {
-	return &DeleteTrainingByID{trainingRepo: trainingRepo}
+func NewDeleteTrainingByID(trainingRepo trainingdomain.TrainingRepository, bestSetCache trainingdomain.ExerciseBestSetTimeseriesCache) *DeleteTrainingByID {
+	return &DeleteTrainingByID{trainingRepo: trainingRepo, bestSetCache: bestSetCache}
 }
