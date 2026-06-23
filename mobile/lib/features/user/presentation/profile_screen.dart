@@ -64,6 +64,11 @@ class _ProfileBody extends ConsumerWidget {
     final t = context.tokens;
     final mode = ref.watch(themeModeProvider);
     final accent = ref.watch(accentProvider);
+    final versionText = ref.watch(_packageInfoProvider).when(
+      data: (info) => '${info.version} (${info.buildNumber})',
+      loading: () => '...',
+      error: (_, __) => '-',
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -141,11 +146,7 @@ class _ProfileBody extends ConsumerWidget {
               child: _row(
                 context,
                 'バージョン',
-                value: ref.watch(_packageInfoProvider).when(
-                  data: (info) => '${info.version} (${info.buildNumber})',
-                  loading: () => '...',
-                  error: (_, _) => '-',
-                ),
+                value: versionText,
                 chevron: false,
               ),
             ),
