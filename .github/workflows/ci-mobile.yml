@@ -27,6 +27,7 @@ jobs:
       - run: flutter pub get
       # 生成コード（*.freezed.dart / *.g.dart）は gitignore のため CI で再生成
       - run: dart run build_runner build
+      - run: dart format --output=write lib test && git diff lib/
       - run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze
       - run: flutter test --coverage
