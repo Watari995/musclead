@@ -106,6 +106,24 @@ func (m *MockRoutineRepository) DeleteByID(ctx context.Context, id valueobject.R
 	return m.Called(ctx, id).Error(0)
 }
 
+// --- ExerciseBestSetTimeseriesCache ---
+
+type MockExerciseBestSetTimeseriesCache struct{ mock.Mock }
+
+func (m *MockExerciseBestSetTimeseriesCache) FindByPeriod(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID, from, to time.Time) ([]*trainingdomain.BestSetView, bool, error) {
+	args := m.Called(ctx, userID, exerciseID, from, to)
+	views, _ := args.Get(0).([]*trainingdomain.BestSetView)
+	return views, args.Bool(1), args.Error(2)
+}
+
+func (m *MockExerciseBestSetTimeseriesCache) Save(ctx context.Context, userID valueobject.UserID, bestSet *trainingdomain.BestSetView) error {
+	return m.Called(ctx, userID, bestSet).Error(0)
+}
+
+func (m *MockExerciseBestSetTimeseriesCache) Evict(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID) error {
+	return m.Called(ctx, userID, exerciseID).Error(0)
+}
+
 // --- SubscriptionQuery ---
 
 type MockSubscriptionQuery struct{ mock.Mock }
