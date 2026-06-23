@@ -116,7 +116,7 @@ func buildFindBestSetsByExerciseIDSQL() string {
 			t.id AS id,
 			te.exercise_id AS exercise_id,
 			ROW_NUMBER() OVER (
-				PARTITION BY t.id --セッション単位でベストを選ぶ
+				PARTITION BY t.id
 				ORDER BY ts.weight_kg DESC, ts.reps DESC
 			) AS rn
 			FROM training_sets ts
