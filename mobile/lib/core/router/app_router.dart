@@ -32,6 +32,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
     refreshListenable: refresh,
+    onException: (context, state, router) {
+      // musclead://oauth/callback 等のカスタム URL スキームは go_router では
+      // ルート解決できないが、app_links が処理するため無視して問題ない。
+      if (state.uri.scheme == 'musclead') return;
+      router.go('/meals');
+    },
     redirect: (context, state) {
       final status = refresh.value;
       final loc = state.matchedLocation;
