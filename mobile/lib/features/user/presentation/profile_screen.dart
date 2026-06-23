@@ -59,11 +59,13 @@ class _ProfileBody extends ConsumerWidget {
     final t = context.tokens;
     final mode = ref.watch(themeModeProvider);
     final accent = ref.watch(accentProvider);
-    final versionText = ref.watch(packageInfoProvider).when(
-      data: (info) => '${info.version} (${info.buildNumber})',
-      loading: () => '...',
-      error: (_, __) => '-',
-    );
+    final versionText = ref
+        .watch(packageInfoProvider)
+        .when(
+          data: (info) => '${info.version} (${info.buildNumber})',
+          loading: () => '...',
+          error: (_, _) => '-',
+        );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
