@@ -88,7 +88,6 @@ func (e *myError) SetData(data ...map[string]any) MyError {
 }
 
 // ─── 汎用ファクトリ ───
-
 func NewInternalError() MyError {
 	return &myError{
 		status:      http.StatusInternalServerError,
