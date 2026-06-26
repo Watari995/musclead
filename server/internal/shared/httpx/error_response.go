@@ -32,6 +32,7 @@ func WriteError(w http.ResponseWriter, err error) {
 		})
 		return
 	}
+
 	// それ以外ならinternal server error
 	sentry.CaptureException(err)
 	WriteJSON(w, http.StatusInternalServerError, ErrorResponse{
