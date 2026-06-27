@@ -3,9 +3,10 @@
 import Link from "next/link";
 import type { Exercise } from "@/features/training/model/exercise";
 import type { ExerciseDraft, SetDraft } from "@/features/training/model/training-draft";
-import type { BestSetDTO } from "@/shared/api/client";
+import type { BestSetDTO, LastSessionSetsByExerciseDTO } from "@/shared/api/client";
 import { Button, Card, Label, NumberField, TextInput } from "@/shared/ui";
 import { BestSetBadge } from "./BestSetBadge";
+import { LastSessionBadge } from "./LastSessionBadge";
 import { SetField } from "./SetField";
 
 type Props = {
@@ -14,6 +15,8 @@ type Props = {
   exercises: Exercise[];
   bestSet: BestSetDTO | null;
   bestSetLoading: boolean;
+  lastSession: LastSessionSetsByExerciseDTO | null;
+  lastSessionLoading: boolean;
   onChange: (patch: Partial<Omit<ExerciseDraft, "key" | "sets" | "displayOrder">>) => void;
   onRemove: () => void;
   onMoveUp?: () => void;
@@ -33,6 +36,8 @@ export function ExerciseField({
   exercises,
   bestSet,
   bestSetLoading,
+  lastSession,
+  lastSessionLoading,
   onChange,
   onRemove,
   onMoveUp,
@@ -67,7 +72,10 @@ export function ExerciseField({
             </select>
           </Label>
           {exercise.exerciseID && (
-            <BestSetBadge bestSet={bestSet} loading={bestSetLoading} />
+            <>
+              <BestSetBadge bestSet={bestSet} loading={bestSetLoading} />
+              <LastSessionBadge lastSession={lastSession} loading={lastSessionLoading} />
+            </>
           )}
           {exercises.length === 0 && (
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
