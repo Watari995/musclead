@@ -85,7 +85,43 @@ func BestSetTimeseriesDataPointFromData(b *trainingdomain.BestSetView) BestSetTi
 }
 
 type BestSetTimeseriesResponse struct {
-	Period     string                           `json:"period"`
-	ExerciseID string                           `json:"exercise_id"`
-	DataPoints []BestSetTimeseriesDataPointDTO  `json:"data_points"`
+	Period     string                          `json:"period"`
+	ExerciseID string                          `json:"exercise_id"`
+	DataPoints []BestSetTimeseriesDataPointDTO `json:"data_points"`
+}
+
+type LastSessionSetDTO struct {
+	WeightKg  string `json:"weight_kg"`
+	Reps      int    `json:"reps"`
+	SetNumber int    `json:"set_number"`
+}
+
+func lastSessionSetFromData(s *trainingdomain.LastSessionSetView) LastSessionSetDTO {
+	return LastSessionSetDTO{
+		WeightKg:  s.WeightKg.String(),
+		Reps:      s.Reps.Value(),
+		SetNumber: s.SetNumber.Value(),
+	}
+}
+
+type LastSessionSetsByExerciseDTO struct {
+	ExerciseID  string              `json:"exercise_id"`
+	PerformedAt time.Time           `json:"performed_at"`
+	Sets        []LastSessionSetDTO `json:"sets"`
+}
+
+func LastSessionSetsByExerciseFromData(s *trainingdomain.LastSessionSetByExerciseView) LastSessionSetsByExerciseDTO {
+	sets := make([]LastSessionSetDTO, 0, len(s.Sets))
+	for _, set := range s.Sets {
+		sets = append(sets, lastSessionSetFromData(set))
+	}
+	return LastSessionSetsByExerciseDTO{
+		ExerciseID:  s.ExerciseID.Value(),
+		PerformedAt: s.PerformedAt,
+		Sets:        sets,
+	}
+}
+
+type ListLastSessionSetsResponse struct {
+	Sets []LastSessionSetsByExerciseDTO `json:"sets"`
 }

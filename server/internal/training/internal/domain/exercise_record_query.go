@@ -34,5 +34,5 @@ type ExerciseRecordQueryService interface {
 	//      t.started_at BETWEEN from AND to で絞り込み、ORDER BY started_at ASC で返す。
 	FindBestSetTimeseriesByExerciseID(ctx context.Context, userID valueobject.UserID, exerciseID valueobject.ExerciseID, from, to time.Time) ([]*BestSetView, error)
 	// 前回のセッションのセットをexerciseIDごとに返す
-	FindLastSessionSetByExerciseIDs(ctx context.Context, userID valueobject.UserID, exerciseIDs []valueobject.ExerciseID) ([]*LastSessionSetByExerciseView, error)
+	FindLastSessionSetsByExerciseIDs(ctx context.Context, userID valueobject.UserID, exerciseIDs []valueobject.ExerciseID) ([]*LastSessionSetByExerciseView, error)
 }
