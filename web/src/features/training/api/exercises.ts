@@ -9,7 +9,9 @@ import {
 import {
   apiClient,
   type BestSetDTO,
+  type LastSessionSetsByExerciseDTO,
   type ListBestSetsResponse,
+  type ListLastSessionSetsResponse,
   type ListExercisesResponse,
   type ReorderExercisesRequest,
   type UpsertExerciseRequest,
@@ -51,6 +53,8 @@ export const EXERCISES_QUERY_KEY = ["exercises", "all"] as const;
 const EXERCISE_QUERY_KEY = (id: string) => ["exercise", id] as const;
 const BEST_SETS_QUERY_KEY = (ids: string[]) =>
   ["exercises", "best-sets", ids] as const;
+const LAST_SESSION_SETS_QUERY_KEY = (ids: string[]) =>
+  ["exercises", "last-session-sets", ids] as const;
 
 export class ExerciseNameTakenError extends Error {
   constructor() {
@@ -121,6 +125,33 @@ export function useBestSetsQuery(exerciseIDs: string[]) {
       const map = new Map<string, BestSetDTO>();
       for (const b of list) {
         if (b.exercise_id) map.set(b.exercise_id, b);
+      }
+      return map;
+    },
+  });
+}
+
+// 複数種目の前回セッションセットを 1 リクエストでまとめて取得する。
+// exercise_id をキーにした Map にして返す。
+export function useLastSessionSetsQuery(exerciseIDs: string[]) {
+  const ids = Array.from(new Set(exerciseIDs.filter(Boolean))).sort();
+  return useQuery({
+    queryKey: LAST_SESSION_SETS_QUERY_KEY(ids),
+    enabled: ids.length > 0,
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+    queryFn: async (): Promise<Map<string, LastSessionSetsByExerciseDTO>> => {
+      const { data, error, response } = await apiClient.GET(
+        "/exercises/last-session-sets",
+        { params: { query: { exercise_ids: ids } } },
+      );
+      if (error) {
+        throw new Error(error.error?.message ?? `HTTP ${response.status}`);
+      }
+      const list = (data as ListLastSessionSetsResponse).sets ?? [];
+      const map = new Map<string, LastSessionSetsByExerciseDTO>();
+      for (const s of list) {
+        if (s.exercise_id) map.set(s.exercise_id, s);
       }
       return map;
     },

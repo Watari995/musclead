@@ -340,6 +340,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/exercises/last-session-sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 前回のセッションの記録を取得 */
+        get: {
+            parameters: {
+                query: {
+                    /** @description 対象 ExerciseID 一覧 */
+                    exercise_ids: string[];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ListLastSessionSetsResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/exercises/reorder": {
         parameters: {
             query?: never;
@@ -564,6 +621,228 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/exercises/{id}/best-set-timeseries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 種目のベストセット時系列取得
+         * @description 指定期間内のセッションごとのベストセット（最重量セット）を古い順で返す。
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description 期間 (1week, 1month, 3months, halfyear, 1year) */
+                    period?: string;
+                    /** @description これ以前のデータを取得 (ISO 8601) */
+                    before?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description 対象 ExerciseID */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_training_dto.BestSetTimeseriesResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/food_products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 食品名検索 */
+        get: {
+            parameters: {
+                query: {
+                    /** @description 食品名 */
+                    q: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_food_dto.SearchByNameResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** 食品登録 */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description 食品登録 */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_Watari995_musclead_internal_food_dto.CreateFoodProductRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_food_dto.CreateFoodProductResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/food_products/barcode/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 食品バーコード検索 */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description 食品バーコード */
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_food_dto.SearchByBarcodeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2611,6 +2890,35 @@ export interface components {
             email?: string;
             password?: string;
         };
+        "github_com_Watari995_musclead_internal_food_dto.CreateFoodProductRequest": {
+            barcode?: string;
+            calories?: number;
+            carbohydrate_g?: string;
+            fat_g?: string;
+            name?: string;
+            protein_g?: string;
+        };
+        "github_com_Watari995_musclead_internal_food_dto.CreateFoodProductResponse": {
+            food_product_id?: string;
+        };
+        "github_com_Watari995_musclead_internal_food_dto.FoodProductDTO": {
+            barcode?: string;
+            calories?: number;
+            carbohydrate_g?: string;
+            created_at?: string;
+            fat_g?: string;
+            id?: string;
+            name?: string;
+            protein_g?: string;
+            register_source?: string;
+            updated_at?: string;
+        };
+        "github_com_Watari995_musclead_internal_food_dto.SearchByBarcodeResponse": {
+            food_products?: components["schemas"]["github_com_Watari995_musclead_internal_food_dto.FoodProductDTO"][];
+        };
+        "github_com_Watari995_musclead_internal_food_dto.SearchByNameResponse": {
+            food_products?: components["schemas"]["github_com_Watari995_musclead_internal_food_dto.FoodProductDTO"][];
+        };
         "github_com_Watari995_musclead_internal_meal_dto.GenerateMealPhotoImagePresignedURLRequest": {
             content_type?: string;
         };
@@ -2746,6 +3054,17 @@ export interface components {
             /** @description weightは精度のためstringとして持つ */
             weight_kg?: string;
         };
+        "github_com_Watari995_musclead_internal_training_dto.BestSetTimeseriesDataPointDTO": {
+            performed_at?: string;
+            reps?: number;
+            training_id?: string;
+            weight_kg?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.BestSetTimeseriesResponse": {
+            data_points?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.BestSetTimeseriesDataPointDTO"][];
+            exercise_id?: string;
+            period?: string;
+        };
         "github_com_Watari995_musclead_internal_training_dto.ExerciseDTO": {
             created_at?: string;
             display_order?: number;
@@ -2754,12 +3073,25 @@ export interface components {
             updated_at?: string;
             user_id?: string;
         };
+        "github_com_Watari995_musclead_internal_training_dto.LastSessionSetDTO": {
+            reps?: number;
+            set_number?: number;
+            weight_kg?: string;
+        };
+        "github_com_Watari995_musclead_internal_training_dto.LastSessionSetsByExerciseDTO": {
+            exercise_id?: string;
+            performed_at?: string;
+            sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.LastSessionSetDTO"][];
+        };
         "github_com_Watari995_musclead_internal_training_dto.ListBestSetsResponse": {
             best_sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.BestSetDTO"][];
         };
         "github_com_Watari995_musclead_internal_training_dto.ListExercisesResponse": {
             exercises?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.ExerciseDTO"][];
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
+        };
+        "github_com_Watari995_musclead_internal_training_dto.ListLastSessionSetsResponse": {
+            sets?: components["schemas"]["github_com_Watari995_musclead_internal_training_dto.LastSessionSetsByExerciseDTO"][];
         };
         "github_com_Watari995_musclead_internal_training_dto.ListRoutinesResponse": {
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
