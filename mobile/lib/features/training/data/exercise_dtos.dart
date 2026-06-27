@@ -67,6 +67,42 @@ abstract class UpsertExerciseRequest with _$UpsertExerciseRequest {
 }
 
 @freezed
+abstract class LastSessionSetDto with _$LastSessionSetDto {
+  const factory LastSessionSetDto({
+    required int setNumber,
+    @DecimalStringConverter() required Decimal weightKg,
+    required int reps,
+  }) = _LastSessionSetDto;
+
+  factory LastSessionSetDto.fromJson(Map<String, dynamic> json) =>
+      _$LastSessionSetDtoFromJson(json);
+}
+
+@freezed
+abstract class LastSessionSetsByExerciseDto
+    with _$LastSessionSetsByExerciseDto {
+  const factory LastSessionSetsByExerciseDto({
+    required String exerciseId,
+    required DateTime performedAt,
+    @Default(<LastSessionSetDto>[]) List<LastSessionSetDto> sets,
+  }) = _LastSessionSetsByExerciseDto;
+
+  factory LastSessionSetsByExerciseDto.fromJson(Map<String, dynamic> json) =>
+      _$LastSessionSetsByExerciseDtoFromJson(json);
+}
+
+@freezed
+abstract class ListLastSessionSetsResponse with _$ListLastSessionSetsResponse {
+  const factory ListLastSessionSetsResponse({
+    @Default(<LastSessionSetsByExerciseDto>[])
+    List<LastSessionSetsByExerciseDto> sets,
+  }) = _ListLastSessionSetsResponse;
+
+  factory ListLastSessionSetsResponse.fromJson(Map<String, dynamic> json) =>
+      _$ListLastSessionSetsResponseFromJson(json);
+}
+
+@freezed
 abstract class BestSetTimeseriesDataPointDto
     with _$BestSetTimeseriesDataPointDto {
   const factory BestSetTimeseriesDataPointDto({
