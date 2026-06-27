@@ -67,6 +67,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   final List<_ExerciseDraft> _exercises = [];
   final TextEditingController _memo = TextEditingController();
   Map<String, BestSetDto> _bestSets = {};
+  Map<String, LastSessionSetsByExerciseDto> _lastSessionSets = {};
   bool _saving = false;
   String? _error;
 
@@ -84,7 +85,10 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         _exercises.add(_ExerciseDraft(e.exerciseId, e.name));
       }
     }
-    if (_exercises.isNotEmpty) _loadBestSets();
+    if (_exercises.isNotEmpty) {
+      _loadBestSets();
+      _loadLastSessionSets();
+    }
   }
 
   void _initFromTraining(TrainingDto training) {
@@ -127,10 +131,25 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     }
   }
 
+  Future<void> _loadLastSessionSets() async {
+    final ids = _exercises.map((e) => e.exerciseId).toList();
+    if (ids.isEmpty) return;
+    try {
+      final map = await ref
+          .read(trainingRepositoryProvider)
+          .lastSessionSets(ids);
+      if (!mounted) return;
+      setState(() => _lastSessionSets = map);
+    } catch (_) {
+      // 前回セッションは取得できなくても致命的でないため無視
+    }
+  }
+
   void _addExercise(ExerciseDto ex) {
     if (_exercises.any((e) => e.exerciseId == ex.id)) return;
     setState(() => _exercises.add(_ExerciseDraft(ex.id, ex.name)));
     _loadBestSets();
+    _loadLastSessionSets();
   }
 
   void _removeExercise(int i) => setState(() {
@@ -379,6 +398,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final e = _exercises[i];
     final t = context.tokens;
     final best = _bestSets[e.exerciseId];
+    final lastSession = _lastSessionSets[e.exerciseId];
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: AppCard(
@@ -419,6 +439,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               ],
             ),
             if (best != null) _bestSetLine(best),
+            if (lastSession != null && lastSession.sets.isNotEmpty)
+              _lastSessionLine(lastSession),
             const SizedBox(height: 4),
             for (var si = 0; si < e.sets.length; si++) _setRow(i, si),
             Align(
@@ -432,6 +454,37 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             _exerciseMemo(e),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _lastSessionLine(LastSessionSetsByExerciseDto lastSession) {
+    final t = context.tokens;
+    final d = lastSession.performedAt.toLocal();
+    final date = '${d.year}/${d.month}/${d.day}';
+    final setsText = lastSession.sets
+        .map((s) => '${s.setNumber}. ${s.weightKg}kg×${s.reps}')
+        .join('  ');
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 2),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '📅 前回 ',
+              style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
+            ),
+            TextSpan(
+              text: '($date)  ',
+              style: TextStyle(color: t.muted),
+            ),
+            TextSpan(
+              text: setsText,
+              style: TextStyle(color: t.muted),
+            ),
+          ],
+        ),
+        style: const TextStyle(fontSize: 12),
       ),
     );
   }

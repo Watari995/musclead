@@ -20,6 +20,7 @@ type ExerciseHandler struct {
 	findBestSets         *trainingusecase.FindBestSetsByExerciseIDs
 	getBestSetTimeseries *trainingusecase.GetExerciseBestSetTimeseries
 	list                 *trainingusecase.ListExercises
+	findLastSessionSets  *trainingusecase.FindLastSessionSetsByExerciseIDs
 	create               *trainingusecase.CreateExercise
 	update               *trainingusecase.UpdateExercise
 	delete               *trainingusecase.DeleteExerciseByID
@@ -31,6 +32,7 @@ func NewExerciseHandler(
 	findBestSets *trainingusecase.FindBestSetsByExerciseIDs,
 	getBestSetTimeseries *trainingusecase.GetExerciseBestSetTimeseries,
 	list *trainingusecase.ListExercises,
+	findLastSessionSets *trainingusecase.FindLastSessionSetsByExerciseIDs,
 	create *trainingusecase.CreateExercise,
 	update *trainingusecase.UpdateExercise,
 	delete *trainingusecase.DeleteExerciseByID,
@@ -41,6 +43,7 @@ func NewExerciseHandler(
 		findBestSets:         findBestSets,
 		getBestSetTimeseries: getBestSetTimeseries,
 		list:                 list,
+		findLastSessionSets:  findLastSessionSets,
 		create:               create,
 		update:               update,
 		delete:               delete,
@@ -51,6 +54,7 @@ func NewExerciseHandler(
 	mux.HandleFunc("GET /exercises/best-sets", h.FindBestSets)
 	mux.HandleFunc("GET /exercises/{id}/best-set-timeseries", h.GetBestSetTimeseries)
 	mux.HandleFunc("GET /exercises", h.List)
+	mux.HandleFunc("GET /exercises/last-session-sets", h.FindLastSessionSets)
 	mux.HandleFunc("POST /exercises", h.Create)
 	mux.HandleFunc("POST /exercises/reorder", h.Reorder)
 	mux.HandleFunc("PUT /exercises/{id}", h.Update)
@@ -157,6 +161,44 @@ func (h *ExerciseHandler) List(w http.ResponseWriter, r *http.Request) {
 		Pagination: shareddto.PaginationDTO(output.Pagination),
 	}
 	httpx.WriteJSON(w, http.StatusOK, resp)
+}
+
+// FindLastSessionSetsByExerciseIDs godoc
+//
+// @Summary 前回のセッションの記録を取得
+// @Tags exercises
+// @Produce json
+// @Security BearerAuth
+// @Param exercise_ids query []string true "対象 ExerciseID 一覧" collectionFormat(multi)
+// @Success 200 {object} trainingdto.ListLastSessionSetsResponse
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /exercises/last-session-sets [get]
+func (h *ExerciseHandler) FindLastSessionSets(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	exerciseIDs := make([]valueobject.ExerciseID, 0, len(r.URL.Query()["exercise_ids"]))
+	for _, raw := range r.URL.Query()["exercise_ids"] {
+		id, err := valueobject.NewPrimaryIDFromString[valueobject.ExerciseID](raw)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid exerciseID"))
+			return
+		}
+		exerciseIDs = append(exerciseIDs, *id)
+	}
+	output, err := h.findLastSessionSets.Execute(r.Context(), trainingusecase.FindLastSessionSetsByExerciseIDsInput{UserID: userID, ExerciseIDs: exerciseIDs})
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, trainingdto.ListLastSessionSetsResponse{
+		Sets: lo.Map(output.ExerciseRecords, func(s *trainingdomain.LastSessionSetByExerciseView, _ int) trainingdto.LastSessionSetsByExerciseDTO {
+			return trainingdto.LastSessionSetsByExerciseFromData(s)
+		}),
+	})
 }
 
 // Create godoc

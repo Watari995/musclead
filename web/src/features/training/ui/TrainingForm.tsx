@@ -16,6 +16,7 @@ import { type RecordTrainingRequest } from "@/shared/api/client";
 import {
   useBestSetsQuery,
   useExercisesQuery,
+  useLastSessionSetsQuery,
 } from "@/features/training/api/exercises";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 import { ExerciseField } from "./ExerciseField";
@@ -58,6 +59,9 @@ export function TrainingForm({
     .filter(Boolean);
   const bestSetsQuery = useBestSetsQuery(selectedExerciseIDs);
   const bestSets = bestSetsQuery.data;
+
+  const lastSessionSetsQuery = useLastSessionSetsQuery(selectedExerciseIDs);
+  const lastSessionSets = lastSessionSetsQuery.data;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +121,8 @@ export function TrainingForm({
               exercises={exercises}
               bestSet={bestSets?.get(exercise.exerciseID) ?? null}
               bestSetLoading={bestSetsQuery.isLoading}
+              lastSession={lastSessionSets?.get(exercise.exerciseID) ?? null}
+              lastSessionLoading={lastSessionSetsQuery.isLoading}
               onChange={(patch) =>
                 setDraft((d) => updateExercise(d, index, patch))
               }

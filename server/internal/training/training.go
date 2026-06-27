@@ -8,8 +8,8 @@ import (
 
 	purchasepublicfunctions "github.com/Watari995/musclead/internal/purchase/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
-	traininghandler "github.com/Watari995/musclead/internal/training/internal/handler"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
+	traininghandler "github.com/Watari995/musclead/internal/training/internal/handler"
 	traininginfra "github.com/Watari995/musclead/internal/training/internal/infra"
 	trainingusecase "github.com/Watari995/musclead/internal/training/internal/usecase"
 	"github.com/go-gorp/gorp/v3"
@@ -76,10 +76,11 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	// exercise record
 	findBestSets := trainingusecase.NewFindBestSetsByExerciseIDs(exerciseRecordQueryService)
 	getBestSetTimeseries := trainingusecase.NewGetExerciseBestSetTimeseries(exerciseRecordQueryService, bestSetCache)
+	findLastSessionSets := trainingusecase.NewFindLastSessionSetsByExerciseIDs(exerciseRecordQueryService)
 
 	return &Module{
 		TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining),
-		ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, findBestSets, getBestSetTimeseries, listExercises, createExercise, updateExercise, deleteExercise, reorderExercises),
+		ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, findBestSets, getBestSetTimeseries, listExercises, findLastSessionSets, createExercise, updateExercise, deleteExercise, reorderExercises),
 		RoutineHandler:  traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine, reorderRoutines),
 	}
 }
