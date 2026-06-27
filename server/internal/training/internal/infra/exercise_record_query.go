@@ -184,3 +184,112 @@ func toBestSetViewFromRow(row bestSetsByExerciseIDsRow) (*trainingdomain.BestSet
 		ExerciseID:  *exerciseID,
 	}, nil
 }
+
+func buildFindLastSessionSetsByExerciseIDsSQL(exerciseIDs [][]byte) (string, []any) {
+	placeholders, args := sqlquery.InPlaceholders(exerciseIDs)
+	return fmt.Sprintf(`
+	SELECT exercise_id, performed_at, weight_kg, reps, set_number
+	FROM (
+		SELECT
+		  te.exercise_id AS exercise_id,
+			t.started_at AS performed_at,
+			ts.weight_kg AS weight_kg,
+			ts.reps AS reps,
+			ts.set_number AS set_number,
+			DENSE_RANK() OVER (
+				PARTITION BY te.exercise_id
+				ORDER BY t.started_at DESC -- 直近のセッションを一つ取得する
+			) AS rn
+		FROM training_sets ts
+		JOIN training_exercises te ON ts.training_exercise_id = te.id
+		JOIN trainings t ON te.training_id = t.id
+		-- 途中でセッションを終了した時などバグりそうなので今日のセッションは除外する
+		WHERE t.user_id = ? AND te.exercise_id IN (%s) AND DATE(t.started_at) <> CURDATE()
+	) ranked
+	WHERE ranked.rn = 1
+	ORDER BY exercise_id, set_number
+	`, placeholders), args
+}
+
+type lastSessionSetsRow struct {
+	ExerciseID  []byte    `db:"exercise_id"`
+	PerformedAt time.Time `db:"performed_at"`
+	WeightKg    string    `db:"weight_kg"`
+	Reps        int32     `db:"reps"`
+	SetNumber   int32     `db:"set_number"`
+}
+
+func (s *exerciseRecordQueryService) FindLastSessionSetsByExerciseIDs(ctx context.Context, userID valueobject.UserID, exerciseIDs []valueobject.ExerciseID) ([]*trainingdomain.LastSessionSetByExerciseView, error) {
+	// 0件の時はerrorになるため先にチェックしてnilを返す
+	if len(exerciseIDs) == 0 {
+		return nil, nil
+	}
+	q := dbtx.Querier(ctx, s.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	exerciseIDBytes := make([][]byte, 0, len(exerciseIDs))
+	for _, e := range exerciseIDs {
+		bytes, err := e.Bytes()
+		if err != nil {
+			return nil, err
+		}
+		exerciseIDBytes = append(exerciseIDBytes, bytes)
+	}
+	var rows []lastSessionSetsRow
+	sqlStr, inArgs := buildFindLastSessionSetsByExerciseIDsSQL(exerciseIDBytes)
+	// userIDを先頭に追加する
+	args := append([]any{userIDBytes}, inArgs...)
+	if _, err = q.Select(&rows, sqlStr, args...); err != nil {
+		return nil, err
+	}
+
+	byExerciseID := map[string]*trainingdomain.LastSessionSetByExerciseView{}
+	for _, r := range rows {
+		lastSessionSet, err := toLastSessionSetByExerciseViewFromRow(r)
+		if err != nil {
+			return nil, err
+		}
+		if v, ok := byExerciseID[lastSessionSet.ExerciseID.String()]; !ok {
+			byExerciseID[lastSessionSet.ExerciseID.String()] = lastSessionSet
+		} else {
+			v.Sets = append(v.Sets, lastSessionSet.Sets[0])
+		}
+	}
+	result := make([]*trainingdomain.LastSessionSetByExerciseView, 0, len(byExerciseID))
+	for _, v := range byExerciseID {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func toLastSessionSetByExerciseViewFromRow(row lastSessionSetsRow) (*trainingdomain.LastSessionSetByExerciseView, error) {
+	exerciseID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.ExerciseID](row.ExerciseID)
+	if err != nil {
+		return nil, err
+	}
+	setNumber, err := valueobject.NewNonNegativeInt(int(row.SetNumber))
+	if err != nil {
+		return nil, err
+	}
+	weightKg, err := valueobject.NewNonNegativeDecimalFromString(row.WeightKg)
+	if err != nil {
+		return nil, err
+	}
+	reps, err := valueobject.NewNonNegativeInt(int(row.Reps))
+	if err != nil {
+		return nil, err
+	}
+	return &trainingdomain.LastSessionSetByExerciseView{
+		ExerciseID:  *exerciseID,
+		PerformedAt: row.PerformedAt,
+		Sets: []*trainingdomain.LastSessionSetView{
+			{
+				SetNumber: *setNumber,
+				WeightKg:  *weightKg,
+				Reps:      *reps,
+			},
+		},
+	}, nil
+}

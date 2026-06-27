@@ -63,6 +63,20 @@ class TrainingRepository {
         return ListBestSetsResponse.fromJson(res.data!).bestSets;
       });
 
+  /// 複数種目の前回セッションセットを一括取得する。exercise_id をキーにした Map を返す。
+  Future<Map<String, LastSessionSetsByExerciseDto>> lastSessionSets(
+    List<String> exerciseIds,
+  ) => guardApi(() async {
+    if (exerciseIds.isEmpty) return <String, LastSessionSetsByExerciseDto>{};
+    final res = await _dio.get<Map<String, dynamic>>(
+      '/exercises/last-session-sets',
+      queryParameters: {'exercise_ids': exerciseIds},
+      options: Options(listFormat: ListFormat.multi),
+    );
+    final list = ListLastSessionSetsResponse.fromJson(res.data!).sets;
+    return {for (final s in list) s.exerciseId: s};
+  });
+
   /// 種目マスタを渡した順に並び替える。
   Future<void> reorderExercises(List<String> exerciseIds) => guardApi(
     () => _dio.post<void>(
