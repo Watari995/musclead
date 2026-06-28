@@ -10,8 +10,8 @@ import (
 )
 
 type trainingQuery struct {
-	listTrainingDatesByMonth   *ListTrainingDatesByMonth
-	listTrainingSummaryByDate  *ListTrainingSummaryByDate
+	listTrainingDatesByMonth  *ListTrainingDatesByMonth
+	listTrainingSummaryByDate *ListTrainingSummaryByDate
 }
 
 func NewTrainingQuery(
@@ -36,7 +36,7 @@ func (q *trainingQuery) ListTrainingDatesByMonth(ctx context.Context, userID val
 	return output.Dates, nil
 }
 
-func (q *trainingQuery) ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*trainingdomain.TrainingSummaryView, error) {
+func (q *trainingQuery) ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*trainingpublicfunctions.TrainingSummaryView, error) {
 	output, err := q.listTrainingSummaryByDate.Execute(ctx, ListTrainingSummaryByDateInput{
 		UserID: userID,
 		Date:   date,
@@ -44,5 +44,19 @@ func (q *trainingQuery) ListSummaryByDate(ctx context.Context, userID valueobjec
 	if err != nil {
 		return nil, err
 	}
-	return output.TrainingSummaries, nil
+	return toTrainingSummaryViews(output.TrainingSummaries), nil
+}
+
+func toTrainingSummaryViews(views []*trainingdomain.TrainingSummaryView) []*trainingpublicfunctions.TrainingSummaryView {
+	result := make([]*trainingpublicfunctions.TrainingSummaryView, 0, len(views))
+	for _, v := range views {
+		result = append(result, &trainingpublicfunctions.TrainingSummaryView{
+			TrainingID:    v.TrainingID,
+			StartedAt:     v.StartedAt,
+			EndedAt:       v.EndedAt,
+			ExerciseCount: v.ExerciseCount,
+			SetCount:      v.SetCount,
+		})
+	}
+	return result
 }

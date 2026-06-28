@@ -36,7 +36,7 @@ func (q *mealQuery) ListMealDatesByMonth(ctx context.Context, userID valueobject
 	return output.Dates, nil
 }
 
-func (q *mealQuery) ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*mealdomain.MealSummaryView, error) {
+func (q *mealQuery) ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*mealpublicfunctions.MealSummaryView, error) {
 	output, err := q.listMealSummaryByDate.Execute(ctx, ListMealSummaryByDateInput{
 		UserID: userID,
 		Date:   date,
@@ -44,5 +44,21 @@ func (q *mealQuery) ListSummaryByDate(ctx context.Context, userID valueobject.Us
 	if err != nil {
 		return nil, err
 	}
-	return output.MealSummaries, nil
+	return toMealSummaryViews(output.MealSummaries), nil
+}
+
+func toMealSummaryViews(views []*mealdomain.MealSummaryView) []*mealpublicfunctions.MealSummaryView {
+	result := make([]*mealpublicfunctions.MealSummaryView, 0, len(views))
+	for _, v := range views {
+		result = append(result, &mealpublicfunctions.MealSummaryView{
+			MealID:        v.MealID,
+			MealType:      v.MealType,
+			EatenAt:       v.EatenAt,
+			Calories:      v.Calories,
+			ProteinG:      v.ProteinG,
+			FatG:          v.FatG,
+			CarbohydrateG: v.CarbohydrateG,
+		})
+	}
+	return result
 }
