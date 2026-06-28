@@ -6,8 +6,9 @@ import (
 
 	mealpublicfunctions "github.com/Watari995/musclead/internal/meal/interface/publicfunctions"
 	trainingpublicfunctions "github.com/Watari995/musclead/internal/training/interface/publicfunctions"
-	weightpublicfunctions "github.com/Watari995/musclead/internal/weight/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/valueobject"
+	weightpublicfunctions "github.com/Watari995/musclead/internal/weight/interface/publicfunctions"
+	"golang.org/x/sync/errgroup"
 )
 
 type GetDailySummaryInput struct {
@@ -40,5 +41,36 @@ func NewGetDailySummary(
 }
 
 func (uc *GetDailySummary) Execute(ctx context.Context, input GetDailySummaryInput) (*GetDailySummaryOutput, error) {
-	panic("not implemented")
+	g, ctx := errgroup.WithContext(ctx)
+
+	var trainings []*trainingpublicfunctions.TrainingSummaryView
+	g.Go(func() error {
+		var err error
+		trainings, err = uc.trainingQuery.ListSummaryByDate(ctx, input.UserID, input.Date)
+		return err
+	})
+
+	var meals []*mealpublicfunctions.MealSummaryView
+	g.Go(func() error {
+		var err error
+		meals, err = uc.mealQuery.ListSummaryByDate(ctx, input.UserID, input.Date)
+		return err
+	})
+
+	var weights []*weightpublicfunctions.WeightSummaryView
+	g.Go(func() error {
+		var err error
+		weights, err = uc.weightQuery.ListSummaryByDate(ctx, input.UserID, input.Date)
+		return err
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	return &GetDailySummaryOutput{
+		Trainings: trainings,
+		Meals:     meals,
+		Weights:   weights,
+	}, nil
 }

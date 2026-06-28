@@ -102,12 +102,17 @@ server/internal/calendar/
 
 ### goroutine 実装方針
 
-`monthly-summary` / `daily-summary` ともに training・weight・meal の3クエリを並列実行する。
+`monthly-summary` / `daily-summary` ともに training・weight・meal の3クエリを並列実行する。ユースケースによって異なるエラー戦略を採用する。
 
-**パターン: `sync.WaitGroup` + 個別エラーハンドリング**
+**`monthly-summary`: `sync.WaitGroup` + 部分失敗許容**
 
-`errgroup` を使わない理由: 1つのクエリが失敗しても他の成功データを返すため（部分失敗許容）。
+カレンダーの点は一部欠けても画面として成立するため、失敗したクエリの結果をスキップして残りを返す。
 各 goroutine は自身の結果とエラーを独立した変数に書き込み、`WaitGroup.Wait()` 後にまとめてレスポンスを組み立てる。
+
+**`daily-summary`: `errgroup` + all-or-nothing**
+
+詳細画面でデータが部分的に欠けると「記録がない」と誤読されるため、いずれか1つでも失敗した場合はエラーを返す。
+`errgroup.WithContext` を用い、1つの goroutine が失敗した時点で context がキャンセルされ他の goroutine も停止する。
 
 ### タイムゾーン
 
@@ -120,7 +125,7 @@ server/internal/calendar/
 ## 代替案
 
 - **`home` モジュールとして新設**: フロントエンドの概念をバックエンドに持ち込むため不採用。
-- **`errgroup` で並列処理**: 1つ失敗で全キャンセルになり部分失敗許容ができないため不採用。
+- **`daily-summary` を `WaitGroup` + 部分返却**: 詳細画面でデータが欠けると記録なしと誤読されるため不採用。`errgroup` で all-or-nothing とする。
 - **色設定をクライアント側に持つ**: アプリ削除で設定が消えるため不採用。
 
 ## 影響
