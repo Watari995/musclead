@@ -25,6 +25,7 @@ func NewModule(dbmap *gorp.DbMap, redisClient *redis.Client) *Module {
 	// repository
 	dbmap.AddTableWithName(weightinfra.WeightModel{}, "weights").SetKeys(false, "ID")
 	repo := weightinfra.NewWeightRepository(dbmap)
+	weightQueryService := weightinfra.NewWeightQueryService(dbmap)
 	var cache weightdomain.WeightTimeseriesCache
 	if redisClient != nil {
 		cache = weightinfra.NewRedisWeightTimeseriesCache(redisClient, 24*time.Hour)
@@ -40,8 +41,10 @@ func NewModule(dbmap *gorp.DbMap, redisClient *redis.Client) *Module {
 	delete := weightusecase.NewDeleteWeightByID(repo, cache)
 	getTimeseries := weightusecase.NewGetWeightTimeseries(repo, cache)
 	checkIfExistsWeightByUserIDAndMeasuredAt := weightusecase.NewCheckIfExistsWeightByUserIDAndMeasuredAt(repo)
+	listWeightDatesByMonth := weightusecase.NewListWeightDatesByMonth(weightQueryService)
+	listWeightSummaryByDate := weightusecase.NewListWeightSummaryByDate(weightQueryService)
 	weightCommand := weightusecase.NewWeightCommand(record)
-	weightQuery := weightusecase.NewWeightQuery(checkIfExistsWeightByUserIDAndMeasuredAt)
+	weightQuery := weightusecase.NewWeightQuery(checkIfExistsWeightByUserIDAndMeasuredAt, listWeightDatesByMonth, listWeightSummaryByDate)
 
 	return &Module{
 		Handler:       weighthandler.New(record, find, list, update, delete, getTimeseries),
