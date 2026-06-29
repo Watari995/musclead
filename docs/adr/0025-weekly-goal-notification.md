@@ -12,12 +12,14 @@
 
 ## 決定
 
-### 新規モジュール構成
+### モジュール構成
+
+`user_weekly_goals` はユーザー設定の一部として `user` モジュールに統合する。`goal` を独立モジュールとするほど大きな関心事ではなく、`user_preferences` と同じ文脈で管理するのが自然なため。
 
 ```
-server/internal/goal/          -- ユーザーの週次目標 CRUD
-server/internal/notification/  -- アプリ内通知の生成・既読管理
-server/cmd/goal-checker/       -- 週次チェック worker（goroutine/channel 本体）
+server/internal/user/          -- 既存。user_weekly_goals を追加
+server/internal/notification/  -- アプリ内通知の生成・既読管理（新規）
+server/cmd/goal-checker/       -- 週次チェック worker（goroutine/channel 本体）（新規）
 ```
 
 ### テーブル設計
@@ -49,8 +51,8 @@ server/cmd/goal-checker/       -- 週次チェック worker（goroutine/channel 
 
 | メソッド | パス | 説明 |
 |---|---|---|
-| `GET` | `/goals` | 自分の目標取得 |
-| `PUT` | `/goals` | 目標更新（未設定は null） |
+| `GET` | `/user/weekly-goal` | 自分の目標取得 |
+| `PUT` | `/user/weekly-goal` | 目標更新（未設定は null） |
 | `GET` | `/notifications` | 通知一覧（`unread_count` 含む） |
 | `GET` | `/notifications/:id` | 通知詳細 |
 | `PUT` | `/notifications/:id/read` | 既読化 |
@@ -105,11 +107,12 @@ ticker(日曜23時)
 - **メール通知（Resend）**: 週1通知でメールは過剰。アプリ内通知の方が UX として自然。
 - **毎日チェック + 重複排除ロジック**: 週1判定で十分なため複雑性を避けて不採用。
 - **EAV（goal_type / target_value の行持ち）**: 型安全性が下がるため不採用。カラム持ちで明示的に管理する。
+- **`goal` を独立モジュールとする**: `user_preferences` と同じくユーザー設定の一部であるため `user` モジュールに統合。独立させるほどの大きさではない。
 
 ## 影響
 
 - migration: `user_weekly_goals`、`notifications` テーブルを新規作成
-- `server/internal/goal/` を新規作成し `main.go` にルート追加
+- `server/internal/user/` に `user_weekly_goals` のドメイン・infra・usecase・handler を追加
 - `server/internal/notification/` を新規作成し `main.go` にルート追加
 - `server/cmd/goal-checker/` に worker を新規作成
 - Mobile: ホームタブヘッダーにベルアイコン追加、通知一覧・詳細画面を新規作成

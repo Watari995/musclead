@@ -43,3 +43,5 @@ type SubscriptionID struct{ PrimaryIDBase }
 type MealTemplateID struct{ PrimaryIDBase }
 type FoodProductID struct{ PrimaryIDBase }
 type TokenID struct{ PrimaryIDBase }
+type UserWeeklyGoalID struct{ PrimaryIDBase }
+type NotificationID struct{ PrimaryIDBase }
