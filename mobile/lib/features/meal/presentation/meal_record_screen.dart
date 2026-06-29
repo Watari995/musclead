@@ -141,8 +141,7 @@ class MealRecordScreen extends HookConsumerWidget {
         memo: memoCtrl.text.trim().isEmpty ? null : memoCtrl.text.trim(),
         photos: photos,
         foodProductId: selectedFoodId.value,
-        servingCount:
-            selectedFoodId.value != null ? servingCount.value : null,
+        servingCount: selectedFoodId.value != null ? servingCount.value : null,
       );
       try {
         final repo = ref.read(mealRepositoryProvider);
@@ -247,8 +246,7 @@ class MealRecordScreen extends HookConsumerWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.add, size: 18),
-                      onPressed: () =>
-                          updateServing(servingCount.value + 0.5),
+                      onPressed: () => updateServing(servingCount.value + 0.5),
                     ),
                   ],
                 ),
