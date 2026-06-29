@@ -26,6 +26,7 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	// repositoryを作成
 	dbmap.AddTableWithName(userinfra.UserModel{}, "users").SetKeys(false, "ID")
 	dbmap.AddTableWithName(userinfra.UserPreferencesModel{}, "user_preferences").SetKeys(false, "ID")
+	dbmap.AddTableWithName(userinfra.UserWeeklyGoalModel{}, "user_weekly_goals").SetKeys(false, "ID")
 	repo := userinfra.NewUserRepository(dbmap)
 	prefsRepo := userinfra.NewUserPreferencesRepository(dbmap)
 	hasher := userinfra.NewBcryptPasswordHasher()
@@ -35,8 +36,11 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	updateUser := userusecase.NewUpdateUser(repo, storageClient)
 	delete := userusecase.NewDeleteUser(repo)
 	generateProfileImagePresignedURL := userusecase.NewGenerateProfileImagePresignedURL(storageClient)
+	weeklyGoalRepo := userinfra.NewUserWeeklyGoalRepository(dbmap)
 	me := userusecase.NewMe(repo, prefsRepo)
 	updatePreferences := userusecase.NewUpdatePreferences(prefsRepo)
+	getWeeklyGoal := userusecase.NewGetWeeklyGoal(weeklyGoalRepo)
+	upsertWeeklyGoal := userusecase.NewUpsertWeeklyGoal(weeklyGoalRepo)
 
 	authenticate := userusecase.NewAuthenticate(repo, hasher)
 	userCommand := userusecase.NewUserCommand(authenticate)
@@ -48,6 +52,7 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	authedMux := http.NewServeMux()
 	userhandler.RegisterAuthenticatedHandlers(authedMux, urlBuilder, me, find, updateUser, delete, generateProfileImagePresignedURL)
 	userhandler.RegisterAuthenticatedPreferencesHandlers(authedMux, updatePreferences)
+	userhandler.RegisterAuthenticatedWeeklyGoalHandlers(authedMux, getWeeklyGoal, upsertWeeklyGoal)
 
 	return &Module{
 		PublicHandler: userhandler.NewPublic(register),
