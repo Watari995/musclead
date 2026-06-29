@@ -3,7 +3,6 @@ package notification
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	notificationpublicfunctions "github.com/Watari995/musclead/internal/notification/interface/publicfunctions"
@@ -44,7 +43,7 @@ type notificationCommand struct {
 	create *notificationusecase.CreateNotification
 }
 
-func (c *notificationCommand) Create(ctx context.Context, userID valueobject.UserID, notificationType string, metadata json.RawMessage) error {
+func (c *notificationCommand) Create(ctx context.Context, userID valueobject.UserID, notificationType valueobject.NotificationType, metadata valueobject.Metadata) error {
 	return c.create.Execute(ctx, notificationusecase.CreateNotificationInput{
 		UserID:           userID,
 		NotificationType: notificationType,

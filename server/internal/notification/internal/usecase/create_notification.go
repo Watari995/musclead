@@ -2,7 +2,6 @@ package notificationusecase
 
 import (
 	"context"
-	"encoding/json"
 
 	notificationdomain "github.com/Watari995/musclead/internal/notification/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -10,8 +9,8 @@ import (
 
 type CreateNotificationInput struct {
 	UserID           valueobject.UserID
-	NotificationType string
-	Metadata         json.RawMessage
+	NotificationType valueobject.NotificationType
+	Metadata         valueobject.Metadata
 }
 
 type CreateNotification struct {
@@ -23,6 +22,12 @@ func NewCreateNotification(notificationRepo notificationdomain.NotificationRepos
 }
 
 func (uc *CreateNotification) Execute(ctx context.Context, input CreateNotificationInput) error {
-	// TODO: implement
+	if err := uc.notificationRepo.Save(ctx, notificationdomain.CreateNotification(
+		input.UserID,
+		input.NotificationType,
+		input.Metadata,
+	)); err != nil {
+		return err
+	}
 	return nil
 }
