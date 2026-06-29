@@ -21,6 +21,8 @@ type Meal struct {
 	fatG          *valueobject.NonNegativeDecimal
 	carbohydrateG *valueobject.NonNegativeDecimal
 	memo          *valueobject.String1000
+	foodProductID *valueobject.FoodProductID
+	servingCount  valueobject.NonNegativeDecimal
 	createdAt     time.Time
 	updatedAt     time.Time
 
@@ -63,6 +65,14 @@ func (m *Meal) Memo() *valueobject.String1000 {
 	return m.memo
 }
 
+func (m *Meal) FoodProductID() *valueobject.FoodProductID {
+	return m.foodProductID
+}
+
+func (m *Meal) ServingCount() valueobject.NonNegativeDecimal {
+	return m.servingCount
+}
+
 func (m *Meal) CreatedAt() time.Time {
 	return m.createdAt
 }
@@ -88,6 +98,8 @@ type UpdateMealParams struct {
 	FatG          *valueobject.NonNegativeDecimal
 	CarbohydrateG *valueobject.NonNegativeDecimal
 	Memo          *valueobject.String1000
+	FoodProductID *valueobject.FoodProductID
+	ServingCount  valueobject.NonNegativeDecimal
 	Photos        []PhotoSpec
 }
 
@@ -101,6 +113,8 @@ func (m *Meal) Update(
 	m.fatG = params.FatG
 	m.carbohydrateG = params.CarbohydrateG
 	m.memo = params.Memo
+	m.foodProductID = params.FoodProductID
+	m.servingCount = params.ServingCount
 	m.photos = params.Photos
 	m.updatedAt = time.Now()
 }
@@ -114,6 +128,8 @@ func CreateMeal(
 	fatG *valueobject.NonNegativeDecimal,
 	carbohydrateG *valueobject.NonNegativeDecimal,
 	memo *valueobject.String1000,
+	foodProductID *valueobject.FoodProductID,
+	servingCount valueobject.NonNegativeDecimal,
 	photos []PhotoSpec,
 ) *Meal {
 	now := time.Now()
@@ -127,6 +143,8 @@ func CreateMeal(
 		fatG:          fatG,
 		carbohydrateG: carbohydrateG,
 		memo:          memo,
+		foodProductID: foodProductID,
+		servingCount:  servingCount,
 		createdAt:     now,
 		updatedAt:     now,
 		photos:        photos,
@@ -143,6 +161,8 @@ func NewMeal(
 	fatG *valueobject.NonNegativeDecimal,
 	carbohydrateG *valueobject.NonNegativeDecimal,
 	memo *valueobject.String1000,
+	foodProductID *valueobject.FoodProductID,
+	servingCount valueobject.NonNegativeDecimal,
 	createdAt time.Time,
 	updatedAt time.Time,
 	photos []PhotoSpec,
@@ -157,6 +177,8 @@ func NewMeal(
 		fatG:          fatG,
 		carbohydrateG: carbohydrateG,
 		memo:          memo,
+		foodProductID: foodProductID,
+		servingCount:  servingCount,
 		createdAt:     createdAt,
 		updatedAt:     updatedAt,
 		photos:        photos,

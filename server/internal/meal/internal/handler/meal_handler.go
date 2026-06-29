@@ -129,6 +129,23 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	var foodProductID *valueobject.FoodProductID
+	if req.FoodProductID != nil {
+		foodProductID, err = valueobject.NewPrimaryIDFromString[valueobject.FoodProductID](*req.FoodProductID)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid food_product_id"))
+			return
+		}
+	}
+	servingCountF := 1.0
+	if req.ServingCount != nil {
+		servingCountF = *req.ServingCount
+	}
+	servingCount, err := valueobject.ParseOptionalNonNegativeDecimal(&servingCountF)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid serving_count"))
+		return
+	}
 	// 各 photo path が自分のディレクトリ配下か & traversal 含まないか検証
 	for _, p := range req.Photos {
 		if err := sharedstorage.ValidateUserOwnedImagePath(sharedstorage.ImageKindMeal, userID.Value(), p.ImagePath); err != nil {
@@ -151,6 +168,8 @@ func (h *MealHandler) Record(w http.ResponseWriter, r *http.Request) {
 		FatG:          fatG,
 		CarbohydrateG: carbohydrateG,
 		Memo:          memo,
+		FoodProductID: foodProductID,
+		ServingCount:  *servingCount,
 		Photos:        photos,
 	}
 
@@ -266,6 +285,23 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	var foodProductID *valueobject.FoodProductID
+	if req.FoodProductID != nil {
+		foodProductID, err = valueobject.NewPrimaryIDFromString[valueobject.FoodProductID](*req.FoodProductID)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid food_product_id"))
+			return
+		}
+	}
+	servingCountF := 1.0
+	if req.ServingCount != nil {
+		servingCountF = *req.ServingCount
+	}
+	servingCount, err := valueobject.ParseOptionalNonNegativeDecimal(&servingCountF)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid serving_count"))
+		return
+	}
 	photos := lo.Map(req.Photos, func(p mealdto.MealPhotoInput, _ int) mealdomain.PhotoSpec {
 		return mealdomain.PhotoSpec{
 			ImagePath:    p.ImagePath,
@@ -288,6 +324,8 @@ func (h *MealHandler) Update(w http.ResponseWriter, r *http.Request) {
 		FatG:          fatG,
 		CarbohydrateG: carbohydrateG,
 		Memo:          memo,
+		FoodProductID: foodProductID,
+		ServingCount:  *servingCount,
 		Photos:        photos,
 	}
 	output, err := h.update.Execute(r.Context(), input)

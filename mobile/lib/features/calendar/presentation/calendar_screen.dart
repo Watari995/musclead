@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
@@ -332,6 +333,7 @@ class _DailySummarySection extends ConsumerWidget {
                 style: TextStyle(fontSize: 13, color: t.muted),
               );
             }
+            final totalMealCalories = data.totalCalories;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -345,6 +347,7 @@ class _DailySummarySection extends ConsumerWidget {
                             right: DateFormat(
                               'HH:mm',
                             ).format(tr.startedAt.toLocal()),
+                            onTap: () => context.go('/trainings'),
                           ),
                         )
                         .toList(),
@@ -354,14 +357,13 @@ class _DailySummarySection extends ConsumerWidget {
                 if (data.meals.isNotEmpty) ...[
                   _SummarySection(
                     title: '食事',
-                    children: data.meals
-                        .map(
-                          (m) => _SummaryRow(
-                            left: m.mealType,
-                            right: '${m.calories}kcal',
-                          ),
-                        )
-                        .toList(),
+                    children: [
+                      _SummaryRow(
+                        left: '合計',
+                        right: '${totalMealCalories}kcal',
+                        onTap: () => context.go('/meals'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                 ],
@@ -375,6 +377,7 @@ class _DailySummarySection extends ConsumerWidget {
                             right: w.bodyFatPercentage != null
                                 ? '体脂肪 ${w.bodyFatPercentage}%'
                                 : '',
+                            onTap: () => context.go('/weights'),
                           ),
                         )
                         .toList(),
@@ -415,28 +418,40 @@ class _SummarySection extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({required this.left, required this.right});
+  const _SummaryRow({required this.left, required this.right, this.onTap});
   final String left;
   final String right;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: t.border),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(left, style: const TextStyle(fontSize: 13)),
-          if (right.isNotEmpty)
-            Text(right, style: TextStyle(fontSize: 12, color: t.muted)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: t.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(left, style: const TextStyle(fontSize: 13)),
+            if (right.isNotEmpty)
+              Row(
+                children: [
+                  Text(right, style: TextStyle(fontSize: 12, color: t.muted)),
+                  if (onTap != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(Icons.chevron_right, size: 14, color: t.muted),
+                  ],
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }

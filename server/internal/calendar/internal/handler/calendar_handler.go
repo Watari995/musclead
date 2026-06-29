@@ -128,9 +128,10 @@ func (h *CalendarHandler) GetDailySummary(w http.ResponseWriter, r *http.Request
 		weightDTOs = append(weightDTOs, weightDTO)
 	}
 	res := calendardto.GetDailySummaryResponse{
-		Trainings: trainingDTOs,
-		Meals:     mealDTOs,
-		Weights:   weightDTOs,
+		Trainings:     trainingDTOs,
+		Meals:         mealDTOs,
+		TotalCalories: summary.TotalCalories.Value(),
+		Weights:       weightDTOs,
 	}
 	httpx.WriteJSON(w, http.StatusOK, res)
 }

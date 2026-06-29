@@ -17,6 +17,8 @@ export type Meal = {
   fatG: string;
   carbohydrateG: string;
   memo: string;
+  foodProductId: string | undefined;
+  servingCount: number;
   photos: MealPhoto[];
 };
 
@@ -30,6 +32,8 @@ export function toMeal(dto: MealDTO): Meal {
     fatG: dto.fat_g ?? "0",
     carbohydrateG: dto.carbohydrate_g ?? "0",
     memo: dto.memo ?? "",
+    foodProductId: dto.food_product_id,
+    servingCount: parseFloat(dto.serving_count ?? "1") || 1,
     photos: (dto.photos ?? [])
       .map((p) => ({
         imagePath: p.image_path ?? "",
