@@ -22,8 +22,8 @@ type mealRepository struct {
 }
 
 const upsertMealSQL = `
-INSERT INTO meals (id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO meals (id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, food_product_id, serving_count, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     eaten_at = VALUES(eaten_at),
     meal_type = VALUES(meal_type),
@@ -32,6 +32,8 @@ ON DUPLICATE KEY UPDATE
     fat_g = VALUES(fat_g),
     carbohydrate_g = VALUES(carbohydrate_g),
     memo = VALUES(memo),
+    food_product_id = VALUES(food_product_id),
+    serving_count = VALUES(serving_count),
     updated_at = VALUES(updated_at)
 `
 
@@ -44,7 +46,7 @@ func (r *mealRepository) FindAllByUserIDWithOffsetPagination(ctx context.Context
 
 	var mealRows []MealModel
 	_, err = q.Select(&mealRows,
-		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE user_id = ? ORDER BY eaten_at DESC LIMIT ? OFFSET ?",
+		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, food_product_id, serving_count, created_at, updated_at FROM meals WHERE user_id = ? ORDER BY eaten_at DESC LIMIT ? OFFSET ?",
 		bytes, int32(limit), int32(offset),
 	)
 	if err != nil {
@@ -100,7 +102,7 @@ func (r *mealRepository) FindByIDAndUserID(ctx context.Context, id valueobject.M
 	}
 	var mealRow MealModel
 	err = q.SelectOne(&mealRow,
-		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, created_at, updated_at FROM meals WHERE id = ? AND user_id = ?",
+		"SELECT id, user_id, eaten_at, meal_type, calories, protein_g, fat_g, carbohydrate_g, memo, food_product_id, serving_count, created_at, updated_at FROM meals WHERE id = ? AND user_id = ?",
 		idBytes, userIDBytes,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -228,7 +230,15 @@ func toMeal(row MealModel, photos []MealPhotoModel) (*mealdomain.Meal, error) {
 			return nil, err
 		}
 	}
-	return mealdomain.NewMeal(*mealID, *userID, row.EatenAt, *mealType, *calories, proteinG, fatG, carbohydrateG, memoVO, row.CreatedAt, row.UpdatedAt, toPhotoSpec(photos)), nil
+	foodProductID, err := sqlconv.NewPrimaryIDFromNullableBytes[valueobject.FoodProductID](row.FoodProductID)
+	if err != nil {
+		return nil, err
+	}
+	servingCount, err := valueobject.NewNonNegativeDecimalFromString(row.ServingCount)
+	if err != nil {
+		return nil, err
+	}
+	return mealdomain.NewMeal(*mealID, *userID, row.EatenAt, *mealType, *calories, proteinG, fatG, carbohydrateG, memoVO, foodProductID, *servingCount, row.CreatedAt, row.UpdatedAt, toPhotoSpec(photos)), nil
 }
 
 func buildUpsertMealParams(meal *mealdomain.Meal) ([]any, error) {
@@ -256,6 +266,10 @@ func buildUpsertMealParams(meal *mealdomain.Meal) ([]any, error) {
 	if meal.Memo() != nil {
 		memo = sqlconv.StringToNullString(meal.Memo().Value())
 	}
+	foodProductIDBytes, err := sqlconv.NewBytesFromNullablePrimaryID(meal.FoodProductID())
+	if err != nil {
+		return nil, err
+	}
 	return []any{
 		bytes,
 		userIDBytes,
@@ -266,6 +280,8 @@ func buildUpsertMealParams(meal *mealdomain.Meal) ([]any, error) {
 		fatG,
 		carbohydrateG,
 		memo,
+		foodProductIDBytes,
+		meal.ServingCount().Value().String(),
 		meal.CreatedAt(),
 		meal.UpdatedAt(),
 	}, nil

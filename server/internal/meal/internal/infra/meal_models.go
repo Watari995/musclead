@@ -16,6 +16,8 @@ type MealModel struct {
 	FatG          sql.NullString `db:"fat_g"`
 	CarbohydrateG sql.NullString `db:"carbohydrate_g"`
 	Memo          sql.NullString `db:"memo"`
+	FoodProductID []byte         `db:"food_product_id"`
+	ServingCount  string         `db:"serving_count"`
 	CreatedAt     time.Time      `db:"created_at"`
 	UpdatedAt     time.Time      `db:"updated_at"`
 }
