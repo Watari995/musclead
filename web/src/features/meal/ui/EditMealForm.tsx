@@ -189,6 +189,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
             <NumberField
               step="0.5"
               min={0.5}
+              placeholder="1"
               value={servingCount}
               onChange={handleServingCountChange}
             />
