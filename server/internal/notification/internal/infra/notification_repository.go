@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"errors"
 
+	notificationdomain "github.com/Watari995/musclead/internal/notification/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
-	notificationdomain "github.com/Watari995/musclead/internal/notification/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 )
@@ -20,7 +20,7 @@ func NewNotificationRepository(dbmap *gorp.DbMap) notificationdomain.Notificatio
 	return &notificationRepository{dbmap: dbmap}
 }
 
-func (r *notificationRepository) FindByID(ctx context.Context, id valueobject.NotificationID, userID valueobject.UserID) (*notificationdomain.Notification, error) {
+func (r *notificationRepository) FindByIDAndUserID(ctx context.Context, id valueobject.NotificationID, userID valueobject.UserID) (*notificationdomain.Notification, error) {
 	// TODO: implement
 	return nil, nil
 }
@@ -49,10 +49,14 @@ func toNotificationEntity(row NotificationModel) (*notificationdomain.Notificati
 	if err != nil {
 		return nil, err
 	}
+	notificationType, err := valueobject.NewNotificationTypeFromString(row.NotificationType)
+	if err != nil {
+		return nil, err
+	}
 	return notificationdomain.NewNotification(
 		*id,
 		*userID,
-		row.NotificationType,
+		*notificationType,
 		row.Metadata,
 		row.ReadAt,
 		row.CreatedAt,

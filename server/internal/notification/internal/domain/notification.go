@@ -1,7 +1,6 @@
 package notificationdomain
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/Watari995/musclead/internal/valueobject"
@@ -10,8 +9,8 @@ import (
 type Notification struct {
 	id               valueobject.NotificationID
 	userID           valueobject.UserID
-	notificationType string
-	metadata         json.RawMessage
+	notificationType valueobject.NotificationType
+	metadata         valueobject.Metadata
 	readAt           *time.Time
 	createdAt        time.Time
 }
@@ -24,11 +23,11 @@ func (n *Notification) UserID() valueobject.UserID {
 	return n.userID
 }
 
-func (n *Notification) NotificationType() string {
+func (n *Notification) NotificationType() valueobject.NotificationType {
 	return n.notificationType
 }
 
-func (n *Notification) Metadata() json.RawMessage {
+func (n *Notification) Metadata() valueobject.Metadata {
 	return n.metadata
 }
 
@@ -51,8 +50,8 @@ func (n *Notification) MarkAsRead() {
 
 func CreateNotification(
 	userID valueobject.UserID,
-	notificationType string,
-	metadata json.RawMessage,
+	notificationType valueobject.NotificationType,
+	metadata valueobject.Metadata,
 ) *Notification {
 	return &Notification{
 		id:               valueobject.NewPrimaryID[valueobject.NotificationID](),
@@ -66,8 +65,8 @@ func CreateNotification(
 func NewNotification(
 	id valueobject.NotificationID,
 	userID valueobject.UserID,
-	notificationType string,
-	metadata json.RawMessage,
+	notificationType valueobject.NotificationType,
+	metadata valueobject.Metadata,
 	readAt *time.Time,
 	createdAt time.Time,
 ) *Notification {
