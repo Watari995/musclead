@@ -91,6 +91,20 @@ export type RegisterResponse = UserDto<"RegisterResponse">;
 export type UpdatePreferencesRequest = UserDto<"UpdatePreferencesRequest">;
 export type UpdatePreferencesResponse = UserDto<"UpdatePreferencesResponse">;
 
+type CalendarDto<K extends string> =
+  `github_com_Watari995_musclead_internal_calendar_dto.${K}` extends infer P
+    ? P extends keyof Schemas
+      ? Schemas[P]
+      : never
+    : never;
+
+export type GetMonthlySummaryResponse = CalendarDto<"GetMonthlySummaryResponse">;
+export type MonthlySummaryDayDTO = CalendarDto<"MonthlySummaryDayDTO">;
+export type GetDailySummaryResponse = CalendarDto<"GetDailySummaryResponse">;
+export type CalendarTrainingSummaryDTO = CalendarDto<"TrainingSummaryDTO">;
+export type CalendarMealSummaryDTO = CalendarDto<"MealSummaryDTO">;
+export type CalendarWeightSummaryDTO = CalendarDto<"WeightSummaryDTO">;
+
 export type MealDTO = MealDto<"MealDTO">;
 export type RecordMealRequest = MealDto<"RecordMealRequest">;
 export type UpdateMealRequest = MealDto<"UpdateMealRequest">;

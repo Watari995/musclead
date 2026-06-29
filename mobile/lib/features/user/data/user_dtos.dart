@@ -23,6 +23,9 @@ abstract class UserDto with _$UserDto {
 abstract class PreferencesDto with _$PreferencesDto {
   const factory PreferencesDto({
     @Default('system') String theme,
+    @JsonKey(name: 'training_color') @Default('#4A90E2') String trainingColor,
+    @JsonKey(name: 'meal_color') @Default('#7ED321') String mealColor,
+    @JsonKey(name: 'weight_color') @Default('#FF6B6B') String weightColor,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _PreferencesDto;

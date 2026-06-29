@@ -10,8 +10,11 @@ import (
 )
 
 type UpdatePreferencesInput struct {
-	UserID valueobject.UserID
-	Theme  shareddto.Patch[valueobject.Theme]
+	UserID        valueobject.UserID
+	Theme         shareddto.Patch[valueobject.Theme]
+	MealColor     *valueobject.ColorHex
+	TrainingColor *valueobject.ColorHex
+	WeightColor   *valueobject.ColorHex
 }
 
 type UpdatePreferencesOutput struct {
@@ -33,6 +36,18 @@ func (uc *UpdatePreferences) Execute(ctx context.Context, input UpdatePreference
 	if input.Theme.Set {
 		pref.SetTheme(input.Theme.Value)
 	}
+
+	// Update calendar colors
+	if input.MealColor != nil {
+		pref.SetMealColor(*input.MealColor)
+	}
+	if input.TrainingColor != nil {
+		pref.SetTrainingColor(*input.TrainingColor)
+	}
+	if input.WeightColor != nil {
+		pref.SetWeightColor(*input.WeightColor)
+	}
+
 	if err := uc.prefsRepo.Save(ctx, pref); err != nil {
 		return nil, myerror.NewInternalError().Wrap(err)
 	}

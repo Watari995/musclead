@@ -143,6 +143,9 @@ export type Theme = "light" | "dark" | "system";
 
 export type UpdatePreferencesBody = {
   theme?: Theme;
+  training_color?: string;
+  meal_color?: string;
+  weight_color?: string;
 };
 
 export function useUpdatePreferencesMutation() {

@@ -57,9 +57,40 @@ func (h *PreferencesHandler) UpdatePreferences(w http.ResponseWriter, r *http.Re
 		}
 		themePatch.Value = *v
 	}
+	var mealColor *valueobject.ColorHex
+	if req.MealColor != nil {
+		c, err := valueobject.NewColorHex(*req.MealColor)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid meal color"))
+			return
+		}
+		mealColor = c
+	}
+	var trainingColor *valueobject.ColorHex
+	if req.TrainingColor != nil {
+		c, err := valueobject.NewColorHex(*req.TrainingColor)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid training color"))
+			return
+		}
+		trainingColor = c
+	}
+	var weightColor *valueobject.ColorHex
+	if req.WeightColor != nil {
+		c, err := valueobject.NewColorHex(*req.WeightColor)
+		if err != nil {
+			httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid weight color"))
+			return
+		}
+		weightColor = c
+	}
+
 	output, err := h.updatePreferences.Execute(r.Context(), userusecase.UpdatePreferencesInput{
-		UserID: userID,
-		Theme:  themePatch,
+		UserID:        userID,
+		Theme:         themePatch,
+		MealColor:     mealColor,
+		TrainingColor: trainingColor,
+		WeightColor:   weightColor,
 	})
 	if err != nil {
 		httpx.WriteError(w, err)

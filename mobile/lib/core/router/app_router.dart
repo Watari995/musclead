@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/calendar/presentation/calendar_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/meal/data/meal_dtos.dart';
@@ -37,7 +38,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       // musclead://oauth/callback 等のカスタム URL スキームは go_router では
       // ルート解決できないが、app_links が処理するため無視して問題ない。
       if (state.uri.scheme == 'musclead') return;
-      router.go('/meals');
+      router.go('/calendar');
     },
     redirect: (context, state) {
       final status = refresh.value;
@@ -48,7 +49,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       if (status == AuthStatus.unknown) return atSplash ? null : '/splash';
       if (status == AuthStatus.unauthenticated) return atAuth ? null : '/login';
       // authenticated
-      if (atAuth || atSplash) return '/meals';
+      if (atAuth || atSplash) return '/calendar';
       return null;
     },
     routes: [
@@ -90,6 +91,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             HomeShell(navigationShell: navigationShell),
         branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/calendar',
+                builder: (_, _) => const CalendarScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(path: '/meals', builder: (_, _) => const MealsScreen()),
