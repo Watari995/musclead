@@ -50,10 +50,34 @@ class MealRecordScreen extends HookConsumerWidget {
     final memoCtrl = useTextEditingController(text: edit?.memo ?? '');
     final loading = useState(false);
     final error = useState<String?>(null);
+    final selectedFoodId = useState<String?>(edit?.foodProductId);
+    final baseFood = useState<FoodProductDto?>(null);
+    final servingCount = useState<double>(
+      double.tryParse(edit?.servingCount ?? '') ?? 1.0,
+    );
     final t = context.tokens;
     const numeric = TextInputType.numberWithOptions(decimal: true);
 
+    void updateServing(double s) {
+      final base = baseFood.value;
+      if (base == null) return;
+      servingCount.value = s;
+      caloriesCtrl.text = '${(base.calories * s).round()}';
+      proteinCtrl.text = base.proteinG != null
+          ? ((double.tryParse(base.proteinG!) ?? 0) * s).toStringAsFixed(1)
+          : '';
+      fatCtrl.text = base.fatG != null
+          ? ((double.tryParse(base.fatG!) ?? 0) * s).toStringAsFixed(1)
+          : '';
+      carbCtrl.text = base.carbohydrateG != null
+          ? ((double.tryParse(base.carbohydrateG!) ?? 0) * s).toStringAsFixed(1)
+          : '';
+    }
+
     void applyFood(FoodProductDto food) {
+      selectedFoodId.value = food.id;
+      baseFood.value = food;
+      servingCount.value = 1.0;
       caloriesCtrl.text = '${food.calories}';
       proteinCtrl.text = food.proteinG ?? '';
       fatCtrl.text = food.fatG ?? '';
@@ -116,6 +140,8 @@ class MealRecordScreen extends HookConsumerWidget {
         carbohydrateG: double.tryParse(carbCtrl.text.trim()),
         memo: memoCtrl.text.trim().isEmpty ? null : memoCtrl.text.trim(),
         photos: photos,
+        foodProductId: selectedFoodId.value,
+        servingCount: selectedFoodId.value != null ? servingCount.value : null,
       );
       try {
         final repo = ref.read(mealRepositoryProvider);
@@ -189,6 +215,42 @@ class MealRecordScreen extends HookConsumerWidget {
                   if (food != null && context.mounted) applyFood(food);
                 },
               ),
+
+              if (baseFood.value != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text(
+                      'サービング数',
+                      style: TextStyle(fontSize: 13, color: t.muted),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.remove, size: 18),
+                      onPressed: () => updateServing(
+                        (servingCount.value - 0.5).clamp(0.5, 99),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 40,
+                      child: Text(
+                        servingCount.value % 1 == 0
+                            ? '${servingCount.value.toInt()}'
+                            : servingCount.value.toStringAsFixed(1),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add, size: 18),
+                      onPressed: () => updateServing(servingCount.value + 0.5),
+                    ),
+                  ],
+                ),
+              ],
 
               const SizedBox(height: 24),
               const Divider(),

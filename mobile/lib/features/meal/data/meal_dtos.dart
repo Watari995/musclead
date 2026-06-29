@@ -35,6 +35,8 @@ abstract class MealDto with _$MealDto {
     String? userId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? foodProductId,
+    String? servingCount,
   }) = _MealDto;
 
   factory MealDto.fromJson(Map<String, dynamic> json) =>
@@ -74,6 +76,8 @@ abstract class RecordMealRequest with _$RecordMealRequest {
     double? carbohydrateG,
     String? memo,
     @Default(<MealPhotoInput>[]) List<MealPhotoInput> photos,
+    String? foodProductId,
+    double? servingCount,
   }) = _RecordMealRequest;
 
   factory RecordMealRequest.fromJson(Map<String, dynamic> json) =>

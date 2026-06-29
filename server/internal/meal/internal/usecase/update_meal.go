@@ -21,6 +21,8 @@ type UpdateMealInput struct {
 	FatG          *valueobject.NonNegativeDecimal
 	CarbohydrateG *valueobject.NonNegativeDecimal
 	Memo          *valueobject.String1000
+	FoodProductID *valueobject.FoodProductID
+	ServingCount  valueobject.NonNegativeDecimal
 	Photos        []mealdomain.PhotoSpec
 }
 
@@ -59,6 +61,8 @@ func (uc *UpdateMeal) Execute(ctx context.Context, input UpdateMealInput) (*Upda
 			FatG:          input.FatG,
 			CarbohydrateG: input.CarbohydrateG,
 			Memo:          input.Memo,
+			FoodProductID: input.FoodProductID,
+			ServingCount:  input.ServingCount,
 			Photos:        input.Photos,
 		}
 		meal.Update(params)

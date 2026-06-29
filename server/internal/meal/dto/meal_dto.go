@@ -24,6 +24,8 @@ type RecordMealRequest struct {
 	FatG          *float64         `json:"fat_g,omitempty"`
 	CarbohydrateG *float64         `json:"carbohydrate_g,omitempty"`
 	Memo          *string          `json:"memo,omitempty"`
+	FoodProductID *string          `json:"food_product_id,omitempty"`
+	ServingCount  *float64         `json:"serving_count,omitempty"`
 	Photos        []MealPhotoInput `json:"photos"`
 }
 
@@ -39,6 +41,8 @@ type UpdateMealRequest struct {
 	FatG          *float64         `json:"fat_g,omitempty"`
 	CarbohydrateG *float64         `json:"carbohydrate_g,omitempty"`
 	Memo          *string          `json:"memo,omitempty"`
+	FoodProductID *string          `json:"food_product_id,omitempty"`
+	ServingCount  *float64         `json:"serving_count,omitempty"`
 	Photos        []MealPhotoInput `json:"photos"`
 }
 
@@ -86,6 +90,8 @@ type MealDTO struct {
 	FatG          *string    `json:"fat_g,omitempty"`
 	CarbohydrateG *string    `json:"carbohydrate_g,omitempty"`
 	Memo          *string    `json:"memo,omitempty"`
+	FoodProductID *string    `json:"food_product_id,omitempty"`
+	ServingCount  string     `json:"serving_count"`
 	CreatedAt     time.Time  `json:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at"`
 	Photos        []PhotoDTO `json:"photos"`
@@ -114,6 +120,12 @@ func FromEntity(m *mealdomain.Meal, urlBuilder shareddomain.URLBuilder) MealDTO 
 		memoStr = &s
 	}
 
+	var foodProductIDStr *string
+	if m.FoodProductID() != nil {
+		s := m.FoodProductID().Value()
+		foodProductIDStr = &s
+	}
+
 	photos := lo.Map(m.Photos(), func(p mealdomain.PhotoSpec, idx int) PhotoDTO {
 		return PhotoFromEntity(p, urlBuilder)
 	})
@@ -128,6 +140,8 @@ func FromEntity(m *mealdomain.Meal, urlBuilder shareddomain.URLBuilder) MealDTO 
 		FatG:          fatGStr,
 		CarbohydrateG: carbohydrateGStr,
 		Memo:          memoStr,
+		FoodProductID: foodProductIDStr,
+		ServingCount:  m.ServingCount().Value().String(),
 		CreatedAt:     m.CreatedAt(),
 		UpdatedAt:     m.UpdatedAt(),
 		Photos:        photos,
