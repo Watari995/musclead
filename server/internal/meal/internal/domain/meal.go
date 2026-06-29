@@ -14,8 +14,10 @@ type PhotoSpec struct {
 type Meal struct {
 	id            valueobject.MealID
 	userID        valueobject.UserID
+	foodProductID *valueobject.FoodProductID
 	eatenAt       time.Time
 	mealType      valueobject.String20
+	serviceSize   valueobject.NonNegativeDecimal
 	calories      valueobject.NonNegativeInt
 	proteinG      *valueobject.NonNegativeDecimal
 	fatG          *valueobject.NonNegativeDecimal
@@ -35,12 +37,20 @@ func (m *Meal) UserID() valueobject.UserID {
 	return m.userID
 }
 
+func (m *Meal) FoodProductID() *valueobject.FoodProductID {
+	return m.foodProductID
+}
+
 func (m *Meal) EatenAt() time.Time {
 	return m.eatenAt
 }
 
 func (m *Meal) MealType() valueobject.String20 {
 	return m.mealType
+}
+
+func (m *Meal) ServiceSize() valueobject.NonNegativeDecimal {
+	return m.serviceSize
 }
 
 func (m *Meal) Calories() valueobject.NonNegativeInt {
@@ -81,8 +91,10 @@ func (m *Meal) ReplacePhotos(photos []PhotoSpec) {
 }
 
 type UpdateMealParams struct {
+	FoodProductID *valueobject.FoodProductID
 	EatenAt       time.Time
 	MealType      valueobject.String20
+	ServiceSize   valueobject.NonNegativeDecimal
 	Calories      valueobject.NonNegativeInt
 	ProteinG      *valueobject.NonNegativeDecimal
 	FatG          *valueobject.NonNegativeDecimal
@@ -94,8 +106,10 @@ type UpdateMealParams struct {
 func (m *Meal) Update(
 	params UpdateMealParams,
 ) {
+	m.foodProductID = params.FoodProductID
 	m.eatenAt = params.EatenAt
 	m.mealType = params.MealType
+	m.serviceSize = params.ServiceSize
 	m.calories = params.Calories
 	m.proteinG = params.ProteinG
 	m.fatG = params.FatG
@@ -107,8 +121,10 @@ func (m *Meal) Update(
 
 func CreateMeal(
 	userID valueobject.UserID,
+	foodProductID *valueobject.FoodProductID,
 	eatenAt time.Time,
 	mealType valueobject.String20,
+	serviceSize valueobject.NonNegativeDecimal,
 	calories valueobject.NonNegativeInt,
 	proteinG *valueobject.NonNegativeDecimal,
 	fatG *valueobject.NonNegativeDecimal,
@@ -120,8 +136,10 @@ func CreateMeal(
 	return &Meal{
 		id:            valueobject.NewPrimaryID[valueobject.MealID](),
 		userID:        userID,
+		foodProductID: foodProductID,
 		eatenAt:       eatenAt,
 		mealType:      mealType,
+		serviceSize:   serviceSize,
 		calories:      calories,
 		proteinG:      proteinG,
 		fatG:          fatG,
@@ -136,8 +154,10 @@ func CreateMeal(
 func NewMeal(
 	id valueobject.MealID,
 	userID valueobject.UserID,
+	foodProductID *valueobject.FoodProductID,
 	eatenAt time.Time,
 	mealType valueobject.String20,
+	serviceSize valueobject.NonNegativeDecimal,
 	calories valueobject.NonNegativeInt,
 	proteinG *valueobject.NonNegativeDecimal,
 	fatG *valueobject.NonNegativeDecimal,
@@ -150,8 +170,10 @@ func NewMeal(
 	return &Meal{
 		id:            id,
 		userID:        userID,
+		foodProductID: foodProductID,
 		eatenAt:       eatenAt,
 		mealType:      mealType,
+		serviceSize:   serviceSize,
 		calories:      calories,
 		proteinG:      proteinG,
 		fatG:          fatG,
