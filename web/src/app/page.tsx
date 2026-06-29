@@ -10,7 +10,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!ready) return;
-    router.replace(token ? "/meals" : "/login");
+    router.replace(token ? "/calendar" : "/login");
   }, [ready, token, router]);
 
   return <div className="text-[var(--color-ink-muted)] text-sm">読み込み中…</div>;

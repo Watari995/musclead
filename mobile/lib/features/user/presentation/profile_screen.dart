@@ -42,7 +42,8 @@ class ProfileScreen extends ConsumerWidget {
         AsyncValueView<MeResponse>(
           value: me,
           onRetry: () => ref.invalidate(meProvider),
-          data: (data) => _ProfileBody(user: data.user),
+          data: (data) =>
+              _ProfileBody(user: data.user, preferences: data.preferences),
         ),
       ],
     );
@@ -50,9 +51,10 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _ProfileBody extends ConsumerWidget {
-  const _ProfileBody({required this.user});
+  const _ProfileBody({required this.user, this.preferences});
 
   final UserDto user;
+  final PreferencesDto? preferences;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -127,6 +129,10 @@ class _ProfileBody extends ConsumerWidget {
             ),
           ],
         ),
+        if (preferences != null) ...[
+          const SectionTitle('カレンダー'),
+          _CalendarColorSection(prefs: preferences!),
+        ],
         const SectionTitle('連携サービス'),
         AppListBox(
           children: [
@@ -375,6 +381,174 @@ class _ProfileBody extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CalendarColorSection extends ConsumerStatefulWidget {
+  const _CalendarColorSection({required this.prefs});
+  final PreferencesDto prefs;
+
+  @override
+  ConsumerState<_CalendarColorSection> createState() =>
+      _CalendarColorSectionState();
+}
+
+class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
+  bool _saving = false;
+
+  static const _presets = [
+    Color(0xFF4A90E2),
+    Color(0xFF7ED321),
+    Color(0xFFFF6B6B),
+    Color(0xFFF5A623),
+    Color(0xFFBD10E0),
+    Color(0xFF50E3C2),
+    Color(0xFFB8E986),
+    Color(0xFF9013FE),
+  ];
+
+  String _colorToHex(Color c) {
+    final r = (c.r * 255.0).round().clamp(0, 255);
+    final g = (c.g * 255.0).round().clamp(0, 255);
+    final b = (c.b * 255.0).round().clamp(0, 255);
+    return '#${r.toRadixString(16).padLeft(2, '0')}${g.toRadixString(16).padLeft(2, '0')}${b.toRadixString(16).padLeft(2, '0')}';
+  }
+
+  Color _parseColor(String hex) {
+    try {
+      return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    } catch (_) {
+      return const Color(0xFF4A90E2);
+    }
+  }
+
+  Future<void> _updateColor(String field, Color color) async {
+    setState(() => _saving = true);
+    try {
+      final repo = ref.read(userRepositoryProvider);
+      await repo.updateCalendarColors(
+        trainingColor: field == 'training' ? _colorToHex(color) : null,
+        mealColor: field == 'meal' ? _colorToHex(color) : null,
+        weightColor: field == 'weight' ? _colorToHex(color) : null,
+      );
+      ref.invalidate(meProvider);
+    } catch (_) {
+      // ignore - UI stays optimistic
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final trainingColor = _parseColor(widget.prefs.trainingColor);
+    final mealColor = _parseColor(widget.prefs.mealColor);
+    final weightColor = _parseColor(widget.prefs.weightColor);
+
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'カレンダーの色',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: t.muted,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ColorRow(
+            label: 'トレーニング',
+            currentColor: trainingColor,
+            presets: _presets,
+            onSelect: (c) => _updateColor('training', c),
+            disabled: _saving,
+          ),
+          const SizedBox(height: 10),
+          _ColorRow(
+            label: '食事',
+            currentColor: mealColor,
+            presets: _presets,
+            onSelect: (c) => _updateColor('meal', c),
+            disabled: _saving,
+          ),
+          const SizedBox(height: 10),
+          _ColorRow(
+            label: '体重',
+            currentColor: weightColor,
+            presets: _presets,
+            onSelect: (c) => _updateColor('weight', c),
+            disabled: _saving,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColorRow extends StatelessWidget {
+  const _ColorRow({
+    required this.label,
+    required this.currentColor,
+    required this.presets,
+    required this.onSelect,
+    required this.disabled,
+  });
+
+  final String label;
+  final Color currentColor;
+  final List<Color> presets;
+  final ValueChanged<Color> onSelect;
+  final bool disabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Row(
+      children: [
+        Container(
+          width: 18,
+          height: 18,
+          decoration: BoxDecoration(
+            color: currentColor,
+            shape: BoxShape.circle,
+            border: Border.all(color: t.border),
+          ),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 72,
+          child: Text(label, style: const TextStyle(fontSize: 13)),
+        ),
+        Expanded(
+          child: Wrap(
+            spacing: 6,
+            children: presets.map((c) {
+              final selected = c.toARGB32() == currentColor.toARGB32();
+              return GestureDetector(
+                onTap: disabled ? null : () => onSelect(c),
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: c,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: selected
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Colors.transparent,
+                      width: selected ? 2.5 : 0,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }
