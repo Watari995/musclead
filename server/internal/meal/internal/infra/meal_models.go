@@ -8,7 +8,6 @@ import (
 type MealModel struct {
 	ID            []byte         `db:"id"`
 	UserID        []byte         `db:"user_id"`
-	FoodProductID []byte         `db:"food_product_id"`
 	EatenAt       time.Time      `db:"eaten_at"`
 	MealType      string         `db:"meal_type"`
 	Calories      int            `db:"calories"`
