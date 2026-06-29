@@ -76,6 +76,7 @@ abstract class GetDailySummaryResponse with _$GetDailySummaryResponse {
     @Default(<CalendarTrainingSummaryDto>[])
     List<CalendarTrainingSummaryDto> trainings,
     @Default(<CalendarMealSummaryDto>[]) List<CalendarMealSummaryDto> meals,
+    @JsonKey(name: 'total_calories') @Default(0) int totalCalories,
     @Default(<CalendarWeightSummaryDto>[])
     List<CalendarWeightSummaryDto> weights,
   }) = _GetDailySummaryResponse;

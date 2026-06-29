@@ -3348,6 +3348,7 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_calendar_dto.GetDailySummaryResponse": {
             meals?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.MealSummaryDTO"][];
+            total_calories?: number;
             trainings?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.TrainingSummaryDTO"][];
             weights?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.WeightSummaryDTO"][];
         };

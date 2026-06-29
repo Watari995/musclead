@@ -34,12 +34,10 @@ export function DailySummaryPanel({ date, data, isLoading }: Props) {
           )}
           {(data.meals ?? []).length > 0 && (
             <Section title="食事">
-              {data.meals!.map((m) => (
-                <Row key={m.meal_id}>
-                  <span>{m.meal_type}</span>
-                  <span className="text-[var(--color-ink-muted)] text-xs">{m.calories}kcal</span>
-                </Row>
-              ))}
+              <Row>
+                <span>合計</span>
+                <span className="text-[var(--color-ink-muted)] text-xs">{data.total_calories ?? 0}kcal</span>
+              </Row>
             </Section>
           )}
           {(data.weights ?? []).length > 0 && (

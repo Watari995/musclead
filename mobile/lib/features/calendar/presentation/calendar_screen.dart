@@ -333,10 +333,7 @@ class _DailySummarySection extends ConsumerWidget {
                 style: TextStyle(fontSize: 13, color: t.muted),
               );
             }
-            final totalMealCalories = data.meals.fold(
-              0,
-              (sum, m) => sum + m.calories,
-            );
+            final totalMealCalories = data.totalCalories;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
