@@ -22,8 +22,9 @@ class CalendarScreen extends HookConsumerWidget {
       DateTime(now.year, now.month, now.day),
     );
 
-    final monthlySummary =
-        ref.watch(monthlySummaryProvider((year.value, month.value)));
+    final monthlySummary = ref.watch(
+      monthlySummaryProvider((year.value, month.value)),
+    );
     final me = ref.watch(meProvider);
     final prefs = me.asData?.value.preferences;
 
@@ -176,8 +177,8 @@ class _CalendarGrid extends StatelessWidget {
             final color = i == 0
                 ? Theme.of(context).colorScheme.error
                 : i == 6
-                    ? Colors.blue
-                    : t.muted;
+                ? Colors.blue
+                : t.muted;
             return Expanded(
               child: Center(
                 child: Text(
@@ -204,9 +205,9 @@ class _CalendarGrid extends StatelessWidget {
           itemBuilder: (context, index) {
             if (index < firstWeekday) return const SizedBox.shrink();
             final day = index - firstWeekday + 1;
-            final dateStr = DateFormat('yyyy-MM-dd').format(
-              DateTime(year, month, day),
-            );
+            final dateStr = DateFormat(
+              'yyyy-MM-dd',
+            ).format(DateTime(year, month, day));
             final info = dayMap[dateStr];
             final isToday = dateStr == todayStr;
             final isSelected =
@@ -234,8 +235,7 @@ class _CalendarGrid extends StatelessWidget {
                           ? BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color:
-                                    Theme.of(context).colorScheme.onSurface,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 width: 1.5,
                               ),
                             )
@@ -249,10 +249,10 @@ class _CalendarGrid extends StatelessWidget {
                             color: isSelected
                                 ? Theme.of(context).colorScheme.surface
                                 : dow == 0
-                                    ? Theme.of(context).colorScheme.error
-                                    : dow == 6
-                                        ? Colors.blue
-                                        : null,
+                                ? Theme.of(context).colorScheme.error
+                                : dow == 6
+                                ? Colors.blue
+                                : null,
                           ),
                         ),
                       ),
@@ -261,7 +261,8 @@ class _CalendarGrid extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (info?.hasTraining == true) _Dot(color: trainingColor),
+                        if (info?.hasTraining == true)
+                          _Dot(color: trainingColor),
                         if (info?.hasMeal == true) _Dot(color: mealColor),
                         if (info?.hasWeight == true) _Dot(color: weightColor),
                       ],
@@ -341,9 +342,9 @@ class _DailySummarySection extends ConsumerWidget {
                         .map(
                           (tr) => _SummaryRow(
                             left: '${tr.exerciseCount}種目 / ${tr.setCount}セット',
-                            right: DateFormat('HH:mm').format(
-                              tr.startedAt.toLocal(),
-                            ),
+                            right: DateFormat(
+                              'HH:mm',
+                            ).format(tr.startedAt.toLocal()),
                           ),
                         )
                         .toList(),

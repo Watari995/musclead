@@ -33,11 +33,14 @@ class UserRepository {
     String? mealColor,
     String? weightColor,
   }) => guardApi(
-    () => _dio.patch<void>('/users/me/preferences', data: {
-      'training_color': trainingColor,
-      'meal_color': mealColor,
-      'weight_color': weightColor,
-    }..removeWhere((_, v) => v == null)),
+    () => _dio.patch<void>(
+      '/users/me/preferences',
+      data: {
+        'training_color': trainingColor,
+        'meal_color': mealColor,
+        'weight_color': weightColor,
+      }..removeWhere((_, v) => v == null),
+    ),
   );
 
   /// プロフィール画像アップロード:

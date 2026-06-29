@@ -36,14 +36,15 @@ final calendarRepositoryProvider = Provider<CalendarRepository>(
 );
 
 final monthlySummaryProvider =
-    FutureProvider.family<GetMonthlySummaryResponse, (int, int)>(
-  (ref, args) {
-    final (year, month) = args;
-    return ref.watch(calendarRepositoryProvider).getMonthlySummary(year, month);
-  },
-);
+    FutureProvider.family<GetMonthlySummaryResponse, (int, int)>((ref, args) {
+      final (year, month) = args;
+      return ref
+          .watch(calendarRepositoryProvider)
+          .getMonthlySummary(year, month);
+    });
 
 final dailySummaryProvider =
     FutureProvider.family<GetDailySummaryResponse, DateTime>(
-  (ref, date) => ref.watch(calendarRepositoryProvider).getDailySummary(date),
-);
+      (ref, date) =>
+          ref.watch(calendarRepositoryProvider).getDailySummary(date),
+    );
