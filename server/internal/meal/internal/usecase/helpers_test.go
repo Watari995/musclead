@@ -13,11 +13,15 @@ func newDummyMeal(t *testing.T, userID valueobject.UserID) *mealdomain.Meal {
 	t.Helper()
 	mealType, _ := valueobject.NewString20("lunch")
 	calories, _ := valueobject.NewNonNegativeInt(600)
+	servingCount, _ := valueobject.NewNonNegativeDecimalFromString("1.00")
 	return mealdomain.CreateMeal(
 		userID,
 		time.Now(),
 		*mealType,
 		*calories,
-		nil, nil, nil, nil, nil,
+		nil, nil, nil, nil,
+		nil,
+		*servingCount,
+		nil,
 	)
 }

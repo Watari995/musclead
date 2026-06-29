@@ -21,6 +21,13 @@ type LocalPhoto = {
   previewURL: string;
 };
 
+type BaseNutrients = {
+  calories: number;
+  proteinG: number | undefined;
+  fatG: number | undefined;
+  carbohydrateG: number | undefined;
+};
+
 type Props = {
   prefill?: MealTemplate | null;
   onPrefillConsumed?: () => void;
@@ -31,6 +38,9 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
   const [form, setForm] = useState<RecordMealRequest>(initialForm);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [registerBarcode, setRegisterBarcode] = useState<string | undefined>();
+  const [selectedFoodId, setSelectedFoodId] = useState<string | undefined>();
+  const [baseNutrients, setBaseNutrients] = useState<BaseNutrients | undefined>();
+  const [servingCount, setServingCount] = useState<number>(1);
 
   useEffect(() => {
     if (!prefill) return;
@@ -57,14 +67,37 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
   const isPending = recordMutation.isPending || uploadMutation.isPending;
 
   const handleFoodSelect = (food: FoodProduct) => {
+    const base: BaseNutrients = {
+      calories: food.calories,
+      proteinG: food.proteinG ? parseFloat(food.proteinG) : undefined,
+      fatG: food.fatG ? parseFloat(food.fatG) : undefined,
+      carbohydrateG: food.carbohydrateG ? parseFloat(food.carbohydrateG) : undefined,
+    };
+    setSelectedFoodId(food.id);
+    setBaseNutrients(base);
+    setServingCount(1);
     setForm((prev) => ({
       ...prev,
-      calories: food.calories,
-      protein_g: food.proteinG ? parseFloat(food.proteinG) : undefined,
-      fat_g: food.fatG ? parseFloat(food.fatG) : undefined,
-      carbohydrate_g: food.carbohydrateG ? parseFloat(food.carbohydrateG) : undefined,
+      calories: base.calories,
+      protein_g: base.proteinG,
+      fat_g: base.fatG,
+      carbohydrate_g: base.carbohydrateG,
       memo: (prev.memo ?? "").trim() === "" ? food.name : prev.memo,
     }));
+  };
+
+  const handleServingCountChange = (v: number | undefined) => {
+    const s = v ?? 1;
+    setServingCount(s);
+    if (baseNutrients) {
+      setForm((prev) => ({
+        ...prev,
+        calories: Math.round(baseNutrients.calories * s),
+        protein_g: baseNutrients.proteinG !== undefined ? baseNutrients.proteinG * s : undefined,
+        fat_g: baseNutrients.fatG !== undefined ? baseNutrients.fatG * s : undefined,
+        carbohydrate_g: baseNutrients.carbohydrateG !== undefined ? baseNutrients.carbohydrateG * s : undefined,
+      }));
+    }
   };
 
   const handlePickPhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,6 +159,8 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
         fat_g: form.fat_g ?? 0,
         carbohydrate_g: form.carbohydrate_g ?? 0,
         memo: trimmedMemo === "" ? undefined : trimmedMemo,
+        food_product_id: selectedFoodId,
+        serving_count: servingCount,
         photos: imagePaths.map((path, i) => ({
           image_path: path,
           display_order: i,
@@ -136,6 +171,9 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
           photos.forEach((p) => URL.revokeObjectURL(p.previewURL));
           setPhotos([]);
           setForm(initialForm());
+          setSelectedFoodId(undefined);
+          setBaseNutrients(undefined);
+          setServingCount(1);
           onSuccess?.();
         },
       },
@@ -152,6 +190,16 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
             setShowRegisterModal(true);
           }}
         />
+        {baseNutrients && (
+          <Label label="サービング数">
+            <NumberField
+              step="0.5"
+              min={0.5}
+              value={servingCount}
+              onChange={handleServingCountChange}
+            />
+          </Label>
+        )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Label label="種類">

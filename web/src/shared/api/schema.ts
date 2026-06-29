@@ -2940,11 +2940,13 @@ export interface components {
             created_at?: string;
             eaten_at?: string;
             fat_g?: string;
+            food_product_id?: string;
             id?: string;
             meal_type?: string;
             memo?: string;
             photos?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.PhotoDTO"][];
             protein_g?: string;
+            serving_count?: string;
             updated_at?: string;
             user_id?: string;
         };
@@ -2975,10 +2977,12 @@ export interface components {
             carbohydrate_g?: number;
             eaten_at?: string;
             fat_g?: number;
+            food_product_id?: string;
             meal_type?: string;
             memo?: string;
             photos?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealPhotoInput"][];
             protein_g?: number;
+            serving_count?: number;
         };
         "github_com_Watari995_musclead_internal_meal_dto.RecordMealResponse": {
             meal_id?: string;
@@ -2991,10 +2995,12 @@ export interface components {
             carbohydrate_g?: number;
             eaten_at?: string;
             fat_g?: number;
+            food_product_id?: string;
             meal_type?: string;
             memo?: string;
             photos?: components["schemas"]["github_com_Watari995_musclead_internal_meal_dto.MealPhotoInput"][];
             protein_g?: number;
+            serving_count?: number;
         };
         "github_com_Watari995_musclead_internal_meal_dto.UpdateMealResponse": {
             meal_id?: string;
