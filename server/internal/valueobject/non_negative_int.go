@@ -23,3 +23,7 @@ func NewNonNegativeInt(v int) (*NonNegativeInt, error) {
 	}
 	return &n, nil
 }
+
+func (n NonNegativeInt) Add(other NonNegativeInt) NonNegativeInt {
+	return NonNegativeInt{LiteralBase: LiteralBase[int]{v: n.Value() + other.Value()}}
+}

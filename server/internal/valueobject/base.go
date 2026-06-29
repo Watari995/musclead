@@ -21,3 +21,7 @@ func (l LiteralBase[T]) String() string {
 func (l LiteralBase[T]) Equals(o LiteralBase[T]) bool {
 	return l.v == o.v
 }
+
+func (l LiteralBase[T]) Add(o LiteralBase[T]) LiteralBase[T] {
+	return LiteralBase[T]{v: l.v + o.v}
+}

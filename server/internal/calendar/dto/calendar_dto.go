@@ -102,7 +102,8 @@ func FromWeightSummaryViewToDTO(view *publicfunctions.WeightSummaryView) WeightS
 }
 
 type GetDailySummaryResponse struct {
-	Trainings []TrainingSummaryDTO `json:"trainings"`
-	Meals     []MealSummaryDTO     `json:"meals"`
-	Weights   []WeightSummaryDTO   `json:"weights"`
+	Trainings     []TrainingSummaryDTO `json:"trainings"`
+	Meals         []MealSummaryDTO     `json:"meals"`
+	TotalCalories int                  `json:"total_calories"`
+	Weights       []WeightSummaryDTO   `json:"weights"`
 }

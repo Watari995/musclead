@@ -17,9 +17,10 @@ type GetDailySummaryInput struct {
 }
 
 type GetDailySummaryOutput struct {
-	Trainings []*trainingpublicfunctions.TrainingSummaryView
-	Meals     []*mealpublicfunctions.MealSummaryView
-	Weights   []*weightpublicfunctions.WeightSummaryView
+	Trainings     []*trainingpublicfunctions.TrainingSummaryView
+	Meals         []*mealpublicfunctions.MealSummaryView
+	TotalCalories valueobject.NonNegativeInt
+	Weights       []*weightpublicfunctions.WeightSummaryView
 }
 
 type GetDailySummary struct {
@@ -68,9 +69,15 @@ func (uc *GetDailySummary) Execute(ctx context.Context, input GetDailySummaryInp
 		return nil, err
 	}
 
+	totalCalories := valueobject.NonNegativeInt{}
+	for _, meal := range meals {
+		totalCalories = totalCalories.Add(meal.Calories)
+	}
+
 	return &GetDailySummaryOutput{
-		Trainings: trainings,
-		Meals:     meals,
-		Weights:   weights,
+		Trainings:     trainings,
+		Meals:         meals,
+		TotalCalories: totalCalories,
+		Weights:       weights,
 	}, nil
 }
