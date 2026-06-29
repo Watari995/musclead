@@ -1,0 +1,4 @@
+ALTER TABLE user_preferences
+  ADD COLUMN training_color VARCHAR(7) NOT NULL DEFAULT '#4A90E2',
+  ADD COLUMN meal_color     VARCHAR(7) NOT NULL DEFAULT '#7ED321',
+  ADD COLUMN weight_color   VARCHAR(7) NOT NULL DEFAULT '#FF6B6B';

@@ -17,10 +17,13 @@ type userPreferencesRepository struct {
 }
 
 const upsertUserPreferencesSQL = `
-INSERT INTO user_preferences (id, user_id, theme, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO user_preferences (id, user_id, theme, meal_color, training_color, weight_color, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     theme = VALUES(theme),
+    meal_color = VALUES(meal_color),
+    training_color = VALUES(training_color),
+    weight_color = VALUES(weight_color),
     updated_at = VALUES(updated_at)
 `
 
@@ -31,7 +34,7 @@ func (r *userPreferencesRepository) FindByUserID(ctx context.Context, userID val
 		return nil, err
 	}
 	var row UserPreferencesModel
-	err = q.SelectOne(&row, "SELECT id, user_id, theme, created_at, updated_at FROM user_preferences WHERE user_id = ?", bytes)
+	err = q.SelectOne(&row, "SELECT id, user_id, theme, meal_color, training_color, weight_color, created_at, updated_at FROM user_preferences WHERE user_id = ?", bytes)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -51,7 +54,11 @@ func (r *userPreferencesRepository) Save(ctx context.Context, preferences *userd
 	if err != nil {
 		return err
 	}
-	_, err = q.Exec(upsertUserPreferencesSQL, bytes, userIDBytes, preferences.Theme().Value(), preferences.CreatedAt(), preferences.UpdatedAt())
+	theme := preferences.Theme().Value()
+	mealColor := preferences.MealColor().Value()
+	trainingColor := preferences.TrainingColor().Value()
+	weightColor := preferences.WeightColor().Value()
+	_, err = q.Exec(upsertUserPreferencesSQL, bytes, userIDBytes, theme, mealColor, trainingColor, weightColor, preferences.CreatedAt(), preferences.UpdatedAt())
 	return err
 }
 
@@ -68,7 +75,28 @@ func toUserPreferences(row UserPreferencesModel) (*userdomain.UserPreferences, e
 	if err != nil {
 		return nil, err
 	}
-	return userdomain.NewUserPreferences(*userPreferencesID, *userID, *theme, row.CreatedAt, row.UpdatedAt), nil
+	mealColor, err := valueobject.NewColorHex(row.MealColor)
+	if err != nil {
+		return nil, err
+	}
+	trainingColor, err := valueobject.NewColorHex(row.TrainingColor)
+	if err != nil {
+		return nil, err
+	}
+	weightColor, err := valueobject.NewColorHex(row.WeightColor)
+	if err != nil {
+		return nil, err
+	}
+	return userdomain.NewUserPreferences(
+		*userPreferencesID,
+		*userID,
+		*theme,
+		*mealColor,
+		*trainingColor,
+		*weightColor,
+		row.CreatedAt,
+		row.UpdatedAt,
+	), nil
 }
 
 func NewUserPreferencesRepository(dbmap *gorp.DbMap) userdomain.UserPreferencesRepository {

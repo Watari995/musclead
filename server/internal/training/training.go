@@ -8,6 +8,7 @@ import (
 
 	purchasepublicfunctions "github.com/Watari995/musclead/internal/purchase/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	trainingpublicfunctions "github.com/Watari995/musclead/internal/training/interface/publicfunctions"
 	trainingdomain "github.com/Watari995/musclead/internal/training/internal/domain"
 	traininghandler "github.com/Watari995/musclead/internal/training/internal/handler"
 	traininginfra "github.com/Watari995/musclead/internal/training/internal/infra"
@@ -20,6 +21,7 @@ type Module struct {
 	TrainingHandler http.Handler
 	ExerciseHandler http.Handler
 	RoutineHandler  http.Handler
+	trainingQuery   trainingpublicfunctions.TrainingQuery
 }
 
 // NewModule は training モジュールを初期化する。
@@ -40,6 +42,7 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	routineRepo := traininginfra.NewRoutineRepository(dbmap)
 	routineQueryService := traininginfra.NewRoutineQueryService(dbmap)
 	exerciseRecordQueryService := traininginfra.NewExerciseRecordQueryService(dbmap)
+	trainingQueryService := traininginfra.NewTrainingQueryService(dbmap)
 
 	txManager := dbtx.NewTransactionManager(dbmap)
 
@@ -77,10 +80,19 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	findBestSets := trainingusecase.NewFindBestSetsByExerciseIDs(exerciseRecordQueryService)
 	getBestSetTimeseries := trainingusecase.NewGetExerciseBestSetTimeseries(exerciseRecordQueryService, bestSetCache)
 	findLastSessionSets := trainingusecase.NewFindLastSessionSetsByExerciseIDs(exerciseRecordQueryService)
+	// calendar
+	listTrainingDatesByMonth := trainingusecase.NewListTrainingDatesByMonth(trainingQueryService)
+	listTrainingSummaryByDate := trainingusecase.NewListTrainingSummaryByDate(trainingQueryService)
+	trainingQuery := trainingusecase.NewTrainingQuery(listTrainingDatesByMonth, listTrainingSummaryByDate)
 
 	return &Module{
 		TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining),
 		ExerciseHandler: traininghandler.NewExerciseHandler(findExercise, findBestSets, getBestSetTimeseries, listExercises, findLastSessionSets, createExercise, updateExercise, deleteExercise, reorderExercises),
 		RoutineHandler:  traininghandler.NewRoutineHandler(findRoutine, listRoutines, createRoutine, updateRoutine, deleteRoutine, reorderRoutines),
+		trainingQuery:   trainingQuery,
 	}
+}
+
+func (m *Module) TrainingQuery() trainingpublicfunctions.TrainingQuery {
+	return m.trainingQuery
 }

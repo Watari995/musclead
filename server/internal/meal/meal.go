@@ -5,6 +5,7 @@ package meal
 import (
 	"net/http"
 
+	mealpublicfunctions "github.com/Watari995/musclead/internal/meal/interface/publicfunctions"
 	mealhandler "github.com/Watari995/musclead/internal/meal/internal/handler"
 	mealinfra "github.com/Watari995/musclead/internal/meal/internal/infra"
 	mealusecase "github.com/Watari995/musclead/internal/meal/internal/usecase"
@@ -16,7 +17,8 @@ import (
 // Module は meal モジュールの公開 API。
 // HTTP ハンドラだけを外に出すことで、 内部の usecase / repository を隠蔽する。
 type Module struct {
-	Handler http.Handler
+	Handler   http.Handler
+	mealQuery mealpublicfunctions.MealQuery
 }
 
 func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder) *Module {
@@ -26,6 +28,7 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 
 	repo := mealinfra.NewMealRepository(dbmap)
 	templateRepo := mealinfra.NewMealTemplateRepository(dbmap)
+	mealQueryService := mealinfra.NewMealQueryService(dbmap)
 	txManager := dbtx.NewTransactionManager(dbmap)
 
 	record := mealusecase.NewRecordMeal(repo, txManager)
@@ -40,12 +43,21 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	updateTemplate := mealusecase.NewUpdateMealTemplate(templateRepo)
 	deleteTemplate := mealusecase.NewDeleteMealTemplate(templateRepo)
 	reorderTemplate := mealusecase.NewReorderMealTemplate(templateRepo, txManager)
+	// calendar
+	listMealDatesByMonth := mealusecase.NewListMealDatesByMonth(mealQueryService)
+	listMealSummaryByDate := mealusecase.NewListMealSummaryByDate(mealQueryService)
+	mealQuery := mealusecase.NewMealQuery(listMealDatesByMonth, listMealSummaryByDate)
 
 	return &Module{
-		Handler: mealhandler.New(
+		Handler:   mealhandler.New(
 			urlBuilder,
 			record, find, update, delete, list, generateMealPhotoImagePresignedURL,
 			listTemplates, createTemplate, updateTemplate, deleteTemplate, reorderTemplate,
 		),
+		mealQuery: mealQuery,
 	}
+}
+
+func (m *Module) MealQuery() mealpublicfunctions.MealQuery {
+	return m.mealQuery
 }

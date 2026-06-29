@@ -27,6 +27,22 @@ class UserRepository {
     () => _dio.patch<void>('/users/me/preferences', data: {'theme': theme}),
   );
 
+  /// カレンダードットの色設定を更新する。
+  Future<void> updateCalendarColors({
+    String? trainingColor,
+    String? mealColor,
+    String? weightColor,
+  }) => guardApi(
+    () => _dio.patch<void>(
+      '/users/me/preferences',
+      data: {
+        'training_color': trainingColor,
+        'meal_color': mealColor,
+        'weight_color': weightColor,
+      }..removeWhere((_, v) => v == null),
+    ),
+  );
+
   /// プロフィール画像アップロード:
   /// 1) presigned URL 取得 → 2) 署名URLへ直接 PUT → 3) PATCH /users/me で path 紐付け。
   Future<void> uploadProfileImage(Uint8List bytes, String contentType) =>

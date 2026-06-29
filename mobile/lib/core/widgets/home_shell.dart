@@ -12,6 +12,11 @@ class HomeShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   static const _tabs = [
+    (
+      icon: Icons.calendar_month_outlined,
+      active: Icons.calendar_month,
+      label: 'ホーム',
+    ),
     (icon: Icons.restaurant_outlined, active: Icons.restaurant, label: '食事'),
     (
       icon: Icons.fitness_center_outlined,

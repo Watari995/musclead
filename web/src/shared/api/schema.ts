@@ -2402,6 +2402,94 @@ export interface paths {
         };
         trace?: never;
     };
+    "/calendar/monthly-summary": {
+        parameters: {
+            query?: { year?: number; month?: number };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: { year?: number; month?: number };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.GetMonthlySummaryResponse"];
+                    };
+                };
+                400: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                401: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/calendar/daily-summary": {
+        parameters: {
+            query?: { date?: string };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: { date?: string };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.GetDailySummaryResponse"];
+                    };
+                };
+                400: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+                401: {
+                    headers: { [name: string]: unknown };
+                    content: {
+                        "application/json": components["schemas"]["github_com_Watari995_musclead_internal_shared_httpx.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/me/profile-image/presigned-url": {
         parameters: {
             query?: never;
@@ -3210,8 +3298,11 @@ export interface components {
         };
         "github_com_Watari995_musclead_internal_user_dto.PreferencesDTO": {
             created_at?: string;
+            meal_color?: string;
             theme?: string;
+            training_color?: string;
             updated_at?: string;
+            weight_color?: string;
         };
         "github_com_Watari995_musclead_internal_user_dto.RegisterRequest": {
             birthday?: string;
@@ -3223,7 +3314,10 @@ export interface components {
             user_id?: string;
         };
         "github_com_Watari995_musclead_internal_user_dto.UpdatePreferencesRequest": {
+            meal_color?: string;
             theme?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.Patch-string"];
+            training_color?: string;
+            weight_color?: string;
         };
         "github_com_Watari995_musclead_internal_user_dto.UpdatePreferencesResponse": {
             user_id?: string;
@@ -3236,6 +3330,43 @@ export interface components {
             name?: string;
             profile_image_url?: string;
             updated_at?: string;
+        };
+        "github_com_Watari995_musclead_internal_calendar_dto.GetMonthlySummaryResponse": {
+            days?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.MonthlySummaryDayDTO"][];
+        };
+        "github_com_Watari995_musclead_internal_calendar_dto.MonthlySummaryDayDTO": {
+            date?: string;
+            has_meal?: boolean;
+            has_training?: boolean;
+            has_weight?: boolean;
+        };
+        "github_com_Watari995_musclead_internal_calendar_dto.GetDailySummaryResponse": {
+            meals?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.MealSummaryDTO"][];
+            trainings?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.TrainingSummaryDTO"][];
+            weights?: components["schemas"]["github_com_Watari995_musclead_internal_calendar_dto.WeightSummaryDTO"][];
+        };
+        "github_com_Watari995_musclead_internal_calendar_dto.TrainingSummaryDTO": {
+            training_id?: string;
+            started_at?: string;
+            ended_at?: string;
+            exercise_count?: number;
+            set_count?: number;
+        };
+        "github_com_Watari995_musclead_internal_calendar_dto.MealSummaryDTO": {
+            meal_id?: string;
+            meal_type?: string;
+            eaten_at?: string;
+            calories?: number;
+            protein_g?: string;
+            fat_g?: string;
+            carbohydrate_g?: string;
+        };
+        "github_com_Watari995_musclead_internal_calendar_dto.WeightSummaryDTO": {
+            weight_id?: string;
+            weight_kg?: string;
+            body_fat_percentage?: string;
+            skeletal_muscle_kg?: string;
+            measured_at?: string;
         };
         "github_com_Watari995_musclead_internal_weight_dto.ListWeightsResponse": {
             pagination?: components["schemas"]["github_com_Watari995_musclead_internal_shared_dto.PaginationDTO"];
