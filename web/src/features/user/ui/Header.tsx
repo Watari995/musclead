@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useMeQuery } from "@/features/user/api/user";
 import { Avatar } from "@/features/user/ui/Avatar";
+import { NotificationBell } from "@/features/notification/ui/NotificationBell";
 
 const NAV_ITEMS = [
   { href: "/meals", label: "食事" },
@@ -78,6 +79,7 @@ export function Header() {
           <div className="flex items-center gap-3 text-sm">
             {loggedIn ? (
               <>
+                <NotificationBell />
                 {meQuery.data?.name && (
                   <Link
                     href="/profile"
