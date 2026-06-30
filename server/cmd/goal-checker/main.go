@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-gorp/gorp/v3"
@@ -20,6 +22,14 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
+	go func() {
+		<-sigCh
+		slog.Info("shutting down")
+		cancel()
+	}()
 
 	db, err := newDB()
 	if err != nil {
