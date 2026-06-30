@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/tab_page.dart';
+import '../../notifications/data/notification_repository.dart';
 import '../../user/data/user_repository.dart';
 import '../data/calendar_dtos.dart';
 import '../data/calendar_repository.dart';
@@ -33,8 +34,44 @@ class CalendarScreen extends HookConsumerWidget {
     final mealColor = _parseColor(prefs?.mealColor ?? '#7ED321');
     final weightColor = _parseColor(prefs?.weightColor ?? '#FF6B6B');
 
+    final unreadCount = ref
+            .watch(notificationsProvider)
+            .asData
+            ?.value
+            .unreadCount ??
+        0;
+
     return TabPage(
       title: 'カレンダー',
+      trailing: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => context.push('/notifications'),
+          ),
+          if (unreadCount > 0)
+            Positioned(
+              right: 6,
+              top: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  unreadCount > 99 ? '99+' : '$unreadCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       onRefresh: () async {
         ref.invalidate(monthlySummaryProvider((year.value, month.value)));
         if (selectedDate.value != null) {
