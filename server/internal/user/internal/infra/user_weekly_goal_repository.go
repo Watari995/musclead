@@ -51,16 +51,16 @@ func (r *userWeeklyGoalRepository) FindByUserID(ctx context.Context, userID valu
 	return result, nil
 }
 
-func (r *userWeeklyGoalRepository) Save(ctx context.Context, weeklyGoal *userdomain.UserWeeklyGoal) (*userdomain.UserWeeklyGoal, error) {
+func (r *userWeeklyGoalRepository) Save(ctx context.Context, weeklyGoal *userdomain.UserWeeklyGoal) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	params, err := buildUpsertParamsFromEntity(weeklyGoal)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err := q.Exec(upsertUserWeeklyGoalSQL, params...); err != nil {
-		return nil, err
+		return err
 	}
-	return weeklyGoal, nil
+	return nil
 }
 
 func buildUpsertParamsFromEntity(weeklyGoal *userdomain.UserWeeklyGoal) ([]any, error) {

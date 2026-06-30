@@ -3,6 +3,7 @@ package notificationusecase
 import (
 	"context"
 
+	"github.com/Watari995/musclead/internal/myerror"
 	notificationdomain "github.com/Watari995/musclead/internal/notification/internal/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -23,6 +24,8 @@ func NewReadNotification(notificationRepo notificationdomain.NotificationReposit
 }
 
 func (uc *ReadNotification) Execute(ctx context.Context, input ReadNotificationInput) (*ReadNotificationOutput, error) {
-	// TODO: implement
-	return nil, nil
+	if err := uc.notificationRepo.MarkAsRead(ctx, input.ID, input.UserID); err != nil {
+		return nil, myerror.NewInternalError().Wrap(err)
+	}
+	return &ReadNotificationOutput{}, nil
 }

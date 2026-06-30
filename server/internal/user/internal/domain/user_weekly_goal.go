@@ -28,12 +28,27 @@ func (u *UserWeeklyGoal) TrainingCount() *valueobject.NonNegativeInt {
 	return u.trainingCount
 }
 
+func (u *UserWeeklyGoal) SetTrainingCount(trainingCount *valueobject.NonNegativeInt) {
+	u.trainingCount = trainingCount
+	u.updatedAt = time.Now()
+}
+
 func (u *UserWeeklyGoal) CalorieAverage() *valueobject.NonNegativeInt {
 	return u.calorieAverage
 }
 
+func (u *UserWeeklyGoal) SetCalorieAverage(calorieAverage *valueobject.NonNegativeInt) {
+	u.calorieAverage = calorieAverage
+	u.updatedAt = time.Now()
+}
+
 func (u *UserWeeklyGoal) WeightChangeKg() *valueobject.WeightChangeKg {
 	return u.weightChangeKg
+}
+
+func (u *UserWeeklyGoal) SetWeightChangeKg(weightChangeKg *valueobject.WeightChangeKg) {
+	u.weightChangeKg = weightChangeKg
+	u.updatedAt = time.Now()
 }
 
 func (u *UserWeeklyGoal) CreatedAt() time.Time {

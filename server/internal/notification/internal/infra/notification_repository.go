@@ -92,7 +92,7 @@ func (r *notificationRepository) Save(ctx context.Context, notification *notific
 	return nil
 }
 
-func (r *notificationRepository) MarkAsRead(ctx context.Context, id valueobject.NotificationID) error {
+func (r *notificationRepository) MarkAsRead(ctx context.Context, id valueobject.NotificationID, userID valueobject.UserID) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := id.Bytes()
 	if err != nil {
@@ -145,4 +145,3 @@ func toNotificationEntity(row NotificationModel) (*notificationdomain.Notificati
 		row.CreatedAt,
 	), nil
 }
-

@@ -20,6 +20,10 @@ type userErrors struct {
 	InvalidCredentialsError ErrorCode
 }
 
+type userWeeklyGoalErrors struct {
+	NotFoundError ErrorCode
+}
+
 type mealErrors struct {
 	NotFoundError ErrorCode
 }
@@ -54,9 +58,14 @@ type paymentErrors struct {
 	NotFoundError ErrorCode
 }
 
+type notificationErrors struct {
+	NotFoundError ErrorCode
+}
+
 var ErrorCodes = struct {
 	General           generalErrors
 	User              userErrors
+	UserWeeklyGoal    userWeeklyGoalErrors
 	Meal              mealErrors
 	MealTemplate      mealTemplateErrors
 	Training          trainingErrors
@@ -64,6 +73,7 @@ var ErrorCodes = struct {
 	SubscriptionOrder subscriptionOrderErrors
 	Subscription      subscriptionErrors
 	Payment           paymentErrors
+	Notification      notificationErrors
 }{
 	General: generalErrors{
 		InternalError:        "general.internal_error",
@@ -80,6 +90,9 @@ var ErrorCodes = struct {
 		NotFoundError:           "user.not_found_error",
 		EmailAlreadyExistsError: "user.email_already_exists_error",
 		InvalidCredentialsError: "user.invalid_credentials_error",
+	},
+	UserWeeklyGoal: userWeeklyGoalErrors{
+		NotFoundError: "user_weekly_goal.not_found_error",
 	},
 	Meal: mealErrors{
 		NotFoundError: "meal.not_found_error",
@@ -107,5 +120,8 @@ var ErrorCodes = struct {
 	},
 	Payment: paymentErrors{
 		NotFoundError: "payment.not_found_error",
+	},
+	Notification: notificationErrors{
+		NotFoundError: "notification.not_found_error",
 	},
 }
