@@ -29,6 +29,7 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	dbmap.AddTableWithName(userinfra.UserWeeklyGoalModel{}, "user_weekly_goals").SetKeys(false, "ID")
 	repo := userinfra.NewUserRepository(dbmap)
 	prefsRepo := userinfra.NewUserPreferencesRepository(dbmap)
+	weeklyGoalRepo := userinfra.NewUserWeeklyGoalRepository(dbmap)
 	hasher := userinfra.NewBcryptPasswordHasher()
 
 	register := userusecase.NewRegisterUser(repo, hasher)
@@ -36,7 +37,6 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	updateUser := userusecase.NewUpdateUser(repo, storageClient)
 	delete := userusecase.NewDeleteUser(repo)
 	generateProfileImagePresignedURL := userusecase.NewGenerateProfileImagePresignedURL(storageClient)
-	weeklyGoalRepo := userinfra.NewUserWeeklyGoalRepository(dbmap)
 	me := userusecase.NewMe(repo, prefsRepo)
 	updatePreferences := userusecase.NewUpdatePreferences(prefsRepo)
 	getWeeklyGoal := userusecase.NewGetWeeklyGoal(weeklyGoalRepo)
@@ -46,7 +46,8 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	userCommand := userusecase.NewUserCommand(authenticate)
 
 	getEmailByUserID := userusecase.NewGetEmailByUserID(repo)
-	userQuery := userusecase.NewUserQuery(getEmailByUserID)
+	getAllUserIDs := userusecase.NewGetAllUserIDs(repo)
+	userQuery := userusecase.NewUserQuery(getEmailByUserID, getAllUserIDs, getWeeklyGoal)
 
 	// 認証済みルートをひとつの mux にまとめる
 	authedMux := http.NewServeMux()
