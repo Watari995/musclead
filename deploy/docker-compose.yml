@@ -52,6 +52,19 @@ services:
         condition: service_healthy
     # 公開は Caddy 経由。直接ポート公開はしない
 
+  goal-checker:
+    image: ghcr.io/watari995/musclead-server:latest
+    pull_policy: always
+    restart: always
+    env_file: .env
+    command: ["/app/goal-checker"]
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+    depends_on:
+      db:
+        condition: service_healthy
+
   caddy:
     image: caddy:2-alpine
     restart: always
