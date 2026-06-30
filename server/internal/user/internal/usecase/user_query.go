@@ -38,15 +38,24 @@ func (q *userQuery) GetWeeklyGoal(ctx context.Context, input publicfunctions.Get
 	if err != nil {
 		return publicfunctions.GetWeeklyGoalOutput{}, err
 	}
-	return publicfunctions.GetWeeklyGoalOutput{
-		ID:             output.Goal.ID(),
-		UserID:         output.Goal.UserID(),
-		TrainingCount:  output.Goal.TrainingCount(),
-		CalorieAverage: output.Goal.CalorieAverage(),
-		WeightChangeKg: output.Goal.WeightChangeKg(),
-		CreatedAt:      output.Goal.CreatedAt(),
-		UpdatedAt:      output.Goal.UpdatedAt(),
-	}, nil
+	var result publicfunctions.GetWeeklyGoalOutput
+	if output.Goal == nil {
+		result = publicfunctions.GetWeeklyGoalOutput{Goal: nil}
+	} else {
+		result = publicfunctions.GetWeeklyGoalOutput{
+			Goal: &publicfunctions.WeeklyGoalData{
+				ID:             output.Goal.ID(),
+				UserID:         output.Goal.UserID(),
+				TrainingCount:  output.Goal.TrainingCount(),
+				CalorieAverage: output.Goal.CalorieAverage(),
+				WeightChangeKg: output.Goal.WeightChangeKg(),
+				CreatedAt:      output.Goal.CreatedAt(),
+				UpdatedAt:      output.Goal.UpdatedAt(),
+			},
+		}
+
+	}
+	return result, nil
 }
 
 func (q *userQuery) GetAllUserIDs(ctx context.Context) ([]valueobject.UserID, error) {

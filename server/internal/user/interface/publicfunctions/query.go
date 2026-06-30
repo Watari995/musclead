@@ -19,7 +19,7 @@ type GetWeeklyGoalInput struct {
 	UserID valueobject.UserID
 }
 
-type GetWeeklyGoalOutput struct {
+type WeeklyGoalData struct {
 	ID             valueobject.UserWeeklyGoalID
 	UserID         valueobject.UserID
 	TrainingCount  *valueobject.NonNegativeInt
@@ -27,6 +27,10 @@ type GetWeeklyGoalOutput struct {
 	WeightChangeKg *valueobject.WeightChangeKg
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
+}
+
+type GetWeeklyGoalOutput struct {
+	Goal *WeeklyGoalData
 }
 
 type UserQuery interface {

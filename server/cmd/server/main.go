@@ -25,7 +25,6 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/billing"
 	"github.com/Watari995/musclead/internal/calendar"
