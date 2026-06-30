@@ -23,6 +23,7 @@
         "notificationinfra",
         "notificationpublicfunctions",
         "notificationusecase",
+        "ozzo",
         "publicfunctions",
         "semgrep",
         "semgrepignore",

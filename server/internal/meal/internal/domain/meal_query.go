@@ -20,4 +20,5 @@ type MealSummaryView struct {
 type MealQueryService interface {
 	ListMealDatesByMonth(ctx context.Context, userID valueobject.UserID, year, month int) ([]time.Time, error)
 	ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*MealSummaryView, error)
+	GetAverageCaloriesInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (*valueobject.NonNegativeDecimal, error)
 }

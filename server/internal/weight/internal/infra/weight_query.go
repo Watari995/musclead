@@ -85,6 +85,46 @@ func (s *weightQueryService) ListSummaryByDate(ctx context.Context, userID value
 	return result, nil
 }
 
+type getWeightChangeInAWeekRow struct {
+	WeightChangeKg sql.NullString `db:"weight_change_kg"`
+}
+
+func (s *weightQueryService) GetWeightChangeInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (*valueobject.WeightChangeKg, error) {
+	q := dbtx.Querier(ctx, s.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	weekStartStr := weekStart.Format("2006-01-02")
+	weekEnd := weekStart.AddDate(0, 0, 6).Format("2006-01-02")
+	var row getWeightChangeInAWeekRow
+	if err := q.SelectOne(&row, `
+	SELECT
+	(
+		SELECT weight_kg
+		FROM weights
+		WHERE user_id = ?
+		AND DATE(CONVERT_TZ(measured_at, '+00:00', '+09:00')) BETWEEN ? AND ?
+		ORDER BY measured_at DESC LIMIT 1
+	)
+	-
+	(
+		SELECT weight_kg
+		FROM weights
+		WHERE user_id = ?
+		AND DATE(CONVERT_TZ(measured_at, '+00:00', '+09:00')) BETWEEN ? AND ?
+		ORDER BY measured_at ASC LIMIT 1
+	) AS weight_change_kg
+	`, userIDBytes, weekStartStr, weekEnd, userIDBytes, weekStartStr, weekEnd); err != nil {
+		return nil, err
+	}
+	weightChangeKg, err := sqlconv.NewWeightChangeKgFromNullString(row.WeightChangeKg)
+	if err != nil {
+		return nil, err
+	}
+	return weightChangeKg, nil
+}
+
 func toWeightSummaryViewFromRow(row listWeightSummaryByDateRow) (*weightdomain.WeightSummaryView, error) {
 	weightID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.WeightID](row.WeightID)
 	if err != nil {
