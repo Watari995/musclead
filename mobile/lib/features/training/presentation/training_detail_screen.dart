@@ -84,6 +84,12 @@ class TrainingDetailScreen extends ConsumerWidget {
                 child: _ExerciseCard(
                   name: names[ex.exerciseId] ?? '種目',
                   exercise: ex,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          TrainingRecordScreen(editingTraining: training),
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -144,45 +150,64 @@ class TrainingDetailScreen extends ConsumerWidget {
 }
 
 class _ExerciseCard extends StatelessWidget {
-  const _ExerciseCard({required this.name, required this.exercise});
+  const _ExerciseCard({
+    required this.name,
+    required this.exercise,
+    this.onTap,
+  });
 
   final String name;
   final TrainingExerciseDto exercise;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
     return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-          ),
-          const SizedBox(height: 6),
-          for (final s in exercise.sets)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 24,
-                    child: Text(
-                      '${s.setNumber}',
-                      style: TextStyle(color: t.muted),
+      padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                for (final s in exercise.sets)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          child: Text(
+                            '${s.setNumber}',
+                            style: TextStyle(color: t.muted),
+                          ),
+                        ),
+                        Text(
+                          '${s.weightKg} kg',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        const Spacer(),
+                        Text('${s.reps} 回', style: TextStyle(color: t.muted)),
+                      ],
                     ),
                   ),
-                  Text(
-                    '${s.weightKg} kg',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const Spacer(),
-                  Text('${s.reps} 回', style: TextStyle(color: t.muted)),
-                ],
-              ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
