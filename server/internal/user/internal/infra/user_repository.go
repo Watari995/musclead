@@ -65,6 +65,27 @@ func (r *userRepository) FindByEmail(ctx context.Context, email valueobject.Emai
 	return toUser(row)
 }
 
+type getAllUserIDsRow struct {
+	ID []byte `db:"id"`
+}
+
+func (r *userRepository) GetAllUserIDs(ctx context.Context) ([]valueobject.UserID, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	var rows []getAllUserIDsRow
+	if _, err := q.Select(&rows, "SELECT id FROM users WHERE deleted_at IS NULL"); err != nil {
+		return nil, err
+	}
+	result := make([]valueobject.UserID, 0, len(rows))
+	for _, row := range rows {
+		userID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.UserID](row.ID)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, *userID)
+	}
+	return result, nil
+}
+
 func (r *userRepository) Save(ctx context.Context, user *userdomain.User) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	bytes, err := user.ID().Bytes()

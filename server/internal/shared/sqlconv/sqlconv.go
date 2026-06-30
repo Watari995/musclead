@@ -112,6 +112,14 @@ func NewNonNegativeDecimalFromNullString(s sql.NullString) (*valueobject.NonNega
 	return valueobject.NewNonNegativeDecimal(*d)
 }
 
+func NewNonNegativeDecimalFromNullFloat64(s sql.NullFloat64) (*valueobject.NonNegativeDecimal, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	d := decimal.NewFromFloat(s.Float64)
+	return valueobject.NewNonNegativeDecimal(d)
+}
+
 // ─── int / NonNegativeInt ───────────────────────────────
 
 // NonNegativeIntToNullInt32 は *NonNegativeInt を sql.NullInt32 に詰める。
@@ -168,6 +176,26 @@ func NewWeightKgFromNullString(s sql.NullString) (*valueobject.WeightKg, error) 
 		return nil, nil
 	}
 	return NewWeightKgFromString(s.String)
+}
+
+// ─── WeightChangeKg ──────────────────────────────────────────────────────────────────
+func NewWeightChangeKgFromString(s string) (*valueobject.WeightChangeKg, error) {
+	d, err := decimal.NewFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	return valueobject.NewWeightChangeKgFromDecimal(d)
+}
+
+func NewWeightChangeKgFromNullString(s sql.NullString) (*valueobject.WeightChangeKg, error) {
+	if !s.Valid {
+		return nil, nil
+	}
+	weightChangeKg, err := NewWeightChangeKgFromString(s.String)
+	if err != nil {
+		return nil, err
+	}
+	return weightChangeKg, nil
 }
 
 // ─── UUID ───────────────────────────────────────────────

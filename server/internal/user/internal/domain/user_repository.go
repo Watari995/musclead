@@ -9,5 +9,6 @@ import (
 type UserRepository interface {
 	FindByID(ctx context.Context, id valueobject.UserID) (*User, error)
 	FindByEmail(ctx context.Context, email valueobject.Email) (*User, error)
+	GetAllUserIDs(ctx context.Context) ([]valueobject.UserID, error)
 	Save(ctx context.Context, user *User) error
 }

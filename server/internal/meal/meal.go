@@ -46,7 +46,8 @@ func NewModule(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlB
 	// calendar
 	listMealDatesByMonth := mealusecase.NewListMealDatesByMonth(mealQueryService)
 	listMealSummaryByDate := mealusecase.NewListMealSummaryByDate(mealQueryService)
-	mealQuery := mealusecase.NewMealQuery(listMealDatesByMonth, listMealSummaryByDate)
+	getAverageCaloriesInAWeek := mealusecase.NewGetAverageCaloriesInAWeek(mealQueryService)
+	mealQuery := mealusecase.NewMealQuery(listMealDatesByMonth, listMealSummaryByDate, getAverageCaloriesInAWeek)
 
 	return &Module{
 		Handler:   mealhandler.New(

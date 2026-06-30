@@ -30,6 +30,12 @@ func (m *MockUserRepository) Save(ctx context.Context, user *userdomain.User) er
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) GetAllUserIDs(ctx context.Context) ([]valueobject.UserID, error) {
+	args := m.Called(ctx)
+	ids, _ := args.Get(0).([]valueobject.UserID)
+	return ids, args.Error(1)
+}
+
 // MockPasswordHasher は userdomain.PasswordHasher の偽実装(テスト用)。
 type MockPasswordHasher struct {
 	mock.Mock

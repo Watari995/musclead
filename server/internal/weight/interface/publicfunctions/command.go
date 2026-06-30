@@ -33,4 +33,5 @@ type WeightQuery interface {
 	CheckIfExistsWeightByUserIDAndMeasuredAt(ctx context.Context, userID valueobject.UserID, measuredAt time.Time) (bool, error)
 	ListWeightDatesByMonth(ctx context.Context, userID valueobject.UserID, year, month int) ([]time.Time, error)
 	ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*WeightSummaryView, error)
+	GetWeightChangeInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (*valueobject.WeightChangeKg, error)
 }

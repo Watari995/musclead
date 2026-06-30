@@ -20,4 +20,5 @@ type TrainingQueryService interface {
 		[]time.Time, error,
 	)
 	ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*TrainingSummaryView, error)
+	GetTrainingCountInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (valueobject.NonNegativeInt, error)
 }

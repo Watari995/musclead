@@ -97,6 +97,27 @@ func (s *trainingQueryService) ListSummaryByDate(ctx context.Context, userID val
 	return result, nil
 }
 
+type getTrainingCountInAWeekRow struct {
+	TrainingCount int `db:"training_count"`
+}
+
+func (s *trainingQueryService) GetTrainingCountInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (valueobject.NonNegativeInt, error) {
+	q := dbtx.Querier(ctx, s.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return valueobject.NonNegativeInt{}, err
+	}
+	var row getTrainingCountInAWeekRow
+	if err := q.SelectOne(&row, `SELECT COUNT(DISTINCT t.id) AS training_count FROM trainings t WHERE t.user_id = ? AND DATE(CONVERT_TZ(t.started_at, '+00:00', '+09:00')) BETWEEN ? AND ?`, userIDBytes, weekStart.Format("2006-01-02"), weekStart.AddDate(0, 0, 6).Format("2006-01-02")); err != nil {
+		return valueobject.NonNegativeInt{}, err
+	}
+	trainingCount, err := valueobject.NewNonNegativeInt(row.TrainingCount)
+	if err != nil {
+		return valueobject.NonNegativeInt{}, err
+	}
+	return *trainingCount, nil
+}
+
 func toTrainingSummaryViewFromRow(row listTrainingSummaryByDateRow) (*trainingdomain.TrainingSummaryView, error) {
 	trainingID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.TrainingID](row.TrainingID)
 	if err != nil {

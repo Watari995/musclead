@@ -44,7 +44,8 @@ func NewModule(dbmap *gorp.DbMap, redisClient *redis.Client) *Module {
 	listWeightDatesByMonth := weightusecase.NewListWeightDatesByMonth(weightQueryService)
 	listWeightSummaryByDate := weightusecase.NewListWeightSummaryByDate(weightQueryService)
 	weightCommand := weightusecase.NewWeightCommand(record)
-	weightQuery := weightusecase.NewWeightQuery(checkIfExistsWeightByUserIDAndMeasuredAt, listWeightDatesByMonth, listWeightSummaryByDate)
+	getWeightChangeInAWeek := weightusecase.NewGetWeightChangeInAWeek(weightQueryService)
+	weightQuery := weightusecase.NewWeightQuery(checkIfExistsWeightByUserIDAndMeasuredAt, listWeightDatesByMonth, listWeightSummaryByDate, getWeightChangeInAWeek)
 
 	return &Module{
 		Handler:       weighthandler.New(record, find, list, update, delete, getTimeseries),
