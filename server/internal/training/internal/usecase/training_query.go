@@ -12,15 +12,18 @@ import (
 type trainingQuery struct {
 	listTrainingDatesByMonth  *ListTrainingDatesByMonth
 	listTrainingSummaryByDate *ListTrainingSummaryByDate
+	countSessionsByWeek       *CountSessionsByWeek
 }
 
 func NewTrainingQuery(
 	listTrainingDatesByMonth *ListTrainingDatesByMonth,
 	listTrainingSummaryByDate *ListTrainingSummaryByDate,
+	countSessionsByWeek *CountSessionsByWeek,
 ) trainingpublicfunctions.TrainingQuery {
 	return &trainingQuery{
 		listTrainingDatesByMonth:  listTrainingDatesByMonth,
 		listTrainingSummaryByDate: listTrainingSummaryByDate,
+		countSessionsByWeek:       countSessionsByWeek,
 	}
 }
 
@@ -45,6 +48,10 @@ func (q *trainingQuery) ListSummaryByDate(ctx context.Context, userID valueobjec
 		return nil, err
 	}
 	return toTrainingSummaryViews(output.TrainingSummaries), nil
+}
+
+func (q *trainingQuery) CountSessionsByWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (valueobject.NonNegativeInt, error) {
+	return q.countSessionsByWeek.Execute(ctx, userID, weekStart)
 }
 
 func toTrainingSummaryViews(views []*trainingdomain.TrainingSummaryView) []*trainingpublicfunctions.TrainingSummaryView {

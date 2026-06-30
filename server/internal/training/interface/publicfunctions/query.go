@@ -18,4 +18,5 @@ type TrainingSummaryView struct {
 type TrainingQuery interface {
 	ListTrainingDatesByMonth(ctx context.Context, userID valueobject.UserID, year, month int) ([]time.Time, error)
 	ListSummaryByDate(ctx context.Context, userID valueobject.UserID, date time.Time) ([]*TrainingSummaryView, error)
+	CountSessionsByWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (valueobject.NonNegativeInt, error)
 }
