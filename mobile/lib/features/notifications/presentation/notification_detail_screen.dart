@@ -40,11 +40,9 @@ class _NotificationDetailScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('通知詳細'),
-        backgroundColor: t.surface,
-        foregroundColor: t.ink,
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      backgroundColor: t.bg,
       body: notification == null
           ? const Center(child: CircularProgressIndicator(strokeWidth: 2.4))
           : _NotificationBody(notification: notification),
@@ -68,7 +66,7 @@ class _NotificationBody extends StatelessWidget {
         if (notification.notificationType == 'weekly_goal') ...[
           _WeeklyGoalDetail(metadata: m),
         ] else ...[
-          Text('通知', style: TextStyle(fontSize: 16, color: t.ink)),
+          Text('通知', style: TextStyle(fontSize: 16, color: t.subtle)),
         ],
         const SizedBox(height: 16),
         Text(
@@ -104,7 +102,7 @@ class _WeeklyGoalDetail extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: t.ink,
+            color: t.muted,
           ),
         ),
         const SizedBox(height: 16),
@@ -159,7 +157,7 @@ class _GoalRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: TextStyle(fontSize: 12, color: t.muted)),
-                Text(value, style: TextStyle(fontSize: 14, color: t.ink)),
+                Text(value, style: const TextStyle(fontSize: 14)),
               ],
             ),
           ),

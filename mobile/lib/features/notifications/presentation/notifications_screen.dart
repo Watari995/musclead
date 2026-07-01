@@ -67,9 +67,11 @@ class _NotificationTile extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: notification.isRead ? t.surface : t.surfaceAlt,
+          color: notification.isRead
+              ? context.colors.surface
+              : context.colors.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: t.line),
+          border: Border.all(color: t.border),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -92,7 +94,6 @@ class _NotificationTile extends ConsumerWidget {
                         fontWeight: notification.isRead
                             ? FontWeight.normal
                             : FontWeight.bold,
-                        color: t.ink,
                       ),
                     ),
                     const SizedBox(height: 2),

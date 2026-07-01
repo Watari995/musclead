@@ -58,11 +58,9 @@ class WeeklyGoalScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('週次目標'),
-        backgroundColor: t.surface,
-        foregroundColor: t.ink,
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      backgroundColor: t.bg,
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [
@@ -129,6 +127,7 @@ class _GoalField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final cs = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,7 +136,7 @@ class _GoalField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: t.ink,
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 6),
@@ -152,18 +151,18 @@ class _GoalField extends StatelessWidget {
                   hintText: '未設定',
                   hintStyle: TextStyle(color: t.muted),
                   filled: true,
-                  fillColor: t.surface,
+                  fillColor: cs.surface,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 10,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: t.line),
+                    borderSide: BorderSide(color: t.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: t.line),
+                    borderSide: BorderSide(color: t.border),
                   ),
                 ),
               ),
