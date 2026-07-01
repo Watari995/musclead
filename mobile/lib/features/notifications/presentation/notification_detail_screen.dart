@@ -119,15 +119,15 @@ class _WeeklyGoalDetail extends StatelessWidget {
             label: '平均カロリー',
             value:
                 '${calorieActual != null ? calorieActual.round() : '—'} / $calorieGoal kcal',
-            achieved: calorieActual != null &&
-                calorieActual <= calorieGoal,
+            achieved: calorieActual != null && calorieActual <= calorieGoal,
           ),
         if (weightGoal != null)
           _GoalRow(
             label: '体重変化',
             value:
                 '${weightActual != null ? (weightActual > 0 ? '+' : '') + weightActual.toStringAsFixed(1) : '—'} kg（目標: ${weightGoal > 0 ? '+' : ''}${weightGoal.toStringAsFixed(1)} kg）',
-            achieved: weightActual != null &&
+            achieved:
+                weightActual != null &&
                 weightGoal.isNegative == weightActual.isNegative &&
                 weightActual.abs() >= weightGoal.abs(),
           ),
@@ -163,10 +163,7 @@ class _GoalRow extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            achieved ? '✅' : '❌',
-            style: const TextStyle(fontSize: 18),
-          ),
+          Text(achieved ? '✅' : '❌', style: const TextStyle(fontSize: 18)),
         ],
       ),
     );

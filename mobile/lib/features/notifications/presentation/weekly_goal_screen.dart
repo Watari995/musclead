@@ -33,17 +33,19 @@ class WeeklyGoalScreen extends HookConsumerWidget {
     Future<void> save() async {
       saving.value = true;
       try {
-        await ref.read(notificationRepositoryProvider).upsertWeeklyGoal(
-          trainingCount: trainingCtrl.text.isEmpty
-              ? null
-              : int.tryParse(trainingCtrl.text),
-          calorieAverage: calorieCtrl.text.isEmpty
-              ? null
-              : int.tryParse(calorieCtrl.text),
-          weightChangeKg: weightCtrl.text.isEmpty
-              ? null
-              : double.tryParse(weightCtrl.text),
-        );
+        await ref
+            .read(notificationRepositoryProvider)
+            .upsertWeeklyGoal(
+              trainingCount: trainingCtrl.text.isEmpty
+                  ? null
+                  : int.tryParse(trainingCtrl.text),
+              calorieAverage: calorieCtrl.text.isEmpty
+                  ? null
+                  : int.tryParse(calorieCtrl.text),
+              weightChangeKg: weightCtrl.text.isEmpty
+                  ? null
+                  : double.tryParse(weightCtrl.text),
+            );
         ref.invalidate(weeklyGoalProvider);
         saved.value = true;
         await Future.delayed(const Duration(seconds: 2));
@@ -168,10 +170,7 @@ class _GoalField extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                unit,
-                style: TextStyle(fontSize: 13, color: t.muted),
-              ),
+              child: Text(unit, style: TextStyle(fontSize: 13, color: t.muted)),
             ),
           ],
         ),
