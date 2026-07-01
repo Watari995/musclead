@@ -158,10 +158,8 @@ class _GoalRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(fontSize: 12, color: t.muted)),
-                Text(value,
-                    style: TextStyle(fontSize: 14, color: t.ink)),
+                Text(label, style: TextStyle(fontSize: 12, color: t.muted)),
+                Text(value, style: TextStyle(fontSize: 14, color: t.ink)),
               ],
             ),
           ),

@@ -34,12 +34,8 @@ class CalendarScreen extends HookConsumerWidget {
     final mealColor = _parseColor(prefs?.mealColor ?? '#7ED321');
     final weightColor = _parseColor(prefs?.weightColor ?? '#FF6B6B');
 
-    final unreadCount = ref
-            .watch(notificationsProvider)
-            .asData
-            ?.value
-            .unreadCount ??
-        0;
+    final unreadCount =
+        ref.watch(notificationsProvider).asData?.value.unreadCount ?? 0;
 
     return TabPage(
       title: 'カレンダー',
