@@ -25,13 +25,13 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/Watari995/musclead/docs"
 	"github.com/Watari995/musclead/internal/auth"
 	"github.com/Watari995/musclead/internal/billing"
 	"github.com/Watari995/musclead/internal/calendar"
 	"github.com/Watari995/musclead/internal/food"
 	"github.com/Watari995/musclead/internal/healthsync"
 	"github.com/Watari995/musclead/internal/meal"
+	"github.com/Watari995/musclead/internal/notification"
 	"github.com/Watari995/musclead/internal/payment"
 	"github.com/Watari995/musclead/internal/purchase"
 	_ "github.com/Watari995/musclead/internal/shared"
@@ -225,6 +225,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
 	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery(), redisClient)
 	calendarModule := calendar.NewModule(trainingModule.TrainingQuery(), mealModule.MealQuery(), weightModule.WeightQuery())
+	notificationModule := notification.NewModule(dbmap)
 
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
@@ -264,6 +265,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// calendar
 	mux.Handle("/calendar", authModule.Middleware(calendarModule.Handler))
 	mux.Handle("/calendar/", authModule.Middleware(calendarModule.Handler))
+	// notification
+	mux.Handle("/notifications", authModule.Middleware(notificationModule.Handler))
+	mux.Handle("/notifications/", authModule.Middleware(notificationModule.Handler))
 
 	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
 	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule, healthSyncModule

@@ -152,7 +152,7 @@ func NewDisabledUserError() MyError {
 }
 
 // ─── ドメイン固有ファクトリ (generalCode + code を分離) ───
-
+// User
 func NewUserNotFoundError() MyError {
 	return &myError{
 		status:      http.StatusNotFound,
@@ -160,7 +160,6 @@ func NewUserNotFoundError() MyError {
 		code:        ErrorCodes.User.NotFoundError,
 	}
 }
-
 func NewEmailAlreadyExistsError() MyError {
 	return &myError{
 		status:      http.StatusConflict,
@@ -168,12 +167,20 @@ func NewEmailAlreadyExistsError() MyError {
 		code:        ErrorCodes.User.EmailAlreadyExistsError,
 	}
 }
-
 func NewInvalidCredentialsError() MyError {
 	return &myError{
 		status:      http.StatusUnauthorized,
 		generalCode: ErrorCodes.General.UnauthorizedError,
 		code:        ErrorCodes.User.InvalidCredentialsError,
+	}
+}
+
+// UserWeeklyGoal
+func NewUserWeeklyGoalNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.UserWeeklyGoal.NotFoundError,
 	}
 }
 
@@ -278,6 +285,15 @@ func NewPaymentNotFoundError() MyError {
 		status:      http.StatusNotFound,
 		generalCode: ErrorCodes.General.NotFoundError,
 		code:        ErrorCodes.Payment.NotFoundError,
+	}
+}
+
+// Notification
+func NewNotificationNotFoundError() MyError {
+	return &myError{
+		status:      http.StatusNotFound,
+		generalCode: ErrorCodes.General.NotFoundError,
+		code:        ErrorCodes.Notification.NotFoundError,
 	}
 }
 

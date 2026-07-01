@@ -85,6 +85,34 @@ func (s *mealQueryService) ListSummaryByDate(ctx context.Context, userID valueob
 	return result, nil
 }
 
+type getAverageCaloriesInAWeekRow struct {
+	AverageCalories sql.NullFloat64 `db:"average_calories"`
+}
+
+func (s *mealQueryService) GetAverageCaloriesInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (*valueobject.NonNegativeDecimal, error) {
+	q := dbtx.Querier(ctx, s.dbmap)
+	userIDBytes, err := userID.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	weekStartStr := weekStart.Format("2006-01-02")
+	weekEnd := weekStart.AddDate(0, 0, 6).Format("2006-01-02")
+	var row getAverageCaloriesInAWeekRow
+	if err := q.SelectOne(&row, `
+		SELECT SUM(calories) / 7 AS average_calories
+		FROM meals
+		WHERE user_id = ?
+		AND DATE(CONVERT_TZ(eaten_at, '+00:00', '+09:00')) BETWEEN ? AND ?
+	`, userIDBytes, weekStartStr, weekEnd); err != nil {
+		return nil, err
+	}
+	averageCalories, err := sqlconv.NewNonNegativeDecimalFromNullFloat64(row.AverageCalories)
+	if err != nil {
+		return nil, err
+	}
+	return averageCalories, nil
+}
+
 func toMealSummaryViewFromRow(row listMealSummaryByDateRow) (*mealdomain.MealSummaryView, error) {
 	mealID, err := sqlconv.NewPrimaryIDFromBytes[valueobject.MealID](row.MealID)
 	if err != nil {

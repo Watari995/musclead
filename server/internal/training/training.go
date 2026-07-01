@@ -83,7 +83,8 @@ func NewModule(dbmap *gorp.DbMap, subscriptionQuery purchasepublicfunctions.Subs
 	// calendar
 	listTrainingDatesByMonth := trainingusecase.NewListTrainingDatesByMonth(trainingQueryService)
 	listTrainingSummaryByDate := trainingusecase.NewListTrainingSummaryByDate(trainingQueryService)
-	trainingQuery := trainingusecase.NewTrainingQuery(listTrainingDatesByMonth, listTrainingSummaryByDate)
+	countSessionsByWeek := trainingusecase.NewCountSessionsByWeek(trainingQueryService)
+	trainingQuery := trainingusecase.NewTrainingQuery(listTrainingDatesByMonth, listTrainingSummaryByDate, countSessionsByWeek)
 
 	return &Module{
 		TrainingHandler: traininghandler.NewTrainingHandler(findTraining, listTrainings, recordTraining, updateTraining, deleteTraining),

@@ -10,17 +10,20 @@ import (
 )
 
 type mealQuery struct {
-	listMealDatesByMonth  *ListMealDatesByMonth
-	listMealSummaryByDate *ListMealSummaryByDate
+	listMealDatesByMonth        *ListMealDatesByMonth
+	listMealSummaryByDate       *ListMealSummaryByDate
+	getAverageCaloriesInAWeek   *GetAverageCaloriesInAWeek
 }
 
 func NewMealQuery(
 	listMealDatesByMonth *ListMealDatesByMonth,
 	listMealSummaryByDate *ListMealSummaryByDate,
+	getAverageCaloriesInAWeek *GetAverageCaloriesInAWeek,
 ) mealpublicfunctions.MealQuery {
 	return &mealQuery{
-		listMealDatesByMonth:  listMealDatesByMonth,
-		listMealSummaryByDate: listMealSummaryByDate,
+		listMealDatesByMonth:        listMealDatesByMonth,
+		listMealSummaryByDate:       listMealSummaryByDate,
+		getAverageCaloriesInAWeek:   getAverageCaloriesInAWeek,
 	}
 }
 
@@ -45,6 +48,10 @@ func (q *mealQuery) ListSummaryByDate(ctx context.Context, userID valueobject.Us
 		return nil, err
 	}
 	return toMealSummaryViews(output.MealSummaries), nil
+}
+
+func (q *mealQuery) GetAverageCaloriesInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (*valueobject.NonNegativeDecimal, error) {
+	return q.getAverageCaloriesInAWeek.Execute(ctx, userID, weekStart)
 }
 
 func toMealSummaryViews(views []*mealdomain.MealSummaryView) []*mealpublicfunctions.MealSummaryView {

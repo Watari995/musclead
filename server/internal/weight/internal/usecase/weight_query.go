@@ -13,17 +13,20 @@ type weightQuery struct {
 	checkIfExistsWeightByUserIDAndMeasuredAt *CheckIfExistsWeightByUserIDAndMeasuredAt
 	listWeightDatesByMonth                   *ListWeightDatesByMonth
 	listWeightSummaryByDate                  *ListWeightSummaryByDate
+	getWeightChangeInAWeek                   *GetWeightChangeInAWeek
 }
 
 func NewWeightQuery(
 	checkIfExistsWeightByUserIDAndMeasuredAt *CheckIfExistsWeightByUserIDAndMeasuredAt,
 	listWeightDatesByMonth *ListWeightDatesByMonth,
 	listWeightSummaryByDate *ListWeightSummaryByDate,
+	getWeightChangeInAWeek *GetWeightChangeInAWeek,
 ) weightpublicfunctions.WeightQuery {
 	return &weightQuery{
 		checkIfExistsWeightByUserIDAndMeasuredAt: checkIfExistsWeightByUserIDAndMeasuredAt,
 		listWeightDatesByMonth:                   listWeightDatesByMonth,
 		listWeightSummaryByDate:                  listWeightSummaryByDate,
+		getWeightChangeInAWeek:                   getWeightChangeInAWeek,
 	}
 }
 
@@ -52,6 +55,10 @@ func (q *weightQuery) ListSummaryByDate(ctx context.Context, userID valueobject.
 		return nil, err
 	}
 	return toWeightSummaryViews(output.WeightSummaries), nil
+}
+
+func (q *weightQuery) GetWeightChangeInAWeek(ctx context.Context, userID valueobject.UserID, weekStart time.Time) (*valueobject.WeightChangeKg, error) {
+	return q.getWeightChangeInAWeek.Execute(ctx, userID, weekStart)
 }
 
 func toWeightSummaryViews(views []*weightdomain.WeightSummaryView) []*weightpublicfunctions.WeightSummaryView {

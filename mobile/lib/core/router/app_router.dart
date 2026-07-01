@@ -17,6 +17,9 @@ import '../../features/training/presentation/routine_create_screen.dart';
 import '../../features/training/presentation/routines_screen.dart';
 import '../../features/training/presentation/training_record_screen.dart';
 import '../../features/training/presentation/trainings_screen.dart';
+import '../../features/notifications/presentation/notification_detail_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
+import '../../features/notifications/presentation/weekly_goal_screen.dart';
 import '../../features/user/presentation/profile_screen.dart';
 import '../../features/weight/presentation/weights_screen.dart';
 import '../widgets/home_shell.dart';
@@ -56,6 +59,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+      GoRoute(
+        path: '/notifications',
+        builder: (_, _) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/notifications/:id',
+        builder: (_, state) =>
+            NotificationDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/weekly-goal',
+        builder: (_, _) => const WeeklyGoalScreen(),
+      ),
       // 食事記録・編集はタブシェルの上にフルスクリーンで push する
       GoRoute(
         path: '/meals/new',

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -133,6 +134,15 @@ class _ProfileBody extends ConsumerWidget {
           const SectionTitle('カレンダー'),
           _CalendarColorSection(prefs: preferences!),
         ],
+        const SectionTitle('目標'),
+        AppListBox(
+          children: [
+            AppListRow(
+              onTap: () => context.push('/weekly-goal'),
+              child: _row(context, '週次目標'),
+            ),
+          ],
+        ),
         const SectionTitle('連携サービス'),
         AppListBox(
           children: [

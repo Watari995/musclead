@@ -75,7 +75,7 @@ jobs:
             set -e
             cd ~/musclead
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose -f deploy/docker-compose.yml --env-file deploy/.env pull server
+            docker compose -f deploy/docker-compose.yml --env-file deploy/.env pull server goal-checker
             docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
             docker logout ghcr.io
             docker image prune -f

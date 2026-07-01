@@ -26,6 +26,8 @@ RUN go install github.com/swaggo/swag/cmd/swag@latest \
 # GOOS / GOARCH で「ターゲット用バイナリ吐いて」 と Go に指示
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -ldflags="-s -w" -o /app/server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -ldflags="-s -w" -o /app/goal-checker ./cmd/goal-checker
 
 # -- Stage 2: migrate CLI ---------
 # curl で arm64 バイナリを download するだけなので Go 不要
@@ -45,6 +47,7 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 
 COPY --from=builder /app/server /app/server
+COPY --from=builder /app/goal-checker /app/goal-checker
 COPY --from=migrate /usr/local/bin/migrate /usr/local/bin/migrate
 
 # Migration ファイル同梱(起動時に適用)
