@@ -27,10 +27,8 @@ func run(
 
 	// workerのなかで処理を行う
 	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 5 {
+		wg.Go(func() {
 			for userID := range ch {
 				checkAndNotify(
 					ctx,
@@ -43,7 +41,7 @@ func run(
 					notifCommand,
 				)
 			}
-		}()
+		})
 	}
 
 	// tickerで毎週1かい処理を実行
