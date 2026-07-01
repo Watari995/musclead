@@ -31,7 +31,6 @@ class _NotificationDetailScreenState
   @override
   Widget build(BuildContext context) {
     final notifications = ref.watch(notificationsProvider);
-    final t = context.tokens;
 
     final notification = notifications.asData?.value.notifications
         .where((n) => n.id == widget.id)
