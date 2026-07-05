@@ -10,6 +10,7 @@ import (
 	paymentinfra "github.com/Watari995/musclead/internal/payment/internal/infra"
 	paymentusecase "github.com/Watari995/musclead/internal/payment/internal/usecase"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	outboxinfra "github.com/Watari995/musclead/internal/shared/infra/outbox"
 	userpublicfunctions "github.com/Watari995/musclead/internal/user/interface/publicfunctions"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/go-gorp/gorp/v3"
@@ -46,12 +47,12 @@ func NewModule(dbmap *gorp.DbMap, cfg Config, userQuery userpublicfunctions.User
 	dbmap.AddTableWithName(paymentinfra.PaymentModel{}, "payments").SetKeys(false, "ID")
 	dbmap.AddTableWithName(paymentinfra.PaymentEventModel{}, "payment_events").SetKeys(false, "ID")
 	dbmap.AddTableWithName(paymentinfra.StripeEventModel{}, "stripe_events").SetKeys(false, "ID")
-	dbmap.AddTableWithName(paymentinfra.OutboxEventModel{}, "outbox_events").SetKeys(false, "ID")
+	dbmap.AddTableWithName(outboxinfra.OutboxEventModel{}, "outbox_events").SetKeys(false, "ID")
 
 	paymentRepo := paymentinfra.NewPaymentRepository(dbmap)
 	paymentEventRepo := paymentinfra.NewPaymentEventRepository(dbmap)
 	stripeEventRepo := paymentinfra.NewStripeEventRepository(dbmap)
-	outboxEventRepo := paymentinfra.NewOutboxEventRepository(dbmap)
+	outboxEventRepo := outboxinfra.NewOutboxEventRepository(dbmap)
 	retryStrategy := &paymentinfra.ExternalRetryStrategy{}
 	txManager := dbtx.NewTransactionManager(dbmap)
 

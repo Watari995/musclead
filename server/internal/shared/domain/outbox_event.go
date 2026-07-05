@@ -1,4 +1,4 @@
-package paymentdomain
+package shareddomain
 
 import (
 	"time"
@@ -7,13 +7,6 @@ import (
 )
 
 // OutboxEvent は payment context が発行する通知用 outbox (ADR 0015)。
-//
-// 設計:
-//   - Webhook 処理の TX 内で INSERT し、 TX 外で SNS publish する
-//   - 即時 publish 成功時は published_at を SET
-//   - 即時 publish 失敗時は 1 分後の outbox-relay Lambda が拾う (failsafe)
-//
-// migration: sql/migrations/000018_create_outbox_events.up.sql
 //
 // aggregateID は string (将来 payment 以外の集約 ID も入る前提で汎用化)。
 type OutboxEvent struct {
