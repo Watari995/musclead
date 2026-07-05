@@ -20,16 +20,19 @@ type Module struct {
 
 func NewModule(dbmap *gorp.DbMap) *Module {
 	dbmap.AddTableWithName(notificationinfra.NotificationModel{}, "notifications").SetKeys(false, "ID")
+	dbmap.AddTableWithName(notificationinfra.DeviceTokenModel{}, "device_tokens").SetKeys(false, "ID")
 	repo := notificationinfra.NewNotificationRepository(dbmap)
+	deviceTokenRepo := notificationinfra.NewDeviceTokenRepository(dbmap)
 
 	getNotifications := notificationusecase.NewGetNotifications(repo)
 	getNotification := notificationusecase.NewGetNotification(repo)
 	readNotification := notificationusecase.NewReadNotification(repo)
+	registerDeviceToken := notificationusecase.NewRegisterDeviceToken(deviceTokenRepo)
 
 	createNotification := notificationusecase.NewCreateNotification(repo)
 
 	return &Module{
-		Handler:             notificationhandler.New(getNotifications, getNotification, readNotification),
+		Handler:             notificationhandler.New(getNotifications, getNotification, readNotification, registerDeviceToken),
 		notificationCommand: &notificationCommand{create: createNotification},
 	}
 }

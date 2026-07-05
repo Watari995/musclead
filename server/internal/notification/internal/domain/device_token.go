@@ -40,7 +40,6 @@ func (d *DeviceToken) UpdatedAt() time.Time {
 }
 
 func CreateDeviceToken(
-	id valueobject.DeviceTokenID,
 	userID valueobject.UserID,
 	token string,
 	platform valueobject.NotificationPlatform,

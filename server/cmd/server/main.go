@@ -268,6 +268,7 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// notification
 	mux.Handle("/notifications", authModule.Middleware(notificationModule.Handler))
 	mux.Handle("/notifications/", authModule.Middleware(notificationModule.Handler))
+	mux.Handle("/device-tokens", authModule.Middleware(notificationModule.Handler))
 
 	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
 	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule, healthSyncModule
