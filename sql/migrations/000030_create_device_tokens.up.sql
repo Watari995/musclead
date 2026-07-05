@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS device_tokens (
   id         BINARY(16)   NOT NULL,
   user_id    BINARY(16)   NOT NULL,
   token      VARCHAR(255) NOT NULL,
+  platform   VARCHAR(20)  NOT NULL, -- ios / android etc
   created_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   updated_at DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
                                    ON UPDATE CURRENT_TIMESTAMP(6),
