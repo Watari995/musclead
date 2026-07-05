@@ -10,6 +10,7 @@ import (
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
@@ -17,7 +18,7 @@ type CompletePayment struct {
 	paymentRepo      paymentdomain.PaymentRepository
 	paymentEventRepo paymentdomain.PaymentEventRepository
 	stripeEventRepo  paymentdomain.StripeEventRepository
-	outboxEventRepo  paymentdomain.OutboxEventRepository
+	outboxEventRepo  shareddomain.OutboxEventRepository
 	stripeClient     paymentdomain.StripeClient
 	txManager        dbtx.TransactionManager
 }
@@ -72,7 +73,7 @@ func (uc *CompletePayment) CompletePayment(ctx context.Context, input publicfunc
 		"current_period_end":     currentPeriodEnd.Format(time.RFC3339),
 		"subscription_plan":      valueobject.SubscriptionPlanPro,
 	}
-	outboxEvent := paymentdomain.CreateOutboxEvent(valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentSucceeded), payment.ID().String(), outboxEventMetadata)
+	outboxEvent := shareddomain.CreateOutboxEvent(valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentSucceeded), payment.ID().String(), outboxEventMetadata)
 
 	// stripe_events / payments / payment_events / outbox_events を atomic に保存 (ADR 0014, 0018)
 	err = uc.txManager.Processing(ctx, func(ctx context.Context) error {
@@ -109,7 +110,7 @@ func NewCompletePayment(
 	paymentRepo paymentdomain.PaymentRepository,
 	paymentEventRepo paymentdomain.PaymentEventRepository,
 	stripeEventRepo paymentdomain.StripeEventRepository,
-	outboxEventRepo paymentdomain.OutboxEventRepository,
+	outboxEventRepo shareddomain.OutboxEventRepository,
 	stripeClient paymentdomain.StripeClient,
 	txManager dbtx.TransactionManager,
 ) *CompletePayment {

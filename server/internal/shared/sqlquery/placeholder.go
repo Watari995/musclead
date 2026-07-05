@@ -18,7 +18,7 @@ import "strings"
 //
 // items が空の場合は空文字列と nil を返すので、 呼び出し側は事前に len チェックして
 // クエリ自体を発行しないこと。 IN () は MySQL では構文エラーになる。
-func InPlaceholders(items [][]byte) (string, []any) {
+func InPlaceholders[T any](items []T) (string, []any) {
 	if len(items) == 0 {
 		return "", nil
 	}
