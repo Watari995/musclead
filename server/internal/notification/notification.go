@@ -9,6 +9,8 @@ import (
 	notificationhandler "github.com/Watari995/musclead/internal/notification/internal/handler"
 	notificationinfra "github.com/Watari995/musclead/internal/notification/internal/infra"
 	notificationusecase "github.com/Watari995/musclead/internal/notification/internal/usecase"
+	"github.com/Watari995/musclead/internal/shared/dbtx"
+	outboxinfra "github.com/Watari995/musclead/internal/shared/infra/outbox"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 )
@@ -23,13 +25,15 @@ func NewModule(dbmap *gorp.DbMap) *Module {
 	dbmap.AddTableWithName(notificationinfra.DeviceTokenModel{}, "device_tokens").SetKeys(false, "ID")
 	repo := notificationinfra.NewNotificationRepository(dbmap)
 	deviceTokenRepo := notificationinfra.NewDeviceTokenRepository(dbmap)
+	outboxEventRepo := outboxinfra.NewOutboxEventRepository(dbmap)
+	txManager := dbtx.NewTransactionManager(dbmap)
 
 	getNotifications := notificationusecase.NewGetNotifications(repo)
 	getNotification := notificationusecase.NewGetNotification(repo)
 	readNotification := notificationusecase.NewReadNotification(repo)
 	registerDeviceToken := notificationusecase.NewRegisterDeviceToken(deviceTokenRepo)
 
-	createNotification := notificationusecase.NewCreateNotification(repo)
+	createNotification := notificationusecase.NewCreateNotification(repo, outboxEventRepo, txManager)
 
 	return &Module{
 		Handler:             notificationhandler.New(getNotifications, getNotification, readNotification, registerDeviceToken),
