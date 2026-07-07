@@ -48,6 +48,25 @@ func (n *Notification) MarkAsRead() {
 	n.readAt = &now
 }
 
+func (n *Notification) ToPushMessage() (PushMessage, error) {
+	var title, body string
+	switch n.notificationType.Value() {
+	case string(valueobject.NotificationTypeWeeklyGoal):
+		title = "週間レポートが作成されました。"
+		body = "アプリ右上のベルマークからご確認ください。"
+	default:
+		return PushMessage{}, valueobject.ErrInvalidNotificationType
+	}
+	return PushMessage{
+		Title: title,
+		Body:  body,
+		Data: map[string]string{
+			"notification_id": n.ID().Value(),
+			"type":            n.notificationType.String(),
+		},
+	}, nil
+}
+
 func CreateNotification(
 	userID valueobject.UserID,
 	notificationType valueobject.NotificationType,
