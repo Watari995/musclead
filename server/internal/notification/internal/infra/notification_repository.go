@@ -21,6 +21,33 @@ func NewNotificationRepository(dbmap *gorp.DbMap) notificationdomain.Notificatio
 	return &notificationRepository{dbmap: dbmap}
 }
 
+func (r *notificationRepository) FindByID(ctx context.Context, id valueobject.NotificationID) (*notificationdomain.Notification, error) {
+	q := dbtx.Querier(ctx, r.dbmap)
+	bytes, err := id.Bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	var row NotificationModel
+	if err := q.SelectOne(&row, `
+	SELECT id, user_id, notification_type, metadata, read_at, created_at FROM notifications
+	WHERE id = ?
+	`, bytes); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	var notification *notificationdomain.Notification
+	notification, err = toNotificationEntity(row)
+	if err != nil {
+		return nil, err
+	}
+	return notification, nil
+}
+
 func (r *notificationRepository) FindByIDAndUserID(ctx context.Context, id valueobject.NotificationID, userID valueobject.UserID) (*notificationdomain.Notification, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	idBytes, err := id.Bytes()
