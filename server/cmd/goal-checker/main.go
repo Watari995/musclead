@@ -47,7 +47,7 @@ func main() {
 	trainingModule := training.NewModule(dbmap, nil, nil)
 	mealModule := meal.NewModule(dbmap, nil, nil)
 	weightModule := weight.NewModule(dbmap, nil)
-	notifModule := notification.NewModule(dbmap)
+	notifModule := notification.NewModule(dbmap, notification.Config{})
 
 	run(ctx,
 		userModule.UserQuery(),
