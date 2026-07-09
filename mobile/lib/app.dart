@@ -9,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/auth/application/auth_controller.dart';
+import 'features/notifications/application/push_service.dart';
 import 'features/user/data/user_repository.dart';
 
 class MuscleadApp extends ConsumerStatefulWidget {
@@ -20,6 +21,7 @@ class MuscleadApp extends ConsumerStatefulWidget {
 
 class _MuscleadAppState extends ConsumerState<MuscleadApp> {
   StreamSubscription<Uri>? _linkSub;
+  bool _pushTokenRegistered = false;
 
   @override
   void initState() {
@@ -50,6 +52,10 @@ class _MuscleadAppState extends ConsumerState<MuscleadApp> {
           ref.read(themeModeProvider.notifier).hydrate(theme);
         }
       });
+      if (!_pushTokenRegistered) {
+        _pushTokenRegistered = true;
+        ref.read(pushServiceProvider).initAndGetToken();
+      }
     }
 
     return MaterialApp.router(

@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/notification_repository.dart';
 
-/// FCM プッシュ通知サービスの雛形 — **Phase 3**。
+/// FCM プッシュ通知サービス。
 ///
-/// device token のサーバ登録までは実装済み。配信処理(outbox relay)は
-/// まだバックエンド未実装のため、通知基盤が整うまでアプリ起動時には呼ばない。
+/// `app.dart` でログイン済み判定後に `initAndGetToken()` を呼び、
+/// device token をサーバに登録する。配信(outbox relay)はバックエンド側で処理される。
 class PushService {
   PushService(this._messaging, this._notificationRepository);
 
