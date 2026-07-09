@@ -9,6 +9,7 @@ const (
 	OutboxEventTypePaymentFailed    OutboxEventTypeCode = "PaymentFailed"
 	OutboxEventTypePaymentCanceled  OutboxEventTypeCode = "PaymentCanceled"
 	OutboxEventTypePaymentRenewed   OutboxEventTypeCode = "PaymentRenewed"
+	OutboxEventTypeNotification     OutboxEventTypeCode = "Notification"
 )
 
 var ErrInvalidOutboxEventType = errors.New("invalid outbox event type")
