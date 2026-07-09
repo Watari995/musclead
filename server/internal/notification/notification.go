@@ -51,7 +51,7 @@ func NewModule(dbmap *gorp.DbMap, cfg Config) *Module {
 	var relayOutbox *notificationusecase.RelayOutbox
 	relayEnabled := true
 	if len(cfg.CredentialsJSON) != 0 && err == nil {
-		relayOutbox = notificationusecase.NewRelayOutBox(outboxEventRepo, repo, deviceTokenQuery, fcmClient)
+		relayOutbox = notificationusecase.NewRelayOutbox(outboxEventRepo, repo, deviceTokenQuery, deviceTokenRepo, fcmClient)
 	} else {
 		relayEnabled = false
 	}

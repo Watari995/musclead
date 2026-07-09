@@ -43,6 +43,18 @@ func (r *deviceTokenRepository) Save(ctx context.Context, deviceToken *notificat
 	return nil
 }
 
+func (r *deviceTokenRepository) DeleteByID(ctx context.Context, id valueobject.DeviceTokenID) error {
+	q := dbtx.Querier(ctx, r.dbmap)
+	idBytes, err := id.Bytes()
+	if err != nil {
+		return err
+	}
+	if _, err := q.Exec("DELETE FROM device_tokens WHERE id = ?", idBytes); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (r *deviceTokenRepository) FindAllByUserID(ctx context.Context, userID valueobject.UserID) ([]notificationdomain.DeviceTokenView, error) {
 	q := dbtx.Querier(ctx, r.dbmap)
 	userIDBytes, err := userID.Bytes()

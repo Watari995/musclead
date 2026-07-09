@@ -37,7 +37,11 @@ func (f fcmClient) Send(ctx context.Context, token string, msg notificationdomai
 
 	_, err := f.client.Send(ctx, message)
 	if err != nil {
-		return err
+		if messaging.IsRegistrationTokenNotRegistered(err) {
+			return notificationdomain.ErrTokenNoLongerAvailable
+		} else {
+			return err
+		}
 	}
 
 	return nil

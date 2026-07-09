@@ -2,6 +2,7 @@ package notificationusecase
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/Watari995/musclead/internal/myerror"
@@ -17,14 +18,16 @@ type RelayOutbox struct {
 	outboxRepo             shareddomain.OutboxEventRepository
 	notificationRepo       notificationdomain.NotificationRepository
 	deviceTokenQuery       notificationdomain.DeviceTokenQuery
+	deviceTokenRepo        notificationdomain.DeviceTokenRepository
 	pushNotificationClient notificationdomain.PushNotificationClient
 }
 
-func NewRelayOutBox(outboxRepo shareddomain.OutboxEventRepository, notificationRepo notificationdomain.NotificationRepository, deviceTokenQuery notificationdomain.DeviceTokenQuery, pushNotificationClient notificationdomain.PushNotificationClient) *RelayOutbox {
+func NewRelayOutbox(outboxRepo shareddomain.OutboxEventRepository, notificationRepo notificationdomain.NotificationRepository, deviceTokenQuery notificationdomain.DeviceTokenQuery, deviceTokenRepo notificationdomain.DeviceTokenRepository, pushNotificationClient notificationdomain.PushNotificationClient) *RelayOutbox {
 	return &RelayOutbox{
 		outboxRepo:             outboxRepo,
 		notificationRepo:       notificationRepo,
 		deviceTokenQuery:       deviceTokenQuery,
+		deviceTokenRepo:        deviceTokenRepo,
 		pushNotificationClient: pushNotificationClient,
 	}
 }
@@ -37,7 +40,7 @@ func (uc *RelayOutbox) Execute(ctx context.Context) error {
 		return myerror.NewInternalError().Wrap(err)
 	}
 	if len(events) == 0 {
-		return nil // 処理するエラーがなかったら何もしない。
+		return nil // 処理するイベントがなかったら何もしない。
 	}
 
 	// notificationを1件ずつ処理していく
@@ -71,6 +74,14 @@ func (uc *RelayOutbox) Execute(ctx context.Context) error {
 		for _, t := range tokens {
 			// 送信処理(best effort)
 			if err := uc.pushNotificationClient.Send(ctx, t.Token, msg); err != nil {
+				if errors.Is(err, notificationdomain.ErrTokenNoLongerAvailable) {
+					// tokenが無効だった場合はdevice_tokenから消す。
+					if err := uc.deviceTokenRepo.DeleteByID(ctx, t.ID); err != nil {
+						return err
+					}
+					slog.Info("relay: removed stale device token", "device_token_id", t.ID.Value())
+					continue
+				}
 				slog.Error("relay: failed to publish", "err", err)
 				continue
 			}
