@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   useRoutineQuery,
@@ -23,12 +24,14 @@ export default function EditRoutinePage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const t = useTranslations("routines");
+  const tc = useTranslations("common");
   const query = useRoutineQuery(params.id, Boolean(token));
 
   if (!ready || !token) return null;
   if (query.isLoading) {
     return (
-      <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+      <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
     );
   }
   if (query.isError) {
@@ -60,15 +63,17 @@ function EditRoutineFormShell({
   onDone: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("routines");
+  const tc = useTranslations("common");
   const mutation = useUpdateRoutineMutation(id);
 
   return (
     <div className="space-y-6">
-      <SectionTitle>ルーティンを編集</SectionTitle>
+      <SectionTitle>{t("editRoutine")}</SectionTitle>
       <RoutineForm
         initial={initial}
-        submitLabel="更新する"
-        submittingLabel="更新中…"
+        submitLabel={tc("update")}
+        submittingLabel={tc("updating")}
         submitting={mutation.isPending}
         errorMessage={
           mutation.isError ? (mutation.error as Error).message : null

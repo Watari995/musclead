@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { TrainingExerciseDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useExercisesQuery } from "@/features/training/api/exercises";
@@ -32,10 +33,13 @@ export default function TrainingDetailPage() {
     exerciseNameByID.set(ex.id, ex.name);
   }
 
+  const t = useTranslations("trainings");
+  const tc = useTranslations("common");
+
   if (!ready || !token) return null;
 
   if (query.isLoading) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
   if (query.isError) {
     return <ErrorText>{(query.error as Error).message}</ErrorText>;
@@ -53,12 +57,12 @@ export default function TrainingDetailPage() {
           </SectionTitle>
           {training.ended_at && (
             <p className="text-xs text-[var(--color-ink-muted)] -mt-2 mb-3">
-              終了: {formatDateTime(training.ended_at)}
+              {t("ended")} {formatDateTime(training.ended_at)}
             </p>
           )}
         </div>
         <Link href={`/trainings/${training.id}/edit`}>
-          <Button variant="ghost">編集</Button>
+          <Button variant="ghost">{tc("edit")}</Button>
         </Link>
       </div>
 
@@ -74,7 +78,7 @@ export default function TrainingDetailPage() {
             key={ex.id}
             exercise={ex}
             exerciseName={
-              ex.exercise_id ? exerciseNameByID.get(ex.exercise_id) ?? "(削除済み)" : "-"
+              ex.exercise_id ? exerciseNameByID.get(ex.exercise_id) ?? t("deleted") : "-"
             }
           />
         ))}
@@ -90,13 +94,15 @@ function ExerciseSummary({
   exercise: TrainingExerciseDTO;
   exerciseName: string;
 }) {
+  const t = useTranslations("trainings");
+  const tc = useTranslations("common");
   return (
     <Card className="p-4 space-y-3">
       <div className="flex items-baseline justify-between">
         <h3 className="text-sm font-bold tracking-tight">{exerciseName}</h3>
         <span className="text-xs text-[var(--color-ink-muted)]">
-          {(exercise.sets ?? []).length} セット
-          {exercise.rest_seconds != null && ` / 既定休憩 ${exercise.rest_seconds}秒`}
+          {(exercise.sets ?? []).length} {t("sets")}
+          {exercise.rest_seconds != null && ` / ${t("defaultRest", { seconds: exercise.rest_seconds })}`}
         </span>
       </div>
 
@@ -108,10 +114,10 @@ function ExerciseSummary({
         <thead>
           <tr className="text-xs text-[var(--color-ink-muted)] text-left">
             <th className="w-12 font-medium pb-1">#</th>
-            <th className="font-medium pb-1">重量</th>
-            <th className="font-medium pb-1">レップ</th>
-            <th className="font-medium pb-1">休憩</th>
-            <th className="font-medium pb-1">メモ</th>
+            <th className="font-medium pb-1">{t("weight")}</th>
+            <th className="font-medium pb-1">{t("reps")}</th>
+            <th className="font-medium pb-1">{t("rest")}</th>
+            <th className="font-medium pb-1">{tc("memo")}</th>
           </tr>
         </thead>
         <tbody>

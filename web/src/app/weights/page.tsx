@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useWeightsQuery } from "@/features/weight/api/weights";
 import { RecordWeightForm } from "@/features/weight/ui/RecordWeightForm";
@@ -17,6 +18,8 @@ export default function WeightsPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const t = useTranslations("weights");
+  const tc = useTranslations("common");
   const query = useWeightsQuery(Boolean(token));
 
   if (!ready || !token) return null;
@@ -24,22 +27,22 @@ export default function WeightsPage() {
   return (
     <div className="space-y-8">
       <section>
-        <SectionTitle>グラフ</SectionTitle>
+        <SectionTitle>{t("graph")}</SectionTitle>
         <WeightGraph />
       </section>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <section>
-          <SectionTitle>体重一覧</SectionTitle>
+          <SectionTitle>{t("list")}</SectionTitle>
           {query.isLoading && (
-            <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+            <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
           )}
           {query.isError && (
             <ErrorText>{(query.error as Error).message}</ErrorText>
           )}
           {query.data && query.data.length === 0 && (
             <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
-              まだ体重が記録されていません。
+              {t("noWeights")}
             </Card>
           )}
           {query.data && query.data.length > 0 && (
@@ -51,7 +54,7 @@ export default function WeightsPage() {
           )}
         </section>
         <aside>
-          <SectionTitle>体重を記録</SectionTitle>
+          <SectionTitle>{t("record")}</SectionTitle>
           <RecordWeightForm />
         </aside>
       </div>

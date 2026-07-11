@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/notification_dtos.dart';
 import '../data/notification_repository.dart';
 
@@ -38,7 +39,7 @@ class _NotificationDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('通知詳細'),
+        title: Text(AppLocalizations.of(context)!.notificationDetailTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -62,10 +63,11 @@ class _NotificationBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(18),
       children: [
+        final l = AppLocalizations.of(context)!;
         if (notification.notificationType == 'weekly_goal') ...[
           _WeeklyGoalDetail(metadata: m),
         ] else ...[
-          Text('通知', style: TextStyle(fontSize: 16, color: t.subtle)),
+          Text(l.notificationTitle, style: TextStyle(fontSize: 16, color: t.subtle)),
         ],
         const SizedBox(height: 16),
         Text(
@@ -96,38 +98,50 @@ class _WeeklyGoalDetail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          achieved ? '今週の目標を達成しました！ 🎉' : '今週の目標結果',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: t.muted,
-          ),
-        ),
+        Builder(builder: (context) {
+          final l = AppLocalizations.of(context)!;
+          return Text(
+            achieved ? l.notificationGoalAchievedDetail : l.notificationGoalResult,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: t.muted,
+            ),
+          );
+        }),
         const SizedBox(height: 16),
         if (trainingGoal != null)
-          _GoalRow(
-            label: 'トレーニング',
-            value: '${trainingActual ?? 0} / $trainingGoal 回',
-            achieved: (trainingActual?.toInt() ?? 0) >= trainingGoal.toInt(),
-          ),
+          Builder(builder: (context) {
+            final l = AppLocalizations.of(context)!;
+            return _GoalRow(
+              label: l.notificationTraining,
+              value: '${trainingActual ?? 0} / $trainingGoal 回',
+              achieved: (trainingActual?.toInt() ?? 0) >= trainingGoal.toInt(),
+            );
+          }),
         if (calorieGoal != null)
-          _GoalRow(
-            label: '平均カロリー',
-            value:
-                '${calorieActual != null ? calorieActual.round() : '—'} / $calorieGoal kcal',
-            achieved: calorieActual != null && calorieActual <= calorieGoal,
-          ),
+          Builder(builder: (context) {
+            final l = AppLocalizations.of(context)!;
+            return _GoalRow(
+              label: l.notificationCalorie,
+              value:
+                  '${calorieActual != null ? calorieActual.round() : '—'} / $calorieGoal kcal',
+              achieved: calorieActual != null && calorieActual <= calorieGoal,
+            );
+          }),
         if (weightGoal != null)
-          _GoalRow(
-            label: '体重変化',
-            value:
-                '${weightActual != null ? (weightActual > 0 ? '+' : '') + weightActual.toStringAsFixed(1) : '—'} kg（目標: ${weightGoal > 0 ? '+' : ''}${weightGoal.toStringAsFixed(1)} kg）',
-            achieved:
+          Builder(builder: (context) {
+            final l = AppLocalizations.of(context)!;
+            return _GoalRow(
+              label: l.notificationWeightChange,
+              value:
+                  '${weightActual != null ? (weightActual > 0 ? '+' : '') + weightActual.toStringAsFixed(1) : '—'} kg',
+              achieved:
                 weightActual != null &&
                 weightGoal.isNegative == weightActual.isNegative &&
                 weightActual.abs() >= weightGoal.abs(),
-          ),
+            );
+          }),
       ],
     );
   }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { TrainingDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useExercisesQuery } from "@/features/training/api/exercises";
@@ -34,6 +35,9 @@ export default function TrainingsPage() {
     exerciseNameByID.set(ex.id, ex.name);
   }
 
+  const t = useTranslations("trainings");
+  const tr = useTranslations("routines");
+  const tc = useTranslations("common");
   const del = useDeleteTrainingMutation();
 
   if (!ready || !token) return null;
@@ -44,7 +48,7 @@ export default function TrainingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SectionTitle>トレーニング履歴</SectionTitle>
+        <SectionTitle>{t("title")}</SectionTitle>
         <div className="flex items-center gap-2 flex-wrap">
           <Popover
             align="end"
@@ -59,14 +63,14 @@ export default function TrainingsPage() {
                 onClick={onClick}
                 disabled={!hasRoutines || startFromRoutine.isPending}
                 title={
-                  hasRoutines ? undefined : "ルーティンを登録してください"
+                  hasRoutines ? undefined : t("pleaseRegisterRoutines")
                 }
                 aria-expanded={ariaExpanded}
                 aria-controls={ariaControls}
               >
                 {startFromRoutine.isPending
-                  ? "開始中…"
-                  : "ルーティンから始める ▾"}
+                  ? t("starting")
+                  : t("startFromRoutine")}
               </Button>
             )}
           >
@@ -87,7 +91,7 @@ export default function TrainingsPage() {
                   >
                     <div className="font-medium truncate">{r.name}</div>
                     <div className="text-xs text-[var(--color-ink-muted)]">
-                      {(r.routine_exercises ?? []).length} 種目
+                      {tr("exerciseCount", { count: (r.routine_exercises ?? []).length })}
                     </div>
                   </button>
                 </li>
@@ -95,7 +99,7 @@ export default function TrainingsPage() {
             </ul>
           </Popover>
           <Link href="/trainings/new">
-            <Button>+ 新規記録</Button>
+            <Button>{t("newRecord")}</Button>
           </Link>
         </div>
       </div>
@@ -105,7 +109,7 @@ export default function TrainingsPage() {
       )}
 
       {query.isLoading && (
-        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
       )}
       {query.isError && (
         <ErrorText>{(query.error as Error).message}</ErrorText>
@@ -113,7 +117,7 @@ export default function TrainingsPage() {
 
       {query.data && query.data.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
-          まだトレーニングが記録されていません。
+          {t("noTrainings")}
         </Card>
       )}
 
@@ -125,7 +129,7 @@ export default function TrainingsPage() {
               training={t}
               exerciseNameByID={exerciseNameByID}
               onDelete={() => {
-                if (confirm("このトレーニングを削除しますか?")) {
+                if (confirm(t("deleteConfirm"))) {
                   del.mutate(t.id ?? "");
                 }
               }}
@@ -149,6 +153,7 @@ function TrainingCard({
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const tc = useTranslations("common");
   const totalSets = (training.exercises ?? []).reduce(
     (n, ex) => n + (ex.sets?.length ?? 0),
     0,
@@ -189,7 +194,7 @@ function TrainingCard({
           href={`/trainings/${training.id}/edit`}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] px-2 h-8 inline-flex items-center"
         >
-          編集
+          {tc("edit")}
         </Link>
         <button
           type="button"
@@ -197,7 +202,7 @@ function TrainingCard({
           disabled={deleting}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] disabled:opacity-50 px-2 h-8"
         >
-          削除
+          {tc("delete")}
         </button>
       </div>
     </li>

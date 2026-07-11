@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/notification_repository.dart';
 
 class WeeklyGoalScreen extends HookConsumerWidget {
@@ -55,9 +56,10 @@ class WeeklyGoalScreen extends HookConsumerWidget {
       }
     }
 
+    final l = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('週次目標'),
+        title: Text(l.weeklyGoalTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -65,27 +67,27 @@ class WeeklyGoalScreen extends HookConsumerWidget {
         padding: const EdgeInsets.all(18),
         children: [
           Text(
-            '毎週日曜に達成チェックの通知が届きます。\n設定しない項目は空欄のままにしてください。',
+            l.weeklyGoalDescription,
             style: TextStyle(fontSize: 13, color: t.muted),
           ),
           const SizedBox(height: 24),
           _GoalField(
-            label: 'トレーニング回数',
-            unit: '回 / 週',
+            label: l.weeklyGoalTrainingCount,
+            unit: l.weeklyGoalTrainingUnit,
             controller: trainingCtrl,
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
           _GoalField(
-            label: '平均カロリー目標',
-            unit: 'kcal 以内 / 日',
+            label: l.weeklyGoalCalorieGoal,
+            unit: l.weeklyGoalCalorieUnit,
             controller: calorieCtrl,
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
           _GoalField(
-            label: '体重変化目標',
-            unit: 'kg（例: -0.5 で減量）',
+            label: l.weeklyGoalWeightChange,
+            unit: l.weeklyGoalWeightUnit,
             controller: weightCtrl,
             keyboardType: const TextInputType.numberWithOptions(
               signed: true,
@@ -94,13 +96,13 @@ class WeeklyGoalScreen extends HookConsumerWidget {
           ),
           const SizedBox(height: 32),
           AppButton(
-            label: saving.value ? '保存中…' : '保存',
+            label: saving.value ? l.weeklyGoalSaving : l.weeklyGoalSave,
             onPressed: saving.value ? null : save,
           ),
           if (saved.value) ...[
             const SizedBox(height: 12),
             Text(
-              '保存しました',
+              l.weeklyGoalSaved,
               textAlign: TextAlign.center,
               style: TextStyle(color: t.accent, fontSize: 14),
             ),
@@ -148,7 +150,7 @@ class _GoalField extends StatelessWidget {
                 controller: controller,
                 keyboardType: keyboardType,
                 decoration: InputDecoration(
-                  hintText: '未設定',
+                  hintText: AppLocalizations.of(context)!.weeklyGoalNotSet,
                   hintStyle: TextStyle(color: t.muted),
                   filled: true,
                   fillColor: cs.surface,

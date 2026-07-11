@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useMonthlyCalendarQuery, useDailyCalendarQuery } from "@/features/calendar/api/calendar";
 import { usePreferencesQuery } from "@/features/user/api/user";

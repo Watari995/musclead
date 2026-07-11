@@ -6,6 +6,7 @@ import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/food_product_dtos.dart';
 import '../data/food_product_repository.dart';
 
@@ -37,15 +38,16 @@ class _FoodRegisterSheet extends HookConsumerWidget {
     final error = useState<String?>(null);
     final t = context.tokens;
     const numeric = TextInputType.numberWithOptions(decimal: true);
+    final l = AppLocalizations.of(context)!;
 
     Future<void> submit() async {
       final kcal = int.tryParse(caloriesCtrl.text.trim());
       if (nameCtrl.text.trim().isEmpty) {
-        error.value = '食品名を入力してください';
+        error.value = l.foodNameRequired;
         return;
       }
       if (kcal == null) {
-        error.value = 'カロリーを入力してください';
+        error.value = l.commonCaloriesRequired;
         return;
       }
       loading.value = true;
@@ -83,7 +85,7 @@ class _FoodRegisterSheet extends HookConsumerWidget {
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = '登録に失敗しました';
+        error.value = l.foodRegisterFailed;
       } finally {
         if (context.mounted) loading.value = false;
       }
@@ -100,14 +102,14 @@ class _FoodRegisterSheet extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '食品を登録',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              Text(
+                l.foodRegisterTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 16),
               if (initialBarcode != null) ...[
                 AppTextField(
-                  label: 'バーコード',
+                  label: l.foodBarcodeLabel2,
                   controller: barcodeCtrl,
                   hint: '4901085615881',
                   keyboardType: TextInputType.number,
@@ -115,13 +117,13 @@ class _FoodRegisterSheet extends HookConsumerWidget {
                 const SizedBox(height: 14),
               ],
               AppTextField(
-                label: '食品名 *',
+                label: l.foodNameField,
                 controller: nameCtrl,
-                hint: 'スニッカーズ',
+                hint: 'Snickers',
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'カロリー (kcal) *',
+                label: l.foodCaloriesField,
                 controller: caloriesCtrl,
                 hint: '250',
                 keyboardType: TextInputType.number,
@@ -166,7 +168,7 @@ class _FoodRegisterSheet extends HookConsumerWidget {
               ],
               const SizedBox(height: 20),
               AppButton(
-                label: '登録する',
+                label: l.foodRegisterBtn,
                 loading: loading.value,
                 onPressed: submit,
               ),

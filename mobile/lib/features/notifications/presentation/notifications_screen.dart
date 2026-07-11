@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/tab_page.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/notification_dtos.dart';
 import '../data/notification_repository.dart';
 
@@ -14,9 +15,10 @@ class NotificationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final notifications = ref.watch(notificationsProvider);
     return TabPage(
-      title: '通知',
+      title: l.notificationTitle,
       onRefresh: () => ref.refresh(notificationsProvider.future),
       children: [
         AsyncValueView<GetNotificationsResponse>(
@@ -28,7 +30,7 @@ class NotificationsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 48),
                 child: Center(
                   child: Text(
-                    '通知はありません',
+                    l.notificationEmpty,
                     style: TextStyle(color: context.tokens.muted),
                   ),
                 ),
@@ -53,13 +55,14 @@ class _NotificationTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final achieved = notification.metadata['achieved'] as bool? ?? false;
     final label = notification.notificationType == 'weekly_goal'
-        ? (achieved ? '今週の目標を達成しました！' : '今週の目標を確認してください')
-        : '通知';
+        ? (achieved ? l.notificationWeeklyGoalAchieved : l.notificationWeeklyGoalCheck)
+        : l.notificationTitle;
     final dateStr = DateFormat(
-      'M月d日 HH:mm',
+      'M/d HH:mm',
     ).format(notification.createdAt.toLocal());
 
     return GestureDetector(

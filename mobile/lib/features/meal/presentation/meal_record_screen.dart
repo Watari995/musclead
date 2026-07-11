@@ -10,11 +10,10 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../food/data/food_product_dtos.dart';
 import '../../food/presentation/food_register_sheet.dart';
 import '../../food/presentation/food_search_section.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/meal_dtos.dart';
 import '../data/meal_repository.dart';
 import '../data/meal_template_dtos.dart';
-
-const _mealTypes = ['朝食', '昼食', '夕食', '間食'];
 
 /// 食事記録・編集ページ。[existing] を渡すと編集モード、[fromTemplate] でプリフィル。
 class MealRecordScreen extends HookConsumerWidget {
@@ -29,7 +28,9 @@ class MealRecordScreen extends HookConsumerWidget {
     final tpl = fromTemplate;
     final isEdit = edit != null;
 
-    final mealType = useState(edit?.mealType ?? tpl?.mealType ?? '朝食');
+    final l = AppLocalizations.of(context)!;
+    final mealTypes = [l.mealBreakfast, l.mealLunch, l.mealDinner, l.mealSnack];
+    final mealType = useState(edit?.mealType ?? tpl?.mealType ?? l.mealBreakfast);
     final eatenAt = useState(edit?.eatenAt ?? DateTime.now());
     final caloriesCtrl = useTextEditingController(
       text: edit != null
@@ -112,7 +113,7 @@ class MealRecordScreen extends HookConsumerWidget {
     Future<void> submit() async {
       final kcal = int.tryParse(caloriesCtrl.text.trim());
       if (kcal == null) {
-        error.value = 'カロリーを入力してください';
+        error.value = l.commonCaloriesRequired;
         return;
       }
       loading.value = true;

@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useFindMealQuery } from "@/features/meal/api/meals";
 import { EditMealForm } from "@/features/meal/ui/EditMealForm";

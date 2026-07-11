@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { SectionTitle } from "@/shared/ui";
 import { useNotificationsQuery } from "@/features/notification/api/notifications";
