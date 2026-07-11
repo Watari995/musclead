@@ -275,8 +275,9 @@ class _WeightChart extends StatelessWidget {
                         interval: (dataPoints.length / 4).ceilToDouble(),
                         getTitlesWidget: (v, _) {
                           final i = v.toInt();
-                          if (i < 0 || i >= dataPoints.length)
+                          if (i < 0 || i >= dataPoints.length) {
                             return const SizedBox.shrink();
+                          }
                           return Text(
                             mdLabel(dataPoints[i].performedAt),
                             style: TextStyle(fontSize: 10, color: t.muted),
@@ -377,8 +378,9 @@ class _RepsChart extends StatelessWidget {
                   interval: (dataPoints.length / 4).ceilToDouble(),
                   getTitlesWidget: (v, _) {
                     final i = v.toInt();
-                    if (i < 0 || i >= dataPoints.length)
+                    if (i < 0 || i >= dataPoints.length) {
                       return const SizedBox.shrink();
+                    }
                     return Text(
                       mdLabel(dataPoints[i].performedAt),
                       style: TextStyle(fontSize: 10, color: t.muted),

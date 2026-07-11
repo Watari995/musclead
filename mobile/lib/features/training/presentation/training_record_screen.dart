@@ -225,8 +225,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     } on Failure catch (f) {
       setState(() => _error = f.message);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(() => _error = AppLocalizations.of(context)!.commonSaveFailed);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
