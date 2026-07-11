@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "next-intl";
 import {
   useWeightTimeseriesQuery,
   type WeightTimeseriesPeriod,
@@ -17,21 +18,21 @@ import {
 import type { Weight } from "@/features/weight/model/weight";
 import { Card, ErrorText } from "@/shared/ui";
 
-const PERIOD_OPTIONS: { value: WeightTimeseriesPeriod; label: string }[] = [
-  { value: "1week", label: "1週間" },
-  { value: "1month", label: "1ヶ月" },
-  { value: "3months", label: "3ヶ月" },
-  { value: "halfyear", label: "半年" },
-  { value: "1year", label: "1年" },
+const PERIOD_VALUES: WeightTimeseriesPeriod[] = [
+  "1week", "1month", "3months", "halfyear", "1year",
 ];
+
+const PERIOD_KEY_MAP: Record<WeightTimeseriesPeriod, string> = {
+  "1week": "period1Week",
+  "1month": "period1Month",
+  "3months": "period3Months",
+  "halfyear": "periodHalfYear",
+  "1year": "period1Year",
+};
 
 type WeightType = "weight" | "body_fat" | "muscle";
 
-const TYPE_OPTIONS: { value: WeightType; label: string; unit: string }[] = [
-  { value: "weight", label: "体重", unit: "kg" },
-  { value: "body_fat", label: "体脂肪率", unit: "%" },
-  { value: "muscle", label: "骨格筋量", unit: "kg" },
-];
+const WEIGHT_TYPE_VALUES: WeightType[] = ["weight", "body_fat", "muscle"];
 
 function getValue(w: Weight, type: WeightType): number | null {
   if (type === "weight") return parseFloat(w.weightKg);
@@ -42,17 +43,30 @@ function getValue(w: Weight, type: WeightType): number | null {
   return null;
 }
 
+function getUnit(type: WeightType): string {
+  if (type === "body_fat") return "%";
+  return "kg";
+}
+
 function formatDate(iso: string): string {
   const d = new Date(iso);
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 export function WeightGraph() {
+  const t = useTranslations("weights");
+  const tGraph = useTranslations("graph");
+  const tCommon = useTranslations("common");
   const [period, setPeriod] = useState<WeightTimeseriesPeriod>("1month");
   const [type, setType] = useState<WeightType>("weight");
   const query = useWeightTimeseriesQuery(period);
 
-  const typeOption = TYPE_OPTIONS.find((o) => o.value === type);
+  const typeLabels: Record<WeightType, string> = {
+    weight: t("typeWeight"),
+    body_fat: t("typeBodyFat"),
+    muscle: t("typeMuscle"),
+  };
+
   const points = (query.data ?? [])
     .map((w) => ({
       date: formatDate(w.measuredAt),
@@ -65,18 +79,18 @@ export function WeightGraph() {
       <div className="space-y-4">
         {/* type タブ */}
         <div className="flex gap-1 overflow-x-auto">
-          {TYPE_OPTIONS.map((opt) => (
+          {WEIGHT_TYPE_VALUES.map((opt) => (
             <button
-              key={opt.value}
+              key={opt}
               type="button"
-              onClick={() => setType(opt.value)}
+              onClick={() => setType(opt)}
               className={`px-3 py-1.5 text-xs rounded-md border whitespace-nowrap ${
-                type === opt.value
+                type === opt
                   ? "bg-[var(--color-ink)] text-[var(--color-surface)] border-[var(--color-ink)]"
                   : "border-[var(--color-line)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-alt)]"
               }`}
             >
-              {opt.label}
+              {typeLabels[opt]}
             </button>
           ))}
         </div>
@@ -85,7 +99,7 @@ export function WeightGraph() {
         <div className="h-64">
           {query.isLoading && (
             <p className="text-sm text-[var(--color-ink-muted)] py-12 text-center">
-              読み込み中…
+              {tCommon("loading")}
             </p>
           )}
           {query.isError && (
@@ -93,7 +107,7 @@ export function WeightGraph() {
           )}
           {query.data && points.length === 0 && !query.isLoading && (
             <p className="text-sm text-[var(--color-ink-muted)] py-12 text-center">
-              データがありません
+              {tCommon("noData")}
             </p>
           )}
           {points.length > 0 && (
@@ -108,8 +122,8 @@ export function WeightGraph() {
                 />
                 <Tooltip
                   formatter={(value) => [
-                    `${String(value)} ${typeOption?.unit ?? ""}`,
-                    typeOption?.label ?? "",
+                    `${String(value)} ${getUnit(type)}`,
+                    typeLabels[type],
                   ]}
                 />
                 <Line
@@ -126,18 +140,18 @@ export function WeightGraph() {
 
         {/* period タブ */}
         <div className="flex gap-1 overflow-x-auto border-t border-[var(--color-line)] pt-3">
-          {PERIOD_OPTIONS.map((opt) => (
+          {PERIOD_VALUES.map((value) => (
             <button
-              key={opt.value}
+              key={value}
               type="button"
-              onClick={() => setPeriod(opt.value)}
+              onClick={() => setPeriod(value)}
               className={`flex-1 px-2 py-1.5 text-xs rounded-md whitespace-nowrap ${
-                period === opt.value
+                period === value
                   ? "bg-[var(--color-ink)] text-[var(--color-surface)] font-bold"
                   : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-alt)]"
               }`}
             >
-              {opt.label}
+              {tGraph(PERIOD_KEY_MAP[value] as "period1Week" | "period1Month" | "period3Months" | "periodHalfYear" | "period1Year")}
             </button>
           ))}
         </div>
