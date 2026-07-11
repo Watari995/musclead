@@ -30,7 +30,7 @@ export function DailySummaryPanel({ date, data, isLoading }: Props) {
             <Section title={t("training")}>
               {data.trainings!.map((tr) => (
                 <Row key={tr.training_id}>
-                  <span>{t("exerciseCount", { count: tr.exercise_count })} / {t("setsCount", { count: tr.set_count })}</span>
+                  <span>{t("exerciseCount", { count: tr.exercise_count ?? 0 })} / {t("setsCount", { count: tr.set_count ?? 0 })}</span>
                   <span className="text-[var(--color-ink-muted)] text-xs">
                     {new Date(tr.started_at!).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
                   </span>
