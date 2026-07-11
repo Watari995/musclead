@@ -157,6 +157,7 @@ class _ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return AppCard(
       child: Column(
@@ -184,7 +185,7 @@ class _ExerciseCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const Spacer(),
-                  Text('${s.reps} 回', style: TextStyle(color: t.muted)),
+                  Text(l.trainingRepsUnit(s.reps), style: TextStyle(color: t.muted)),
                 ],
               ),
             ),

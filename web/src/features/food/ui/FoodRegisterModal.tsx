@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button, ErrorText, Label, NumberField, TextInput } from "@/shared/ui";
 import { useCreateFoodProductMutation } from "../api/food_products";
 import type { FoodProduct } from "../model/food_product";
@@ -12,6 +13,8 @@ type Props = {
 };
 
 export function FoodRegisterModal({ initialBarcode, onSuccess, onCancel }: Props) {
+  const t = useTranslations("food");
+  const tCommon = useTranslations("common");
   const [barcode, setBarcode] = useState(initialBarcode ?? "");
   const [name, setName] = useState("");
   const [calories, setCalories] = useState<number | undefined>();
@@ -54,10 +57,10 @@ export function FoodRegisterModal({ initialBarcode, onSuccess, onCancel }: Props
       onClick={(e) => e.target === e.currentTarget && onCancel()}
     >
       <div className="bg-[var(--color-surface)] rounded-xl p-6 w-full max-w-sm space-y-4">
-        <h2 className="text-base font-bold">食品を登録</h2>
+        <h2 className="text-base font-bold">{t("registerTitle")}</h2>
         <form className="space-y-3" onSubmit={handleSubmit}>
           {initialBarcode && (
-            <Label label="バーコード">
+            <Label label={t("barcodeLabel")}>
               <TextInput
                 value={barcode}
                 onChange={(e) => setBarcode(e.target.value)}
@@ -65,15 +68,15 @@ export function FoodRegisterModal({ initialBarcode, onSuccess, onCancel }: Props
               />
             </Label>
           )}
-          <Label label="食品名 *">
+          <Label label={t("foodName")}>
             <TextInput
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="例: スニッカーズ"
+              placeholder={t("foodNamePlaceholder")}
             />
           </Label>
-          <Label label="カロリー (kcal) *">
+          <Label label={t("calories")}>
             <NumberField
               min={0}
               placeholder="0"
@@ -97,10 +100,10 @@ export function FoodRegisterModal({ initialBarcode, onSuccess, onCancel }: Props
           )}
           <div className="flex gap-2 pt-1">
             <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
-              キャンセル
+              {tCommon("cancel")}
             </Button>
             <Button type="submit" fullWidth disabled={mutation.isPending}>
-              {mutation.isPending ? "登録中…" : "登録する"}
+              {mutation.isPending ? t("registering") : t("register")}
             </Button>
           </div>
         </form>

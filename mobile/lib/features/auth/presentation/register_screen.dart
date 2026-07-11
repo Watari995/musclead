@@ -66,7 +66,7 @@ class RegisterScreen extends HookConsumerWidget {
               AppTextField(
                 label: l.registerNameLabel,
                 controller: name,
-                hint: '山田 太郎',
+                hint: l.registerNameHint,
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),

@@ -115,7 +115,8 @@ class _WeeklyGoalDetail extends StatelessWidget {
             final l = AppLocalizations.of(context)!;
             return _GoalRow(
               label: l.notificationTraining,
-              value: '${trainingActual ?? 0} / $trainingGoal 回',
+              value: AppLocalizations.of(context)!.notificationTrainingActualGoal(
+                (trainingActual ?? 0).toInt(), trainingGoal.toInt()),
               achieved: (trainingActual?.toInt() ?? 0) >= trainingGoal.toInt(),
             );
           }),

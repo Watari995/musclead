@@ -36,6 +36,7 @@
   "registerTitle": "Create account",
   "registerFailed": "Failed to create account",
   "registerNameLabel": "Name",
+  "registerNameHint": "John Doe",
   "registerPasswordHint": "8+ characters",
   "registerStartBtn": "Create and get started",
 
@@ -290,5 +291,25 @@
   "calendarWed": "Wed",
   "calendarThu": "Thu",
   "calendarFri": "Fri",
-  "calendarSat": "Sat"
+  "calendarSat": "Sat",
+  "calendarExerciseSets": "{exerciseCount} exercises / {setCount} sets",
+  "@calendarExerciseSets": {
+    "placeholders": {
+      "exerciseCount": { "type": "int" },
+      "setCount": { "type": "int" }
+    }
+  },
+  "trainingRepsUnit": "{reps} reps",
+  "@trainingRepsUnit": {
+    "placeholders": { "reps": { "type": "int" } }
+  },
+  "notificationDateFormat": "MMM d HH:mm",
+  "notificationTrainingActualGoal": "{actual} / {goal} times",
+  "@notificationTrainingActualGoal": {
+    "placeholders": {
+      "actual": { "type": "int" },
+      "goal": { "type": "int" }
+    }
+  },
+  "trainingExerciseHint": "Bench Press"
 }

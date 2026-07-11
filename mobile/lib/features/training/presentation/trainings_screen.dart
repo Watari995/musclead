@@ -85,18 +85,15 @@ class _TrainingRow extends StatelessWidget {
 
   final TrainingDto training;
 
-  String? _duration() {
-    final end = training.endedAt;
-    if (end == null) return null;
-    final mins = end.difference(training.startedAt).inMinutes;
-    return '$mins分';
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final count = training.exercises.length;
+    final end = training.endedAt;
+    final duration = end != null
+        ? l.trainingDuration(end.difference(training.startedAt).inMinutes)
+        : null;
     return AppListRow(
       onTap: () => Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute<void>(
@@ -124,8 +121,8 @@ class _TrainingRow extends StatelessWidget {
               ],
             ),
           ),
-          if (_duration() != null)
-            Text(_duration()!, style: TextStyle(fontSize: 12, color: t.muted)),
+          if (duration != null)
+            Text(duration, style: TextStyle(fontSize: 12, color: t.muted)),
           const SizedBox(width: 6),
           Icon(Icons.chevron_right, color: t.subtle),
         ],

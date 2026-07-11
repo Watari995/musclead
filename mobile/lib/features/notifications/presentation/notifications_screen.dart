@@ -61,7 +61,7 @@ class _NotificationTile extends ConsumerWidget {
     final label = notification.notificationType == 'weekly_goal'
         ? (achieved ? l.notificationWeeklyGoalAchieved : l.notificationWeeklyGoalCheck)
         : l.notificationTitle;
-    final dateStr = DateFormat('M月d日 HH:mm').format(notification.createdAt.toLocal());
+    final dateStr = DateFormat('M/d HH:mm').format(notification.createdAt.toLocal());
 
     return GestureDetector(
       onTap: () => context.push('/notifications/${notification.id}'),

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ErrorText, TextInput } from "@/shared/ui";
 import {
   useFoodProductsByBarcodeQuery,
@@ -16,6 +17,7 @@ type Props = {
 type Mode = "name" | "barcode";
 
 export function FoodSearchSection({ onSelect, onNotFound }: Props) {
+  const t = useTranslations("food");
   const [mode, setMode] = useState<Mode>("name");
   const [nameQuery, setNameQuery] = useState("");
   const [barcodeInput, setBarcodeInput] = useState("");
@@ -86,21 +88,21 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
                 : "border-[var(--color-line)] text-[var(--color-ink-muted)] hover:border-[var(--color-ink)]"
             }`}
           >
-            {m === "name" ? "名前で検索" : "バーコード"}
+            {m === "name" ? t("searchByName") : t("barcode")}
           </button>
         ))}
       </div>
 
       {mode === "name" ? (
         <TextInput
-          placeholder="例: おにぎり、プロテインバー…"
+          placeholder={t("namePlaceholder")}
           value={nameQuery}
           onChange={handleNameChange}
         />
       ) : (
         <div className="flex gap-2">
           <TextInput
-            placeholder="バーコードの数字を入力 (8〜13桁)"
+            placeholder={t("barcodePlaceholder")}
             value={barcodeInput}
             onChange={(e) => {
               setBarcodeInput(e.target.value);
@@ -114,17 +116,17 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
             disabled={barcodeInput.trim().length < 8}
             className="shrink-0 px-4 py-2 rounded-md bg-[var(--color-ink)] text-[var(--color-bg)] text-sm font-medium disabled:opacity-40 transition-opacity"
           >
-            検索
+            {t("search")}
           </button>
         </div>
       )}
 
       {isLoading && (
-        <p className="text-xs text-[var(--color-ink-muted)]">検索中…</p>
+        <p className="text-xs text-[var(--color-ink-muted)]">{t("searching")}</p>
       )}
 
       {isError && (
-        <ErrorText>検索に失敗しました。もう一度お試しください。</ErrorText>
+        <ErrorText>{t("searchFailed")}</ErrorText>
       )}
 
       {showResults && (
@@ -152,7 +154,7 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
       {showEmpty && (
         <div className="flex items-center justify-between py-1">
           <p className="text-xs text-[var(--color-ink-muted)]">
-            見つかりませんでした
+            {t("notFound")}
           </p>
           <button
             type="button"
@@ -161,7 +163,7 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
             }
             className="text-xs text-[var(--color-ink)] underline"
           >
-            登録する →
+            {t("registerLink")}
           </button>
         </div>
       )}

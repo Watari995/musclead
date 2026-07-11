@@ -36,6 +36,7 @@
   "registerTitle": "アカウント作成",
   "registerFailed": "アカウント作成に失敗しました",
   "registerNameLabel": "お名前",
+  "registerNameHint": "山田 太郎",
   "registerPasswordHint": "8文字以上",
   "registerStartBtn": "作成してはじめる",
 
@@ -290,5 +291,25 @@
   "calendarWed": "水",
   "calendarThu": "木",
   "calendarFri": "金",
-  "calendarSat": "土"
+  "calendarSat": "土",
+  "calendarExerciseSets": "{exerciseCount}種目 / {setCount}セット",
+  "@calendarExerciseSets": {
+    "placeholders": {
+      "exerciseCount": { "type": "int" },
+      "setCount": { "type": "int" }
+    }
+  },
+  "trainingRepsUnit": "{reps} 回",
+  "@trainingRepsUnit": {
+    "placeholders": { "reps": { "type": "int" } }
+  },
+  "notificationDateFormat": "M月d日 HH:mm",
+  "notificationTrainingActualGoal": "{actual} / {goal} 回",
+  "@notificationTrainingActualGoal": {
+    "placeholders": {
+      "actual": { "type": "int" },
+      "goal": { "type": "int" }
+    }
+  },
+  "trainingExerciseHint": "ベンチプレス"
 }

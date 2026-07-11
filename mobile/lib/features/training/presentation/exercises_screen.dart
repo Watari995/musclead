@@ -163,7 +163,7 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'ベンチプレス'),
+          decoration: InputDecoration(hintText: l.trainingExerciseHint),
         ),
         actions: [
           TextButton(
