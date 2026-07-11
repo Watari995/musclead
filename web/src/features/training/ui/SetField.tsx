@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { SetDraft } from "@/features/training/model/training-draft";
 import { NumberField, TextInput } from "@/shared/ui";
 
@@ -20,47 +21,50 @@ export function SetField({
   onRemove,
   disabled,
 }: Props) {
+  const t = useTranslations("trainings");
+  const tCommon = useTranslations("common");
+
   return (
     <>
       {/* モバイル */}
       <div className="sm:hidden border border-[var(--color-line)] rounded-md p-3 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold tracking-tight text-[var(--color-ink-muted)]">
-            セット #{set.setNumber}
+            {t("setNumber", { num: set.setNumber })}
           </span>
           <button
             type="button"
             onClick={onRemove}
             disabled={disabled}
             className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] disabled:opacity-50 px-2"
-            aria-label={`セット${set.setNumber}を削除`}
+            aria-label={t("setDelete", { num: set.setNumber })}
           >
-            削除
+            {tCommon("delete")}
           </button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <MobileField label="重量(kg)">
+          <MobileField label={t("weightKg")}>
             <TextInput
               type="text"
               inputMode="decimal"
               placeholder="kg"
               value={set.weightKg}
               onChange={(e) => onChange({ weightKg: e.target.value })}
-              aria-label={`セット${set.setNumber}の重量`}
+              aria-label={t("setWeightAria", { num: set.setNumber })}
               disabled={disabled}
             />
           </MobileField>
-          <MobileField label="レップ">
+          <MobileField label={t("reps")}>
             <NumberField
               min={0}
               placeholder="回"
               value={set.reps || undefined}
               onChange={(v) => onChange({ reps: v ?? 0 })}
-              aria-label={`セット${set.setNumber}のレップ`}
+              aria-label={t("setRepsAria", { num: set.setNumber })}
               disabled={disabled}
             />
           </MobileField>
-          <MobileField label="休憩(秒)">
+          <MobileField label={t("restSecondsMobile")}>
             <NumberField
               min={0}
               placeholder={
@@ -68,7 +72,7 @@ export function SetField({
               }
               value={set.restSeconds ?? undefined}
               onChange={(v) => onChange({ restSeconds: v ?? null })}
-              aria-label={`セット${set.setNumber}の休憩秒数`}
+              aria-label={t("setRestAria", { num: set.setNumber })}
               disabled={disabled}
             />
           </MobileField>
@@ -86,7 +90,7 @@ export function SetField({
           placeholder="kg"
           value={set.weightKg}
           onChange={(e) => onChange({ weightKg: e.target.value })}
-          aria-label={`セット${set.setNumber}の重量`}
+          aria-label={t("setWeightAria", { num: set.setNumber })}
           disabled={disabled}
         />
         <NumberField
@@ -94,19 +98,19 @@ export function SetField({
           placeholder="回"
           value={set.reps || undefined}
           onChange={(v) => onChange({ reps: v ?? 0 })}
-          aria-label={`セット${set.setNumber}のレップ`}
+          aria-label={t("setRepsAria", { num: set.setNumber })}
           disabled={disabled}
         />
         <NumberField
           min={0}
           placeholder={
             exerciseDefaultRest !== null
-              ? `${exerciseDefaultRest}秒(既定)`
-              : "休憩 秒"
+              ? t("defaultRestPlaceholder", { seconds: exerciseDefaultRest })
+              : t("defaultRestSec")
           }
           value={set.restSeconds ?? undefined}
           onChange={(v) => onChange({ restSeconds: v ?? null })}
-          aria-label={`セット${set.setNumber}の休憩秒数`}
+          aria-label={t("setRestAria", { num: set.setNumber })}
           disabled={disabled}
         />
         <button
@@ -114,9 +118,9 @@ export function SetField({
           onClick={onRemove}
           disabled={disabled}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] disabled:opacity-50 px-2"
-          aria-label={`セット${set.setNumber}を削除`}
+          aria-label={t("setDelete", { num: set.setNumber })}
         >
-          削除
+          {tCommon("delete")}
         </button>
       </div>
     </>

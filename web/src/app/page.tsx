@@ -7,6 +7,7 @@ import { useAccessToken } from "@/shared/auth/access-token";
 
 export default function HomePage() {
   const router = useRouter();
+  const tc = useTranslations("common");
   const { token, ready } = useAccessToken();
 
   useEffect(() => {
@@ -14,5 +15,5 @@ export default function HomePage() {
     router.replace(token ? "/calendar" : "/login");
   }, [ready, token, router]);
 
-  return <div className="text-[var(--color-ink-muted)] text-sm">読み込み中…</div>;
+  return <div className="text-[var(--color-ink-muted)] text-sm">{tc("loading")}</div>;
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { type UpsertRoutineRequest } from "@/shared/api/client";
 import {
   addExercise,
@@ -34,6 +35,9 @@ export function RoutineForm({
   errorMessage,
   onCancel,
 }: Props) {
+  const t = useTranslations("routines");
+  const tCommon = useTranslations("common");
+  const tTrainings = useTranslations("trainings");
   const [draft, setDraft] = useState<RoutineDraft>(initial);
 
   const exercisesQuery = useExercisesQuery();
@@ -47,7 +51,7 @@ export function RoutineForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <Card className="p-5 space-y-4">
-        <Label label="ルーティン名">
+        <Label label={t("routineName")}>
           <TextInput
             value={draft.name}
             onChange={(e) =>
@@ -68,7 +72,7 @@ export function RoutineForm({
             <Card key={exercise.key} className="p-4 space-y-3">
               <div className="flex items-start gap-2">
                 <div className="flex-1">
-                  <Label label={`種目 ${index + 1}`}>
+                  <Label label={tTrainings("exercise", { index: index + 1 })}>
                     <select
                       value={exercise.exerciseID}
                       onChange={(e) =>
@@ -78,11 +82,11 @@ export function RoutineForm({
                       }
                       disabled={submitting}
                       required
-                      aria-label={`種目${index + 1}を選択`}
+                      aria-label={tTrainings("exerciseSelect", { index: index + 1 })}
                       className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
                     >
                       <option value="" disabled>
-                        種目を選択…
+                        {t("selectExercise")}
                       </option>
                       {exercises.map((ex) => (
                         <option key={ex.id} value={ex.id}>
@@ -93,12 +97,12 @@ export function RoutineForm({
                   </Label>
                   {exercises.length === 0 && (
                     <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-                      まだ種目が登録されていません。{" "}
+                      {t("noExercisesCreate")}{" "}
                       <Link
                         href="/exercises/new"
                         className="underline hover:opacity-70"
                       >
-                        先に作成
+                        {t("createFirst")}
                       </Link>
                     </p>
                   )}
@@ -111,7 +115,7 @@ export function RoutineForm({
                     }
                     disabled={submitting || index === 0}
                     className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 px-2 h-11"
-                    aria-label="上へ"
+                    aria-label={tCommon("up")}
                   >
                     ↑
                   </button>
@@ -122,7 +126,7 @@ export function RoutineForm({
                     }
                     disabled={submitting || index === last}
                     className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 px-2 h-11"
-                    aria-label="下へ"
+                    aria-label={tCommon("down")}
                   >
                     ↓
                   </button>
@@ -131,9 +135,9 @@ export function RoutineForm({
                     onClick={() => setDraft((d) => removeExercise(d, index))}
                     disabled={submitting || draft.exercises.length === 1}
                     className="text-xs text-[var(--color-accent)] disabled:opacity-50 px-2 h-11"
-                    aria-label={`種目${index + 1}を削除`}
+                    aria-label={tTrainings("exerciseDelete", { index: index + 1 })}
                   >
-                    削除
+                    {tCommon("delete")}
                   </button>
                 </div>
               </div>
@@ -147,7 +151,7 @@ export function RoutineForm({
           disabled={submitting}
           fullWidth
         >
-          + 種目を追加
+          {t("addExercise")}
         </Button>
       </div>
 
@@ -161,7 +165,7 @@ export function RoutineForm({
             onClick={onCancel}
             disabled={submitting}
           >
-            キャンセル
+            {tCommon("cancel")}
           </Button>
         )}
         <Button

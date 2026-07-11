@@ -105,7 +105,7 @@ export default function RoutinesPage() {
                   key={r.id}
                   routine={r}
                   onDelete={() => {
-                    if (confirm(t("deleteConfirm", { name: r.name }))) {
+                    if (confirm(t("deleteConfirm", { name: r.name ?? "" }))) {
                       del.mutate(r.id ?? "");
                     }
                   }}

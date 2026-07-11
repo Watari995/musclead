@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/tab_page.dart';
-import '../../../l10n/app_localizations.dart';
 import '../data/notification_dtos.dart';
 import '../data/notification_repository.dart';
+import '../../../l10n/app_localizations.dart';
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -61,9 +61,7 @@ class _NotificationTile extends ConsumerWidget {
     final label = notification.notificationType == 'weekly_goal'
         ? (achieved ? l.notificationWeeklyGoalAchieved : l.notificationWeeklyGoalCheck)
         : l.notificationTitle;
-    final dateStr = DateFormat(
-      'M/d HH:mm',
-    ).format(notification.createdAt.toLocal());
+    final dateStr = DateFormat('M月d日 HH:mm').format(notification.createdAt.toLocal());
 
     return GestureDetector(
       onTap: () => context.push('/notifications/${notification.id}'),
@@ -94,16 +92,11 @@ class _NotificationTile extends ConsumerWidget {
                       label,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: notification.isRead
-                            ? FontWeight.normal
-                            : FontWeight.bold,
+                        fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      dateStr,
-                      style: TextStyle(fontSize: 12, color: t.muted),
-                    ),
+                    Text(dateStr, style: TextStyle(fontSize: 12, color: t.muted)),
                   ],
                 ),
               ),
@@ -112,10 +105,7 @@ class _NotificationTile extends ConsumerWidget {
                   margin: const EdgeInsets.only(top: 4),
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                 ),
             ],
           ),

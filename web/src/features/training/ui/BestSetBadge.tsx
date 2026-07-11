@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { BestSetDTO } from "@/shared/api/client";
 
 type Props = {
@@ -22,13 +23,15 @@ function formatDate(iso: string): string {
 }
 
 export function BestSetBadge({ bestSet, loading }: Props) {
+  const t = useTranslations("bestSet");
+
   // 取得中はチラつき防止で何も出さない。
   if (loading) return null;
 
   if (!bestSet) {
     return (
       <p className="mt-1 text-xs text-[var(--color-ink-muted)]">
-        まだ記録がありません
+        {t("noRecord")}
       </p>
     );
   }
@@ -39,7 +42,7 @@ export function BestSetBadge({ bestSet, loading }: Props) {
   return (
     <p className="mt-1 text-xs text-[var(--color-ink-muted)]">
       <span className="text-[var(--color-accent)]">★</span>{" "}
-      <span className="font-medium text-[var(--color-ink)]">最高記録</span>{" "}
+      <span className="font-medium text-[var(--color-ink)]">{t("bestRecord")}</span>{" "}
       {weight}kg × {bestSet.reps ?? 0}回
       {date && <span className="ml-1 opacity-70">({date})</span>}
     </p>

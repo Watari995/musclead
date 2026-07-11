@@ -18,12 +18,12 @@ function formatDate(iso: string) {
   });
 }
 
-function notificationLabel(n: NotificationDTO): string {
+function notificationLabel(n: NotificationDTO, t: (key: string) => string): string {
   if (n.notification_type === "weekly_goal") {
     const achieved = n.metadata["achieved"] as boolean | undefined;
-    return achieved ? "今週の目標を達成しました！" : "今週の目標を確認してください";
+    return achieved ? t("weeklyGoalAchieved") : t("checkWeeklyGoal");
   }
-  return "通知";
+  return t("title");
 }
 
 export default function NotificationsPage() {
@@ -34,23 +34,25 @@ export default function NotificationsPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const t = useTranslations("notifications");
+  const tc = useTranslations("common");
   const { data, isLoading, isError } = useNotificationsQuery();
 
   if (!ready || !token) return null;
 
   return (
     <div className="space-y-6">
-      <SectionTitle>通知</SectionTitle>
+      <SectionTitle>{t("title")}</SectionTitle>
 
       {isLoading && (
-        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
       )}
       {isError && (
-        <p className="text-sm text-red-500">通知の取得に失敗しました</p>
+        <p className="text-sm text-red-500">{t("loadFailed")}</p>
       )}
 
       {data && data.notifications.length === 0 && (
-        <p className="text-sm text-[var(--color-ink-muted)]">通知はありません</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{t("noNotifications")}</p>
       )}
 
       {data && data.notifications.length > 0 && (
@@ -68,7 +70,7 @@ export default function NotificationsPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm ${!n.is_read ? "font-bold" : ""} text-[var(--color-ink)]`}>
-                    {notificationLabel(n)}
+                    {notificationLabel(n, t)}
                   </p>
                   <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
                     {formatDate(n.created_at)}

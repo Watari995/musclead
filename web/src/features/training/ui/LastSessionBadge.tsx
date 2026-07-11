@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { LastSessionSetsByExerciseDTO } from "@/shared/api/client";
 
 type Props = {
@@ -21,6 +22,8 @@ function formatDate(iso: string): string {
 }
 
 export function LastSessionBadge({ lastSession, loading }: Props) {
+  const t = useTranslations("lastSession");
+
   if (loading) return null;
   if (!lastSession?.sets?.length) return null;
 
@@ -29,7 +32,7 @@ export function LastSessionBadge({ lastSession, loading }: Props) {
   return (
     <div className="mt-1 text-xs text-[var(--color-ink-muted)]">
       <span className="font-medium">
-        📅 前回{date && <span className="ml-1 opacity-70">({date})</span>}
+        {t("label")}{date && <span className="ml-1 opacity-70">({date})</span>}
       </span>
       <span className="ml-2 inline-flex flex-wrap gap-x-3">
         {lastSession.sets.map((s) => (

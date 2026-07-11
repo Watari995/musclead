@@ -18,11 +18,12 @@ export default function MealEditPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const tc = useTranslations("common");
   const query = useFindMealQuery(params.id, Boolean(token));
 
   if (!ready || !token) return null;
   if (query.isLoading) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
   if (query.isError) {
     return <ErrorText>{(query.error as Error).message}</ErrorText>;
@@ -34,6 +35,8 @@ export default function MealEditPage() {
 
 function MealEditContent({ meal }: { meal: Meal }) {
   const router = useRouter();
+  const t = useTranslations("meals");
+  const tc = useTranslations("common");
 
   return (
     <div className="max-w-lg mx-auto space-y-4">
@@ -43,9 +46,9 @@ function MealEditContent({ meal }: { meal: Meal }) {
           onClick={() => router.back()}
           className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
         >
-          ← 戻る
+          {tc("back")}
         </button>
-        <SectionTitle>食事を編集</SectionTitle>
+        <SectionTitle>{t("editMeal")}</SectionTitle>
       </div>
       <EditMealForm
         meal={meal}

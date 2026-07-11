@@ -156,7 +156,7 @@ class MealRecordScreen extends HookConsumerWidget {
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = '保存に失敗しました';
+        error.value = l.mealSaveFailed;
       } finally {
         if (context.mounted) loading.value = false;
       }
@@ -165,20 +165,23 @@ class MealRecordScreen extends HookConsumerWidget {
     Future<void> deleteMeal() async {
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('削除の確認'),
-          content: const Text('この記録を削除しますか？'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('キャンセル'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text('削除', style: TextStyle(color: t.accent)),
-            ),
-          ],
-        ),
+        builder: (ctx) {
+          final dl = AppLocalizations.of(ctx)!;
+          return AlertDialog(
+            title: Text(dl.mealDeleteConfirmTitle),
+            content: Text(dl.mealDeleteConfirmMsg),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(dl.commonCancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(dl.commonDelete, style: TextStyle(color: t.accent)),
+              ),
+            ],
+          );
+        },
       );
       if (confirmed != true || !context.mounted) return;
       loading.value = true;
@@ -187,14 +190,14 @@ class MealRecordScreen extends HookConsumerWidget {
         ref.invalidate(mealsProvider);
         if (context.mounted) context.pop();
       } catch (_) {
-        error.value = '削除に失敗しました';
+        error.value = l.mealDeleteFailed;
         loading.value = false;
       }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? '食事を編集' : '食事を記録'),
+        title: Text(isEdit ? l.mealEditTitle : l.mealRecordTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -222,7 +225,7 @@ class MealRecordScreen extends HookConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      'サービング数',
+                      l.mealServingCount,
                       style: TextStyle(fontSize: 13, color: t.muted),
                     ),
                     const Spacer(),
@@ -261,7 +264,7 @@ class MealRecordScreen extends HookConsumerWidget {
               Wrap(
                 spacing: 8,
                 children: [
-                  for (final m in _mealTypes)
+                  for (final m in mealTypes)
                     ChoiceChip(
                       label: Text(m),
                       selected: mealType.value == m,
@@ -302,7 +305,7 @@ class MealRecordScreen extends HookConsumerWidget {
 
               const SizedBox(height: 14),
               AppTextField(
-                label: 'カロリー (kcal)',
+                label: l.mealCaloriesLabel,
                 controller: caloriesCtrl,
                 hint: '420',
                 keyboardType: TextInputType.number,
@@ -340,9 +343,9 @@ class MealRecordScreen extends HookConsumerWidget {
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'メモ · 任意',
+                label: l.mealMemoOptional2,
                 controller: memoCtrl,
-                hint: 'オートミール・バナナ・卵',
+                hint: 'Oatmeal · Banana · Egg',
               ),
 
               if (error.value != null) ...[
@@ -355,14 +358,14 @@ class MealRecordScreen extends HookConsumerWidget {
 
               const SizedBox(height: 24),
               AppButton(
-                label: isEdit ? '保存する' : '記録する',
+                label: isEdit ? l.mealSaveBtn : l.mealRecordBtn,
                 loading: loading.value,
                 onPressed: submit,
               ),
               if (isEdit) ...[
                 const SizedBox(height: 8),
                 AppButton(
-                  label: 'この記録を削除',
+                  label: l.mealDeleteRecord,
                   variant: AppButtonVariant.text,
                   onPressed: loading.value ? null : deleteMeal,
                 ),

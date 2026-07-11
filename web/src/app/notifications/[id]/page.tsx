@@ -10,7 +10,7 @@ import {
   useReadNotificationMutation,
 } from "@/features/notification/api/notifications";
 
-function WeeklyGoalDetail({ metadata }: { metadata: Record<string, unknown> }) {
+function WeeklyGoalDetail({ metadata, t }: { metadata: Record<string, unknown>; t: (key: string) => string }) {
   const achieved = metadata["achieved"] as boolean | undefined;
   const trainingGoal = metadata["training_goal"] as number | null | undefined;
   const trainingActual = metadata["training_actual"] as number | undefined;
@@ -22,32 +22,32 @@ function WeeklyGoalDetail({ metadata }: { metadata: Record<string, unknown> }) {
   return (
     <div className="space-y-4">
       <p className="text-lg font-bold">
-        {achieved ? "今週の目標を達成しました！ 🎉" : "今週の目標結果"}
+        {achieved ? t("weeklyGoalAchievedBanner") : t("weeklyGoalResults")}
       </p>
       <ul className="space-y-2 text-sm">
         {trainingGoal != null && (
           <li className="flex justify-between border-b border-[var(--color-line)] pb-2">
-            <span className="text-[var(--color-ink-muted)]">トレーニング</span>
+            <span className="text-[var(--color-ink-muted)]">{t("training")}</span>
             <span>
-              {trainingActual ?? 0} / {trainingGoal} 回
+              {trainingActual ?? 0} / {trainingGoal} {t("timesUnit")}
               {(trainingActual ?? 0) >= trainingGoal ? " ✅" : " ❌"}
             </span>
           </li>
         )}
         {calorieGoal != null && (
           <li className="flex justify-between border-b border-[var(--color-line)] pb-2">
-            <span className="text-[var(--color-ink-muted)]">平均カロリー</span>
+            <span className="text-[var(--color-ink-muted)]">{t("avgCalories")}</span>
             <span>
-              {calorieActual != null ? Math.round(calorieActual) : "—"} / {calorieGoal} kcal
+              {calorieActual != null ? Math.round(calorieActual) : "—"} / {calorieGoal} {t("kcalUnit")}
               {calorieActual != null && calorieActual <= calorieGoal ? " ✅" : " ❌"}
             </span>
           </li>
         )}
         {weightGoal != null && (
           <li className="flex justify-between border-b border-[var(--color-line)] pb-2">
-            <span className="text-[var(--color-ink-muted)]">体重変化</span>
+            <span className="text-[var(--color-ink-muted)]">{t("weightChange")}</span>
             <span>
-              {weightActual != null ? `${weightActual > 0 ? "+" : ""}${weightActual}` : "—"} / 目標 {weightGoal > 0 ? "+" : ""}{weightGoal} kg
+              {weightActual != null ? `${weightActual > 0 ? "+" : ""}${weightActual}` : "—"} / {t("goal")} {weightGoal > 0 ? "+" : ""}{weightGoal} {t("kgUnit")}
             </span>
           </li>
         )}
@@ -60,6 +60,8 @@ export default function NotificationDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const { token, ready } = useAccessToken();
+  const t = useTranslations("notifications");
+  const tc = useTranslations("common");
   const { data } = useNotificationsQuery();
   const readMutation = useReadNotificationMutation();
 
@@ -79,19 +81,19 @@ export default function NotificationDetailPage() {
   if (!ready || !token) return null;
 
   if (!data) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
 
   if (!notification) {
-    return <p className="text-sm text-red-500">通知が見つかりません</p>;
+    return <p className="text-sm text-red-500">{t("notFound")}</p>;
   }
 
   return (
     <div className="space-y-6">
-      <SectionTitle>通知詳細</SectionTitle>
+      <SectionTitle>{t("notificationDetail")}</SectionTitle>
       <div className="border border-[var(--color-line)] rounded-xl p-4 space-y-3">
         {notification.notification_type === "weekly_goal" && (
-          <WeeklyGoalDetail metadata={notification.metadata} />
+          <WeeklyGoalDetail metadata={notification.metadata} t={t} />
         )}
         <p className="text-xs text-[var(--color-ink-muted)]">
           {new Date(notification.created_at).toLocaleString("ja-JP")}
@@ -102,7 +104,7 @@ export default function NotificationDetailPage() {
         onClick={() => router.back()}
         className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
       >
-        ← 通知一覧に戻る
+        {t("backToList")}
       </button>
     </div>
   );

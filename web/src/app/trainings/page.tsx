@@ -123,14 +123,14 @@ export default function TrainingsPage() {
 
       {query.data && query.data.length > 0 && (
         <ul className="space-y-3">
-          {query.data.map((t) => (
+          {query.data.map((training) => (
             <TrainingCard
-              key={t.id}
-              training={t}
+              key={training.id}
+              training={training}
               exerciseNameByID={exerciseNameByID}
               onDelete={() => {
                 if (confirm(t("deleteConfirm"))) {
-                  del.mutate(t.id ?? "");
+                  del.mutate(training.id ?? "");
                 }
               }}
               deleting={del.isPending}
