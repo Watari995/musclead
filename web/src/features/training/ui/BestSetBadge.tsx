@@ -43,7 +43,7 @@ export function BestSetBadge({ bestSet, loading }: Props) {
     <p className="mt-1 text-xs text-[var(--color-ink-muted)]">
       <span className="text-[var(--color-accent)]">★</span>{" "}
       <span className="font-medium text-[var(--color-ink)]">{t("bestRecord")}</span>{" "}
-      {weight}kg × {bestSet.reps ?? 0}回
+      {weight}kg × {bestSet.reps ?? 0}{t("repsUnit")}
       {date && <span className="ml-1 opacity-70">({date})</span>}
     </p>
   );

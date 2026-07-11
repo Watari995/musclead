@@ -137,7 +137,7 @@ function ExerciseSummary({
                 <td className="py-2 font-medium">{set.weight_kg} kg</td>
                 <td className="py-2">{set.reps}</td>
                 <td className="py-2 text-[var(--color-ink-muted)]">
-                  {rest !== null ? `${rest}秒` : "—"}
+                  {rest !== null ? `${rest}${t("secUnit")}` : "—"}
                 </td>
                 <td className="py-2 text-[var(--color-ink-muted)] text-xs">
                   {set.memo ?? ""}

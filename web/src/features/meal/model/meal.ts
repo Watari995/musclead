@@ -44,17 +44,8 @@ export function toMeal(dto: MealDTO): Meal {
   };
 }
 
-export function mealTypeLabel(t: MealType): string {
-  switch (t) {
-    case "breakfast":
-      return "朝食";
-    case "lunch":
-      return "昼食";
-    case "dinner":
-      return "夕食";
-    case "snack":
-      return "間食";
-  }
+export function mealTypeLabelKey(type: MealType): "breakfast" | "lunch" | "dinner" | "snack" {
+  return type;
 }
 
 export function mealTypeEmoji(t: MealType): string {

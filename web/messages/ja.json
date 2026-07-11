@@ -34,7 +34,11 @@
       "size": "ファイルサイズは 10 MB 以下にしてください",
       "max": "写真は最大 {max} 枚まで追加できます",
       "fail": "写真のアップロードに失敗しました"
-    }
+    },
+    "decrease": "減らす",
+    "increase": "増やす",
+    "decreaseLabel": "{label}を減らす",
+    "increaseLabel": "{label}を増やす"
   },
   "nav": {
     "meals": "食事",
@@ -102,7 +106,8 @@
     "apply": "適用"
   },
   "birthdayInput": {
-    "placeholder": "選択してください"
+    "placeholder": "選択してください",
+    "dateFormat": "{year} 年 {month} 月 {day} 日"
   },
   "exercises": {
     "title": "種目マスタ",
@@ -178,7 +183,12 @@
     "defaultRestSec": "休憩 秒",
     "restExerciseDefault": "既定の休憩(秒)",
     "memoOptional": "任意",
-    "noRecordYet": "まだ記録がありません"
+    "noRecordYet": "まだ記録がありません",
+    "exerciseUnit": "種目",
+    "setsUnit": "セット",
+    "secUnit": "秒",
+    "repsUnit": "回",
+    "secPlaceholder": "秒"
   },
   "weights": {
     "graph": "グラフ",
@@ -263,10 +273,12 @@
   },
   "bestSet": {
     "noRecord": "まだ記録がありません",
-    "bestRecord": "最高記録"
+    "bestRecord": "最高記録",
+    "repsUnit": "回"
   },
   "lastSession": {
-    "label": "📅 前回"
+    "label": "📅 前回",
+    "repsUnit": "回"
   },
   "notifications": {
     "title": "通知",
@@ -296,7 +308,15 @@
     "nextMonth": "次の月",
     "noRecords": "この日の記録はありません",
     "total": "合計",
-    "weekdays": ["日", "月", "火", "水", "木", "金", "土"],
+    "weekdays": [
+      "日",
+      "月",
+      "火",
+      "水",
+      "木",
+      "金",
+      "土"
+    ],
     "yearMonth": "{year}年{month}月",
     "setsCount": "{count}セット",
     "exerciseCount": "{count}種目",
@@ -406,7 +426,9 @@
     "section3Title": "3. 第三者への提供",
     "section3Text": "収集した個人情報は、法令に基づく場合を除き、第三者へ提供しません。本サービスは広告目的での情報共有を行いません。",
     "section4Title": "4. 利用する外部サービス",
-    "section4Items": ["Firebase（クラッシュレポート・利用統計）"],
+    "section4Items": [
+      "Firebase（クラッシュレポート・利用統計）"
+    ],
     "section5Title": "5. データの保管・削除",
     "section5Text": "ユーザーデータはサービス提供に必要な期間のみ保管します。アカウント削除をご希望の場合は、サポートページからお問い合わせください。削除依頼から7日以内に個人情報を削除します。",
     "section6Title": "6. お問い合わせ",

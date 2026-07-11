@@ -174,7 +174,7 @@ function TrainingCard({
             {formatDateTime(training.started_at)}
           </span>
           <span className="text-xs text-[var(--color-ink-muted)]">
-            {(training.exercises ?? []).length} 種目 / {totalSets} セット
+            {(training.exercises ?? []).length} {t("exerciseUnit")} / {totalSets} {t("setsUnit")}
           </span>
         </div>
         {exerciseNames.length > 0 && (

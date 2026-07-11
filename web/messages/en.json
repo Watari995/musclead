@@ -34,7 +34,11 @@
       "size": "File size must be 10 MB or less",
       "max": "You can add up to {max} photos",
       "fail": "Failed to upload photo"
-    }
+    },
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "decreaseLabel": "Decrease {label}",
+    "increaseLabel": "Increase {label}"
   },
   "nav": {
     "meals": "Meals",
@@ -102,7 +106,8 @@
     "apply": "Apply"
   },
   "birthdayInput": {
-    "placeholder": "Select date"
+    "placeholder": "Select date",
+    "dateFormat": "{month}/{day}/{year}"
   },
   "exercises": {
     "title": "Exercise Library",
@@ -178,7 +183,12 @@
     "defaultRestSec": "Rest (sec)",
     "restExerciseDefault": "Default rest (sec)",
     "memoOptional": "Optional",
-    "noRecordYet": "No records yet"
+    "noRecordYet": "No records yet",
+    "exerciseUnit": "exercise(s)",
+    "setsUnit": "set(s)",
+    "secUnit": "sec",
+    "repsUnit": "reps",
+    "secPlaceholder": "sec"
   },
   "weights": {
     "graph": "Graph",
@@ -263,10 +273,12 @@
   },
   "bestSet": {
     "noRecord": "No records yet",
-    "bestRecord": "Best Record"
+    "bestRecord": "Best Record",
+    "repsUnit": "reps"
   },
   "lastSession": {
-    "label": "📅 Last"
+    "label": "📅 Last",
+    "repsUnit": "reps"
   },
   "notifications": {
     "title": "Notifications",
@@ -296,7 +308,15 @@
     "nextMonth": "Next month",
     "noRecords": "No records for this day",
     "total": "Total",
-    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
     "yearMonth": "{month}/{year}",
     "setsCount": "{count} sets",
     "exerciseCount": "{count} exercises",
@@ -406,7 +426,9 @@
     "section3Title": "3. Sharing with Third Parties",
     "section3Text": "We will not share collected personal information with third parties except as required by law. We do not share information for advertising purposes.",
     "section4Title": "4. External Services Used",
-    "section4Items": ["Firebase (crash reports, usage statistics)"],
+    "section4Items": [
+      "Firebase (crash reports, usage statistics)"
+    ],
     "section5Title": "5. Data Storage & Deletion",
     "section5Text": "User data is stored only for the period necessary to provide the Service. If you wish to delete your account, please contact us via the support page. Personal information will be deleted within 7 days of the deletion request.",
     "section6Title": "6. Contact",

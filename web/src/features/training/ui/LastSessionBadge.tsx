@@ -39,7 +39,7 @@ export function LastSessionBadge({ lastSession, loading }: Props) {
           <span key={s.set_number}>
             {s.set_number}.{" "}
             <span className="text-[var(--color-ink)]">
-              {formatWeight(s.weight_kg ?? "")}kg × {s.reps}回
+              {formatWeight(s.weight_kg ?? "")}kg × {s.reps}{t("repsUnit")}
             </span>
           </span>
         ))}

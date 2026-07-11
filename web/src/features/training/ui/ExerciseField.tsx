@@ -131,7 +131,7 @@ export function ExerciseField({
           <NumberField
             min={0}
             value={exercise.restSeconds ?? undefined}
-            placeholder="例: 90"
+            placeholder="90"
             onChange={(v) => onChange({ restSeconds: v ?? null })}
             disabled={disabled}
           />

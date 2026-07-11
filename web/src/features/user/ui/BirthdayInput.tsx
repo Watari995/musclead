@@ -53,7 +53,7 @@ export function BirthdayInput({
                   : "text-[var(--color-ink-muted)]"
               }
             >
-              {selected ? formatDisplay(selected) : t("placeholder")}
+              {selected ? t("dateFormat", { year: selected.getFullYear(), month: selected.getMonth() + 1, day: selected.getDate() }) : t("placeholder")}
             </span>
             <CalendarIcon />
           </button>
@@ -100,9 +100,6 @@ function toISOShort(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function formatDisplay(d: Date): string {
-  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
-}
 
 function CalendarIcon() {
   return (

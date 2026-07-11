@@ -57,7 +57,7 @@ export function SetField({
           <MobileField label={t("reps")}>
             <NumberField
               min={0}
-              placeholder="回"
+              placeholder={t("repsUnit")}
               value={set.reps || undefined}
               onChange={(v) => onChange({ reps: v ?? 0 })}
               aria-label={t("setRepsAria", { num: set.setNumber })}
@@ -68,7 +68,7 @@ export function SetField({
             <NumberField
               min={0}
               placeholder={
-                exerciseDefaultRest !== null ? `${exerciseDefaultRest}` : "秒"
+                exerciseDefaultRest !== null ? `${exerciseDefaultRest}` : t("secPlaceholder")
               }
               value={set.restSeconds ?? undefined}
               onChange={(v) => onChange({ restSeconds: v ?? null })}
@@ -95,7 +95,7 @@ export function SetField({
         />
         <NumberField
           min={0}
-          placeholder="回"
+          placeholder={t("repsUnit")}
           value={set.reps || undefined}
           onChange={(v) => onChange({ reps: v ?? 0 })}
           aria-label={t("setRepsAria", { num: set.setNumber })}

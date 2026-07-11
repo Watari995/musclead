@@ -7,7 +7,7 @@ import {
   useCreateMealTemplateMutation,
   useDeleteMealTemplateMutation,
 } from "@/features/meal/api/meal_templates";
-import { mealTypeLabel } from "@/features/meal/model/meal";
+import { mealTypeLabelKey } from "@/features/meal/model/meal";
 import type { MealTemplate } from "@/features/meal/model/meal_template";
 import { Card, SectionTitle, ErrorText, Button, Label, TextInput, NumberField } from "@/shared/ui";
 
@@ -68,6 +68,7 @@ function TemplateCard({
   onSelect: (t: MealTemplate) => void;
 }) {
   const t = useTranslations("mealTemplate");
+  const tMeals = useTranslations("meals");
   const tCommon = useTranslations("common");
   const del = useDeleteMealTemplateMutation();
 
@@ -80,7 +81,7 @@ function TemplateCard({
       >
         <div className="font-medium text-sm truncate">{template.name}</div>
         <div className="flex gap-3 mt-0.5 text-xs text-[var(--color-ink-muted)]">
-          <span>{mealTypeLabel(template.mealType)}</span>
+          <span>{tMeals(mealTypeLabelKey(template.mealType))}</span>
           <span className="font-medium text-[var(--color-ink)]">{template.calories} kcal</span>
           <span>P {template.proteinG}g</span>
           <span>F {template.fatG}g</span>

@@ -57,7 +57,7 @@ export function RoutineForm({
             onChange={(e) =>
               setDraft((d) => setName(d, e.target.value))
             }
-            placeholder="例: PPL Day1 (Push)"
+            placeholder="PPL Day1 (Push)"
             required
             maxLength={50}
             disabled={submitting}

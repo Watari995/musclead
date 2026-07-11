@@ -6,7 +6,7 @@ import { useDeleteMealMutation } from "@/features/meal/api/meals";
 import {
   formatMealDateTime,
   mealTypeEmoji,
-  mealTypeLabel,
+  mealTypeLabelKey,
   type Meal,
 } from "@/features/meal/model/meal";
 
@@ -34,7 +34,7 @@ export function MealRow({ meal }: { meal: Meal }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <span className="text-sm font-bold tracking-tight">
-            {mealTypeLabel(meal.type)}
+            {t(mealTypeLabelKey(meal.type))}
           </span>
           <span className="text-xs text-[var(--color-ink-muted)]">
             {formatMealDateTime(meal.eatenAt)}
@@ -82,7 +82,7 @@ export function MealRow({ meal }: { meal: Meal }) {
         <button
           type="button"
           onClick={() => {
-            if (confirm(t("deleteConfirm", { mealType: mealTypeLabel(meal.type) }))) {
+            if (confirm(t("deleteConfirm", { mealType: t(mealTypeLabelKey(meal.type)) }))) {
               del.mutate(meal.id);
             }
           }}
