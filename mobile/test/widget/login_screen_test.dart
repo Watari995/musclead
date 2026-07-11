@@ -23,7 +23,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('musclead'), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(2));
