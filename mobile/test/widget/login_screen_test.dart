@@ -13,6 +13,7 @@ void main() {
       ProviderScope(
         child: MaterialApp(
           theme: buildAppTheme(Brightness.light, kBrandAccent),
+          locale: const Locale('ja'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
