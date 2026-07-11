@@ -10,6 +10,7 @@ import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../data/weight_dtos.dart';
 import '../data/weight_repository.dart';
+import '../../../l10n/app_localizations.dart';
 import 'weight_record_sheet.dart';
 
 class WeightsScreen extends ConsumerWidget {
@@ -17,9 +18,10 @@ class WeightsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final weights = ref.watch(weightsProvider);
     return TabPage(
-      title: '体重',
+      title: l.weightTitle,
       trailing: IconButton(
         icon: Icon(Icons.add, color: context.tokens.accent),
         onPressed: () => showWeightRecordSheet(context),
@@ -31,12 +33,11 @@ class WeightsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(weightsProvider),
           data: (list) {
             if (list.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: Center(child: Text('まだ記録がありません')),
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: Text(l.weightNoRecords)),
               );
             }
-            // API は新しい順。グラフは古い順、リストは新しい順で使う。
             final asc = list.reversed.toList();
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,7 +47,7 @@ class WeightsScreen extends ConsumerWidget {
                   latest: list.first,
                   previous: list.length > 1 ? list[1] : null,
                 ),
-                const SectionTitle('最近の記録'),
+                SectionTitle(l.weightRecentRecords),
                 AppListBox(
                   children: [
                     for (final w in list.take(10)) _WeightRow(weight: w),
@@ -74,6 +75,7 @@ class _ChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final spots = <FlSpot>[
       for (var i = 0; i < ascending.length; i++)
@@ -112,7 +114,7 @@ class _ChartCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
-                '体脂肪 ${latest.bodyFatPercentage}%',
+                l.weightBodyFat(latest.bodyFatPercentage!),
                 style: TextStyle(fontSize: 13, color: t.muted),
               ),
             ),
@@ -122,7 +124,7 @@ class _ChartCard extends StatelessWidget {
             child: spots.length < 2
                 ? Center(
                     child: Text(
-                      '記録が増えるとグラフが表示されます',
+                      l.weightGraphHint,
                       style: TextStyle(color: t.muted, fontSize: 12),
                     ),
                   )
@@ -161,6 +163,7 @@ class _WeightRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return AppListRow(
       child: Row(
@@ -175,7 +178,7 @@ class _WeightRow extends StatelessWidget {
                 ),
                 if (weight.bodyFatPercentage != null)
                   Text(
-                    '体脂肪 ${weight.bodyFatPercentage}%',
+                    l.weightBodyFat(weight.bodyFatPercentage!),
                     style: TextStyle(fontSize: 11, color: t.muted),
                   ),
               ],

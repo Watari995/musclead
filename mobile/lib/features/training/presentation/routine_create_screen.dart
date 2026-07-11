@@ -8,6 +8,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../data/routine_dtos.dart';
 import '../data/training_repository.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// ルーティン作成（名前 + 種目を順番に選択）。
 class RoutineCreateScreen extends ConsumerStatefulWidget {
@@ -39,13 +40,14 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
   });
 
   Future<void> _save() async {
+    final l = AppLocalizations.of(context)!;
     final name = _name.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = '名前を入力してください');
+      setState(() => _error = l.commonNameRequired);
       return;
     }
     if (_selected.isEmpty) {
-      setState(() => _error = '種目を1つ以上選択してください');
+      setState(() => _error = l.trainingExerciseRequired);
       return;
     }
     setState(() {
@@ -72,7 +74,10 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
     } on Failure catch (f) {
       setState(() => _error = f.message);
     } catch (_) {
-      setState(() => _error = '保存に失敗しました');
+      if (mounted) {
+        final l2 = AppLocalizations.of(context)!;
+        setState(() => _error = l2.commonSaveFailed);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -80,21 +85,26 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final exercises = ref.watch(exercisesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('新しいルーティン'),
+        title: Text(l.trainingNewRoutine),
         backgroundColor: Colors.transparent,
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            AppTextField(label: 'ルーティン名', controller: _name, hint: '胸の日'),
+            AppTextField(
+              label: l.trainingRoutineName,
+              controller: _name,
+              hint: l.trainingRoutineHint,
+            ),
             const SizedBox(height: 16),
             Text(
-              '種目を選択（選んだ順に並びます）',
+              l.trainingSelectExercisesHint,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: t.muted,
@@ -104,9 +114,9 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
             const SizedBox(height: 4),
             exercises.when(
               data: (list) => list.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('先に「種目」を追加してください'),
+                  ? Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l.trainingNoExercisesYet),
                     )
                   : Column(
                       children: [
@@ -124,9 +134,9 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
                 padding: EdgeInsets.all(16),
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (e, _) => const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text('種目の読み込みに失敗しました'),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l.trainingExerciseLoadFailed),
               ),
             ),
             if (_error != null) ...[
@@ -140,7 +150,11 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
         child: SafeArea(
           top: false,
-          child: AppButton(label: '作成', loading: _saving, onPressed: _save),
+          child: AppButton(
+            label: l.commonCreate,
+            loading: _saving,
+            onPressed: _save,
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
@@ -96,7 +97,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final exList = ref.read(exercisesProvider).asData?.value ?? [];
     final names = {for (final e in exList) e.id: e.name};
     for (final ex in training.exercises) {
-      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? '種目');
+      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? ex.exerciseId);
       draft.sets.first.dispose();
       draft.sets.clear();
       for (final s in ex.sets) {
@@ -194,7 +195,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       );
     }
     if (reqExercises.isEmpty) {
-      setState(() => _error = '種目を1つ以上追加してください');
+      setState(() => _error = AppLocalizations.of(context)!.trainingExerciseRequired2);
       return;
     }
     setState(() {
@@ -229,7 +230,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     } on Failure catch (f) {
       setState(() => _error = f.message);
     } catch (_) {
-      setState(() => _error = '保存に失敗しました');
+      setState(() => _error = AppLocalizations.of(context)!.commonSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -263,10 +264,11 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? '記録を編集' : 'トレーニング記録'),
+        title: Text(_isEditing ? l.trainingEditTitle : l.trainingRecordTitle),
         backgroundColor: Colors.transparent,
       ),
       body: GestureDetector(
@@ -279,7 +281,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               for (var i = 0; i < _exercises.length; i++) _exerciseCard(i),
               const SizedBox(height: 4),
               AppButton(
-                label: '種目を追加',
+                label: l.trainingSelectExercise,
                 icon: Icons.add,
                 variant: AppButtonVariant.glass,
                 onPressed: _pickExercise,
@@ -300,7 +302,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
         child: SafeArea(
           top: false,
-          child: AppButton(label: '保存', loading: _saving, onPressed: _save),
+          child: AppButton(label: AppLocalizations.of(context)!.trainingSaveBtn, loading: _saving, onPressed: _save),
         ),
       ),
     );
@@ -316,7 +318,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
           tilePadding: const EdgeInsets.symmetric(horizontal: 15),
           childrenPadding: const EdgeInsets.fromLTRB(15, 0, 15, 14),
           title: Text(
-            'メモ（全体）',
+            AppLocalizations.of(context)!.trainingMemoAll,
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: t.muted,
@@ -327,9 +329,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             TextField(
               controller: _memo,
               maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: '今日のコンディション など',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context)!.trainingMemoAllHint,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -340,10 +342,14 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   }
 
   Widget _endedAtCard() {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
+    final endedLocal = _endedAt?.toLocal();
+    final timeStr = endedLocal == null ? '' :
+        '${endedLocal.hour.toString().padLeft(2, '0')}:${endedLocal.minute.toString().padLeft(2, '0')}';
     final label = _endedAt == null
-        ? '終了時刻を入力'
-        : '終了 ${_endedAt!.toLocal().hour.toString().padLeft(2, '0')}:${_endedAt!.toLocal().minute.toString().padLeft(2, '0')}';
+        ? l.trainingEndTimeEmpty
+        : l.trainingEndTimeSet(timeStr);
     return AppCard(
       child: InkWell(
         onTap: () async {
@@ -471,7 +477,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         TextSpan(
           children: [
             TextSpan(
-              text: '📅 前回 ',
+              text: '📅 ${AppLocalizations.of(context)!.trainingPrevSession}',
               style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
             ),
             TextSpan(
@@ -503,11 +509,11 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               style: TextStyle(color: t.gold),
             ),
             TextSpan(
-              text: '最高記録 ',
+              text: AppLocalizations.of(context)!.trainingBestRecord,
               style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
             ),
             TextSpan(
-              text: '${best.weightKg}kg × ${best.reps}回$date',
+              text: '${best.weightKg}kg × ${best.reps}${AppLocalizations.of(context)!.trainingReps}$date',
               style: TextStyle(color: t.muted),
             ),
           ],

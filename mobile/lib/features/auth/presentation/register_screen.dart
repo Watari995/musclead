@@ -8,12 +8,14 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../application/auth_controller.dart';
+import '../../../l10n/app_localizations.dart';
 
 class RegisterScreen extends HookConsumerWidget {
   const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final name = useTextEditingController();
     final email = useTextEditingController();
     final password = useTextEditingController();
@@ -36,7 +38,7 @@ class RegisterScreen extends HookConsumerWidget {
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = 'アカウント作成に失敗しました';
+        error.value = l.registerFailed;
       } finally {
         if (context.mounted) loading.value = false;
       }
@@ -56,20 +58,20 @@ class RegisterScreen extends HookConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'アカウント作成',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+              Text(
+                l.registerTitle,
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 24),
               AppTextField(
-                label: 'お名前',
+                label: l.registerNameLabel,
                 controller: name,
                 hint: '山田 太郎',
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'メールアドレス',
+                label: l.loginEmailLabel,
                 controller: email,
                 hint: 'you@example.com',
                 keyboardType: TextInputType.emailAddress,
@@ -78,9 +80,9 @@ class RegisterScreen extends HookConsumerWidget {
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'パスワード',
+                label: l.loginPasswordLabel,
                 controller: password,
-                hint: '8文字以上',
+                hint: l.registerPasswordHint,
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 autofillHints: const [AutofillHints.newPassword],
@@ -95,7 +97,7 @@ class RegisterScreen extends HookConsumerWidget {
               ],
               const SizedBox(height: 24),
               AppButton(
-                label: '作成してはじめる',
+                label: l.registerStartBtn,
                 loading: loading.value,
                 onPressed: submit,
               ),

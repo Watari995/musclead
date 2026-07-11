@@ -6,6 +6,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_repository.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 種目の管理（一覧 / 追加 / 削除 / 並び替え）。
 class ExercisesScreen extends ConsumerStatefulWidget {
@@ -26,10 +27,11 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final async = ref.watch(exercisesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('種目'),
+        title: Text(l.trainingExercisesLabel),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: _createDialog),
@@ -46,7 +48,7 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
             }
             final items = _items!;
             if (items.isEmpty) {
-              return const Center(child: Text('種目がありません。右上の + で追加'));
+              return Center(child: Text(l.trainingExercisesEmpty));
             }
             return Column(
               children: [
@@ -61,7 +63,7 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '右の ☰ をドラッグで並び替え',
+                        l.trainingReorderHint,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.tokens.muted,
@@ -90,6 +92,7 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
   }
 
   void _onReorder(int oldIndex, int newIndex) {
+    final l = AppLocalizations.of(context)!;
     setState(() {
       final items = _items!;
       var target = newIndex;
@@ -104,7 +107,7 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
           if (mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('並び替えの保存に失敗しました')));
+            ).showSnackBar(SnackBar(content: Text(l.commonReorderFailed)));
           }
         });
   }
@@ -151,11 +154,12 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
   }
 
   Future<void> _createDialog() async {
+    final l = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('種目を追加'),
+        title: Text(l.trainingAddExerciseTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -164,12 +168,12 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('キャンセル'),
+            child: Text(l.commonCancel),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.of(dialogContext).pop(controller.text.trim()),
-            child: const Text('追加'),
+            child: Text(l.commonAdd),
           ),
         ],
       ),
@@ -186,9 +190,10 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
       }
     } catch (_) {
       if (mounted) {
+        final l2 = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('追加に失敗しました')));
+        ).showSnackBar(SnackBar(content: Text(l2.commonAddFailed)));
       }
     }
   }
@@ -205,9 +210,10 @@ class _ExercisesScreenState extends ConsumerState<ExercisesScreen> {
       }
     } catch (_) {
       if (mounted) {
+        final l = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+        ).showSnackBar(SnackBar(content: Text(l.commonDeleteFailed)));
       }
     }
   }

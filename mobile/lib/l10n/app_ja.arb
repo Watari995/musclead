@@ -1,0 +1,294 @@
+{
+  "@@locale": "ja",
+
+  "commonCancel": "キャンセル",
+  "commonDelete": "削除",
+  "commonSave": "保存",
+  "commonRetry": "再試行",
+  "commonAdd": "追加",
+  "commonCreate": "作成",
+  "commonNoRecords": "まだ記録がありません",
+  "commonLoadFailed": "読み込みに失敗しました",
+  "commonSaveFailed": "保存に失敗しました",
+  "commonDeleteFailed": "削除に失敗しました",
+  "commonAddFailed": "追加に失敗しました",
+  "commonReorderFailed": "並び替えの保存に失敗しました",
+  "commonDeleteOk": "削除する",
+  "commonRecord": "記録する",
+  "commonUpdate": "更新する",
+  "commonGraphHint": "記録が増えるとグラフが表示されます",
+  "commonNameRequired": "名前を入力してください",
+  "commonCaloriesRequired": "カロリーを入力してください",
+
+  "navHome": "ホーム",
+  "navMeals": "食事",
+  "navTraining": "トレーニング",
+  "navWeight": "体重",
+  "navProfile": "マイページ",
+
+  "loginTitle": "ログイン",
+  "loginFailed": "ログインに失敗しました",
+  "loginTagline": "筋トレ・食事・体重を一元管理",
+  "loginEmailLabel": "メールアドレス",
+  "loginPasswordLabel": "パスワード",
+  "loginCreateAccountBtn": "アカウントを作成",
+
+  "registerTitle": "アカウント作成",
+  "registerFailed": "アカウント作成に失敗しました",
+  "registerNameLabel": "お名前",
+  "registerPasswordHint": "8文字以上",
+  "registerStartBtn": "作成してはじめる",
+
+  "profileTitle": "マイページ",
+  "profileAccount": "アカウント",
+  "profileAppearance": "外観",
+  "profileThemeColor": "テーマカラー",
+  "profileCalendar": "カレンダー",
+  "profileGoal": "目標",
+  "profileWeeklyGoal": "週次目標",
+  "profileIntegrations": "連携サービス",
+  "profileOther": "その他",
+  "profileVersion": "バージョン",
+  "profileLogout": "ログアウト",
+  "profileDeleteAccount": "アカウントを削除",
+  "profileDeleteAccountMsg": "アカウントとすべてのデータが削除されます。この操作は取り消せません。",
+  "profileDeleteFailed": "削除に失敗しました",
+  "profileAvatarSuccess": "プロフィール画像を更新しました",
+  "profileAvatarFailed": "画像の更新に失敗しました",
+  "profileHpConnected": "HealthPlanet を連携しました",
+  "profileHpFailed": "HealthPlanet 連携に失敗しました",
+  "profileHpStartFailed": "HealthPlanet 連携の開始に失敗しました",
+  "profileCalendarColors": "カレンダーの色",
+  "profileThemeSystem": "システム",
+  "profileThemeLight": "ライト",
+  "profileThemeDark": "ダーク",
+  "profileLanguage": "言語",
+  "profileLanguageJa": "日本語",
+  "profileLanguageEn": "English",
+  "profileTanitaHp": "Tanita HealthPlanet",
+
+  "weightTitle": "体重",
+  "weightNoRecords": "まだ記録がありません",
+  "weightRecentRecords": "最近の記録",
+  "weightBodyFat": "体脂肪 {pct}%",
+  "@weightBodyFat": {
+    "placeholders": {
+      "pct": { "type": "Object" }
+    }
+  },
+  "weightGraphHint": "記録が増えるとグラフが表示されます",
+  "weightRecordTitle": "体重を記録",
+  "weightKgLabel": "体重 (kg)",
+  "weightBodyFatLabel": "体脂肪率 (%) ・任意",
+  "weightMuscleLabel": "骨格筋量 (kg) ・任意",
+  "weightInputRequired": "体重を入力してください",
+  "weightRecordFailed": "記録に失敗しました",
+
+  "trainingTitle": "トレーニング",
+  "trainingExercisesLabel": "種目",
+  "trainingRecordsLabel": "記録",
+  "trainingRoutinesLabel": "ルーティン",
+  "trainingHistory": "履歴",
+  "trainingNoRecords": "まだ記録がありません",
+  "trainingExercisesEmpty": "種目がありません。右上の + で追加",
+  "trainingReorderHint": "右の ☰ をドラッグで並び替え",
+  "trainingAddExerciseTitle": "種目を追加",
+  "trainingExerciseCount": "{count} 種目",
+  "@trainingExerciseCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "trainingDuration": "{mins}分",
+  "@trainingDuration": {
+    "placeholders": {
+      "mins": { "type": "int" }
+    }
+  },
+  "trainingRoutineName": "ルーティン名",
+  "trainingRoutineHint": "胸の日",
+  "trainingNewRoutine": "新しいルーティン",
+  "trainingRoutinesEmpty": "ルーティンがありません。右上の + で作成",
+  "trainingSelectExercisesHint": "種目を選択（選んだ順に並びます）",
+  "trainingNoExercisesYet": "先に「種目」を追加してください",
+  "trainingExerciseLoadFailed": "種目の読み込みに失敗しました",
+  "trainingExerciseRequired": "種目を1つ以上選択してください",
+  "trainingRoutineTapHint": "{count} 種目 ・ タップで記録開始",
+  "@trainingRoutineTapHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "trainingDetailTitle": "{date} の記録",
+  "@trainingDetailTitle": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "trainingMinutes": "分",
+  "trainingHoursLabel": "時間",
+  "trainingExerciseDefault": "種目",
+  "trainingMemoPrefix": "メモ: {text}",
+  "@trainingMemoPrefix": {
+    "placeholders": {
+      "text": { "type": "String" }
+    }
+  },
+  "trainingDeleteConfirmTitle": "記録を削除",
+  "trainingDeleteConfirmMsg": "このトレーニング記録を削除します。よろしいですか？",
+  "trainingReps": "回",
+  "trainingRecordTitle": "トレーニング記録",
+  "trainingEditTitle": "記録を編集",
+  "trainingSaveBtn": "保存",
+  "trainingMemoAll": "メモ（全体）",
+  "trainingMemoAllHint": "今日のコンディション など",
+  "trainingEndTimeEmpty": "終了時刻を入力",
+  "trainingEndTimeSet": "終了 {time}",
+  "@trainingEndTimeSet": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "trainingExerciseMemo": "メモ",
+  "trainingExerciseMemoHint": "フォーム・感覚 など",
+  "trainingAddSet": "セット追加",
+  "trainingBestRecord": "最高記録 ",
+  "trainingPrevSession": "前回 ",
+  "trainingExerciseRequired2": "種目を1つ以上追加してください",
+  "trainingSelectExercise": "種目を選択",
+  "trainingNewExerciseName": "新規種目名",
+  "trainingNoExercisesCreate": "種目がありません。上で作成してください",
+
+  "exerciseRecordsTitle": "記録",
+  "exerciseRecordsNoExercises": "種目が登録されていません",
+  "exerciseRecordsNoData": "この期間のデータがありません",
+  "exerciseRecordsWeightChart": "重量推移 (kg)",
+  "exerciseRecordsRepsChart": "レップス推移",
+  "exerciseRecordsPeriod1week": "1週間",
+  "exerciseRecordsPeriod1month": "1ヶ月",
+  "exerciseRecordsPeriod3months": "3ヶ月",
+  "exerciseRecordsPeriodHalfYear": "半年",
+  "exerciseRecordsPeriod1year": "1年",
+
+  "notificationTitle": "通知",
+  "notificationEmpty": "通知はありません",
+  "notificationWeeklyGoalAchieved": "今週の目標を達成しました！",
+  "notificationWeeklyGoalCheck": "今週の目標を確認してください",
+  "notificationDetailTitle": "通知詳細",
+  "notificationGoalAchievedDetail": "今週の目標を達成しました！ 🎉",
+  "notificationGoalResult": "今週の目標結果",
+  "notificationTraining": "トレーニング",
+  "notificationCalorie": "平均カロリー",
+  "notificationWeightChange": "体重変化",
+
+  "weeklyGoalTitle": "週次目標",
+  "weeklyGoalDescription": "毎週日曜に達成チェックの通知が届きます。\n設定しない項目は空欄のままにしてください。",
+  "weeklyGoalTrainingCount": "トレーニング回数",
+  "weeklyGoalTrainingUnit": "回 / 週",
+  "weeklyGoalCalorieGoal": "平均カロリー目標",
+  "weeklyGoalCalorieUnit": "kcal 以内 / 日",
+  "weeklyGoalWeightChange": "体重変化目標",
+  "weeklyGoalWeightUnit": "kg（例: -0.5 で減量）",
+  "weeklyGoalSaving": "保存中…",
+  "weeklyGoalSave": "保存",
+  "weeklyGoalSaved": "保存しました",
+  "weeklyGoalNotSet": "未設定",
+
+  "mealTitle": "食事",
+  "mealToday": "今日の記録",
+  "mealEmpty": "今日の記録はまだありません",
+  "mealTotal": "合計",
+  "mealProtein": "タンパク質",
+  "mealFat": "脂質",
+  "mealCarb": "炭水化物",
+  "mealTemplateFromRecord": "テンプレートから記録",
+  "mealBreakfast": "朝食",
+  "mealLunch": "昼食",
+  "mealDinner": "夕食",
+  "mealSnack": "間食",
+  "mealSaveFailed": "保存に失敗しました",
+  "mealDeleteFailed": "削除に失敗しました",
+  "mealEditTitle": "食事を編集",
+  "mealRecordTitle": "食事を記録",
+  "mealCaloriesLabel": "カロリー (kcal)",
+  "mealMemoOptional": "メモ ・任意",
+  "mealMemoOptional2": "メモ · 任意",
+  "mealUpdateBtn": "更新する",
+  "mealRecordBtn": "記録する",
+  "mealDeleteRecord": "この記録を削除",
+  "mealServingCount": "サービング数",
+  "mealDeleteConfirmTitle": "削除の確認",
+  "mealDeleteConfirmMsg": "この記録を削除しますか？",
+  "mealSaveBtn": "保存する",
+
+  "mealTemplateTitle": "食事テンプレート",
+  "mealTemplateNew": "+ 新規",
+  "mealTemplateEmpty": "テンプレートはまだありません",
+  "mealTemplateDeleteLabel": "削除",
+  "mealTemplateDeleteConfirm": "「{name}」を削除しますか?",
+  "@mealTemplateDeleteConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "mealTemplateDeleteFailed": "削除に失敗しました",
+  "mealTemplateSaveFailed": "保存に失敗しました",
+  "mealTemplateCreateTitle": "テンプレートを作成",
+  "mealTemplateNameLabel": "テンプレート名",
+  "mealTemplateType": "種類",
+  "mealTemplateSaving": "保存中…",
+  "mealTemplateSaveBtn": "保存する",
+
+  "foodSearchByName": "名前で検索",
+  "foodSearchByBarcode": "バーコード",
+  "foodNameLabel": "食品名",
+  "foodNameHint": "おにぎり、プロテインバー…",
+  "foodBarcodeLabel": "バーコード（8〜13桁）",
+  "foodCameraScan": "カメラでスキャン",
+  "foodSearch": "検索",
+  "foodNotFound": "見つかりませんでした",
+  "foodRegisterLink": "登録する →",
+  "foodScanTitle": "バーコードをスキャン",
+  "foodScanHint": "バーコードを枠内に合わせてください",
+  "foodRegisterTitle": "食品を登録",
+  "foodBarcodeLabel2": "バーコード",
+  "foodNameRequired": "食品名を入力してください",
+  "foodNameField": "食品名 *",
+  "foodCaloriesField": "カロリー (kcal) *",
+  "foodRegisterBtn": "登録する",
+  "foodRegisterFailed": "登録に失敗しました",
+
+  "calendarTitle": "カレンダー",
+  "calendarYearMonth": "{year}年{month}月",
+  "@calendarYearMonth": {
+    "placeholders": {
+      "year": { "type": "int" },
+      "month": { "type": "int" }
+    }
+  },
+  "calendarDayLabel": "{month}月{day}日",
+  "@calendarDayLabel": {
+    "placeholders": {
+      "month": { "type": "int" },
+      "day": { "type": "int" }
+    }
+  },
+  "calendarError": "エラー: {error}",
+  "@calendarError": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "calendarNoRecords": "この日の記録はありません",
+  "calendarTraining": "トレーニング",
+  "calendarMeal": "食事",
+  "calendarWeight": "体重",
+  "calendarTotal": "合計",
+  "calendarSun": "日",
+  "calendarMon": "月",
+  "calendarTue": "火",
+  "calendarWed": "水",
+  "calendarThu": "木",
+  "calendarFri": "金",
+  "calendarSat": "土"
+}

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { Providers } from "./providers";
 import { AuthBootstrap } from "@/shared/auth/AuthBootstrap";
@@ -27,18 +29,22 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="ja"
+      lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col overflow-x-hidden">
+        <NextIntlClientProvider locale={locale} messages={messages}>
         <Providers>
           <AuthBootstrap />
           <ThemePreferenceSync />
@@ -53,6 +59,7 @@ export default function RootLayout({
             </div>
           </footer>
         </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

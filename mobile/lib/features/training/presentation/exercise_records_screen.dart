@@ -7,15 +7,16 @@ import '../../../core/util/formatters.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_repository.dart';
 
-const _periods = [
-  ('1week', '1週間'),
-  ('1month', '1ヶ月'),
-  ('3months', '3ヶ月'),
-  ('halfyear', '半年'),
-  ('1year', '1年'),
+List<(String, String)> _periods(AppLocalizations l) => [
+  ('1week', l.exerciseRecordsPeriod1week),
+  ('1month', l.exerciseRecordsPeriod1month),
+  ('3months', l.exerciseRecordsPeriod3months),
+  ('halfyear', l.exerciseRecordsPeriodHalfYear),
+  ('1year', l.exerciseRecordsPeriod1year),
 ];
 
 class ExerciseRecordsScreen extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('記録'),
+        title: Text(AppLocalizations.of(context)!.exerciseRecordsTitle),
         backgroundColor: Colors.transparent,
       ),
       body: SafeArea(
@@ -45,7 +46,7 @@ class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
           onRetry: () => ref.invalidate(exercisesProvider),
           data: (exercises) {
             if (exercises.isEmpty) {
-              return const Center(child: Text('種目が登録されていません'));
+              return Center(child: Text(AppLocalizations.of(context)!.exerciseRecordsNoExercises));
             }
 
             // 初回: 最初の種目を選択
@@ -61,6 +62,7 @@ class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
                 ),
                 _PeriodSelector(
                   selected: _period,
+                  periods: _periods(AppLocalizations.of(context)!),
                   onChanged: (p) => setState(() => _period = p),
                 ),
                 Expanded(
@@ -127,9 +129,10 @@ class _ExerciseSelector extends StatelessWidget {
 }
 
 class _PeriodSelector extends StatelessWidget {
-  const _PeriodSelector({required this.selected, required this.onChanged});
+  const _PeriodSelector({required this.selected, required this.periods, required this.onChanged});
 
   final String selected;
+  final List<(String, String)> periods;
   final ValueChanged<String> onChanged;
 
   @override
@@ -138,7 +141,7 @@ class _PeriodSelector extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
-        children: _periods.map((pair) {
+        children: periods.map((pair) {
           final (value, label) = pair;
           final isSelected = value == selected;
           return Expanded(
@@ -189,19 +192,20 @@ class _TimeseriesBody extends ConsumerWidget {
         exerciseBestSetTimeseriesProvider((exerciseId, period)),
       ),
       data: (res) {
+        final l = AppLocalizations.of(context)!;
         final pts = res.dataPoints;
         if (pts.isEmpty) {
-          return const Center(child: Text('この期間のデータがありません'));
+          return Center(child: Text(l.exerciseRecordsNoData));
         }
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SectionTitle('重量推移 (kg)'),
+              SectionTitle(l.exerciseRecordsWeightChart),
               _WeightChart(dataPoints: pts),
               const SizedBox(height: 16),
-              const SectionTitle('レップス推移'),
+              SectionTitle(l.exerciseRecordsRepsChart),
               _RepsChart(dataPoints: pts),
             ],
           ),
@@ -230,7 +234,7 @@ class _WeightChart extends StatelessWidget {
         child: spots.length < 2
             ? Center(
                 child: Text(
-                  '記録が増えるとグラフが表示されます',
+                  AppLocalizations.of(context)!.commonGraphHint,
                   style: TextStyle(color: t.muted, fontSize: 12),
                 ),
               )
