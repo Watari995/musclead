@@ -153,6 +153,7 @@ function TrainingCard({
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const t = useTranslations("trainings");
   const tc = useTranslations("common");
   const totalSets = (training.exercises ?? []).reduce(
     (n, ex) => n + (ex.sets?.length ?? 0),

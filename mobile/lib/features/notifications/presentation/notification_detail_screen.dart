@@ -59,11 +59,11 @@ class _NotificationBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final m = notification.metadata;
+    final l = AppLocalizations.of(context)!;
 
     return ListView(
       padding: const EdgeInsets.all(18),
       children: [
-        final l = AppLocalizations.of(context)!;
         if (notification.notificationType == 'weekly_goal') ...[
           _WeeklyGoalDetail(metadata: m),
         ] else ...[
