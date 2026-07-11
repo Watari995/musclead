@@ -86,10 +86,17 @@ class _WeightRecordSheet extends HookConsumerWidget {
             children: [
               Text(
                 l.weightRecordTitle,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 18),
-              NumberStepper(label: l.weightKgLabel, controller: weight, hint: '72.5'),
+              NumberStepper(
+                label: l.weightKgLabel,
+                controller: weight,
+                hint: '72.5',
+              ),
               const SizedBox(height: 14),
               NumberStepper(
                 label: l.weightBodyFatLabel,

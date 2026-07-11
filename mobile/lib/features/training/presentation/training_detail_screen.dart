@@ -110,7 +110,10 @@ class TrainingDetailScreen extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(dl.commonDeleteOk, style: TextStyle(color: context.tokens.accent)),
+              child: Text(
+                dl.commonDeleteOk,
+                style: TextStyle(color: context.tokens.accent),
+              ),
             ),
           ],
         );
@@ -185,7 +188,10 @@ class _ExerciseCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const Spacer(),
-                  Text(l.trainingRepsUnit(s.reps), style: TextStyle(color: t.muted)),
+                  Text(
+                    l.trainingRepsUnit(s.reps),
+                    style: TextStyle(color: t.muted),
+                  ),
                 ],
               ),
             ),

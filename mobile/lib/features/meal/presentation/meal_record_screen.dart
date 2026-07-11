@@ -30,7 +30,9 @@ class MealRecordScreen extends HookConsumerWidget {
 
     final l = AppLocalizations.of(context)!;
     final mealTypes = [l.mealBreakfast, l.mealLunch, l.mealDinner, l.mealSnack];
-    final mealType = useState(edit?.mealType ?? tpl?.mealType ?? l.mealBreakfast);
+    final mealType = useState(
+      edit?.mealType ?? tpl?.mealType ?? l.mealBreakfast,
+    );
     final eatenAt = useState(edit?.eatenAt ?? DateTime.now());
     final caloriesCtrl = useTextEditingController(
       text: edit != null

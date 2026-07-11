@@ -59,9 +59,13 @@ class _NotificationTile extends ConsumerWidget {
     final t = context.tokens;
     final achieved = notification.metadata['achieved'] as bool? ?? false;
     final label = notification.notificationType == 'weekly_goal'
-        ? (achieved ? l.notificationWeeklyGoalAchieved : l.notificationWeeklyGoalCheck)
+        ? (achieved
+              ? l.notificationWeeklyGoalAchieved
+              : l.notificationWeeklyGoalCheck)
         : l.notificationTitle;
-    final dateStr = DateFormat('M/d HH:mm').format(notification.createdAt.toLocal());
+    final dateStr = DateFormat(
+      'M/d HH:mm',
+    ).format(notification.createdAt.toLocal());
 
     return GestureDetector(
       onTap: () => context.push('/notifications/${notification.id}'),
@@ -92,11 +96,16 @@ class _NotificationTile extends ConsumerWidget {
                       label,
                       style: TextStyle(
                         fontSize: 14,
-                        fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
+                        fontWeight: notification.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(dateStr, style: TextStyle(fontSize: 12, color: t.muted)),
+                    Text(
+                      dateStr,
+                      style: TextStyle(fontSize: 12, color: t.muted),
+                    ),
                   ],
                 ),
               ),
@@ -105,7 +114,10 @@ class _NotificationTile extends ConsumerWidget {
                   margin: const EdgeInsets.only(top: 4),
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
                 ),
             ],
           ),

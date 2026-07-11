@@ -196,7 +196,15 @@ class _CalendarGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
-    final weekdays = [l.calendarSun, l.calendarMon, l.calendarTue, l.calendarWed, l.calendarThu, l.calendarFri, l.calendarSat];
+    final weekdays = [
+      l.calendarSun,
+      l.calendarMon,
+      l.calendarTue,
+      l.calendarWed,
+      l.calendarThu,
+      l.calendarFri,
+      l.calendarSat,
+    ];
     final t = context.tokens;
     final dayMap = {for (final d in days) d.date: d};
     final firstWeekday = DateTime(year, month, 1).weekday % 7; // Sun=0
@@ -379,7 +387,10 @@ class _DailySummarySection extends ConsumerWidget {
                     children: data.trainings
                         .map(
                           (tr) => _SummaryRow(
-                            left: l.calendarExerciseSets(tr.exerciseCount, tr.setCount),
+                            left: l.calendarExerciseSets(
+                              tr.exerciseCount,
+                              tr.setCount,
+                            ),
                             right: DateFormat(
                               'HH:mm',
                             ).format(tr.startedAt.toLocal()),

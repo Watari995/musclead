@@ -111,7 +111,10 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.mealTotal, style: TextStyle(fontSize: 12, color: t.muted)),
+          Text(
+            AppLocalizations.of(context)!.mealTotal,
+            style: TextStyle(fontSize: 12, color: t.muted),
+          ),
           const SizedBox(height: 2),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -129,11 +132,23 @@ class _SummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          _MacroBar(label: AppLocalizations.of(context)!.mealProtein, grams: protein, color: t.macroP),
+          _MacroBar(
+            label: AppLocalizations.of(context)!.mealProtein,
+            grams: protein,
+            color: t.macroP,
+          ),
           const SizedBox(height: 10),
-          _MacroBar(label: AppLocalizations.of(context)!.mealFat, grams: fat, color: t.macroF),
+          _MacroBar(
+            label: AppLocalizations.of(context)!.mealFat,
+            grams: fat,
+            color: t.macroF,
+          ),
           const SizedBox(height: 10),
-          _MacroBar(label: AppLocalizations.of(context)!.mealCarb, grams: carb, color: t.macroC),
+          _MacroBar(
+            label: AppLocalizations.of(context)!.mealCarb,
+            grams: carb,
+            color: t.macroC,
+          ),
         ],
       ),
     );

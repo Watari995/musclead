@@ -67,7 +67,10 @@ class _NotificationBody extends StatelessWidget {
         if (notification.notificationType == 'weekly_goal') ...[
           _WeeklyGoalDetail(metadata: m),
         ] else ...[
-          Text(l.notificationTitle, style: TextStyle(fontSize: 16, color: t.subtle)),
+          Text(
+            l.notificationTitle,
+            style: TextStyle(fontSize: 16, color: t.subtle),
+          ),
         ],
         const SizedBox(height: 16),
         Text(
@@ -98,51 +101,65 @@ class _WeeklyGoalDetail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Builder(builder: (context) {
-          final l = AppLocalizations.of(context)!;
-          return Text(
-            achieved ? l.notificationGoalAchievedDetail : l.notificationGoalResult,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: t.muted,
-            ),
-          );
-        }),
+        Builder(
+          builder: (context) {
+            final l = AppLocalizations.of(context)!;
+            return Text(
+              achieved
+                  ? l.notificationGoalAchievedDetail
+                  : l.notificationGoalResult,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: t.muted,
+              ),
+            );
+          },
+        ),
         const SizedBox(height: 16),
         if (trainingGoal != null)
-          Builder(builder: (context) {
-            final l = AppLocalizations.of(context)!;
-            return _GoalRow(
-              label: l.notificationTraining,
-              value: AppLocalizations.of(context)!.notificationTrainingActualGoal(
-                (trainingActual ?? 0).toInt(), trainingGoal.toInt()),
-              achieved: (trainingActual?.toInt() ?? 0) >= trainingGoal.toInt(),
-            );
-          }),
+          Builder(
+            builder: (context) {
+              final l = AppLocalizations.of(context)!;
+              return _GoalRow(
+                label: l.notificationTraining,
+                value: AppLocalizations.of(context)!
+                    .notificationTrainingActualGoal(
+                      (trainingActual ?? 0).toInt(),
+                      trainingGoal.toInt(),
+                    ),
+                achieved:
+                    (trainingActual?.toInt() ?? 0) >= trainingGoal.toInt(),
+              );
+            },
+          ),
         if (calorieGoal != null)
-          Builder(builder: (context) {
-            final l = AppLocalizations.of(context)!;
-            return _GoalRow(
-              label: l.notificationCalorie,
-              value:
-                  '${calorieActual != null ? calorieActual.round() : '—'} / $calorieGoal kcal',
-              achieved: calorieActual != null && calorieActual <= calorieGoal,
-            );
-          }),
+          Builder(
+            builder: (context) {
+              final l = AppLocalizations.of(context)!;
+              return _GoalRow(
+                label: l.notificationCalorie,
+                value:
+                    '${calorieActual != null ? calorieActual.round() : '—'} / $calorieGoal kcal',
+                achieved: calorieActual != null && calorieActual <= calorieGoal,
+              );
+            },
+          ),
         if (weightGoal != null)
-          Builder(builder: (context) {
-            final l = AppLocalizations.of(context)!;
-            return _GoalRow(
-              label: l.notificationWeightChange,
-              value:
-                  '${weightActual != null ? (weightActual > 0 ? '+' : '') + weightActual.toStringAsFixed(1) : '—'} kg',
-              achieved:
-                weightActual != null &&
-                weightGoal.isNegative == weightActual.isNegative &&
-                weightActual.abs() >= weightGoal.abs(),
-            );
-          }),
+          Builder(
+            builder: (context) {
+              final l = AppLocalizations.of(context)!;
+              return _GoalRow(
+                label: l.notificationWeightChange,
+                value:
+                    '${weightActual != null ? (weightActual > 0 ? '+' : '') + weightActual.toStringAsFixed(1) : '—'} kg',
+                achieved:
+                    weightActual != null &&
+                    weightGoal.isNegative == weightActual.isNegative &&
+                    weightActual.abs() >= weightGoal.abs(),
+              );
+            },
+          ),
       ],
     );
   }

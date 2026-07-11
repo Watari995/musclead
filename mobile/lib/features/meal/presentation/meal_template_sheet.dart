@@ -45,7 +45,10 @@ class _MealTemplateSheet extends ConsumerWidget {
               children: [
                 Text(
                   l.mealTemplateTitle,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 TextButton(
                   onPressed: () => showCreateTemplateSheet(context, ref),
@@ -136,7 +139,10 @@ class _TemplateRow extends ConsumerWidget {
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(dialogContext, true),
-                        child: Text(dl.commonDelete, style: TextStyle(color: t.accent)),
+                        child: Text(
+                          dl.commonDelete,
+                          style: TextStyle(color: t.accent),
+                        ),
                       ),
                     ],
                   );
@@ -150,9 +156,9 @@ class _TemplateRow extends ConsumerWidget {
                   ref.invalidate(mealTemplatesProvider);
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l.mealTemplateDeleteFailed)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l.mealTemplateDeleteFailed)),
+                    );
                   }
                 }
               }
@@ -244,7 +250,10 @@ class _CreateTemplateSheet extends HookConsumerWidget {
             children: [
               Text(
                 l.mealTemplateCreateTitle,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 16),
               AppTextField(
@@ -314,7 +323,9 @@ class _CreateTemplateSheet extends HookConsumerWidget {
               ],
               const SizedBox(height: 20),
               AppButton(
-                label: loading.value ? l.mealTemplateSaving : l.mealTemplateSaveBtn,
+                label: loading.value
+                    ? l.mealTemplateSaving
+                    : l.mealTemplateSaveBtn,
                 loading: loading.value,
                 onPressed: submit,
               ),

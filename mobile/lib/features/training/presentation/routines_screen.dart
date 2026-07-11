@@ -113,7 +113,10 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
                 builder: (_) => TrainingRecordScreen(
                   initialExercises: [
                     for (final e in r.routineExercises)
-                      (exerciseId: e.exerciseId, name: e.exerciseName ?? l.trainingExerciseDefault),
+                      (
+                        exerciseId: e.exerciseId,
+                        name: e.exerciseName ?? l.trainingExerciseDefault,
+                      ),
                   ],
                 ),
               ),

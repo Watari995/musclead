@@ -29,9 +29,7 @@ class ProfileScreen extends ConsumerWidget {
       final connected = uri.queryParameters['connected'] == 'true';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            connected ? l.profileHpConnected : l.profileHpFailed,
-          ),
+          content: Text(connected ? l.profileHpConnected : l.profileHpFailed),
         ),
       );
       if (connected) ref.invalidate(meProvider);
@@ -109,7 +107,11 @@ class _ProfileBody extends ConsumerWidget {
           children: [
             AppListRow(
               onTap: () => _showThemeSheet(context, ref, mode),
-              child: _row(context, l.profileAppearance, value: _modeLabel(l, mode)),
+              child: _row(
+                context,
+                l.profileAppearance,
+                value: _modeLabel(l, mode),
+              ),
             ),
             AppListRow(
               onTap: () => _showAccentSheet(context, ref),
@@ -135,10 +137,13 @@ class _ProfileBody extends ConsumerWidget {
             ),
             AppListRow(
               onTap: () => _showLanguageSheet(context, ref, locale),
-              child: _row(context, l.profileLanguage,
-                  value: locale.languageCode == 'ja'
-                      ? l.profileLanguageJa
-                      : l.profileLanguageEn),
+              child: _row(
+                context,
+                l.profileLanguage,
+                value: locale.languageCode == 'ja'
+                    ? l.profileLanguageJa
+                    : l.profileLanguageEn,
+              ),
             ),
           ],
         ),
@@ -168,7 +173,12 @@ class _ProfileBody extends ConsumerWidget {
         AppListBox(
           children: [
             AppListRow(
-              child: _row(context, l.profileVersion, value: versionText, chevron: false),
+              child: _row(
+                context,
+                l.profileVersion,
+                value: versionText,
+                chevron: false,
+              ),
             ),
           ],
         ),
@@ -223,9 +233,9 @@ class _ProfileBody extends ConsumerWidget {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.profileHpStartFailed)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.profileHpStartFailed)));
       }
     }
   }
@@ -274,7 +284,10 @@ class _ProfileBody extends ConsumerWidget {
             children: [
               Text(
                 l.profileThemeColor,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 18),
               Wrap(
@@ -325,7 +338,9 @@ class _ProfileBody extends ConsumerWidget {
             for (final loc in const [Locale('ja'), Locale('en')])
               ListTile(
                 title: Text(
-                  loc.languageCode == 'ja' ? l.profileLanguageJa : l.profileLanguageEn,
+                  loc.languageCode == 'ja'
+                      ? l.profileLanguageJa
+                      : l.profileLanguageEn,
                 ),
                 trailing: loc.languageCode == current.languageCode
                     ? Icon(Icons.check, color: sheetContext.tokens.accent)
@@ -359,7 +374,10 @@ class _ProfileBody extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l.commonDeleteOk, style: TextStyle(color: context.tokens.accent)),
+            child: Text(
+              l.commonDeleteOk,
+              style: TextStyle(color: context.tokens.accent),
+            ),
           ),
         ],
       ),

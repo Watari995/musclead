@@ -104,12 +104,19 @@ class _ExerciseSelector extends StatelessWidget {
           child: DropdownButton<String>(
             value: selectedId,
             isExpanded: true,
-            onChanged: (v) { if (v != null) onChanged(v); },
+            onChanged: (v) {
+              if (v != null) onChanged(v);
+            },
             items: exercises
-                .map((ex) => DropdownMenuItem(
-                      value: ex.id,
-                      child: Text(ex.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ))
+                .map(
+                  (ex) => DropdownMenuItem(
+                    value: ex.id,
+                    child: Text(
+                      ex.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -153,7 +160,9 @@ class _PeriodSelector extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w700
+                        : FontWeight.normal,
                     color: isSelected ? Colors.white : t.muted,
                   ),
                 ),
@@ -175,11 +184,15 @@ class _TimeseriesBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context)!;
-    final async = ref.watch(exerciseBestSetTimeseriesProvider((exerciseId, period)));
+    final async = ref.watch(
+      exerciseBestSetTimeseriesProvider((exerciseId, period)),
+    );
 
     return AsyncValueView<BestSetTimeseriesResponseDto>(
       value: async,
-      onRetry: () => ref.invalidate(exerciseBestSetTimeseriesProvider((exerciseId, period))),
+      onRetry: () => ref.invalidate(
+        exerciseBestSetTimeseriesProvider((exerciseId, period)),
+      ),
       data: (res) {
         final pts = res.dataPoints;
         if (pts.isEmpty) {
@@ -233,10 +246,15 @@ class _WeightChart extends StatelessWidget {
                   lineTouchData: LineTouchData(
                     touchTooltipData: LineTouchTooltipData(
                       getTooltipItems: (spots) => spots
-                          .map((s) => LineTooltipItem(
-                                '${s.y.toStringAsFixed(1)} kg\n${mdLabel(dataPoints[s.x.toInt()].performedAt)}',
-                                const TextStyle(color: Colors.white, fontSize: 12),
-                              ))
+                          .map(
+                            (s) => LineTooltipItem(
+                              '${s.y.toStringAsFixed(1)} kg\n${mdLabel(dataPoints[s.x.toInt()].performedAt)}',
+                              const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -245,7 +263,10 @@ class _WeightChart extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
-                        getTitlesWidget: (v, _) => Text(v.toStringAsFixed(0), style: TextStyle(fontSize: 10, color: t.muted)),
+                        getTitlesWidget: (v, _) => Text(
+                          v.toStringAsFixed(0),
+                          style: TextStyle(fontSize: 10, color: t.muted),
+                        ),
                       ),
                     ),
                     bottomTitles: AxisTitles(
@@ -254,13 +275,21 @@ class _WeightChart extends StatelessWidget {
                         interval: (dataPoints.length / 4).ceilToDouble(),
                         getTitlesWidget: (v, _) {
                           final i = v.toInt();
-                          if (i < 0 || i >= dataPoints.length) return const SizedBox.shrink();
-                          return Text(mdLabel(dataPoints[i].performedAt), style: TextStyle(fontSize: 10, color: t.muted));
+                          if (i < 0 || i >= dataPoints.length)
+                            return const SizedBox.shrink();
+                          return Text(
+                            mdLabel(dataPoints[i].performedAt),
+                            style: TextStyle(fontSize: 10, color: t.muted),
+                          );
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   lineBarsData: [
                     LineChartBarData(
@@ -271,9 +300,16 @@ class _WeightChart extends StatelessWidget {
                       dotData: FlDotData(
                         show: dataPoints.length <= 12,
                         getDotPainter: (spot, xPercentage, bar, index) =>
-                            FlDotCirclePainter(radius: 3, color: t.accent, strokeWidth: 0),
+                            FlDotCirclePainter(
+                              radius: 3,
+                              color: t.accent,
+                              strokeWidth: 0,
+                            ),
                       ),
-                      belowBarData: BarAreaData(show: true, color: t.accent.withValues(alpha: 0.10)),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: t.accent.withValues(alpha: 0.10),
+                      ),
                     ),
                   ],
                 ),
@@ -300,7 +336,9 @@ class _RepsChart extends StatelessWidget {
               toY: dataPoints[i].reps.toDouble(),
               color: t.accent,
               width: dataPoints.length > 20 ? 4 : 12,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(3),
+              ),
             ),
           ],
         ),
@@ -315,10 +353,11 @@ class _RepsChart extends StatelessWidget {
             borderData: FlBorderData(show: false),
             barTouchData: BarTouchData(
               touchTooltipData: BarTouchTooltipData(
-                getTooltipItem: (group, groupIndex, rod, rodIndex) => BarTooltipItem(
-                  '${rod.toY.toInt()} reps\n${mdLabel(dataPoints[group.x].performedAt)}',
-                  const TextStyle(color: Colors.white, fontSize: 12),
-                ),
+                getTooltipItem: (group, groupIndex, rod, rodIndex) =>
+                    BarTooltipItem(
+                      '${rod.toY.toInt()} reps\n${mdLabel(dataPoints[group.x].performedAt)}',
+                      const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
               ),
             ),
             titlesData: FlTitlesData(
@@ -326,7 +365,10 @@ class _RepsChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 32,
-                  getTitlesWidget: (v, _) => Text(v.toInt().toString(), style: TextStyle(fontSize: 10, color: t.muted)),
+                  getTitlesWidget: (v, _) => Text(
+                    v.toInt().toString(),
+                    style: TextStyle(fontSize: 10, color: t.muted),
+                  ),
                 ),
               ),
               bottomTitles: AxisTitles(
@@ -335,13 +377,21 @@ class _RepsChart extends StatelessWidget {
                   interval: (dataPoints.length / 4).ceilToDouble(),
                   getTitlesWidget: (v, _) {
                     final i = v.toInt();
-                    if (i < 0 || i >= dataPoints.length) return const SizedBox.shrink();
-                    return Text(mdLabel(dataPoints[i].performedAt), style: TextStyle(fontSize: 10, color: t.muted));
+                    if (i < 0 || i >= dataPoints.length)
+                      return const SizedBox.shrink();
+                    return Text(
+                      mdLabel(dataPoints[i].performedAt),
+                      style: TextStyle(fontSize: 10, color: t.muted),
+                    );
                   },
                 ),
               ),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
             ),
             barGroups: groups,
           ),

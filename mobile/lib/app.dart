@@ -75,10 +75,7 @@ class _MuscleadAppState extends ConsumerState<MuscleadApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('ja'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('ja'), Locale('en')],
       routerConfig: router,
     );
   }

@@ -94,11 +94,16 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final exList = ref.read(exercisesProvider).asData?.value ?? [];
     final names = {for (final e in exList) e.id: e.name};
     for (final ex in training.exercises) {
-      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? ex.exerciseId);
+      final draft = _ExerciseDraft(
+        ex.exerciseId,
+        names[ex.exerciseId] ?? ex.exerciseId,
+      );
       draft.sets.first.dispose();
       draft.sets.clear();
       for (final s in ex.sets) {
-        draft.sets.add(_SetDraft(weight: s.weightKg.toString(), reps: s.reps.toString()));
+        draft.sets.add(
+          _SetDraft(weight: s.weightKg.toString(), reps: s.reps.toString()),
+        );
       }
       if (draft.sets.isEmpty) draft.sets.add(_SetDraft());
       draft.memo.text = ex.memo ?? '';
@@ -108,7 +113,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
 
   @override
   void dispose() {
-    for (final e in _exercises) { e.dispose(); }
+    for (final e in _exercises) {
+      e.dispose();
+    }
     _memo.dispose();
     super.dispose();
   }
@@ -127,7 +134,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final ids = _exercises.map((e) => e.exerciseId).toList();
     if (ids.isEmpty) return;
     try {
-      final map = await ref.read(trainingRepositoryProvider).lastSessionSets(ids);
+      final map = await ref
+          .read(trainingRepositoryProvider)
+          .lastSessionSets(ids);
       if (!mounted) return;
       setState(() => _lastSessionSets = map);
     } catch (_) {}
@@ -167,20 +176,27 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         final w = Decimal.tryParse(s.weight.text.trim());
         final r = int.tryParse(s.reps.text.trim());
         if (w == null || r == null) continue;
-        sets.add(RecordTrainingSetRequest(setNumber: n++, weightKg: w, reps: r));
+        sets.add(
+          RecordTrainingSetRequest(setNumber: n++, weightKg: w, reps: r),
+        );
       }
-      reqExercises.add(RecordTrainingExerciseRequest(
-        exerciseId: e.exerciseId,
-        displayOrder: i,
-        memo: e.memo.text.trim().isEmpty ? null : e.memo.text.trim(),
-        sets: sets,
-      ));
+      reqExercises.add(
+        RecordTrainingExerciseRequest(
+          exerciseId: e.exerciseId,
+          displayOrder: i,
+          memo: e.memo.text.trim().isEmpty ? null : e.memo.text.trim(),
+          sets: sets,
+        ),
+      );
     }
     if (reqExercises.isEmpty) {
       setState(() => _error = l.trainingExerciseRequired2);
       return;
     }
-    setState(() { _saving = true; _error = null; });
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
     try {
       final req = RecordTrainingRequest(
         startedAt: _startedAt,
@@ -189,14 +205,19 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         exercises: reqExercises,
       );
       if (_isEditing) {
-        await ref.read(trainingRepositoryProvider).updateTraining(widget.editingTraining!.id, req);
+        await ref
+            .read(trainingRepositoryProvider)
+            .updateTraining(widget.editingTraining!.id, req);
       } else {
         await ref.read(trainingRepositoryProvider).recordTraining(req);
       }
       ref.invalidate(trainingsProvider);
       if (mounted) {
         if (_isEditing) {
-          Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).popUntil((route) => route.isFirst);
         } else {
           context.go('/trainings');
         }
@@ -204,7 +225,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     } on Failure catch (f) {
       setState(() => _error = f.message);
     } catch (_) {
-      if (mounted) setState(() => _error = AppLocalizations.of(context)!.commonSaveFailed);
+      if (mounted)
+        setState(() => _error = AppLocalizations.of(context)!.commonSaveFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -275,7 +297,11 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
         child: SafeArea(
           top: false,
-          child: AppButton(label: l.trainingSaveBtn, loading: _saving, onPressed: _save),
+          child: AppButton(
+            label: l.trainingSaveBtn,
+            loading: _saving,
+            onPressed: _save,
+          ),
         ),
       ),
     );
@@ -290,12 +316,23 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 15),
           childrenPadding: const EdgeInsets.fromLTRB(15, 0, 15, 14),
-          title: Text(l.trainingMemoAll, style: TextStyle(fontWeight: FontWeight.w600, color: t.muted, fontSize: 14)),
+          title: Text(
+            l.trainingMemoAll,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: t.muted,
+              fontSize: 14,
+            ),
+          ),
           children: [
             TextField(
               controller: _memo,
               maxLines: 3,
-              decoration: InputDecoration(hintText: l.trainingMemoAllHint, border: const OutlineInputBorder(), isDense: true),
+              decoration: InputDecoration(
+                hintText: l.trainingMemoAllHint,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
             ),
           ],
         ),
@@ -307,7 +344,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final t = context.tokens;
     final label = _endedAt == null
         ? l.trainingEndTimeEmpty
-        : l.trainingEndTimeSet('${_endedAt!.toLocal().hour.toString().padLeft(2, '0')}:${_endedAt!.toLocal().minute.toString().padLeft(2, '0')}');
+        : l.trainingEndTimeSet(
+            '${_endedAt!.toLocal().hour.toString().padLeft(2, '0')}:${_endedAt!.toLocal().minute.toString().padLeft(2, '0')}',
+          );
     return AppCard(
       child: InkWell(
         onTap: () async {
@@ -320,7 +359,13 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
           if (picked == null) return;
           final base = _endedAt ?? now;
           setState(() {
-            _endedAt = DateTime(base.year, base.month, base.day, picked.hour, picked.minute);
+            _endedAt = DateTime(
+              base.year,
+              base.month,
+              base.day,
+              picked.hour,
+              picked.minute,
+            );
           });
         },
         borderRadius: BorderRadius.circular(12),
@@ -331,7 +376,14 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               Icon(Icons.timer_off_outlined, size: 18, color: t.muted),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: _endedAt == null ? t.muted : null, fontSize: 14)),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: _endedAt == null ? t.muted : null,
+                    fontSize: 14,
+                  ),
+                ),
               ),
               if (_endedAt != null)
                 GestureDetector(
@@ -368,7 +420,14 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                       child: Row(
                         children: [
                           Flexible(
-                            child: Text(e.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15), overflow: TextOverflow.ellipsis),
+                            child: Text(
+                              e.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           const SizedBox(width: 4),
                           Icon(Icons.unfold_more, size: 16, color: t.subtle),
@@ -377,11 +436,15 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                     ),
                   ),
                 ),
-                IconButton(icon: Icon(Icons.close, size: 18, color: t.subtle), onPressed: () => _removeExercise(i)),
+                IconButton(
+                  icon: Icon(Icons.close, size: 18, color: t.subtle),
+                  onPressed: () => _removeExercise(i),
+                ),
               ],
             ),
             if (best != null) _bestSetLine(best, l),
-            if (lastSession != null && lastSession.sets.isNotEmpty) _lastSessionLine(lastSession, l),
+            if (lastSession != null && lastSession.sets.isNotEmpty)
+              _lastSessionLine(lastSession, l),
             const SizedBox(height: 4),
             for (var si = 0; si < e.sets.length; si++) _setRow(i, si, l),
             Align(
@@ -399,19 +462,35 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
-  Widget _lastSessionLine(LastSessionSetsByExerciseDto lastSession, AppLocalizations l) {
+  Widget _lastSessionLine(
+    LastSessionSetsByExerciseDto lastSession,
+    AppLocalizations l,
+  ) {
     final t = context.tokens;
     final d = lastSession.performedAt.toLocal();
     final date = '${d.year}/${d.month}/${d.day}';
-    final setsText = lastSession.sets.map((s) => '${s.setNumber}. ${s.weightKg}kg×${s.reps}').join('  ');
+    final setsText = lastSession.sets
+        .map((s) => '${s.setNumber}. ${s.weightKg}kg×${s.reps}')
+        .join('  ');
     return Padding(
       padding: const EdgeInsets.only(top: 2, bottom: 2),
       child: Text.rich(
-        TextSpan(children: [
-          TextSpan(text: '📅 ${l.trainingPrevSession}', style: TextStyle(color: t.muted, fontWeight: FontWeight.w600)),
-          TextSpan(text: '($date)  ', style: TextStyle(color: t.muted)),
-          TextSpan(text: setsText, style: TextStyle(color: t.muted)),
-        ]),
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '📅 ${l.trainingPrevSession}',
+              style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
+            ),
+            TextSpan(
+              text: '($date)  ',
+              style: TextStyle(color: t.muted),
+            ),
+            TextSpan(
+              text: setsText,
+              style: TextStyle(color: t.muted),
+            ),
+          ],
+        ),
         style: const TextStyle(fontSize: 12),
       ),
     );
@@ -424,11 +503,22 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     return Padding(
       padding: const EdgeInsets.only(top: 2, bottom: 4),
       child: Text.rich(
-        TextSpan(children: [
-          TextSpan(text: '★ ', style: TextStyle(color: t.gold)),
-          TextSpan(text: l.trainingBestRecord, style: TextStyle(color: t.muted, fontWeight: FontWeight.w600)),
-          TextSpan(text: '${best.weightKg}kg × ${best.reps}${l.trainingReps}$date', style: TextStyle(color: t.muted)),
-        ]),
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '★ ',
+              style: TextStyle(color: t.gold),
+            ),
+            TextSpan(
+              text: l.trainingBestRecord,
+              style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
+            ),
+            TextSpan(
+              text: '${best.weightKg}kg × ${best.reps}${l.trainingReps}$date',
+              style: TextStyle(color: t.muted),
+            ),
+          ],
+        ),
         style: const TextStyle(fontSize: 12),
       ),
     );
@@ -441,12 +531,19 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: const EdgeInsets.only(bottom: 8),
-        title: Text(l.trainingExerciseMemo, style: TextStyle(fontSize: 13, color: t.muted)),
+        title: Text(
+          l.trainingExerciseMemo,
+          style: TextStyle(fontSize: 13, color: t.muted),
+        ),
         children: [
           TextField(
             controller: e.memo,
             maxLines: 2,
-            decoration: InputDecoration(hintText: l.trainingExerciseMemoHint, border: const OutlineInputBorder(), isDense: true),
+            decoration: InputDecoration(
+              hintText: l.trainingExerciseMemoHint,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
           ),
         ],
       ),
@@ -461,9 +558,15 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          SizedBox(width: 26, child: Text('${si + 1}', style: TextStyle(color: t.muted))),
+          SizedBox(
+            width: 26,
+            child: Text('${si + 1}', style: TextStyle(color: t.muted)),
+          ),
           Expanded(child: _numField(s.weight, 'kg')),
-          const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('×')),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Text('×'),
+          ),
           Expanded(child: _numField(s.reps, l.trainingReps)),
           IconButton(
             icon: Icon(Icons.remove_circle_outline, size: 18, color: t.subtle),
@@ -524,7 +627,9 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
     final l = AppLocalizations.of(context)!;
     final exercises = ref.watch(exercisesProvider);
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -532,35 +637,64 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(l.trainingSelectExercise, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(
+                l.trainingSelectExercise,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _name,
-                      decoration: InputDecoration(hintText: l.trainingNewExerciseName, isDense: true, border: const OutlineInputBorder()),
+                      decoration: InputDecoration(
+                        hintText: l.trainingNewExerciseName,
+                        isDense: true,
+                        border: const OutlineInputBorder(),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  AppButton(label: l.commonCreate, expand: false, loading: _creating, onPressed: _create),
+                  AppButton(
+                    label: l.commonCreate,
+                    expand: false,
+                    loading: _creating,
+                    onPressed: _create,
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
               ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.45),
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.45,
+                ),
                 child: exercises.when(
                   data: (list) => list.isEmpty
-                      ? Padding(padding: const EdgeInsets.all(20), child: Text(l.trainingNoExercisesCreate))
+                      ? Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Text(l.trainingNoExercisesCreate),
+                        )
                       : ListView(
                           shrinkWrap: true,
                           children: [
                             for (final ex in list)
-                              ListTile(title: Text(ex.name), onTap: () => Navigator.of(context).pop(ex)),
+                              ListTile(
+                                title: Text(ex.name),
+                                onTap: () => Navigator.of(context).pop(ex),
+                              ),
                           ],
                         ),
-                  loading: () => const Padding(padding: EdgeInsets.all(20), child: Center(child: CircularProgressIndicator())),
-                  error: (e, _) => Padding(padding: const EdgeInsets.all(20), child: Text(l.commonLoadFailed)),
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (e, _) => Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(l.commonLoadFailed),
+                  ),
                 ),
               ),
             ],
