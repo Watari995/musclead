@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
 import 'training_detail_screen.dart';
+import 'training_record_screen.dart';
 
 class TrainingsScreen extends ConsumerWidget {
   const TrainingsScreen({super.key});
@@ -123,7 +124,14 @@ class _TrainingRow extends StatelessWidget {
           ),
           if (duration != null)
             Text(duration, style: TextStyle(fontSize: 12, color: t.muted)),
-          const SizedBox(width: 6),
+          IconButton(
+            icon: Icon(Icons.edit_outlined, color: t.subtle),
+            onPressed: () => Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute<void>(
+                builder: (_) => TrainingRecordScreen(editingTraining: training),
+              ),
+            ),
+          ),
           Icon(Icons.chevron_right, color: t.subtle),
         ],
       ),

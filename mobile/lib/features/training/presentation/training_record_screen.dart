@@ -50,10 +50,14 @@ class TrainingRecordScreen extends ConsumerStatefulWidget {
     super.key,
     this.initialExercises = const [],
     this.editingTraining,
+    this.focusExerciseId,
   });
 
   final List<({String exerciseId, String name})> initialExercises;
   final TrainingDto? editingTraining;
+
+  /// 指定すると、この種目のカードまで初期表示時にスクロールする。
+  final String? focusExerciseId;
 
   @override
   ConsumerState<TrainingRecordScreen> createState() =>
@@ -64,6 +68,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   late DateTime _startedAt;
   DateTime? _endedAt;
   final List<_ExerciseDraft> _exercises = [];
+  final Map<int, GlobalKey> _exerciseKeys = {};
   final TextEditingController _memo = TextEditingController();
   Map<String, BestSetDto> _bestSets = {};
   Map<String, LastSessionSetsByExerciseDto> _lastSessionSets = {};
@@ -88,6 +93,24 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       _loadBestSets();
       _loadLastSessionSets();
     }
+    if (widget.focusExerciseId != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToFocusedExercise(),
+      );
+    }
+  }
+
+  void _scrollToFocusedExercise() {
+    final index = _exercises.indexWhere(
+      (e) => e.exerciseId == widget.focusExerciseId,
+    );
+    final targetContext = _exerciseKeys[index]?.currentContext;
+    if (targetContext == null) return;
+    Scrollable.ensureVisible(
+      targetContext,
+      duration: const Duration(milliseconds: 300),
+      alignment: 0.1,
+    );
   }
 
   void _initFromTraining(TrainingDto training) {
@@ -402,6 +425,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final best = _bestSets[e.exerciseId];
     final lastSession = _lastSessionSets[e.exerciseId];
     return Padding(
+      key: _exerciseKeys.putIfAbsent(i, () => GlobalKey()),
       padding: const EdgeInsets.only(bottom: 12),
       child: AppCard(
         child: Column(
