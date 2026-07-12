@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../../../l10n/app_localizations.dart';
@@ -31,9 +32,9 @@ class CalendarScreen extends HookConsumerWidget {
     final me = ref.watch(meProvider);
     final prefs = me.asData?.value.preferences;
 
-    final trainingColor = _parseColor(prefs?.trainingColor ?? '#4A90E2');
-    final mealColor = _parseColor(prefs?.mealColor ?? '#7ED321');
-    final weightColor = _parseColor(prefs?.weightColor ?? '#FF6B6B');
+    final trainingColor = _parseColor(prefs?.trainingColor ?? '#1971C2');
+    final mealColor = _parseColor(prefs?.mealColor ?? '#2F9E44');
+    final weightColor = _parseColor(prefs?.weightColor ?? '#E03131');
 
     final unreadCount =
         ref.watch(notificationsProvider).asData?.value.unreadCount ?? 0;
@@ -138,7 +139,7 @@ class CalendarScreen extends HookConsumerWidget {
       final h = hex.replaceAll('#', '');
       return Color(int.parse('FF$h', radix: 16));
     } catch (_) {
-      return const Color(0xFF4A90E2);
+      return const Color(0xFF1971C2);
     }
   }
 }
@@ -477,27 +478,25 @@ class _SummaryRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: t.border),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(left, style: const TextStyle(fontSize: 13)),
-            if (right.isNotEmpty)
-              Row(
-                children: [
-                  Text(right, style: TextStyle(fontSize: 12, color: t.muted)),
-                  if (onTap != null) ...[
-                    const SizedBox(width: 4),
-                    Icon(Icons.chevron_right, size: 14, color: t.muted),
+        child: RoughBox(
+          radius: BorderRadius.circular(8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(left, style: const TextStyle(fontSize: 13)),
+              if (right.isNotEmpty)
+                Row(
+                  children: [
+                    Text(right, style: TextStyle(fontSize: 12, color: t.muted)),
+                    if (onTap != null) ...[
+                      const SizedBox(width: 4),
+                      Icon(Icons.chevron_right, size: 14, color: t.muted),
+                    ],
                   ],
-                ],
-              ),
-          ],
+                ),
+            ],
+          ),
         ),
       ),
     );

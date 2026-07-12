@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/routine_dtos.dart';
@@ -95,12 +96,9 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
     return Padding(
       key: ValueKey(r.id),
       padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: t.border),
-        ),
+      child: RoughBox(
+        radius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
         child: ListTile(
           // 波紋(ink)を角丸にクリップし、長押し時に四角い角が出るのを防ぐ。
           shape: const RoundedRectangleBorder(

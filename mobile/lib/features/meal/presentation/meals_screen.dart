@@ -179,11 +179,13 @@ class _MacroBar extends StatelessWidget {
         Expanded(
           child: Container(
             height: 7,
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: t.accentWeak.withValues(alpha: 0),
+              color: t.paperAlt,
               borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: t.border, width: 1.3),
             ),
-            child: ColoredBox(color: color.withValues(alpha: 0.18)),
+            child: ColoredBox(color: color.withValues(alpha: 0.35)),
           ),
         ),
         const SizedBox(width: 10),
