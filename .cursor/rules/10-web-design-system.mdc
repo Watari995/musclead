@@ -1,56 +1,74 @@
 ---
-description: musclead Web UI のデザインシステム(snkrdunk テイスト)
+description: musclead Web UI のデザインシステム(手描き / Excalidraw 風)
 globs: web/**/*.{ts,tsx,css}
 alwaysApply: true
 ---
 
 # Web Design System
 
-スニーカーダンク(snkrdunk.com) の **ミニマル × モノクロベース** を踏襲する。
+**手描き(Excalidraw 風)× モノクロベース + 単一アクセント** を踏襲する。
 新規 UI を作るとき、 既存ページを編集するときは必ずこの規約に従う。
 
 モバイル対応は本ドキュメントとは別に [11-mobile-responsive.mdc](./11-mobile-responsive.mdc) で必須化している。 全画面でスマホ表示を担保すること。
 
+`mobile/`(Flutter)の `AppTokens` と配色・思想を 1:1 で揃えている。 デザインを変える際は両方を同時に更新する。
+
 ## 1. 思想
 
-- **モノクロ基調**(白 + 黒 + グレー階調)+ 最小限の差し色
-- **余白広め、 装飾は最小限**(影は薄く、 角丸は小さめ)
-- 文字は **左揃え基本、 タイポは詰めて(`tracking-tight`)** 視認性重視
-- カード型 UI で情報をグルーピング、 罫線で区切る
+- **モノクロ基調**(紙 = paper + インク = ink)+ **1 つの swappable アクセント**(既定はモノクロ、 テーマ色で差し替え可)
+- 枠線は **手描き風の二重ストローク**(`.rough`)で表現し、 影はほぼ使わない
+- 文字は **見出し = 手書き系フォント(Caveat)、 本文/UI = Architects Daughter**(和文フォールバックは Yomogi)
+- カード型 UI で情報をグルーピング
 
 ## 2. カラートークン(globals.css 定義)
 
-| 用途 | CSS変数 | 値 |
-|---|---|---|
-| 本文 | `--color-ink` | `#111111` |
-| 補助テキスト | `--color-ink-muted` | `#6b7280` |
-| 罫線 | `--color-line` | `#e5e7eb` |
-| 背景(基本) | `--color-surface` | `#ffffff` |
-| 背景(薄グレー) | `--color-surface-alt` | `#f6f6f6` |
-| エラー/差し色 | `--color-accent` | `#ef3a3a` |
+| 用途 | CSS変数 | Light | Dark |
+|---|---|---|---|
+| 本文/アイコン | `--color-ink` | `#1e1e1e` | `#e8e6de` |
+| 補助テキスト | `--color-ink-muted` | `#7c7c76` | `#8d8e88` |
+| 罫線 | `--color-line` | `#c7c7bd` | `#37383d` |
+| 背景(基本) | `--color-surface` | `#fafaf8` | `#17181c` |
+| 背景(代替面) | `--color-surface-alt` | `#eef0ea` | `#212227` |
+| アクセント | `--color-accent` | `var(--ink)` | `var(--ink)` |
+| たんぱく質 | `--color-macro-protein` | `#1971c2` | `#5aa7f6` |
+| 脂質 | `--color-macro-fat` | `#e8830a` | `#f3a94b` |
+| 炭水化物 | `--color-macro-carb` | `#2f9e44` | `#5ed676` |
 
-**Tailwind の `slate-*` `gray-*` 等は使わない**。 必ず CSS 変数経由で参照する:
+- `--color-accent` は既定で `var(--ink)` を直接参照するモノクロ(brightness を跨いでも背景に沈まない)。 テーマ色を追加するときは `--accent` を実際の hex に上書きする。
+- P/F/C・自己ベストの色は **アクセントから独立した意味色**。 アクセントを変えても変化させない。
+- **Tailwind の `slate-*` `gray-*` 等は使わない**。 必ず CSS 変数経由で参照する:
 ```tsx
 className="text-[var(--color-ink)] border-[var(--color-line)]"
 ```
 
 ## 3. フォント
 
-- Geist Sans を main、 日本語フォールバックは Hiragino Sans → Yu Gothic
-- 見出しは `font-bold tracking-tight`
-- 本文は通常ウェイト、 補助情報は `text-xs` か `text-sm` + `text-[var(--color-ink-muted)]`
+- 見出し・強調: `font-hand`(Caveat)
+- 本文/UI: `font-sans` / `font-sketch`(Architects Daughter、 和文は Yomogi にフォールバック)
+- 数値・データ: `font-mono`(Geist Mono)— kcal・kg・reps など桁の揃う値は必ず mono
+- 日本語は Architects Daughter に和文グリフが無いため自動で Yomogi にフォールバックする(和文だけ手書き感が弱まるのは想定内)
 
-## 4. 共通コンポーネント(`src/components/ui.tsx`)
+## 4. 手描き輪郭ユーティリティ(`.rough`)
+
+- カード/ボタン/入力欄/写真枠など、 枠線を持つ要素は生の `border` + `rounded-*` ではなく **`.rough`(+ 円形なら `.rough-pill`)を使う**
+- `.rough` は背景色を含まない。 塗りは呼び出し側で `bg-[var(--color-surface)]` 等を添える
+- 線の色は `--rough-color` 経由(既定 `var(--color-ink)`)。 フォーカスや選択状態を出したいときは `focus:[--rough-color:var(--color-accent)]` のように上書きする
+- 例外: 20px 前後の小さい色スウォッチ/ドットは `.rough` を使わず単純な `border` のままにする(小さすぎると輪郭のゆらぎが潰れて見えるため)
+- アイコンに手描きの揺らぎを足したいときは `.icon-sketchy`(SVG `feTurbulence` フィルタ、 `layout.tsx` で 1 度だけ定義)を使う
+
+## 5. 共通コンポーネント(`src/shared/ui/`)
 
 | 用途 | コンポーネント |
 |---|---|
-| カード | `<Card>` (白bg + 1px 罫線 + 角丸 `rounded-lg`) |
-| 見出し | `<SectionTitle>` (`text-base font-bold tracking-tight`) |
-| ラベル | `<Label label="...">` (子要素は input 等) |
-| テキスト入力 | `<TextInput>` (`h-11`、 罫線、 focus 時 ink) |
+| カード | `<Card>` (`.rough` + 背景) |
+| 見出し | `<SectionTitle>` (`font-hand text-2xl`) |
+| ラベル | `<Label label="...">` (`font-hand`、 子要素は input 等) |
+| テキスト入力 | `<TextInput>` (`.rough`、 focus で `--rough-color` がアクセントに) |
 | 数値入力 | `<NumberField>` (`TextInput` ベース、 空欄 = `undefined`、 placeholder 必須) |
-| ボタン | `<Button variant="primary"|"ghost"|"danger">` |
+| ステッパー | `<NumberStepper>` (`.rough-pill` の ±ボタン) |
+| ボタン | `<Button variant="primary"|"ghost"|"danger">` (`.rough`) |
 | エラー文 | `<ErrorText>` |
+| ポップオーバー | `<Popover>` (`.rough`) |
 
 **新しい入力フォーム/カードは必ずこれを使う**。 個別に Tailwind で書き直さない。
 
@@ -77,40 +95,40 @@ className="text-[var(--color-ink)] border-[var(--color-line)]"
 - 数値 state の `0` / `"0"` 初期化
 - placeholder なしの数値入力
 
-## 5. レイアウト規約
+## 6. レイアウト規約
 
 - コンテナ: `max-w-5xl mx-auto px-5 sm:px-6`
 - セクション間: `space-y-8` / `gap-8`
 - ヘッダー: `h-14`、 sticky top、 下罫線 1px
 - フッター: 上罫線 + `text-xs text-ink-muted`
 
-## 6. ボタン規約
+## 7. ボタン規約
 
-- 主要 CTA: `Button variant="primary"`(黒地白文字、 `h-11`、 `rounded-md`)
-- セカンダリ: `variant="ghost"`(白地黒文字 + 罫線)
-- 破壊的: `variant="danger"`(白地アクセント色 + 罫線)
+- 主要 CTA: `Button variant="primary"`(ink 地 surface 文字、 `.rough`)
+- セカンダリ: `variant="ghost"`(surface 地 ink 文字 + `.rough`)
+- 破壊的: `variant="danger"`(surface 地アクセント色 + `.rough`)
 - フォーム末尾は `fullWidth`
 
-## 7. リスト/カード
+## 8. リスト/カード
 
-- 一覧は `<ul>` + `divide-y divide-[var(--color-line)]` で区切り
-- 個別の要素を Card で囲まない(罫線で十分)
-- アイコン枠は `w-14 h-14 rounded-md bg-[var(--color-surface-alt)]`
+- 一覧は `<ul>` + `divide-y divide-[var(--color-line)]` で区切るか、 個々を `.rough` カードにする(密度と用途で選ぶ)
+- 写真サムネイル・アイコン枠も `.rough` を使う(例: `w-14 h-14 rough bg-[var(--color-surface-alt)]`)
 
-## 8. アニメーション
+## 9. アニメーション
 
 - 過度なトランジション禁止
 - 許可: `transition-opacity`(hover/active)、 `transition-colors`(focus)
 - duration はデフォルト(指定しない)
+- `prefers-reduced-motion` を尊重する(パルスや揺れを常時アニメーションさせない)
 
-## 9. ダークモード
+## 10. ダークモード
 
-- **対応しない**(globals.css に `prefers-color-scheme` 分岐を入れない)
-- 将来必要になったら CSS 変数のオーバーライドで対応
+- **対応する**(`next-themes` + `.dark` クラス、 `ThemePicker` で Light/Dark/System を選択)
+- 新しいトークンを足すときは必ず `:root` と `.dark` の両方に値を定義する
 
-## 10. 禁則
+## 11. 禁則
 
 - 派手な色のグラデーション禁止
-- 大きな影 `shadow-lg` 以上禁止
-- 角丸は最大 `rounded-lg`、 円形は明示意図のあるアイコンのみ
+- 大きな影 `shadow-lg` 以上禁止(ドラッグ中など一時的な状態を除く)
+- `.rough` を使わない生の `border` + `rounded-*` の組み合わせを新規に増やさない
 - 絵文字は **情報補助の最小限**(食事種別のアイコン枠など)、 装飾目的では使わない
