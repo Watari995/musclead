@@ -21,7 +21,7 @@ export function Avatar({
     <img
       src={src}
       alt={alt}
-      className={`${size} rounded-full object-cover border border-[var(--color-line)] bg-[var(--color-surface-alt)] ${className}`}
+      className={`${size} rough rough-pill object-cover bg-[var(--color-surface-alt)] ${className}`}
     />
   );
 }

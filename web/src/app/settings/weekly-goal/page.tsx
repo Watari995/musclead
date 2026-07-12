@@ -31,7 +31,7 @@ function NullableIntInput({
           onChange={(e) =>
             onChange(e.target.value === "" ? null : Number(e.target.value))
           }
-          className="w-32 h-9 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]"
+          className="w-32 h-9 rough bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]"
         />
         <span className="text-sm text-[var(--color-ink-muted)]">{unit}</span>
       </div>
@@ -102,7 +102,7 @@ export default function WeeklyGoalSettingsPage() {
               onChange={(e) =>
                 setWeightChangeKg(e.target.value === "" ? null : Number(e.target.value))
               }
-              className="w-32 h-9 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]"
+              className="w-32 h-9 rough bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]"
             />
             <span className="text-sm text-[var(--color-ink-muted)]">{t("weightChangeUnit")}</span>
           </div>

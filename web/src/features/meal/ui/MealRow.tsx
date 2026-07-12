@@ -24,10 +24,10 @@ export function MealRow({ meal }: { meal: Meal }) {
         <img
           src={firstPhoto.imageURL}
           alt=""
-          className="w-14 h-14 shrink-0 rounded-md object-cover border border-[var(--color-line)]"
+          className="rough w-14 h-14 shrink-0 object-cover"
         />
       ) : (
-        <div className="w-14 h-14 shrink-0 rounded-md bg-[var(--color-surface-alt)] flex items-center justify-center text-xl">
+        <div className="rough w-14 h-14 shrink-0 bg-[var(--color-surface-alt)] flex items-center justify-center text-xl">
           {mealTypeEmoji(meal.type)}
         </div>
       )}
@@ -49,9 +49,15 @@ export function MealRow({ meal }: { meal: Meal }) {
           <span className="font-medium text-[var(--color-ink)]">
             {meal.calories} kcal
           </span>
-          <span>P {meal.proteinG}g</span>
-          <span>F {meal.fatG}g</span>
-          <span>C {meal.carbohydrateG}g</span>
+          <span className="text-[var(--color-macro-protein)]">
+            P {meal.proteinG}g
+          </span>
+          <span className="text-[var(--color-macro-fat)]">
+            F {meal.fatG}g
+          </span>
+          <span className="text-[var(--color-macro-carb)]">
+            C {meal.carbohydrateG}g
+          </span>
         </div>
         {meal.photos.length > 1 && (
           <div className="mt-2 flex gap-1">
@@ -61,11 +67,11 @@ export function MealRow({ meal }: { meal: Meal }) {
                 key={p.imageURL}
                 src={p.imageURL}
                 alt=""
-                className="w-10 h-10 rounded object-cover border border-[var(--color-line)]"
+                className="rough w-10 h-10 object-cover"
               />
             ))}
             {meal.photos.length > 4 && (
-              <div className="w-10 h-10 rounded bg-[var(--color-surface-alt)] flex items-center justify-center text-xs text-[var(--color-ink-muted)]">
+              <div className="rough w-10 h-10 bg-[var(--color-surface-alt)] flex items-center justify-center text-xs text-[var(--color-ink-muted)]">
                 +{meal.photos.length - 4}
               </div>
             )}

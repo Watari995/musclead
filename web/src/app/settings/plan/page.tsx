@@ -71,12 +71,12 @@ export default function PlanSettingsPage() {
       </header>
 
       {returnStatus === "success" && (
-        <p className="text-sm text-[var(--color-ink)] rounded-md border border-[var(--color-line)] bg-[var(--color-surface-alt)] px-3 py-2">
+        <p className="text-sm text-[var(--color-ink)] rough bg-[var(--color-surface-alt)] px-3 py-2">
           {t("subscribed")}
         </p>
       )}
       {returnStatus === "cancel" && (
-        <p className="text-sm text-[var(--color-ink-muted)] rounded-md border border-[var(--color-line)] px-3 py-2">
+        <p className="text-sm text-[var(--color-ink-muted)] rough px-3 py-2">
           {t("cancelled")}
         </p>
       )}
@@ -84,7 +84,7 @@ export default function PlanSettingsPage() {
       {subscriptionQuery.isPending ? (
         <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
       ) : isPro ? (
-        <div className="rounded-md border border-[var(--color-line)] p-4 space-y-3">
+        <div className="rough p-4 space-y-3">
           <div className="flex items-baseline justify-between gap-2">
             <span className="font-bold tracking-tight">{t("currentPlan")}</span>
             <span className="text-sm text-[var(--color-ink-muted)]">
@@ -113,7 +113,7 @@ export default function PlanSettingsPage() {
           )}
         </div>
       ) : (
-        <div className="rounded-md border border-[var(--color-line)] p-4 space-y-3">
+        <div className="rough p-4 space-y-3">
           <div className="flex items-baseline justify-between gap-2">
             <span className="font-bold tracking-tight">Pro</span>
             <span className="text-sm text-[var(--color-ink-muted)]">

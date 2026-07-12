@@ -83,7 +83,7 @@ export function RoutineForm({
                       disabled={submitting}
                       required
                       aria-label={tTrainings("exerciseSelect", { index: index + 1 })}
-                      className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+                      className="block w-full h-11 px-3 rough bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:[--rough-color:var(--color-accent)] transition-colors"
                     >
                       <option value="" disabled>
                         {t("selectExercise")}

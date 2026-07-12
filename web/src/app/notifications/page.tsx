@@ -56,7 +56,7 @@ export default function NotificationsPage() {
       )}
 
       {data && data.notifications.length > 0 && (
-        <ul className="divide-y divide-[var(--color-line)] border border-[var(--color-line)] rounded-xl overflow-hidden">
+        <ul className="divide-y divide-[var(--color-line)] rough overflow-hidden">
           {data.notifications.map((n) => (
             <li key={n.id}>
               <Link

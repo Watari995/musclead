@@ -21,7 +21,7 @@ export default async function SupportPage() {
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">{t("contactTitle")}</h2>
-        <div className="rounded-xl border border-[var(--color-line)] bg-[var(--color-surface-alt)] p-6 space-y-3">
+        <div className="rough bg-[var(--color-surface-alt)] p-6 space-y-3">
           <p className="text-sm text-[var(--color-ink-muted)]">{t("contactDesc")}</p>
           <a
             href="mailto:support@musclead.app"
