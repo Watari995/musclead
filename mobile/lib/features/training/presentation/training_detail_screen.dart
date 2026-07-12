@@ -86,6 +86,14 @@ class TrainingDetailScreen extends ConsumerWidget {
                 child: _ExerciseCard(
                   name: names[ex.exerciseId] ?? l.trainingExerciseDefault,
                   exercise: ex,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => TrainingRecordScreen(
+                        editingTraining: training,
+                        focusExerciseId: ex.exerciseId,
+                      ),
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -153,49 +161,72 @@ class TrainingDetailScreen extends ConsumerWidget {
 }
 
 class _ExerciseCard extends StatelessWidget {
-  const _ExerciseCard({required this.name, required this.exercise});
+  const _ExerciseCard({
+    required this.name,
+    required this.exercise,
+    required this.onTap,
+  });
 
   final String name;
   final TrainingExerciseDto exercise;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: const TextStyle(fontFamily: 'Caveat', fontSize: 19),
-          ),
-          const SizedBox(height: 6),
-          for (final s in exercise.sets)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
+      padding: EdgeInsets.zero,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  SizedBox(
-                    width: 24,
+                  Expanded(
                     child: Text(
-                      '${s.setNumber}',
-                      style: TextStyle(color: t.muted),
+                      name,
+                      style: const TextStyle(
+                        fontFamily: 'Caveat',
+                        fontSize: 19,
+                      ),
                     ),
                   ),
-                  Text(
-                    '${s.weightKg} kg',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const Spacer(),
-                  Text(
-                    l.trainingRepsUnit(s.reps),
-                    style: TextStyle(color: t.muted),
-                  ),
+                  Icon(Icons.edit_outlined, size: 16, color: t.subtle),
                 ],
               ),
-            ),
-        ],
+              const SizedBox(height: 6),
+              for (final s in exercise.sets)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        child: Text(
+                          '${s.setNumber}',
+                          style: TextStyle(color: t.muted),
+                        ),
+                      ),
+                      Text(
+                        '${s.weightKg} kg',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      const Spacer(),
+                      Text(
+                        l.trainingRepsUnit(s.reps),
+                        style: TextStyle(color: t.muted),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
