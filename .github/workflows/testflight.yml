@@ -87,7 +87,7 @@ jobs:
             -archivePath /tmp/musclead.xcarchive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE="5309b3f1-e8f0-40ee-89d8-d88acf4e7496" \
+            PROVISIONING_PROFILE="3329448c-7eaa-4722-820f-f6a4f21e4bfe" \
             DEVELOPMENT_TEAM=44675MS8C4
 
       - name: xcodebuild export IPA
