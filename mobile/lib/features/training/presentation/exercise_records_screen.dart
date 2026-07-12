@@ -159,7 +159,7 @@ class _PeriodSelector extends StatelessWidget {
                     fontWeight: isSelected
                         ? FontWeight.w700
                         : FontWeight.normal,
-                    color: isSelected ? Colors.white : t.muted,
+                    color: isSelected ? context.colors.onPrimary : t.muted,
                   ),
                 ),
               ),

@@ -60,10 +60,7 @@ class RegisterScreen extends HookConsumerWidget {
             children: [
               Text(
                 l.registerTitle,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: const TextStyle(fontFamily: 'Caveat', fontSize: 32),
               ),
               const SizedBox(height: 24),
               AppTextField(

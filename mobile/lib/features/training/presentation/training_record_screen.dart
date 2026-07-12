@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
 import '../data/exercise_dtos.dart';
@@ -326,14 +327,10 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             ),
           ),
           children: [
-            TextField(
+            RoughTextField(
               controller: _memo,
+              hint: l.trainingMemoAllHint,
               maxLines: 3,
-              decoration: InputDecoration(
-                hintText: l.trainingMemoAllHint,
-                border: const OutlineInputBorder(),
-                isDense: true,
-              ),
             ),
           ],
         ),
@@ -424,8 +421,8 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                             child: Text(
                               e.name,
                               style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
+                                fontFamily: 'Caveat',
+                                fontSize: 19,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -537,14 +534,10 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
           style: TextStyle(fontSize: 13, color: t.muted),
         ),
         children: [
-          TextField(
+          RoughTextField(
             controller: e.memo,
+            hint: l.trainingExerciseMemoHint,
             maxLines: 2,
-            decoration: InputDecoration(
-              hintText: l.trainingExerciseMemoHint,
-              border: const OutlineInputBorder(),
-              isDense: true,
-            ),
           ),
         ],
       ),
@@ -578,15 +571,11 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
-  Widget _numField(TextEditingController c, String suffix) => TextField(
+  Widget _numField(TextEditingController c, String suffix) => RoughTextField(
     controller: c,
     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-    decoration: InputDecoration(
-      isDense: true,
-      suffixText: suffix,
-      border: const OutlineInputBorder(),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-    ),
+    suffixText: suffix,
+    textAlign: TextAlign.center,
   );
 }
 
@@ -640,22 +629,15 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
             children: [
               Text(
                 l.trainingSelectExercise,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: const TextStyle(fontFamily: 'Caveat', fontSize: 24),
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
+                    child: RoughTextField(
                       controller: _name,
-                      decoration: InputDecoration(
-                        hintText: l.trainingNewExerciseName,
-                        isDense: true,
-                        border: const OutlineInputBorder(),
-                      ),
+                      hint: l.trainingNewExerciseName,
                     ),
                   ),
                   const SizedBox(width: 8),
