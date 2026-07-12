@@ -18,6 +18,16 @@ class NotificationRepository {
   Future<void> markAsRead(String id) =>
       guardApi(() => _dio.put<void>('/notifications/$id/read'));
 
+  Future<void> registerDeviceToken({
+    required String token,
+    required String platform,
+  }) => guardApi(
+    () => _dio.post<void>(
+      '/device-tokens',
+      data: {'token': token, 'platform': platform},
+    ),
+  );
+
   Future<WeeklyGoalDto?> getWeeklyGoal() => guardApi(() async {
     final res = await _dio.get<Map<String, dynamic>?>('/users/me/weekly-goal');
     if (res.data == null) return null;

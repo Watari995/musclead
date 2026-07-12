@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useUpdateUserMutation,
   useUploadProfileImageMutation,
@@ -22,6 +23,8 @@ export function ProfileImageEditor({
   imageURL: string;
   displayName: string;
 }) {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pickedImageSrc, setPickedImageSrc] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -46,11 +49,11 @@ export function ProfileImageEditor({
     if (!file) return;
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setError("JPEG / PNG / WebP のみアップロード可能です");
+      setError(tCommon("uploadError.type"));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setError("ファイルサイズは 10 MB 以下にしてください");
+      setError(tCommon("uploadError.size"));
       return;
     }
 
@@ -77,19 +80,19 @@ export function ProfileImageEditor({
       await updateMutation.mutateAsync({ profile_image_path: path });
       closeModal();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "アップロードに失敗しました";
+      const msg = e instanceof Error ? e.message : t("uploadFailed");
       setError(msg);
       // モーダルは開いたままにしてもう一度試せるようにする
     }
   };
 
   const handleRemove = async () => {
-    if (!confirm("プロフィール画像を削除しますか?")) return;
+    if (!confirm(t("deletePhotoConfirm"))) return;
     setError(null);
     try {
       await updateMutation.mutateAsync({ profile_image_path: null });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "削除に失敗しました";
+      const msg = e instanceof Error ? e.message : t("deleteFailed");
       setError(msg);
     }
   };
@@ -101,7 +104,7 @@ export function ProfileImageEditor({
         type="button"
         onClick={handlePickClick}
         disabled={isPending}
-        aria-label="プロフィール画像を編集"
+        aria-label={t("editPhoto")}
         className="relative group rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)] focus:ring-offset-2 disabled:opacity-60"
       >
         <Avatar
@@ -112,7 +115,7 @@ export function ProfileImageEditor({
         />
         <span className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
           <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-            編集
+            {tCommon("edit")}
           </span>
         </span>
       </button>
@@ -134,7 +137,7 @@ export function ProfileImageEditor({
           disabled={isPending}
           className="text-xs text-[var(--color-ink-muted)] hover:text-red-600 disabled:opacity-50"
         >
-          プロフィール画像を削除
+          {t("deletePhoto")}
         </button>
       )}
 

@@ -121,7 +121,7 @@ func run() error {
 	sqsClient := sqs.NewFromConfig(awsCfg)
 	redisClient := newRedisClient(context.Background())
 	slog.Info("redis client initialized", "type", fmt.Sprintf("%T", redisClient))
-	mux, paymentModule, healthSyncModule := newMux(dbmap, storageClient, urlBuilder, redisClient, sqsClient)
+	mux, paymentModule, healthSyncModule, notificationModule := newMux(dbmap, storageClient, urlBuilder, redisClient, sqsClient)
 
 	server := &http.Server{
 		Addr:              addr,
@@ -134,6 +134,9 @@ func run() error {
 
 	// outbox relay worker を起動 (ctx Done で停止)。 SQS 未設定時は no-op。
 	go paymentModule.RunRelay(ctx)
+
+	// notification用のoutbox relay workerを起動
+	go notificationModule.RunRelay(ctx)
 
 	// 体重同期のポーリングを起動
 	go healthSyncModule.RunSync(ctx)
@@ -184,7 +187,7 @@ func openDB() (*sql.DB, error) {
 
 // newMux は全モジュールの HTTP ハンドラをマウントしたルーターを返す。
 // 各モジュールは自身の Handler を Module.Handler として公開する。
-func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client, sqsClient *sqs.Client) (http.Handler, *payment.Module, *healthsync.Module) {
+func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuilder shareddomain.URLBuilder, redisClient *redis.Client, sqsClient *sqs.Client) (http.Handler, *payment.Module, *healthsync.Module, *notification.Module) {
 	mux := http.NewServeMux()
 
 	// ヘルスチェック
@@ -225,7 +228,9 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	billingModule := billing.NewModule(paymentModule.WebhookCommand(), paymentModule.Processor(), purchaseModule.PurchaseCommand())
 	trainingModule := training.NewModule(dbmap, purchaseModule.SubscriptionQuery(), redisClient)
 	calendarModule := calendar.NewModule(trainingModule.TrainingQuery(), mealModule.MealQuery(), weightModule.WeightQuery())
-	notificationModule := notification.NewModule(dbmap)
+	notificationModule := notification.NewModule(dbmap, notification.Config{
+		CredentialsJSON: []byte(os.Getenv("FIREBASE_CREDENTIALS_JSON")),
+	})
 
 	// users
 	mux.Handle("/users", userModule.PublicHandler)
@@ -268,9 +273,10 @@ func newMux(dbmap *gorp.DbMap, storageClient shareddomain.StorageClient, urlBuil
 	// notification
 	mux.Handle("/notifications", authModule.Middleware(notificationModule.Handler))
 	mux.Handle("/notifications/", authModule.Middleware(notificationModule.Handler))
+	mux.Handle("/device-tokens", authModule.Middleware(notificationModule.Handler))
 
 	sentryHandler := sentryhttp.New(sentryhttp.Options{Repanic: true})
-	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule, healthSyncModule
+	return sentryHandler.Handle(httpx.CORSMiddleware(mux)), paymentModule, healthSyncModule, notificationModule
 }
 
 // healthHandler はサーバー稼働確認用のシンプルなヘルスチェック。

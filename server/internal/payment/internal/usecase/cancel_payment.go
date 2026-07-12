@@ -8,6 +8,7 @@ import (
 	"github.com/Watari995/musclead/internal/payment/interface/publicfunctions"
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
 
@@ -15,7 +16,7 @@ type CancelPayment struct {
 	paymentRepo      paymentdomain.PaymentRepository
 	paymentEventRepo paymentdomain.PaymentEventRepository
 	stripeEventRepo  paymentdomain.StripeEventRepository
-	outboxEventRepo  paymentdomain.OutboxEventRepository
+	outboxEventRepo  shareddomain.OutboxEventRepository
 	txManager        dbtx.TransactionManager
 }
 
@@ -51,7 +52,7 @@ func (uc *CancelPayment) CancelPayment(ctx context.Context, input publicfunction
 		"stripe_subscription_id": stripeSubscriptionID,
 		"subscription_plan":      valueobject.SubscriptionPlanPro,
 	}
-	outboxEvent := paymentdomain.CreateOutboxEvent(valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentCanceled), payment.ID().String(), outboxEventMetadata)
+	outboxEvent := shareddomain.CreateOutboxEvent(valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentCanceled), payment.ID().String(), outboxEventMetadata)
 
 	// stripe_events / payments / payment_events / outbox_events を atomic に保存 (ADR 0014, 0018)
 	if err := uc.txManager.Processing(ctx, func(ctx context.Context) error {
@@ -83,7 +84,7 @@ func NewCancelPayment(
 	paymentRepo paymentdomain.PaymentRepository,
 	paymentEventRepo paymentdomain.PaymentEventRepository,
 	stripeEventRepo paymentdomain.StripeEventRepository,
-	outboxEventRepo paymentdomain.OutboxEventRepository,
+	outboxEventRepo shareddomain.OutboxEventRepository,
 	txManager dbtx.TransactionManager,
 ) *CancelPayment {
 	return &CancelPayment{

@@ -9,6 +9,7 @@ import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/food_product_dtos.dart';
 import '../data/food_product_repository.dart';
 
@@ -29,6 +30,7 @@ class FoodSearchSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final mode = useState(_SearchMode.name);
     final nameCtrl = useTextEditingController();
     final barcodeCtrl = useTextEditingController();
@@ -139,13 +141,13 @@ class FoodSearchSection extends HookConsumerWidget {
         Row(
           children: [
             _ModeTab(
-              label: '名前で検索',
+              label: l.foodSearchByName,
               selected: mode.value == _SearchMode.name,
               onTap: () => switchMode(_SearchMode.name),
             ),
             const SizedBox(width: 8),
             _ModeTab(
-              label: 'バーコード',
+              label: l.foodSearchByBarcode,
               selected: mode.value == _SearchMode.barcode,
               onTap: () => switchMode(_SearchMode.barcode),
             ),
@@ -155,9 +157,9 @@ class FoodSearchSection extends HookConsumerWidget {
 
         if (mode.value == _SearchMode.name)
           AppTextField(
-            label: '食品名',
+            label: l.foodNameLabel,
             controller: nameCtrl,
-            hint: 'おにぎり、プロテインバー…',
+            hint: l.foodNameHint,
           )
         else
           Row(
@@ -165,7 +167,7 @@ class FoodSearchSection extends HookConsumerWidget {
             children: [
               Expanded(
                 child: AppTextField(
-                  label: 'バーコード（8〜13桁）',
+                  label: l.foodBarcodeLabel,
                   controller: barcodeCtrl,
                   hint: '4901085615881',
                   keyboardType: TextInputType.number,
@@ -176,13 +178,13 @@ class FoodSearchSection extends HookConsumerWidget {
                 height: 48,
                 child: IconButton(
                   icon: Icon(Icons.qr_code_scanner, color: t.accent),
-                  tooltip: 'カメラでスキャン',
+                  tooltip: l.foodCameraScan,
                   onPressed: openScanner,
                 ),
               ),
               const SizedBox(width: 4),
               AppButton(
-                label: '検索',
+                label: l.foodSearch,
                 expand: false,
                 onPressed: () => searchByBarcode(barcodeCtrl.text.trim()),
               ),
@@ -226,7 +228,7 @@ class FoodSearchSection extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '見つかりませんでした',
+                l.foodNotFound,
                 style: TextStyle(color: t.muted, fontSize: 13),
               ),
               GestureDetector(
@@ -236,7 +238,7 @@ class FoodSearchSection extends HookConsumerWidget {
                       : null,
                 ),
                 child: Text(
-                  '登録する →',
+                  l.foodRegisterLink,
                   style: TextStyle(
                     color: t.accent,
                     fontSize: 13,
@@ -349,7 +351,7 @@ class _BarcodeScannerPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('バーコードをスキャン'),
+        title: Text(AppLocalizations.of(context)!.foodScanTitle),
       ),
       body: Stack(
         children: [
@@ -378,7 +380,7 @@ class _BarcodeScannerPage extends StatelessWidget {
             left: 0,
             right: 0,
             child: Text(
-              'バーコードを枠内に合わせてください',
+              AppLocalizations.of(context)!.foodScanHint,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white, fontSize: 14),
             ),

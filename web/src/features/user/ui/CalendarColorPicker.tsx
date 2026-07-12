@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePreferencesQuery, useUpdatePreferencesMutation } from "@/features/user/api/user";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { ErrorText } from "@/shared/ui";
@@ -15,9 +16,10 @@ type ColorFieldProps = {
   value: string;
   onChange: (color: string) => void;
   disabled: boolean;
+  customColorTitle: string;
 };
 
-function ColorField({ label, value, onChange, disabled }: ColorFieldProps) {
+function ColorField({ label, value, onChange, disabled, customColorTitle }: ColorFieldProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -47,7 +49,7 @@ function ColorField({ label, value, onChange, disabled }: ColorFieldProps) {
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           className="w-6 h-6 rounded cursor-pointer border border-[var(--color-line)] p-0"
-          title="カスタム色"
+          title={customColorTitle}
         />
       </div>
     </div>
@@ -55,6 +57,8 @@ function ColorField({ label, value, onChange, disabled }: ColorFieldProps) {
 }
 
 export function CalendarColorPicker() {
+  const t = useTranslations("appearance");
+  const tNav = useTranslations("nav");
   const { token, ready } = useAccessToken();
   const { data: prefs } = usePreferencesQuery(ready && Boolean(token));
   const mutation = useUpdatePreferencesMutation();
@@ -74,25 +78,30 @@ export function CalendarColorPicker() {
     mutation.mutate({ [field]: value });
   };
 
+  const customColorTitle = t("customColor");
+
   return (
     <div className="space-y-4">
       <ColorField
-        label="トレーニング"
+        label={tNav("trainings")}
         value={effectiveTraining}
         onChange={(v) => handleChange("training_color", v)}
         disabled={mutation.isPending}
+        customColorTitle={customColorTitle}
       />
       <ColorField
-        label="食事"
+        label={tNav("meals")}
         value={effectiveMeal}
         onChange={(v) => handleChange("meal_color", v)}
         disabled={mutation.isPending}
+        customColorTitle={customColorTitle}
       />
       <ColorField
-        label="体重"
+        label={tNav("weights")}
         value={effectiveWeight}
         onChange={(v) => handleChange("weight_color", v)}
         disabled={mutation.isPending}
+        customColorTitle={customColorTitle}
       />
       {mutation.isError && (
         <ErrorText>{(mutation.error as Error).message}</ErrorText>

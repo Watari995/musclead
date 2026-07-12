@@ -2,17 +2,14 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useUpdatePreferencesMutation,
   type Theme,
 } from "@/features/user/api/user";
 import { ErrorText } from "@/shared/ui";
 
-const OPTIONS: { value: Theme; label: string; description: string }[] = [
-  { value: "light", label: "ライト", description: "明るい背景" },
-  { value: "dark", label: "ダーク", description: "目に優しい暗い背景" },
-  { value: "system", label: "システム", description: "OS の設定に追従" },
-];
+const THEME_VALUES: Theme[] = ["light", "dark", "system"];
 
 // 各 theme の固定パレット(プレビュー描画時に inline で適用、 現在の theme に
 // 左右されないようにするため)
@@ -41,6 +38,7 @@ const DARK_PALETTE: Palette = {
 };
 
 export function ThemePicker() {
+  const t = useTranslations("appearance");
   const { theme, setTheme } = useTheme();
   const mutation = useUpdatePreferencesMutation();
 
@@ -61,10 +59,16 @@ export function ThemePicker() {
     // 失敗時はサーバ値が refetch で同期されるので、 そこで自動 rollback
   };
 
+  const options = THEME_VALUES.map((value) => ({
+    value,
+    label: t(value),
+    description: t(`${value}Desc` as "lightDesc" | "darkDesc" | "systemDesc"),
+  }));
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {OPTIONS.map((opt) => (
+        {options.map((opt) => (
           <ThemeCard
             key={opt.value}
             value={opt.value}

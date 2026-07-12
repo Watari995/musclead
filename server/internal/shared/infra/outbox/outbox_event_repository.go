@@ -1,11 +1,13 @@
-package paymentinfra
+package outboxinfra
 
 import (
 	"context"
+	"fmt"
 
-	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
 	"github.com/Watari995/musclead/internal/shared/dbtx"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	"github.com/Watari995/musclead/internal/shared/sqlconv"
+	"github.com/Watari995/musclead/internal/shared/sqlquery"
 	"github.com/Watari995/musclead/internal/valueobject"
 	"github.com/go-gorp/gorp/v3"
 )
@@ -14,20 +16,41 @@ type outboxEventRepository struct {
 	dbmap *gorp.DbMap
 }
 
-func NewOutboxEventRepository(dbmap *gorp.DbMap) paymentdomain.OutboxEventRepository {
+func NewOutboxEventRepository(dbmap *gorp.DbMap) shareddomain.OutboxEventRepository {
 	return &outboxEventRepository{dbmap: dbmap}
 }
 
-func (r *outboxEventRepository) FindPending(ctx context.Context, limit int) ([]*paymentdomain.OutboxEvent, error) {
+func buildFindPendingByEventTypesSQL(eventTypes []valueobject.OutboxEventType, limit int) (string, []any) {
+	values := make([]string, 0, len(eventTypes))
+	for _, v := range eventTypes {
+		value := v.Value()
+		values = append(values, value)
+	}
+	placeholders, args := sqlquery.InPlaceholders(values)
+
+	return fmt.Sprintf(`
+	SELECT id, event_type, aggregate_id, payload, published_at, publish_error, created_at, updated_at
+	FROM outbox_events
+	WHERE published_at IS NULL
+	AND event_type IN (%s)
+	ORDER BY created_at ASC LIMIT %d
+	`, placeholders, limit), args
+}
+
+func (r *outboxEventRepository) FindPendingByEventTypes(ctx context.Context, eventTypes []valueobject.OutboxEventType, limit int) ([]*shareddomain.OutboxEvent, error) {
+	if len(eventTypes) == 0 {
+		return nil, nil // 即時終了
+	}
 	q := dbtx.Querier(ctx, r.dbmap)
+
+	sqlStr, args := buildFindPendingByEventTypesSQL(eventTypes, limit)
+
 	var rows []OutboxEventModel
-	_, err := q.Select(&rows,
-		`SELECT id, event_type, aggregate_id, payload, published_at, publish_error, created_at, updated_at FROM outbox_events WHERE published_at IS NULL ORDER BY created_at ASC LIMIT ?`, limit,
-	)
+	_, err := q.Select(&rows, sqlStr, args...)
 	if err != nil {
 		return nil, err
 	}
-	outboxEvents := make([]*paymentdomain.OutboxEvent, 0, len(rows))
+	outboxEvents := make([]*shareddomain.OutboxEvent, 0, len(rows))
 	for _, row := range rows {
 		outboxEvent, err := toOutboxEvent(row)
 		if err != nil {
@@ -50,7 +73,7 @@ ON DUPLICATE KEY UPDATE
     updated_at = VALUES(updated_at)
 `
 
-func (r *outboxEventRepository) Save(ctx context.Context, event *paymentdomain.OutboxEvent) error {
+func (r *outboxEventRepository) Save(ctx context.Context, event *shareddomain.OutboxEvent) error {
 	q := dbtx.Querier(ctx, r.dbmap)
 	params, err := buildUpsertOutboxEventParams(event)
 	if err != nil {
@@ -62,7 +85,7 @@ func (r *outboxEventRepository) Save(ctx context.Context, event *paymentdomain.O
 	return nil
 }
 
-func toOutboxEvent(row OutboxEventModel) (*paymentdomain.OutboxEvent, error) {
+func toOutboxEvent(row OutboxEventModel) (*shareddomain.OutboxEvent, error) {
 	id, err := sqlconv.NewPrimaryIDFromBytes[valueobject.OutboxEventID](row.ID)
 	if err != nil {
 		return nil, err
@@ -77,7 +100,7 @@ func toOutboxEvent(row OutboxEventModel) (*paymentdomain.OutboxEvent, error) {
 	}
 	publishedAt := sqlconv.FromNullTime(row.PublishedAt)
 	publishError := sqlconv.NewStringFromNullString(row.PublishError)
-	return paymentdomain.NewOutboxEvent(
+	return shareddomain.NewOutboxEvent(
 		*id,
 		*eventType,
 		aggregateID,
@@ -89,7 +112,7 @@ func toOutboxEvent(row OutboxEventModel) (*paymentdomain.OutboxEvent, error) {
 	), nil
 }
 
-func buildUpsertOutboxEventParams(event *paymentdomain.OutboxEvent) ([]any, error) {
+func buildUpsertOutboxEventParams(event *shareddomain.OutboxEvent) ([]any, error) {
 	idBytes, err := event.ID().Bytes()
 	if err != nil {
 		return nil, err

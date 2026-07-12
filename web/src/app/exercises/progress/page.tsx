@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useExercisesQuery } from "@/features/training/api/exercises";
 import { ExerciseBestSetGraph } from "@/features/training/ui/ExerciseBestSetGraph";
@@ -12,6 +13,7 @@ function ExerciseProgressContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, ready } = useAccessToken();
+  const t = useTranslations("exercises");
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -36,12 +38,12 @@ function ExerciseProgressContent() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SectionTitle>記録グラフ</SectionTitle>
+        <SectionTitle>{t("progressGraph")}</SectionTitle>
         <Link
           href="/exercises"
           className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
         >
-          ← 種目一覧
+          {t("exercisesLink")}
         </Link>
       </div>
 
@@ -51,7 +53,7 @@ function ExerciseProgressContent() {
         disabled={exercisesQuery.isLoading || exercises.length === 0}
         className="w-full sm:w-72 border border-[var(--color-line)] rounded-md px-3 py-2 text-sm bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-1 focus:ring-[var(--color-ink)]"
       >
-        {exercises.length === 0 && <option value="">種目なし</option>}
+        {exercises.length === 0 && <option value="">{t("noExercises")}</option>}
         {exercises.map((ex) => (
           <option key={ex.id} value={ex.id}>
             {ex.name}
@@ -66,7 +68,7 @@ function ExerciseProgressContent() {
       {exerciseId ? (
         <ExerciseBestSetGraph exerciseId={exerciseId} />
       ) : (
-        <p className="text-sm text-[var(--color-ink-muted)]">種目を選択してください。</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{t("selectExercise")}</p>
       )}
     </div>
   );

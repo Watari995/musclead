@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../theme/app_tokens.dart';
 import '../theme/glass.dart';
+import '../../l10n/app_localizations.dart';
 
 /// 下部にフローティングのガラス製タブバーを持つホームシェル。
 /// `extendBody: true` でコンテンツがバーの背後に回り込み、ガラス越しに透ける。
@@ -11,34 +12,32 @@ class HomeShell extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  static const _tabs = [
-    (
-      icon: Icons.calendar_month_outlined,
-      active: Icons.calendar_month,
-      label: 'ホーム',
-    ),
-    (icon: Icons.restaurant_outlined, active: Icons.restaurant, label: '食事'),
-    (
-      icon: Icons.fitness_center_outlined,
-      active: Icons.fitness_center,
-      label: 'トレーニング',
-    ),
-    (
-      icon: Icons.monitor_weight_outlined,
-      active: Icons.monitor_weight,
-      label: '体重',
-    ),
-    (icon: Icons.person_outline, active: Icons.person, label: 'マイページ'),
+  static const _tabIcons = [
+    (icon: Icons.calendar_month_outlined, active: Icons.calendar_month),
+    (icon: Icons.restaurant_outlined, active: Icons.restaurant),
+    (icon: Icons.fitness_center_outlined, active: Icons.fitness_center),
+    (icon: Icons.monitor_weight_outlined, active: Icons.monitor_weight),
+    (icon: Icons.person_outline, active: Icons.person),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final labels = [
+      l.navHome,
+      l.navMeals,
+      l.navTraining,
+      l.navWeight,
+      l.navProfile,
+    ];
+
     return Scaffold(
       extendBody: true,
       body: navigationShell,
       bottomNavigationBar: _GlassTabBar(
         currentIndex: navigationShell.currentIndex,
-        tabs: _tabs,
+        icons: _tabIcons,
+        labels: labels,
         onTap: (i) => navigationShell.goBranch(
           i,
           initialLocation: i == navigationShell.currentIndex,
@@ -48,17 +47,19 @@ class HomeShell extends StatelessWidget {
   }
 }
 
-typedef _TabSpec = ({IconData icon, IconData active, String label});
+typedef _IconSpec = ({IconData icon, IconData active});
 
 class _GlassTabBar extends StatelessWidget {
   const _GlassTabBar({
     required this.currentIndex,
-    required this.tabs,
+    required this.icons,
+    required this.labels,
     required this.onTap,
   });
 
   final int currentIndex;
-  final List<_TabSpec> tabs;
+  final List<_IconSpec> icons;
+  final List<String> labels;
   final ValueChanged<int> onTap;
 
   @override
@@ -73,10 +74,11 @@ class _GlassTabBar extends StatelessWidget {
             height: 62,
             child: Row(
               children: [
-                for (var i = 0; i < tabs.length; i++)
+                for (var i = 0; i < icons.length; i++)
                   Expanded(
                     child: _TabItem(
-                      spec: tabs[i],
+                      spec: icons[i],
+                      label: labels[i],
                       selected: i == currentIndex,
                       onTap: () => onTap(i),
                     ),
@@ -93,11 +95,13 @@ class _GlassTabBar extends StatelessWidget {
 class _TabItem extends StatelessWidget {
   const _TabItem({
     required this.spec,
+    required this.label,
     required this.selected,
     required this.onTap,
   });
 
-  final _TabSpec spec;
+  final _IconSpec spec;
+  final String label;
   final bool selected;
   final VoidCallback onTap;
 
@@ -126,7 +130,7 @@ class _TabItem extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            spec.label,
+            label,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,

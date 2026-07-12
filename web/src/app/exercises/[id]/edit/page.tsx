@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   useExerciseQuery,
@@ -20,6 +21,7 @@ export default function EditExercisePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { token, ready } = useAccessToken();
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -29,7 +31,7 @@ export default function EditExercisePage() {
 
   if (!ready || !token) return null;
   if (query.isLoading) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
   if (query.isError) {
     return <ErrorText>{(query.error as Error).message}</ErrorText>;
@@ -57,12 +59,14 @@ function EditExerciseForm({
   onDone: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("exercises");
+  const tc = useTranslations("common");
   const [name, setName] = useState(initialName);
   const mutation = useUpdateExerciseMutation(id);
 
   return (
     <div className="space-y-6">
-      <SectionTitle>種目を編集</SectionTitle>
+      <SectionTitle>{t("editExercise")}</SectionTitle>
       <form
         className="space-y-4"
         onSubmit={(e) => {
@@ -71,7 +75,7 @@ function EditExerciseForm({
         }}
       >
         <Card className="p-5 space-y-4">
-          <Label label="種目名">
+          <Label label={t("exerciseName")}>
             <TextInput
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -91,14 +95,14 @@ function EditExerciseForm({
             onClick={onCancel}
             disabled={mutation.isPending}
           >
-            キャンセル
+            {tc("cancel")}
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending || !name.trim()}
             className="flex-1"
           >
-            {mutation.isPending ? "更新中…" : "更新する"}
+            {mutation.isPending ? tc("updating") : tc("update")}
           </Button>
         </div>
       </form>

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useMeQuery,
   useUpdateUserMutation,
@@ -21,6 +22,8 @@ import {
 export default function ProfilePage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
+  const t = useTranslations("profile");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -30,7 +33,7 @@ export default function ProfilePage() {
 
   if (!ready || !token) return null;
   if (meQuery.isLoading) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
   if (meQuery.isError) {
     return <ErrorText>{(meQuery.error as Error).message}</ErrorText>;
@@ -39,7 +42,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>プロフィール</SectionTitle>
+      <SectionTitle>{t("title")}</SectionTitle>
 
       <Card className="p-5">
         <ProfileImageEditor
@@ -69,6 +72,8 @@ function ProfileForm({
   email: string;
   onCancel: () => void;
 }) {
+  const t = useTranslations("profile");
+  const tc = useTranslations("common");
   const [name, setName] = useState(initialName);
   const [birthday, setBirthday] = useState(initialBirthday);
   const [done, setDone] = useState(false);
@@ -94,14 +99,14 @@ function ProfileForm({
         }}
       >
         <Card className="p-5 space-y-4">
-          <Label label="メールアドレス">
+          <Label label={t("email")}>
             <TextInput value={email} disabled readOnly />
           </Label>
           <p className="text-xs text-[var(--color-ink-muted)] -mt-2">
-            メールアドレスは現状変更できません
+            {t("emailNotEditable")}
           </p>
 
-          <Label label="名前">
+          <Label label={t("name")}>
             <TextInput
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -111,7 +116,7 @@ function ProfileForm({
             />
           </Label>
 
-          <Label label="誕生日(空欄で削除)">
+          <Label label={t("birthday")}>
             <TextInput
               type="date"
               value={birthday}
@@ -125,7 +130,7 @@ function ProfileForm({
           <ErrorText>{(mutation.error as Error).message}</ErrorText>
         )}
         {done && !mutation.isPending && !mutation.isError && (
-          <p className="text-sm text-[var(--color-ink-muted)]">保存しました</p>
+          <p className="text-sm text-[var(--color-ink-muted)]">{tc("saved")}</p>
         )}
 
         <div className="flex gap-3">
@@ -135,14 +140,14 @@ function ProfileForm({
             onClick={onCancel}
             disabled={mutation.isPending}
           >
-            キャンセル
+            {tc("cancel")}
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending || !hasChange || nameInvalid}
             className="flex-1"
           >
-            {mutation.isPending ? "保存中…" : "保存"}
+            {mutation.isPending ? tc("saving") : tc("save")}
           </Button>
         </div>
       </form>

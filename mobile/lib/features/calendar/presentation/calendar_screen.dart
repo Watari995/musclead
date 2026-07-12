@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/tab_page.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../notifications/data/notification_repository.dart';
 import '../../user/data/user_repository.dart';
 import '../data/calendar_dtos.dart';
@@ -37,8 +38,9 @@ class CalendarScreen extends HookConsumerWidget {
     final unreadCount =
         ref.watch(notificationsProvider).asData?.value.unreadCount ?? 0;
 
+    final l = AppLocalizations.of(context)!;
     return TabPage(
-      title: 'カレンダー',
+      title: l.calendarTitle,
       trailing: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -161,7 +163,7 @@ class _MonthHeader extends StatelessWidget {
       children: [
         IconButton(icon: const Icon(Icons.chevron_left), onPressed: onPrev),
         Text(
-          '$year年$month月',
+          AppLocalizations.of(context)!.calendarYearMonth(year, month),
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         IconButton(icon: const Icon(Icons.chevron_right), onPressed: onNext),
@@ -191,10 +193,18 @@ class _CalendarGrid extends StatelessWidget {
   final Color weightColor;
   final ValueChanged<DateTime> onSelectDate;
 
-  static const _weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final weekdays = [
+      l.calendarSun,
+      l.calendarMon,
+      l.calendarTue,
+      l.calendarWed,
+      l.calendarThu,
+      l.calendarFri,
+      l.calendarSat,
+    ];
     final t = context.tokens;
     final dayMap = {for (final d in days) d.date: d};
     final firstWeekday = DateTime(year, month, 1).weekday % 7; // Sun=0
@@ -205,7 +215,7 @@ class _CalendarGrid extends StatelessWidget {
     return Column(
       children: [
         Row(
-          children: _weekdays.asMap().entries.map((e) {
+          children: weekdays.asMap().entries.map((e) {
             final i = e.key;
             final d = e.value;
             final color = i == 0
@@ -334,8 +344,9 @@ class _DailySummarySection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(dailySummaryProvider(date));
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
-    final label = '${date.month}月${date.day}日';
+    final label = l.calendarDayLabel(date.month, date.day);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +362,7 @@ class _DailySummarySection extends ConsumerWidget {
           loading: () =>
               const Center(child: CircularProgressIndicator(strokeWidth: 2.4)),
           error: (e, _) => Text(
-            'エラー: $e',
+            l.calendarError(e),
             style: TextStyle(
               color: Theme.of(context).colorScheme.error,
               fontSize: 12,
@@ -362,7 +373,7 @@ class _DailySummarySection extends ConsumerWidget {
                 data.meals.isEmpty &&
                 data.weights.isEmpty) {
               return Text(
-                'この日の記録はありません',
+                l.calendarNoRecords,
                 style: TextStyle(fontSize: 13, color: t.muted),
               );
             }
@@ -372,11 +383,14 @@ class _DailySummarySection extends ConsumerWidget {
               children: [
                 if (data.trainings.isNotEmpty) ...[
                   _SummarySection(
-                    title: 'トレーニング',
+                    title: l.calendarTraining,
                     children: data.trainings
                         .map(
                           (tr) => _SummaryRow(
-                            left: '${tr.exerciseCount}種目 / ${tr.setCount}セット',
+                            left: l.calendarExerciseSets(
+                              tr.exerciseCount,
+                              tr.setCount,
+                            ),
                             right: DateFormat(
                               'HH:mm',
                             ).format(tr.startedAt.toLocal()),
@@ -389,10 +403,10 @@ class _DailySummarySection extends ConsumerWidget {
                 ],
                 if (data.meals.isNotEmpty) ...[
                   _SummarySection(
-                    title: '食事',
+                    title: l.calendarMeal,
                     children: [
                       _SummaryRow(
-                        left: '合計',
+                        left: l.calendarTotal,
                         right: '${totalMealCalories}kcal',
                         onTap: () => context.go('/meals'),
                       ),
@@ -402,13 +416,13 @@ class _DailySummarySection extends ConsumerWidget {
                 ],
                 if (data.weights.isNotEmpty)
                   _SummarySection(
-                    title: '体重',
+                    title: l.calendarWeight,
                     children: data.weights
                         .map(
                           (w) => _SummaryRow(
                             left: '${w.weightKg}kg',
                             right: w.bodyFatPercentage != null
-                                ? '体脂肪 ${w.bodyFatPercentage}%'
+                                ? l.weightBodyFat(w.bodyFatPercentage!)
                                 : '',
                             onTap: () => context.go('/weights'),
                           ),
@@ -502,15 +516,16 @@ class _Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _LegendItem(color: trainingColor, label: 'トレーニング', t: t),
+        _LegendItem(color: trainingColor, label: l.calendarTraining, t: t),
         const SizedBox(width: 12),
-        _LegendItem(color: mealColor, label: '食事', t: t),
+        _LegendItem(color: mealColor, label: l.calendarMeal, t: t),
         const SizedBox(width: 12),
-        _LegendItem(color: weightColor, label: '体重', t: t),
+        _LegendItem(color: weightColor, label: l.calendarWeight, t: t),
       ],
     );
   }

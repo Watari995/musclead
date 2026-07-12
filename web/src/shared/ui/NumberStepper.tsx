@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { NumberField } from "./NumberField";
 
 type NumberStepperProps = {
@@ -39,6 +42,7 @@ export function NumberStepper({
   fallback = 0,
   label,
 }: NumberStepperProps) {
+  const t = useTranslations("common");
   const current = value ?? fallback;
 
   const nudge = (delta: number) => {
@@ -55,7 +59,7 @@ export function NumberStepper({
         className={stepBtn}
         onClick={() => nudge(-step)}
         disabled={min !== undefined && current <= min}
-        aria-label={label ? `${label}を減らす` : "減らす"}
+        aria-label={label ? t("decreaseLabel", { label }) : t("decrease")}
       >
         −
       </button>
@@ -74,7 +78,7 @@ export function NumberStepper({
         className={stepBtn}
         onClick={() => nudge(step)}
         disabled={max !== undefined && current >= max}
-        aria-label={label ? `${label}を増やす` : "増やす"}
+        aria-label={label ? t("increaseLabel", { label }) : t("increase")}
       >
         ＋
       </button>

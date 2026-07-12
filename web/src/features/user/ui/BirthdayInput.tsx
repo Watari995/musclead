@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { DayPicker } from "react-day-picker";
 import { Popover } from "@/shared/ui";
 
@@ -18,6 +19,7 @@ export function BirthdayInput({
   disabled,
   required,
 }: Props) {
+  const t = useTranslations("birthdayInput");
   const selected = useMemo(() => parseISODate(value), [value]);
 
   const today = useMemo(() => new Date(), []);
@@ -51,7 +53,7 @@ export function BirthdayInput({
                   : "text-[var(--color-ink-muted)]"
               }
             >
-              {selected ? formatDisplay(selected) : "選択してください"}
+              {selected ? t("dateFormat", { year: selected.getFullYear(), month: selected.getMonth() + 1, day: selected.getDate() }) : t("placeholder")}
             </span>
             <CalendarIcon />
           </button>
@@ -98,9 +100,6 @@ function toISOShort(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-function formatDisplay(d: Date): string {
-  return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
-}
 
 function CalendarIcon() {
   return (

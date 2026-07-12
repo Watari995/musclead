@@ -18,6 +18,7 @@ import {
   useExercisesQuery,
   useLastSessionSetsQuery,
 } from "@/features/training/api/exercises";
+import { useTranslations } from "next-intl";
 import { Button, Card, ErrorText, Label, TextInput } from "@/shared/ui";
 import { ExerciseField } from "./ExerciseField";
 
@@ -43,6 +44,9 @@ export function TrainingForm({
   errorMessage,
   onCancel,
 }: Props) {
+  const t = useTranslations("trainings");
+  const tCommon = useTranslations("common");
+
   // 既存の `setDraft((d) => ...)` 呼び出しをそのまま使えるよう、
   // 関数型アップデートを controlled な onChange に橋渡しするアダプタ。
   const setDraft = (
@@ -73,7 +77,7 @@ export function TrainingForm({
       {/* メタ情報 */}
       <Card className="p-4 sm:p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Label label="開始時刻">
+          <Label label={t("startTime")}>
             <TextInput
               type="datetime-local"
               value={draft.startedAt}
@@ -84,7 +88,7 @@ export function TrainingForm({
               disabled={submitting}
             />
           </Label>
-          <Label label="終了時刻(任意)">
+          <Label label={t("endTime")}>
             <TextInput
               type="datetime-local"
               value={draft.endedAt}
@@ -95,7 +99,7 @@ export function TrainingForm({
             />
           </Label>
         </div>
-        <Label label="メモ">
+        <Label label={tCommon("memo")}>
           <textarea
             value={draft.memo}
             onChange={(e) =>
@@ -103,7 +107,7 @@ export function TrainingForm({
             }
             rows={2}
             className="block w-full px-3 py-2 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
-            placeholder="セッション全体のメモ(任意)"
+            placeholder={t("sessionMemo")}
             disabled={submitting}
           />
         </Label>
@@ -155,7 +159,7 @@ export function TrainingForm({
           disabled={submitting}
           fullWidth
         >
-          + 種目を追加
+          {t("addExercise")}
         </Button>
       </div>
 
@@ -169,7 +173,7 @@ export function TrainingForm({
             onClick={onCancel}
             disabled={submitting}
           >
-            キャンセル
+            {tCommon("cancel")}
           </Button>
         )}
         <Button

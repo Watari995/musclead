@@ -11,25 +11,29 @@ import (
 )
 
 type NotificationHandler struct {
-	getNotifications *notificationusecase.GetNotifications
-	getNotification  *notificationusecase.GetNotification
-	readNotification *notificationusecase.ReadNotification
+	getNotifications    *notificationusecase.GetNotifications
+	getNotification     *notificationusecase.GetNotification
+	readNotification    *notificationusecase.ReadNotification
+	registerDeviceToken *notificationusecase.RegisterDeviceToken
 }
 
 func New(
 	getNotifications *notificationusecase.GetNotifications,
 	getNotification *notificationusecase.GetNotification,
 	readNotification *notificationusecase.ReadNotification,
+	registerDeviceToken *notificationusecase.RegisterDeviceToken,
 ) http.Handler {
 	h := &NotificationHandler{
-		getNotifications: getNotifications,
-		getNotification:  getNotification,
-		readNotification: readNotification,
+		getNotifications:    getNotifications,
+		getNotification:     getNotification,
+		readNotification:    readNotification,
+		registerDeviceToken: registerDeviceToken,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /notifications", h.GetNotifications)
 	mux.HandleFunc("GET /notifications/{id}", h.GetNotification)
 	mux.HandleFunc("PUT /notifications/{id}/read", h.ReadNotification)
+	mux.HandleFunc("POST /device-tokens", h.RegisterDeviceToken)
 	return mux
 }
 
@@ -116,6 +120,44 @@ func (h *NotificationHandler) ReadNotification(w http.ResponseWriter, r *http.Re
 		return
 	}
 	if _, err := h.readNotification.Execute(r.Context(), notificationusecase.ReadNotificationInput{ID: *id, UserID: userID}); err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// RegisterDeviceToken godoc
+//
+// @Summary デバイストークン登録
+// @Tags notifications
+// @Accept json
+// @Security BearerAuth
+// @Param request body notificationdto.RegisterDeviceTokenRequest true "device token"
+// @Success 204
+// @Failure 400 {object} httpx.ErrorResponse
+// @Failure 401 {object} httpx.ErrorResponse
+// @Router /device-tokens [post]
+func (h *NotificationHandler) RegisterDeviceToken(w http.ResponseWriter, r *http.Request) {
+	userID, err := httpx.UserIDFromContext(r.Context())
+	if err != nil {
+		httpx.WriteError(w, err)
+		return
+	}
+	var req notificationdto.RegisterDeviceTokenRequest
+	if err := httpx.DecodeJSON(r, &req); err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid request body"))
+		return
+	}
+	platform, err := valueobject.NewNotificationPlatformFromString(req.Platform)
+	if err != nil {
+		httpx.WriteError(w, myerror.NewBadRequestError().SetMessage("invalid platform"))
+		return
+	}
+	if err := h.registerDeviceToken.Execute(r.Context(), notificationusecase.RegisterDeviceTokenInput{
+		UserID:   userID,
+		Token:    req.Token,
+		Platform: *platform,
+	}); err != nil {
 		httpx.WriteError(w, err)
 		return
 	}

@@ -11,6 +11,7 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
 import '../data/meal_dtos.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/meal_repository.dart';
 import 'meal_template_sheet.dart';
 
@@ -19,16 +20,17 @@ class MealsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final meals = ref.watch(mealsProvider);
     return TabPage(
-      title: '食事',
+      title: l.mealTitle,
       subtitle: dateJpLong(DateTime.now()),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             icon: Icon(Icons.bookmark_outline, color: context.tokens.accent),
-            tooltip: 'テンプレートから記録',
+            tooltip: l.mealTemplateFromRecord,
             onPressed: () async {
               final template = await showMealTemplateSheet(context);
               if (template != null && context.mounted) {
@@ -79,9 +81,9 @@ class _MealsBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SummaryCard(kcal: kcal, protein: p, fat: f, carb: c),
-        const SectionTitle('今日の記録'),
+        SectionTitle(AppLocalizations.of(context)!.mealToday),
         if (today.isEmpty)
-          const _Empty(text: '今日の記録はまだありません')
+          _Empty(text: AppLocalizations.of(context)!.mealEmpty)
         else
           AppListBox(children: [for (final m in today) _MealRow(meal: m)]),
       ],
@@ -109,7 +111,10 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('合計', style: TextStyle(fontSize: 12, color: t.muted)),
+          Text(
+            AppLocalizations.of(context)!.mealTotal,
+            style: TextStyle(fontSize: 12, color: t.muted),
+          ),
           const SizedBox(height: 2),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -127,11 +132,23 @@ class _SummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          _MacroBar(label: 'タンパク質', grams: protein, color: t.macroP),
+          _MacroBar(
+            label: AppLocalizations.of(context)!.mealProtein,
+            grams: protein,
+            color: t.macroP,
+          ),
           const SizedBox(height: 10),
-          _MacroBar(label: '脂質', grams: fat, color: t.macroF),
+          _MacroBar(
+            label: AppLocalizations.of(context)!.mealFat,
+            grams: fat,
+            color: t.macroF,
+          ),
           const SizedBox(height: 10),
-          _MacroBar(label: '炭水化物', grams: carb, color: t.macroC),
+          _MacroBar(
+            label: AppLocalizations.of(context)!.mealCarb,
+            grams: carb,
+            color: t.macroC,
+          ),
         ],
       ),
     );

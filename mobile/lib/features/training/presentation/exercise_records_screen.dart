@@ -9,14 +9,7 @@ import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_repository.dart';
-
-const _periods = [
-  ('1week', '1週間'),
-  ('1month', '1ヶ月'),
-  ('3months', '3ヶ月'),
-  ('halfyear', '半年'),
-  ('1year', '1年'),
-];
+import '../../../l10n/app_localizations.dart';
 
 class ExerciseRecordsScreen extends ConsumerStatefulWidget {
   const ExerciseRecordsScreen({super.key});
@@ -32,11 +25,19 @@ class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final periods = [
+      ('1week', l.exerciseRecordsPeriod1week),
+      ('1month', l.exerciseRecordsPeriod1month),
+      ('3months', l.exerciseRecordsPeriod3months),
+      ('halfyear', l.exerciseRecordsPeriodHalfYear),
+      ('1year', l.exerciseRecordsPeriod1year),
+    ];
     final exercisesAsync = ref.watch(exercisesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('記録'),
+        title: Text(l.exerciseRecordsTitle),
         backgroundColor: Colors.transparent,
       ),
       body: SafeArea(
@@ -45,12 +46,9 @@ class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
           onRetry: () => ref.invalidate(exercisesProvider),
           data: (exercises) {
             if (exercises.isEmpty) {
-              return const Center(child: Text('種目が登録されていません'));
+              return Center(child: Text(l.exerciseRecordsNoExercises));
             }
-
-            // 初回: 最初の種目を選択
             _selectedExerciseId ??= exercises.first.id;
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -60,6 +58,7 @@ class _ExerciseRecordsScreenState extends ConsumerState<ExerciseRecordsScreen> {
                   onChanged: (id) => setState(() => _selectedExerciseId = id),
                 ),
                 _PeriodSelector(
+                  periods: periods,
                   selected: _period,
                   onChanged: (p) => setState(() => _period = p),
                 ),
@@ -127,8 +126,13 @@ class _ExerciseSelector extends StatelessWidget {
 }
 
 class _PeriodSelector extends StatelessWidget {
-  const _PeriodSelector({required this.selected, required this.onChanged});
+  const _PeriodSelector({
+    required this.periods,
+    required this.selected,
+    required this.onChanged,
+  });
 
+  final List<(String, String)> periods;
   final String selected;
   final ValueChanged<String> onChanged;
 
@@ -138,7 +142,7 @@ class _PeriodSelector extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
-        children: _periods.map((pair) {
+        children: periods.map((pair) {
           final (value, label) = pair;
           final isSelected = value == selected;
           return Expanded(
@@ -179,6 +183,7 @@ class _TimeseriesBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final async = ref.watch(
       exerciseBestSetTimeseriesProvider((exerciseId, period)),
     );
@@ -191,17 +196,17 @@ class _TimeseriesBody extends ConsumerWidget {
       data: (res) {
         final pts = res.dataPoints;
         if (pts.isEmpty) {
-          return const Center(child: Text('この期間のデータがありません'));
+          return Center(child: Text(l.exerciseRecordsNoData));
         }
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SectionTitle('重量推移 (kg)'),
+              SectionTitle(l.exerciseRecordsWeightChart),
               _WeightChart(dataPoints: pts),
               const SizedBox(height: 16),
-              const SectionTitle('レップス推移'),
+              SectionTitle(l.exerciseRecordsRepsChart),
               _RepsChart(dataPoints: pts),
             ],
           ),
@@ -230,7 +235,7 @@ class _WeightChart extends StatelessWidget {
         child: spots.length < 2
             ? Center(
                 child: Text(
-                  '記録が増えるとグラフが表示されます',
+                  AppLocalizations.of(context)!.commonGraphHint,
                   style: TextStyle(color: t.muted, fontSize: 12),
                 ),
               )
@@ -323,7 +328,6 @@ class _RepsChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-
     final groups = <BarChartGroupData>[
       for (var i = 0; i < dataPoints.length; i++)
         BarChartGroupData(

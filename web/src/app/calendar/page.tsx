@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useMonthlyCalendarQuery, useDailyCalendarQuery } from "@/features/calendar/api/calendar";
 import { usePreferencesQuery } from "@/features/user/api/user";
@@ -9,6 +10,8 @@ import { DailySummaryPanel } from "@/features/calendar/ui/DailySummaryPanel";
 import { Card } from "@/shared/ui";
 
 export default function CalendarPage() {
+  const t = useTranslations("calendar");
+  const tc = useTranslations("common");
   const { token, ready } = useAccessToken();
   const authenticated = ready && Boolean(token);
 
@@ -48,15 +51,15 @@ export default function CalendarPage() {
   };
 
   if (!ready) {
-    return <p className="text-[var(--color-ink-muted)] text-sm">読み込み中…</p>;
+    return <p className="text-[var(--color-ink-muted)] text-sm">{tc("loading")}</p>;
   }
 
   return (
     <div className="max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold mb-4">カレンダー</h1>
+      <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
       <Card className="p-4">
         {monthlyLoading ? (
-          <p className="text-[var(--color-ink-muted)] text-sm text-center py-8">読み込み中…</p>
+          <p className="text-[var(--color-ink-muted)] text-sm text-center py-8">{tc("loading")}</p>
         ) : (
           <CalendarView
             year={year}
@@ -84,21 +87,21 @@ export default function CalendarPage() {
               className="inline-block w-2 h-2 rounded-full"
               style={{ background: preferences?.training_color ?? "#4A90E2" }}
             />
-            トレーニング
+            {t("training")}
           </span>
           <span className="flex items-center gap-1">
             <span
               className="inline-block w-2 h-2 rounded-full"
               style={{ background: preferences?.meal_color ?? "#7ED321" }}
             />
-            食事
+            {t("meal")}
           </span>
           <span className="flex items-center gap-1">
             <span
               className="inline-block w-2 h-2 rounded-full"
               style={{ background: preferences?.weight_color ?? "#FF6B6B" }}
             />
-            体重
+            {t("weight")}
           </span>
         </div>
       </div>

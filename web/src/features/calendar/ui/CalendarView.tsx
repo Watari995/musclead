@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { MonthlySummaryDayDTO } from "@/shared/api/client";
 import type { PreferencesDTO } from "@/shared/api/client";
 
@@ -14,8 +15,6 @@ type Props = {
   onNextMonth: () => void;
 };
 
-const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
-
 export function CalendarView({
   year,
   month,
@@ -26,6 +25,9 @@ export function CalendarView({
   onPrevMonth,
   onNextMonth,
 }: Props) {
+  const t = useTranslations("calendar");
+  const weekdays = t.raw("weekdays") as string[];
+
   const dayMap = new Map(days.map((d) => [d.date ?? "", d]));
   const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -48,18 +50,18 @@ export function CalendarView({
           type="button"
           onClick={onPrevMonth}
           className="p-2 rounded-md hover:bg-[var(--color-surface-alt)] transition-colors"
-          aria-label="前の月"
+          aria-label={t("prevMonth")}
         >
           ‹
         </button>
         <span className="text-base font-bold">
-          {year}年{month}月
+          {t("yearMonth", { year, month })}
         </span>
         <button
           type="button"
           onClick={onNextMonth}
           className="p-2 rounded-md hover:bg-[var(--color-surface-alt)] transition-colors"
-          aria-label="次の月"
+          aria-label={t("nextMonth")}
         >
           ›
         </button>
@@ -67,7 +69,7 @@ export function CalendarView({
 
       {/* weekday labels */}
       <div className="grid grid-cols-7 mb-1">
-        {WEEKDAYS.map((d, i) => (
+        {weekdays.map((d, i) => (
           <div
             key={d}
             className={`text-center text-xs font-semibold py-1 ${i === 0 ? "text-[var(--color-accent)]" : i === 6 ? "text-blue-500" : "text-[var(--color-ink-muted)]"}`}

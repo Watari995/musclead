@@ -20,6 +20,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslations } from "next-intl";
 import type { RoutineDTO } from "@/shared/api/client";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
@@ -32,6 +33,8 @@ import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 export default function RoutinesPage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
+  const t = useTranslations("routines");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -63,26 +66,26 @@ export default function RoutinesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <SectionTitle>ルーティン</SectionTitle>
+        <SectionTitle>{t("title")}</SectionTitle>
         <Link href="/routines/new">
-          <Button>+ 新しいルーティン</Button>
+          <Button>{t("newRoutine")}</Button>
         </Link>
       </div>
 
       {query.isLoading && (
-        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
       )}
       {query.isError && (
         <ErrorText>{(query.error as Error).message}</ErrorText>
       )}
       {del.isError && <ErrorText>{(del.error as Error).message}</ErrorText>}
       {reorder.isError && (
-        <ErrorText>並び替えに失敗しました。 時間をおいて再度お試しください。</ErrorText>
+        <ErrorText>{tc("reorderFailed")}</ErrorText>
       )}
 
       {query.data && routines.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
-          まだルーティンが登録されていません。 「+ 新しいルーティン」 から作成してください。
+          {t("noRoutinesYet")}
         </Card>
       )}
 
@@ -102,7 +105,7 @@ export default function RoutinesPage() {
                   key={r.id}
                   routine={r}
                   onDelete={() => {
-                    if (confirm(`「${r.name}」 を削除しますか?`)) {
+                    if (confirm(t("deleteConfirm", { name: r.name ?? "" }))) {
                       del.mutate(r.id ?? "");
                     }
                   }}
@@ -126,6 +129,8 @@ function SortableRoutineCard({
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const t = useTranslations("routines");
+  const tc = useTranslations("common");
   const {
     attributes,
     listeners,
@@ -157,7 +162,7 @@ function SortableRoutineCard({
         type="button"
         {...attributes}
         {...listeners}
-        aria-label="ドラッグして並び替え"
+        aria-label={tc("dragToReorder")}
         className="shrink-0 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] touch-none cursor-grab active:cursor-grabbing px-1 h-8 inline-flex items-center"
       >
         <GripIcon />
@@ -171,7 +176,7 @@ function SortableRoutineCard({
             {routine.name}
           </span>
           <span className="text-xs text-[var(--color-ink-muted)]">
-            {(routine.routine_exercises ?? []).length} 種目
+            {t("exerciseCount", { count: (routine.routine_exercises ?? []).length })}
           </span>
         </div>
         {exerciseNames.length > 0 && (
@@ -186,7 +191,7 @@ function SortableRoutineCard({
           href={`/routines/${routine.id}/edit`}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] px-2 h-8 inline-flex items-center"
         >
-          編集
+          {tc("edit")}
         </Link>
         <button
           type="button"
@@ -194,7 +199,7 @@ function SortableRoutineCard({
           disabled={deleting}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] disabled:opacity-50 px-2 h-8"
         >
-          削除
+          {tc("delete")}
         </button>
       </div>
     </li>

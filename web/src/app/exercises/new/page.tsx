@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useCreateExerciseMutation } from "@/features/training/api/exercises";
 import {
@@ -17,6 +18,8 @@ export default function NewExercisePage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
   const [name, setName] = useState("");
+  const t = useTranslations("exercises");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -28,7 +31,7 @@ export default function NewExercisePage() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>新しい種目</SectionTitle>
+      <SectionTitle>{t("newExercisePage")}</SectionTitle>
       <form
         className="space-y-4"
         onSubmit={(e) => {
@@ -40,11 +43,11 @@ export default function NewExercisePage() {
         }}
       >
         <Card className="p-5 space-y-4">
-          <Label label="種目名">
+          <Label label={t("exerciseName")}>
             <TextInput
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="例: ベンチプレス"
+              placeholder={t("exercisePlaceholder")}
               required
               maxLength={50}
               disabled={mutation.isPending}
@@ -61,14 +64,14 @@ export default function NewExercisePage() {
             onClick={() => router.back()}
             disabled={mutation.isPending}
           >
-            キャンセル
+            {tc("cancel")}
           </Button>
           <Button
             type="submit"
             disabled={mutation.isPending || !name.trim()}
             className="flex-1"
           >
-            {mutation.isPending ? "作成中…" : "作成する"}
+            {mutation.isPending ? tc("creating") : tc("create")}
           </Button>
         </div>
       </form>

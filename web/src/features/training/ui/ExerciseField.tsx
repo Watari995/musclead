@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { Exercise } from "@/features/training/model/exercise";
 import type { ExerciseDraft, SetDraft } from "@/features/training/model/training-draft";
 import type { BestSetDTO, LastSessionSetsByExerciseDTO } from "@/shared/api/client";
@@ -47,22 +48,26 @@ export function ExerciseField({
   onRemoveSet,
   disabled,
 }: Props) {
+  const t = useTranslations("trainings");
+  const tCommon = useTranslations("common");
+  const tRoutines = useTranslations("routines");
+
   return (
     <Card className="p-3 sm:p-4 space-y-3">
       {/* header: 種目選択 + 並び替え/削除 */}
       <div className="flex items-start gap-1 sm:gap-2">
         <div className="flex-1">
-          <Label label={`種目 ${index + 1}`}>
+          <Label label={t("exercise", { index: index + 1 })}>
             <select
               value={exercise.exerciseID}
               onChange={(e) => onChange({ exerciseID: e.target.value })}
               disabled={disabled}
               required
-              aria-label={`種目${index + 1}を選択`}
+              aria-label={t("exerciseSelect", { index: index + 1 })}
               className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
             >
               <option value="" disabled>
-                種目を選択…
+                {tRoutines("selectExercise")}
               </option>
               {exercises.map((ex) => (
                 <option key={ex.id} value={ex.id}>
@@ -79,12 +84,12 @@ export function ExerciseField({
           )}
           {exercises.length === 0 && (
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-              まだ種目が登録されていません。{" "}
+              {tRoutines("noExercisesCreate")}{" "}
               <Link
                 href="/exercises/new"
                 className="underline hover:opacity-70"
               >
-                先に作成
+                {tRoutines("createFirst")}
               </Link>
             </p>
           )}
@@ -95,7 +100,7 @@ export function ExerciseField({
             onClick={onMoveUp}
             disabled={disabled || !onMoveUp}
             className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 px-2 h-11"
-            aria-label="上へ"
+            aria-label={tCommon("up")}
           >
             ↑
           </button>
@@ -104,7 +109,7 @@ export function ExerciseField({
             onClick={onMoveDown}
             disabled={disabled || !onMoveDown}
             className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] disabled:opacity-30 px-2 h-11"
-            aria-label="下へ"
+            aria-label={tCommon("down")}
           >
             ↓
           </button>
@@ -113,29 +118,29 @@ export function ExerciseField({
             onClick={onRemove}
             disabled={disabled}
             className="text-xs text-[var(--color-accent)] disabled:opacity-50 px-2 h-11"
-            aria-label={`種目${index + 1}を削除`}
+            aria-label={t("exerciseDelete", { index: index + 1 })}
           >
-            削除
+            {tCommon("delete")}
           </button>
         </div>
       </div>
 
       {/* exercise メタ: 既定の休憩 + メモ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Label label="既定の休憩(秒)">
+        <Label label={t("restExerciseDefault")}>
           <NumberField
             min={0}
             value={exercise.restSeconds ?? undefined}
-            placeholder="例: 90"
+            placeholder="90"
             onChange={(v) => onChange({ restSeconds: v ?? null })}
             disabled={disabled}
           />
         </Label>
-        <Label label="メモ">
+        <Label label={tCommon("memo")}>
           <TextInput
             value={exercise.memo}
             onChange={(e) => onChange({ memo: e.target.value })}
-            placeholder="任意"
+            placeholder={t("memoOptional")}
             disabled={disabled}
           />
         </Label>
@@ -145,9 +150,9 @@ export function ExerciseField({
       <div className="space-y-2">
         <div className="hidden sm:grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 text-xs font-medium text-[var(--color-ink-muted)]">
           <span className="w-8" />
-          <span>重量(kg)</span>
-          <span>レップ</span>
-          <span>休憩(秒、 空欄で既定)</span>
+          <span>{t("weightKg")}</span>
+          <span>{t("reps")}</span>
+          <span>{t("restSecondsHeader")}</span>
           <span />
         </div>
         {exercise.sets.map((set, setIndex) => (
@@ -167,7 +172,7 @@ export function ExerciseField({
           disabled={disabled}
           className="w-full"
         >
-          + セットを追加
+          {t("addSet")}
         </Button>
       </div>
     </Card>

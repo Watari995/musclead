@@ -8,12 +8,14 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../application/auth_controller.dart';
+import '../../../l10n/app_localizations.dart';
 
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final email = useTextEditingController();
     final password = useTextEditingController();
     final loading = useState(false);
@@ -28,11 +30,10 @@ class LoginScreen extends HookConsumerWidget {
         await ref
             .read(authControllerProvider.notifier)
             .login(email.text.trim(), password.text);
-        // 認証状態の変化で go_router が自動的に /meals へ遷移する
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = 'ログインに失敗しました';
+        error.value = l.loginFailed;
       } finally {
         if (context.mounted) loading.value = false;
       }
@@ -72,13 +73,13 @@ class LoginScreen extends HookConsumerWidget {
                 const SizedBox(height: 6),
                 Center(
                   child: Text(
-                    '筋トレ・食事・体重を一元管理',
+                    l.loginTagline,
                     style: TextStyle(fontSize: 13, color: t.muted),
                   ),
                 ),
                 const SizedBox(height: 34),
                 AppTextField(
-                  label: 'メールアドレス',
+                  label: l.loginEmailLabel,
                   controller: email,
                   hint: 'you@example.com',
                   keyboardType: TextInputType.emailAddress,
@@ -87,7 +88,7 @@ class LoginScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 14),
                 AppTextField(
-                  label: 'パスワード',
+                  label: l.loginPasswordLabel,
                   controller: password,
                   hint: '••••••••',
                   obscureText: true,
@@ -104,13 +105,13 @@ class LoginScreen extends HookConsumerWidget {
                 ],
                 const SizedBox(height: 22),
                 AppButton(
-                  label: 'ログイン',
+                  label: l.loginTitle,
                   loading: loading.value,
                   onPressed: submit,
                 ),
                 const SizedBox(height: 14),
                 AppButton(
-                  label: 'アカウントを作成',
+                  label: l.loginCreateAccountBtn,
                   variant: AppButtonVariant.text,
                   onPressed: () => context.go('/register'),
                 ),

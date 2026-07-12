@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useRecordWeightMutation,
   useWeightsQuery,
@@ -24,6 +25,8 @@ type FormState = {
 };
 
 export function RecordWeightForm() {
+  const t = useTranslations("weights");
+  const tCommon = useTranslations("common");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [success, setSuccess] = useState(false);
   const recordMutation = useRecordWeightMutation();
@@ -72,38 +75,38 @@ export function RecordWeightForm() {
           });
         }}
       >
-        <Label label="体重 (kg)">
+        <Label label={t("weightKg")}>
           <NumberStepper
             value={form.weightKg}
             onChange={(v) => setForm({ ...form, weightKg: v })}
             step={0.1}
             min={0}
-            placeholder="例: 60.0"
-            label="体重"
+            placeholder={t("exampleWeight")}
+            label={t("typeWeight")}
           />
         </Label>
-        <Label label="体脂肪率 (%) ※任意">
+        <Label label={t("bodyFat")}>
           <NumberStepper
             value={form.bodyFatPercentage}
             onChange={(v) => setForm({ ...form, bodyFatPercentage: v })}
             step={0.1}
             min={0}
             max={100}
-            placeholder="例: 18.0"
-            label="体脂肪率"
+            placeholder={t("exampleBodyFat")}
+            label={t("typeBodyFat")}
           />
         </Label>
-        <Label label="骨格筋量 (kg) ※任意">
+        <Label label={t("muscleMass")}>
           <NumberStepper
             value={form.skeletalMuscleKg}
             onChange={(v) => setForm({ ...form, skeletalMuscleKg: v })}
             step={0.1}
             min={0}
-            placeholder="例: 30.0"
-            label="骨格筋量"
+            placeholder={t("exampleMuscle")}
+            label={t("typeMuscle")}
           />
         </Label>
-        <Label label="日時">
+        <Label label={tCommon("dateTime")}>
           <TextInput
             type="datetime-local"
             value={form.measuredAt}
@@ -115,14 +118,14 @@ export function RecordWeightForm() {
           <ErrorText>{(recordMutation.error as Error).message}</ErrorText>
         )}
         {success && (
-          <p className="text-sm text-[var(--color-ink-muted)]">記録しました</p>
+          <p className="text-sm text-[var(--color-ink-muted)]">{tCommon("recorded")}</p>
         )}
         <Button
           type="submit"
           fullWidth
           disabled={recordMutation.isPending || form.weightKg === undefined}
         >
-          {recordMutation.isPending ? "記録中…" : "記録する"}
+          {recordMutation.isPending ? tCommon("recording") : tCommon("record")}
         </Button>
       </form>
     </Card>

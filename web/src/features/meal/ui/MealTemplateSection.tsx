@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useMealTemplatesQuery,
   useCreateMealTemplateMutation,
   useDeleteMealTemplateMutation,
 } from "@/features/meal/api/meal_templates";
-import { mealTypeLabel } from "@/features/meal/model/meal";
+import { mealTypeLabelKey } from "@/features/meal/model/meal";
 import type { MealTemplate } from "@/features/meal/model/meal_template";
 import { Card, SectionTitle, ErrorText, Button, Label, TextInput, NumberField } from "@/shared/ui";
 
@@ -15,19 +16,21 @@ type Props = {
 };
 
 export function MealTemplateSection({ onSelect }: Props) {
+  const t = useTranslations("mealTemplate");
+  const tCommon = useTranslations("common");
   const query = useMealTemplatesQuery();
   const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <SectionTitle>食事テンプレート</SectionTitle>
+        <SectionTitle>{t("title")}</SectionTitle>
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] underline"
         >
-          {showForm ? "キャンセル" : "+ 新規"}
+          {showForm ? tCommon("cancel") : t("new")}
         </button>
       </div>
 
@@ -36,20 +39,20 @@ export function MealTemplateSection({ onSelect }: Props) {
       )}
 
       {query.isLoading && (
-        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{tCommon("loading")}</p>
       )}
       {query.isError && (
         <ErrorText>{(query.error as Error).message}</ErrorText>
       )}
       {query.data && query.data.length === 0 && !showForm && (
         <Card className="p-4 text-center text-sm text-[var(--color-ink-muted)]">
-          テンプレートはまだありません
+          {t("noTemplates")}
         </Card>
       )}
       {query.data && query.data.length > 0 && (
         <div className="grid gap-2">
-          {query.data.map((t) => (
-            <TemplateCard key={t.id} template={t} onSelect={onSelect} />
+          {query.data.map((tmpl) => (
+            <TemplateCard key={tmpl.id} template={tmpl} onSelect={onSelect} />
           ))}
         </div>
       )}
@@ -64,6 +67,9 @@ function TemplateCard({
   template: MealTemplate;
   onSelect: (t: MealTemplate) => void;
 }) {
+  const t = useTranslations("mealTemplate");
+  const tMeals = useTranslations("meals");
+  const tCommon = useTranslations("common");
   const del = useDeleteMealTemplateMutation();
 
   return (
@@ -75,7 +81,7 @@ function TemplateCard({
       >
         <div className="font-medium text-sm truncate">{template.name}</div>
         <div className="flex gap-3 mt-0.5 text-xs text-[var(--color-ink-muted)]">
-          <span>{mealTypeLabel(template.mealType)}</span>
+          <span>{tMeals(mealTypeLabelKey(template.mealType))}</span>
           <span className="font-medium text-[var(--color-ink)]">{template.calories} kcal</span>
           <span>P {template.proteinG}g</span>
           <span>F {template.fatG}g</span>
@@ -86,13 +92,13 @@ function TemplateCard({
         type="button"
         disabled={del.isPending}
         onClick={() => {
-          if (confirm(`「${template.name}」を削除しますか?`)) {
+          if (confirm(t("deleteConfirm", { name: template.name }))) {
             del.mutate(template.id);
           }
         }}
         className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0 disabled:opacity-50"
       >
-        削除
+        {tCommon("delete")}
       </button>
     </Card>
   );
@@ -108,6 +114,9 @@ type FormState = {
 };
 
 function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
+  const t = useTranslations("mealTemplate");
+  const tMeals = useTranslations("meals");
+  const tCommon = useTranslations("common");
   const [form, setForm] = useState<FormState>({
     name: "",
     meal_type: "breakfast",
@@ -136,28 +145,28 @@ function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
   return (
     <Card className="p-4">
       <form className="space-y-3" onSubmit={handleSubmit}>
-        <Label label="テンプレート名">
+        <Label label={t("templateName")}>
           <TextInput
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="例: プロテインシェイク"
+            placeholder={t("namePlaceholder")}
             required
           />
         </Label>
-        <Label label="種類">
+        <Label label={tMeals("mealType")}>
           <select
             value={form.meal_type}
             onChange={(e) => setForm({ ...form, meal_type: e.target.value })}
             className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
           >
-            <option value="breakfast">朝食</option>
-            <option value="lunch">昼食</option>
-            <option value="dinner">夕食</option>
-            <option value="snack">間食</option>
+            <option value="breakfast">{tMeals("breakfast")}</option>
+            <option value="lunch">{tMeals("lunch")}</option>
+            <option value="dinner">{tMeals("dinner")}</option>
+            <option value="snack">{tMeals("snack")}</option>
           </select>
         </Label>
         <div className="grid grid-cols-2 gap-3">
-          <Label label="カロリー (kcal)">
+          <Label label={tMeals("calories")}>
             <NumberField
               min={0}
               placeholder="0"
@@ -165,7 +174,7 @@ function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
               onChange={(v) => setForm({ ...form, calories: v })}
             />
           </Label>
-          <Label label="タンパク質 (g)">
+          <Label label={tMeals("protein")}>
             <NumberField
               step="0.1"
               min={0}
@@ -174,7 +183,7 @@ function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
               onChange={(v) => setForm({ ...form, protein_g: v })}
             />
           </Label>
-          <Label label="脂質 (g)">
+          <Label label={tMeals("fat")}>
             <NumberField
               step="0.1"
               min={0}
@@ -183,7 +192,7 @@ function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
               onChange={(v) => setForm({ ...form, fat_g: v })}
             />
           </Label>
-          <Label label="炭水化物 (g)">
+          <Label label={tMeals("carbs")}>
             <NumberField
               step="0.1"
               min={0}
@@ -197,7 +206,7 @@ function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
           <ErrorText>{(mutation.error as Error).message}</ErrorText>
         )}
         <Button type="submit" fullWidth disabled={mutation.isPending}>
-          {mutation.isPending ? "保存中…" : "保存する"}
+          {mutation.isPending ? tCommon("saving") : tCommon("save")}
         </Button>
       </form>
     </Card>

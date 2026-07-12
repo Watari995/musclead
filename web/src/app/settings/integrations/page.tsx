@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button, Card } from "@/shared/ui";
 import { getAccessToken } from "@/shared/auth/access-token";
 
@@ -21,6 +22,7 @@ async function fetchAuthURL(): Promise<string> {
 export default function IntegrationsSettingsPage() {
   const searchParams = useSearchParams();
   const connected = searchParams.get("connected") === "true";
+  const t = useTranslations("integrations");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export default function IntegrationsSettingsPage() {
       const url = await fetchAuthURL();
       window.location.href = url;
     } catch {
-      setError("連携の開始に失敗しました。もう一度お試しください。");
+      setError(t("connectFailed"));
       setLoading(false);
     }
   };
@@ -40,15 +42,15 @@ export default function IntegrationsSettingsPage() {
   return (
     <section className="space-y-4">
       <header className="space-y-1">
-        <h2 className="text-lg font-bold tracking-tight">連携サービス</h2>
+        <h2 className="text-lg font-bold tracking-tight">{t("title")}</h2>
         <p className="text-sm text-[var(--color-ink-muted)]">
-          外部サービスと連携して、データを自動で同期します。
+          {t("desc")}
         </p>
       </header>
 
       {connected && (
         <p className="text-sm text-green-600">
-          HealthPlanet との連携が完了しました。
+          {t("healthPlanetConnected")}
         </p>
       )}
 
@@ -57,7 +59,7 @@ export default function IntegrationsSettingsPage() {
           <div className="space-y-1">
             <p className="text-sm font-semibold">Tanita HealthPlanet</p>
             <p className="text-xs text-[var(--color-ink-muted)]">
-              体重・体脂肪率・骨格筋量を自動で同期します。
+              {t("healthPlanetDesc")}
             </p>
           </div>
           <Button
@@ -66,7 +68,7 @@ export default function IntegrationsSettingsPage() {
             onClick={handleConnect}
             disabled={loading}
           >
-            {loading ? "移動中…" : connected ? "再連携する" : "連携する"}
+            {loading ? t("moving") : connected ? t("reconnect") : t("connect")}
           </Button>
         </div>
         {error && (

@@ -14,6 +14,11 @@ import (
 	weightpublicfunctions "github.com/Watari995/musclead/internal/weight/interface/publicfunctions"
 )
 
+type userCheckJob struct {
+	userID    valueobject.UserID
+	weekStart time.Time
+}
+
 // run はworker poolとschedulerを起動してブロックする。
 func run(
 	ctx context.Context,
@@ -23,17 +28,17 @@ func run(
 	weightQuery weightpublicfunctions.WeightQuery,
 	notifCommand notificationpublicfunctions.NotificationCommand,
 ) {
-	ch := make(chan valueobject.UserID, 100)
+	ch := make(chan userCheckJob, 100)
 
 	// workerのなかで処理を行う
 	var wg sync.WaitGroup
 	for range 5 {
 		wg.Go(func() {
-			for userID := range ch {
+			for job := range ch {
 				checkAndNotify(
 					ctx,
-					userID,
-					time.Now(),
+					job.userID,
+					job.weekStart,
 					userQuery,
 					trainingQuery,
 					mealQuery,
@@ -44,6 +49,8 @@ func run(
 		})
 	}
 
+	jst := time.FixedZone("JST", 9*60*60)
+
 	// tickerで毎週1かい処理を実行
 	ticker := time.NewTicker(7 * 24 * time.Hour)
 	defer ticker.Stop()
@@ -51,6 +58,9 @@ func run(
 	for {
 		select {
 		case <-ticker.C:
+			// tickerが発火した時点から7日前をweekStartとする（過去1週間を対象）。
+			// JST基準で日付を計算し、UTCとの時差による日付ずれを防ぐ。
+			weekStart := time.Now().In(jst).AddDate(0, 0, -7)
 			go func() {
 				userIDs, err := userQuery.GetAllUserIDs(ctx)
 				if err != nil {
@@ -58,7 +68,7 @@ func run(
 					return
 				}
 				for _, id := range userIDs {
-					ch <- id
+					ch <- userCheckJob{userID: id, weekStart: weekStart}
 				}
 			}()
 		case <-ctx.Done():

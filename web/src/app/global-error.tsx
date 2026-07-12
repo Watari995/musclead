@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export default function GlobalError({
   error,
@@ -10,6 +11,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
+  const t = useTranslations("globalError");
+
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
@@ -28,10 +31,10 @@ export default function GlobalError({
       >
         <div style={{ maxWidth: "32rem", margin: "0 auto" }}>
           <h1 style={{ fontSize: "1.25rem", fontWeight: 700 }}>
-            アプリケーションエラー
+            {t("title")}
           </h1>
           <p style={{ fontSize: "0.875rem", marginTop: "1rem" }}>
-            アプリケーション全体に影響する重大なエラーが発生しました。
+            {t("message")}
           </p>
           <p
             style={{
@@ -57,7 +60,7 @@ export default function GlobalError({
               cursor: "pointer",
             }}
           >
-            再試行
+            {t("retry")}
           </button>
         </div>
       </body>

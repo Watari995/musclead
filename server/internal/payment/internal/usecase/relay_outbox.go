@@ -6,6 +6,7 @@ import (
 
 	"github.com/Watari995/musclead/internal/myerror"
 	paymentdomain "github.com/Watari995/musclead/internal/payment/internal/domain"
+	shareddomain "github.com/Watari995/musclead/internal/shared/domain"
 	userpublicfunctions "github.com/Watari995/musclead/internal/user/interface/publicfunctions"
 	"github.com/Watari995/musclead/internal/valueobject"
 )
@@ -17,21 +18,26 @@ const relayBatchSize = 50
 // worker goroutine が一定間隔でこの Execute を呼ぶ (ADR 0020 ①)。
 //
 // 流れ (1件ごと):
-//  1. outboxRepo.FindPending(relayBatchSize) で未配信を取得
+//  1. outboxRepo.FindPendingByEventTypes(payment 系 event type, relayBatchSize) で未配信を取得
 //  2. payment_succeeded のみ: AggregateID(payment_id) → paymentRepo.FindByID → user_id
 //     → userQuery.GetEmailByUserID で email を補完 → publisher.Publish
 //  3. 種別を問わず MarkPublished → outboxRepo.Save (台帳から流す。 対象外の種別も溜めない)
 //
 // 冪等: ここは at-least-once (publish 後 Save 前に crash で再送あり)。 重複は consumer 側で吸収 (ADR 0020 ④⑤)。
 type RelayOutbox struct {
-	outboxRepo  paymentdomain.OutboxEventRepository
+	outboxRepo  shareddomain.OutboxEventRepository
 	paymentRepo paymentdomain.PaymentRepository
 	userQuery   userpublicfunctions.UserQuery
 	publisher   paymentdomain.Publisher
 }
 
 func (uc *RelayOutbox) Execute(ctx context.Context) error {
-	events, err := uc.outboxRepo.FindPending(ctx, relayBatchSize)
+	events, err := uc.outboxRepo.FindPendingByEventTypes(ctx, []valueobject.OutboxEventType{
+		valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentSucceeded),
+		valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentFailed),
+		valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentCanceled),
+		valueobject.NewOutboxEventTypeFromCode(valueobject.OutboxEventTypePaymentRenewed),
+	}, relayBatchSize)
 	if err != nil {
 		return myerror.NewInternalError().Wrap(err)
 	}
@@ -78,7 +84,7 @@ func (uc *RelayOutbox) Execute(ctx context.Context) error {
 }
 
 func NewRelayOutbox(
-	outboxRepo paymentdomain.OutboxEventRepository,
+	outboxRepo shareddomain.OutboxEventRepository,
 	paymentRepo paymentdomain.PaymentRepository,
 	userQuery userpublicfunctions.UserQuery,
 	publisher paymentdomain.Publisher,

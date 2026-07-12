@@ -1,0 +1,315 @@
+{
+  "@@locale": "en",
+
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonSave": "Save",
+  "commonRetry": "Retry",
+  "commonAdd": "Add",
+  "commonCreate": "Create",
+  "commonNoRecords": "No records yet",
+  "commonLoadFailed": "Failed to load",
+  "commonSaveFailed": "Failed to save",
+  "commonDeleteFailed": "Failed to delete",
+  "commonAddFailed": "Failed to add",
+  "commonReorderFailed": "Failed to save order",
+  "commonDeleteOk": "Delete",
+  "commonRecord": "Record",
+  "commonUpdate": "Update",
+  "commonGraphHint": "Graph will appear as records increase",
+  "commonNameRequired": "Please enter a name",
+  "commonCaloriesRequired": "Please enter calories",
+
+  "navHome": "Home",
+  "navMeals": "Meals",
+  "navTraining": "Training",
+  "navWeight": "Weight",
+  "navProfile": "Profile",
+
+  "loginTitle": "Login",
+  "loginFailed": "Login failed",
+  "loginTagline": "Track workouts, meals & weight",
+  "loginEmailLabel": "Email",
+  "loginPasswordLabel": "Password",
+  "loginCreateAccountBtn": "Create account",
+
+  "registerTitle": "Create account",
+  "registerFailed": "Failed to create account",
+  "registerNameLabel": "Name",
+  "registerNameHint": "John Doe",
+  "registerPasswordHint": "8+ characters",
+  "registerStartBtn": "Create and get started",
+
+  "profileTitle": "Profile",
+  "profileAccount": "Account",
+  "profileAppearance": "Appearance",
+  "profileThemeColor": "Theme color",
+  "profileCalendar": "Calendar",
+  "profileGoal": "Goals",
+  "profileWeeklyGoal": "Weekly goal",
+  "profileIntegrations": "Integrations",
+  "profileOther": "Other",
+  "profileVersion": "Version",
+  "profileLogout": "Log out",
+  "profileDeleteAccount": "Delete account",
+  "profileDeleteAccountMsg": "Your account and all data will be deleted. This cannot be undone.",
+  "profileDeleteFailed": "Failed to delete",
+  "profileAvatarSuccess": "Profile image updated",
+  "profileAvatarFailed": "Failed to update image",
+  "profileHpConnected": "HealthPlanet connected",
+  "profileHpFailed": "HealthPlanet connection failed",
+  "profileHpStartFailed": "Failed to start HealthPlanet connection",
+  "profileCalendarColors": "Calendar colors",
+  "profileThemeSystem": "System",
+  "profileThemeLight": "Light",
+  "profileThemeDark": "Dark",
+  "profileLanguage": "Language",
+  "profileLanguageJa": "日本語",
+  "profileLanguageEn": "English",
+  "profileTanitaHp": "Tanita HealthPlanet",
+
+  "weightTitle": "Weight",
+  "weightNoRecords": "No records yet",
+  "weightRecentRecords": "Recent records",
+  "weightBodyFat": "Body fat {pct}%",
+  "@weightBodyFat": {
+    "placeholders": {
+      "pct": { "type": "Object" }
+    }
+  },
+  "weightGraphHint": "Graph will appear as records increase",
+  "weightRecordTitle": "Record weight",
+  "weightKgLabel": "Weight (kg)",
+  "weightBodyFatLabel": "Body fat (%) · optional",
+  "weightMuscleLabel": "Muscle mass (kg) · optional",
+  "weightInputRequired": "Please enter your weight",
+  "weightRecordFailed": "Failed to record",
+
+  "trainingTitle": "Training",
+  "trainingExercisesLabel": "Exercises",
+  "trainingRecordsLabel": "Records",
+  "trainingRoutinesLabel": "Routines",
+  "trainingHistory": "History",
+  "trainingNoRecords": "No records yet",
+  "trainingExercisesEmpty": "No exercises. Tap + to add",
+  "trainingReorderHint": "Drag the handle to reorder",
+  "trainingAddExerciseTitle": "Add exercise",
+  "trainingExerciseCount": "{count} exercises",
+  "@trainingExerciseCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "trainingDuration": "{mins} min",
+  "@trainingDuration": {
+    "placeholders": {
+      "mins": { "type": "int" }
+    }
+  },
+  "trainingRoutineName": "Routine name",
+  "trainingRoutineHint": "Chest day",
+  "trainingNewRoutine": "New routine",
+  "trainingRoutinesEmpty": "No routines. Tap + to create",
+  "trainingSelectExercisesHint": "Select exercises (order matters)",
+  "trainingNoExercisesYet": "Add exercises first",
+  "trainingExerciseLoadFailed": "Failed to load exercises",
+  "trainingExerciseRequired": "Select at least one exercise",
+  "trainingRoutineTapHint": "{count} exercises · Tap to start",
+  "@trainingRoutineTapHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "trainingDetailTitle": "{date} log",
+  "@trainingDetailTitle": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "trainingMinutes": "min",
+  "trainingHoursLabel": "duration",
+  "trainingExerciseDefault": "Exercise",
+  "trainingMemoPrefix": "Note: {text}",
+  "@trainingMemoPrefix": {
+    "placeholders": {
+      "text": { "type": "String" }
+    }
+  },
+  "trainingDeleteConfirmTitle": "Delete record",
+  "trainingDeleteConfirmMsg": "Delete this training record?",
+  "trainingReps": "reps",
+  "trainingRecordTitle": "Training record",
+  "trainingEditTitle": "Edit record",
+  "trainingSaveBtn": "Save",
+  "trainingMemoAll": "Note (overall)",
+  "trainingMemoAllHint": "Today's condition, etc.",
+  "trainingEndTimeEmpty": "Enter end time",
+  "trainingEndTimeSet": "End {time}",
+  "@trainingEndTimeSet": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "trainingExerciseMemo": "Note",
+  "trainingExerciseMemoHint": "Form, feel, etc.",
+  "trainingAddSet": "Add set",
+  "trainingBestRecord": "Best ",
+  "trainingPrevSession": "Last ",
+  "trainingExerciseRequired2": "Add at least one exercise",
+  "trainingSelectExercise": "Select exercise",
+  "trainingNewExerciseName": "New exercise name",
+  "trainingNoExercisesCreate": "No exercises. Create one above",
+
+  "exerciseRecordsTitle": "Records",
+  "exerciseRecordsNoExercises": "No exercises registered",
+  "exerciseRecordsNoData": "No data for this period",
+  "exerciseRecordsWeightChart": "Weight progress (kg)",
+  "exerciseRecordsRepsChart": "Reps progress",
+  "exerciseRecordsPeriod1week": "1 week",
+  "exerciseRecordsPeriod1month": "1 month",
+  "exerciseRecordsPeriod3months": "3 months",
+  "exerciseRecordsPeriodHalfYear": "6 months",
+  "exerciseRecordsPeriod1year": "1 year",
+
+  "notificationTitle": "Notifications",
+  "notificationEmpty": "No notifications",
+  "notificationWeeklyGoalAchieved": "Weekly goal achieved!",
+  "notificationWeeklyGoalCheck": "Check your weekly goal",
+  "notificationDetailTitle": "Notification",
+  "notificationGoalAchievedDetail": "Weekly goal achieved! 🎉",
+  "notificationGoalResult": "Weekly goal result",
+  "notificationTraining": "Training",
+  "notificationCalorie": "Avg. calories",
+  "notificationWeightChange": "Weight change",
+
+  "weeklyGoalTitle": "Weekly goal",
+  "weeklyGoalDescription": "You'll get a check notification every Sunday.\nLeave blank for items you don't want to set.",
+  "weeklyGoalTrainingCount": "Training sessions",
+  "weeklyGoalTrainingUnit": "times / week",
+  "weeklyGoalCalorieGoal": "Avg. calorie goal",
+  "weeklyGoalCalorieUnit": "kcal max / day",
+  "weeklyGoalWeightChange": "Weight change goal",
+  "weeklyGoalWeightUnit": "kg (e.g. -0.5 to lose weight)",
+  "weeklyGoalSaving": "Saving…",
+  "weeklyGoalSave": "Save",
+  "weeklyGoalSaved": "Saved",
+  "weeklyGoalNotSet": "Not set",
+
+  "mealTitle": "Meals",
+  "mealToday": "Today's meals",
+  "mealEmpty": "No meals recorded today",
+  "mealTotal": "Total",
+  "mealProtein": "Protein",
+  "mealFat": "Fat",
+  "mealCarb": "Carbs",
+  "mealTemplateFromRecord": "Record from template",
+  "mealBreakfast": "Breakfast",
+  "mealLunch": "Lunch",
+  "mealDinner": "Dinner",
+  "mealSnack": "Snack",
+  "mealSaveFailed": "Failed to save",
+  "mealDeleteFailed": "Failed to delete",
+  "mealEditTitle": "Edit meal",
+  "mealRecordTitle": "Record meal",
+  "mealCaloriesLabel": "Calories (kcal)",
+  "mealMemoOptional": "Note · optional",
+  "mealMemoOptional2": "Note · optional",
+  "mealUpdateBtn": "Update",
+  "mealRecordBtn": "Record",
+  "mealDeleteRecord": "Delete this record",
+  "mealServingCount": "Servings",
+  "mealDeleteConfirmTitle": "Confirm delete",
+  "mealDeleteConfirmMsg": "Delete this record?",
+  "mealSaveBtn": "Save",
+
+  "mealTemplateTitle": "Meal templates",
+  "mealTemplateNew": "+ New",
+  "mealTemplateEmpty": "No templates yet",
+  "mealTemplateDeleteLabel": "Delete",
+  "mealTemplateDeleteConfirm": "Delete \"{name}\"?",
+  "@mealTemplateDeleteConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "mealTemplateDeleteFailed": "Failed to delete",
+  "mealTemplateSaveFailed": "Failed to save",
+  "mealTemplateCreateTitle": "Create template",
+  "mealTemplateNameLabel": "Template name",
+  "mealTemplateType": "Type",
+  "mealTemplateSaving": "Saving…",
+  "mealTemplateSaveBtn": "Save",
+
+  "foodSearchByName": "Search by name",
+  "foodSearchByBarcode": "Barcode",
+  "foodNameLabel": "Food name",
+  "foodNameHint": "Onigiri, protein bar…",
+  "foodBarcodeLabel": "Barcode (8–13 digits)",
+  "foodCameraScan": "Scan with camera",
+  "foodSearch": "Search",
+  "foodNotFound": "Not found",
+  "foodRegisterLink": "Register →",
+  "foodScanTitle": "Scan barcode",
+  "foodScanHint": "Align barcode within the frame",
+  "foodRegisterTitle": "Register food",
+  "foodBarcodeLabel2": "Barcode",
+  "foodNameRequired": "Please enter food name",
+  "foodNameField": "Food name *",
+  "foodCaloriesField": "Calories (kcal) *",
+  "foodRegisterBtn": "Register",
+  "foodRegisterFailed": "Failed to register",
+
+  "calendarTitle": "Calendar",
+  "calendarYearMonth": "{month}/{year}",
+  "@calendarYearMonth": {
+    "placeholders": {
+      "year": { "type": "int" },
+      "month": { "type": "int" }
+    }
+  },
+  "calendarDayLabel": "{month}/{day}",
+  "@calendarDayLabel": {
+    "placeholders": {
+      "month": { "type": "int" },
+      "day": { "type": "int" }
+    }
+  },
+  "calendarError": "Error: {error}",
+  "@calendarError": {
+    "placeholders": {
+      "error": { "type": "Object" }
+    }
+  },
+  "calendarNoRecords": "No records for this day",
+  "calendarTraining": "Training",
+  "calendarMeal": "Meals",
+  "calendarWeight": "Weight",
+  "calendarTotal": "Total",
+  "calendarSun": "Sun",
+  "calendarMon": "Mon",
+  "calendarTue": "Tue",
+  "calendarWed": "Wed",
+  "calendarThu": "Thu",
+  "calendarFri": "Fri",
+  "calendarSat": "Sat",
+  "calendarExerciseSets": "{exerciseCount} exercises / {setCount} sets",
+  "@calendarExerciseSets": {
+    "placeholders": {
+      "exerciseCount": { "type": "int" },
+      "setCount": { "type": "int" }
+    }
+  },
+  "trainingRepsUnit": "{reps} reps",
+  "@trainingRepsUnit": {
+    "placeholders": { "reps": { "type": "int" } }
+  },
+  "notificationDateFormat": "MMM d HH:mm",
+  "notificationTrainingActualGoal": "{actual} / {goal} times",
+  "@notificationTrainingActualGoal": {
+    "placeholders": {
+      "actual": { "type": "int" },
+      "goal": { "type": "int" }
+    }
+  },
+  "trainingExerciseHint": "Bench Press"
+}

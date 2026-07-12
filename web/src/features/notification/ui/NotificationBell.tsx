@@ -1,16 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useNotificationsQuery } from "../api/notifications";
 
 export function NotificationBell() {
+  const t = useTranslations("nav");
   const { data } = useNotificationsQuery();
   const unread = data?.unread_count ?? 0;
 
   return (
     <Link
       href="/notifications"
-      aria-label={`通知${unread > 0 ? `（未読${unread}件）` : ""}`}
+      aria-label={
+        unread > 0
+          ? t("notificationAria", { count: unread })
+          : t("notificationAriaEmpty")
+      }
       className="relative inline-flex items-center justify-center w-9 h-9 rounded-md text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)] transition-colors"
     >
       <BellIcon />

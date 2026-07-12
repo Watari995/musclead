@@ -49,6 +49,8 @@ terraform/**/terraform.tfvars
 .env.bak
 *.pem
 *.key
+deploy/claude_vm_key
+deploy/claude_vm_key.pub
 
 # Generated
 proto/gen/

@@ -1,4 +1,4 @@
-package paymentinfra
+package outboxinfra
 
 import (
 	"database/sql"

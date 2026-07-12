@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { RecordMealForm } from "@/features/meal/ui/RecordMealForm";
 import { SectionTitle } from "@/shared/ui";
@@ -14,6 +15,9 @@ export default function MealRecordPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const t = useTranslations("meals");
+  const tc = useTranslations("common");
+
   if (!ready || !token) return null;
 
   return (
@@ -24,9 +28,9 @@ export default function MealRecordPage() {
           onClick={() => router.back()}
           className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
         >
-          ← 戻る
+          {tc("back")}
         </button>
-        <SectionTitle>食事を記録</SectionTitle>
+        <SectionTitle>{t("recordMeal")}</SectionTitle>
       </div>
       <RecordMealForm onSuccess={() => router.push("/meals")} />
     </div>

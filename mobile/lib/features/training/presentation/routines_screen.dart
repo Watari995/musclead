@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/async_value_view.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/routine_dtos.dart';
 import '../data/training_repository.dart';
 import 'training_record_screen.dart';
@@ -28,10 +29,11 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final async = ref.watch(routinesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ルーティン'),
+        title: Text(l.trainingRoutinesLabel),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
@@ -50,7 +52,7 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
             }
             final items = _items!;
             if (items.isEmpty) {
-              return const Center(child: Text('ルーティンがありません。右上の + で作成'));
+              return Center(child: Text(l.trainingRoutinesEmpty));
             }
             return ReorderableListView.builder(
               padding: const EdgeInsets.all(16),
@@ -68,6 +70,7 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
   }
 
   void _onReorder(int oldIndex, int newIndex) {
+    final l = AppLocalizations.of(context)!;
     setState(() {
       final items = _items!;
       var target = newIndex;
@@ -82,7 +85,7 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
           if (mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('並び替えの保存に失敗しました')));
+            ).showSnackBar(SnackBar(content: Text(l.commonReorderFailed)));
           }
         });
   }
@@ -103,23 +106,34 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
-          onTap: () => Navigator.of(context, rootNavigator: true).push(
-            MaterialPageRoute<void>(
-              builder: (_) => TrainingRecordScreen(
-                initialExercises: [
-                  for (final e in r.routineExercises)
-                    (exerciseId: e.exerciseId, name: e.exerciseName ?? '種目'),
-                ],
+          onTap: () {
+            final l = AppLocalizations.of(context)!;
+            Navigator.of(context, rootNavigator: true).push(
+              MaterialPageRoute<void>(
+                builder: (_) => TrainingRecordScreen(
+                  initialExercises: [
+                    for (final e in r.routineExercises)
+                      (
+                        exerciseId: e.exerciseId,
+                        name: e.exerciseName ?? l.trainingExerciseDefault,
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
           title: Text(
             r.name,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: Text(
-            '${r.routineExercises.length} 種目 ・ タップで記録開始',
-            style: TextStyle(fontSize: 12, color: t.muted),
+          subtitle: Builder(
+            builder: (context) {
+              final l = AppLocalizations.of(context)!;
+              return Text(
+                l.trainingRoutineTapHint(r.routineExercises.length),
+                style: TextStyle(fontSize: 12, color: t.muted),
+              );
+            },
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -154,9 +168,10 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
       }
     } catch (_) {
       if (mounted) {
+        final l = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+        ).showSnackBar(SnackBar(content: Text(l.commonDeleteFailed)));
       }
     }
   }
