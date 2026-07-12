@@ -36,7 +36,7 @@ export default function NewRoutinePage() {
       <SectionTitle>{t("newRoutinePage")}</SectionTitle>
 
       {isLimitReached && (
-        <div className="rounded-md border border-[var(--color-line)] bg-[var(--color-surface-alt)] p-4 space-y-2">
+        <div className="rough bg-[var(--color-surface-alt)] p-4 space-y-2">
           <p className="text-sm text-[var(--color-ink)]">
             {t("proLimitReached")}
           </p>

@@ -51,7 +51,7 @@ function ExerciseProgressContent() {
         value={exerciseId ?? ""}
         onChange={(e) => handleChange(e.target.value)}
         disabled={exercisesQuery.isLoading || exercises.length === 0}
-        className="w-full sm:w-72 border border-[var(--color-line)] rounded-md px-3 py-2 text-sm bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-1 focus:ring-[var(--color-ink)]"
+        className="w-full sm:w-72 rough px-3 py-2 text-sm bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-1 focus:ring-[var(--color-ink)]"
       >
         {exercises.length === 0 && <option value="">{t("noExercises")}</option>}
         {exercises.map((ex) => (

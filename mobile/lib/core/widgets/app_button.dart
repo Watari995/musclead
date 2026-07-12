@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
-import '../theme/glass.dart';
+import '../theme/sketchy.dart';
 
 enum AppButtonVariant { primary, glass, text }
 
-/// プレビューの主CTA(accent塗り) / セカンダリ(ガラス) / テキストボタンに対応。
+/// プレビューの主CTA(accent 塗り) / セカンダリ(手描き輪郭) / テキストボタンに対応。
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -29,9 +29,10 @@ class AppButton extends StatelessWidget {
     final t = context.tokens;
     final enabled = onPressed != null && !loading;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final fg = switch (variant) {
-      AppButtonVariant.primary => Colors.white,
-      AppButtonVariant.glass => context.colors.onSurface,
+      AppButtonVariant.primary => isDark ? t.paper : Colors.white,
+      AppButtonVariant.glass => t.ink,
       AppButtonVariant.text => t.accent,
     };
 
@@ -83,18 +84,19 @@ class AppButton extends StatelessWidget {
     final Widget button = switch (variant) {
       AppButtonVariant.primary => Opacity(
         opacity: opacity,
-        child: Material(
+        child: RoughBox(
+          radius: BorderRadius.circular(14),
+          fill: t.accent,
           color: t.accent,
-          borderRadius: BorderRadius.circular(14),
           clipBehavior: Clip.antiAlias,
           child: inner,
         ),
       ),
       AppButtonVariant.glass => Opacity(
         opacity: opacity,
-        child: GlassSurface(
-          borderRadius: BorderRadius.circular(14),
-          shadow: false,
+        child: RoughBox(
+          radius: BorderRadius.circular(14),
+          clipBehavior: Clip.antiAlias,
           child: inner,
         ),
       ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
+import '../theme/sketchy.dart';
 
-/// 枠線主体のカード（影でなく 1px 罫線）。
+/// 手描き風の二重ストローク輪郭を持つカード。
 class AppCard extends StatelessWidget {
   const AppCard({super.key, required this.child, this.padding});
 
@@ -11,20 +12,11 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.tokens;
-    return Container(
-      padding: padding ?? const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: t.border),
-      ),
-      child: child,
-    );
+    return RoughBox(padding: padding ?? const EdgeInsets.all(15), child: child);
   }
 }
 
-/// 罫線で区切られた行リスト（iOS グループ表示）。
+/// 罫線で区切られた行リスト(iOS グループ表示)。
 class AppListBox extends StatelessWidget {
   const AppListBox({super.key, required this.children});
 
@@ -35,16 +27,13 @@ class AppListBox extends StatelessWidget {
     final t = context.tokens;
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i++) {
-      if (i > 0) rows.add(Divider(height: 1, thickness: 1, color: t.hairline));
+      if (i > 0) {
+        rows.add(Divider(height: 1, thickness: 1.4, color: t.hairline));
+      }
       rows.add(children[i]);
     }
-    return Container(
+    return RoughBox(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: t.border),
-      ),
       child: Column(children: rows),
     );
   }

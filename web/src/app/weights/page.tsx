@@ -46,7 +46,7 @@ export default function WeightsPage() {
             </Card>
           )}
           {query.data && query.data.length > 0 && (
-            <ul className="divide-y divide-[var(--color-line)] border border-[var(--color-line)] rounded-lg overflow-hidden bg-[var(--color-surface)]">
+            <ul className="divide-y divide-[var(--color-line)] rough overflow-hidden bg-[var(--color-surface)]">
               {query.data.map((w) => (
                 <WeightRow key={w.id} weight={w} />
               ))}

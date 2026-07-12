@@ -164,7 +164,7 @@ function SortableExerciseRow({
     <li
       ref={setNodeRef}
       style={style}
-      className={`bg-[var(--color-surface)] border border-[var(--color-line)] rounded-lg p-4 flex items-center justify-between gap-2 ${
+      className={`bg-[var(--color-surface)] rough p-4 flex items-center justify-between gap-2 ${
         isDragging ? "z-10 shadow-lg opacity-90" : ""
       }`}
     >

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_tokens.dart';
-import '../theme/glass.dart';
+import '../theme/sketchy.dart';
 import '../../l10n/app_localizations.dart';
 
-/// 下部にフローティングのガラス製タブバーを持つホームシェル。
-/// `extendBody: true` でコンテンツがバーの背後に回り込み、ガラス越しに透ける。
+/// 下部にフローティングの手描き風タブバーを持つホームシェル。
 class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.navigationShell});
 
@@ -32,9 +31,8 @@ class HomeShell extends StatelessWidget {
     ];
 
     return Scaffold(
-      extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: _GlassTabBar(
+      bottomNavigationBar: _TabBar(
         currentIndex: navigationShell.currentIndex,
         icons: _tabIcons,
         labels: labels,
@@ -49,8 +47,8 @@ class HomeShell extends StatelessWidget {
 
 typedef _IconSpec = ({IconData icon, IconData active});
 
-class _GlassTabBar extends StatelessWidget {
-  const _GlassTabBar({
+class _TabBar extends StatelessWidget {
+  const _TabBar({
     required this.currentIndex,
     required this.icons,
     required this.labels,
@@ -68,8 +66,8 @@ class _GlassTabBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
       child: SafeArea(
         top: false,
-        child: GlassSurface(
-          borderRadius: BorderRadius.circular(30),
+        child: RoughBox(
+          radius: RoughBox.pill,
           child: SizedBox(
             height: 62,
             child: Row(
@@ -115,17 +113,26 @@ class _TabItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          SizedBox(
             width: 46,
             height: 30,
-            decoration: BoxDecoration(
-              color: selected ? t.accentWeak : Colors.transparent,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Icon(
-              selected ? spec.active : spec.icon,
-              size: 23,
-              color: color,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (selected)
+                  RoughBox(
+                    radius: BorderRadius.circular(15),
+                    color: t.accent.withValues(alpha: 0.6),
+                    fill: Colors.transparent,
+                    strokeWidth: 1.5,
+                    child: const SizedBox(width: 40, height: 26),
+                  ),
+                Icon(
+                  selected ? spec.active : spec.icon,
+                  size: 23,
+                  color: color,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 2),

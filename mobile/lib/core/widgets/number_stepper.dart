@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
+import '../theme/sketchy.dart';
 
 /// −/＋ で増減できる数値入力（キーボード不要）。直接タイプも可能。
 class NumberStepper extends StatelessWidget {
@@ -45,14 +46,11 @@ class NumberStepper extends StatelessWidget {
           padding: const EdgeInsets.only(left: 2, bottom: 6),
           child: Text(
             label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            style: TextStyle(fontFamily: 'Caveat', fontSize: 17, color: t.ink),
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: t.border),
-            borderRadius: BorderRadius.circular(13),
-          ),
+        RoughBox(
+          radius: BorderRadius.circular(13),
           child: Row(
             children: [
               _StepButton(icon: Icons.remove, onTap: () => _nudge(-step)),

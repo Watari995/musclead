@@ -91,7 +91,7 @@ export default function NotificationDetailPage() {
   return (
     <div className="space-y-6">
       <SectionTitle>{t("notificationDetail")}</SectionTitle>
-      <div className="border border-[var(--color-line)] rounded-xl p-4 space-y-3">
+      <div className="rough p-4 space-y-3">
         {notification.notification_type === "weekly_goal" && (
           <WeeklyGoalDetail metadata={notification.metadata} t={t} />
         )}

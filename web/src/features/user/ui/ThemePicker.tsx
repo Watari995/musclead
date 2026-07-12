@@ -108,10 +108,10 @@ function ThemeCard({
       onClick={onClick}
       disabled={disabled}
       aria-pressed={selected}
-      className={`text-left rounded-lg border-2 transition-colors overflow-hidden ${
+      className={`rough text-left transition-colors overflow-hidden ${
         selected
-          ? "border-[var(--color-ink)]"
-          : "border-[var(--color-line)] hover:border-[var(--color-ink-muted)]"
+          ? ""
+          : "[--rough-color:var(--color-line)] hover:[--rough-color:var(--color-ink-muted)]"
       } disabled:opacity-60 disabled:cursor-not-allowed`}
     >
       <ThemePreview value={value} />

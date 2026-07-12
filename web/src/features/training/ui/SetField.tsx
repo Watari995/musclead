@@ -27,7 +27,7 @@ export function SetField({
   return (
     <>
       {/* モバイル */}
-      <div className="sm:hidden border border-[var(--color-line)] rounded-md p-3 space-y-2">
+      <div className="sm:hidden rough p-3 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold tracking-tight text-[var(--color-ink-muted)]">
             {t("setNumber", { num: set.setNumber })}

@@ -7,6 +7,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../l10n/app_localizations.dart';
@@ -203,11 +204,9 @@ class FoodSearchSection extends HookConsumerWidget {
 
         if (results.value.isNotEmpty) ...[
           const SizedBox(height: 10),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: t.border),
-              borderRadius: BorderRadius.circular(13),
-            ),
+          RoughBox(
+            radius: BorderRadius.circular(13),
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 for (int i = 0; i < results.value.length; i++) ...[

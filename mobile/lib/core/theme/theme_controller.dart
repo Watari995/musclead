@@ -5,13 +5,13 @@ import '../providers/core_providers.dart';
 import 'app_tokens.dart';
 
 /// 設定画面で選べるアクセント候補（プレビューのスウォッチ準拠）。
+/// Excalidraw のストロークパレットに合わせた 5 色。既定はモノクロ（[kBrandAccent] = ink）。
 const List<Color> kAccentPresets = [
-  kBrandAccent, // ブランド赤
-  Color(0xFF0A84FF), // ブルー
-  Color(0xFF00BCD4), // ターコイズ
-  Color(0xFF30C759), // グリーン
-  Color(0xFFFF9F0A), // オレンジ
-  Color(0xFFBF5AF2), // パープル
+  kBrandAccent, // モノクロ(既定)
+  Color(0xFFE03131), // レッド
+  Color(0xFF1971C2), // ブルー
+  Color(0xFF2F9E44), // グリーン
+  Color(0xFFF08C00), // オレンジ
 ];
 
 /// アクセントカラー。1 トークンで全テーマを駆動し、secure storage に永続化する。

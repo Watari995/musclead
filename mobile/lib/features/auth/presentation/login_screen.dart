@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../application/auth_controller.dart';
@@ -49,17 +50,18 @@ class LoginScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: Container(
-                    width: 62,
-                    height: 62,
-                    decoration: BoxDecoration(
-                      color: t.accent,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Icon(
-                      Icons.fitness_center,
-                      color: Colors.white,
-                      size: 34,
+                  child: RoughBox(
+                    fill: t.accent,
+                    color: t.accent,
+                    radius: BorderRadius.circular(18),
+                    child: SizedBox(
+                      width: 62,
+                      height: 62,
+                      child: Icon(
+                        Icons.fitness_center,
+                        color: context.colors.onPrimary,
+                        size: 34,
+                      ),
                     ),
                   ),
                 ),
@@ -67,7 +69,11 @@ class LoginScreen extends HookConsumerWidget {
                 const Center(
                   child: Text(
                     'musclead',
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+                    style: TextStyle(
+                      fontFamily: 'Architects Daughter',
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),

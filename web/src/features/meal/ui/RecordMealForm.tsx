@@ -210,7 +210,7 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
             <select
               value={form.meal_type}
               onChange={(e) => setForm({ ...form, meal_type: e.target.value })}
-              className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
+              className="block w-full h-11 px-3 rough bg-[var(--color-surface)] focus:outline-none focus:[--rough-color:var(--color-accent)]"
             >
               <option value="breakfast">{t("breakfast")}</option>
               <option value="lunch">{t("lunch")}</option>
@@ -256,7 +256,7 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
               value={form.memo ?? ""}
               onChange={(e) => setForm({ ...form, memo: e.target.value })}
               rows={2}
-              className="block w-full px-3 py-2 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
+              className="block w-full px-3 py-2 rough bg-[var(--color-surface)] focus:outline-none focus:[--rough-color:var(--color-accent)]"
             />
           </Label>
 
@@ -272,7 +272,7 @@ export function RecordMealForm({ prefill, onPrefillConsumed, onSuccess }: Props)
                     <img
                       src={p.previewURL}
                       alt=""
-                      className="w-20 h-20 rounded-md object-cover border border-[var(--color-line)]"
+                      className="rough w-20 h-20 object-cover"
                     />
                     <button
                       type="button"

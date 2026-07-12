@@ -10,12 +10,13 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 18, 6, 8),
+      padding: const EdgeInsets.fromLTRB(4, 18, 4, 8),
       child: Text(
-        text,
+        text.toUpperCase(),
         style: TextStyle(
-          fontSize: 12.5,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
+          letterSpacing: 1.1,
           color: context.tokens.muted,
         ),
       ),
