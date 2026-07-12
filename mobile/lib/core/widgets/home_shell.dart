@@ -127,7 +127,11 @@ class _TabItem extends StatelessWidget {
                     strokeWidth: 1.5,
                     child: const SizedBox(width: 40, height: 26),
                   ),
-                Icon(selected ? spec.active : spec.icon, size: 23, color: color),
+                Icon(
+                  selected ? spec.active : spec.icon,
+                  size: 23,
+                  color: color,
+                ),
               ],
             ),
           ),

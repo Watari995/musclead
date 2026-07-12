@@ -27,10 +27,15 @@ class AppListBox extends StatelessWidget {
     final t = context.tokens;
     final rows = <Widget>[];
     for (var i = 0; i < children.length; i++) {
-      if (i > 0) rows.add(Divider(height: 1, thickness: 1.4, color: t.hairline));
+      if (i > 0) {
+        rows.add(Divider(height: 1, thickness: 1.4, color: t.hairline));
+      }
       rows.add(children[i]);
     }
-    return RoughBox(clipBehavior: Clip.antiAlias, child: Column(children: rows));
+    return RoughBox(
+      clipBehavior: Clip.antiAlias,
+      child: Column(children: rows),
+    );
   }
 }
 
