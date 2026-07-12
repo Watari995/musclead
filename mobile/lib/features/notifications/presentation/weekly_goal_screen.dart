@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/notification_repository.dart';
@@ -129,44 +130,19 @@ class _GoalField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final cs = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
-          ),
-        ),
+        Text(label, style: TextStyle(fontFamily: 'Caveat', fontSize: 18)),
         const SizedBox(height: 6),
         Row(
           children: [
             SizedBox(
               width: 120,
-              child: TextField(
+              child: RoughTextField(
                 controller: controller,
                 keyboardType: keyboardType,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.weeklyGoalNotSet,
-                  hintStyle: TextStyle(color: t.muted),
-                  filled: true,
-                  fillColor: cs.surface,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: t.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: t.border),
-                  ),
-                ),
+                hint: AppLocalizations.of(context)!.weeklyGoalNotSet,
               ),
             ),
             const SizedBox(width: 10),

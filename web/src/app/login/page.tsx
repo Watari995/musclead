@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold tracking-tight mb-6">{t("title")}</h1>
+      <h1 className="font-hand text-3xl mb-6">{t("title")}</h1>
       <Card className="p-6">
         <form
           className="space-y-4"

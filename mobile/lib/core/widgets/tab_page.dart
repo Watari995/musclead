@@ -30,11 +30,7 @@ class TabPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                  ),
+                  style: const TextStyle(fontFamily: 'Caveat', fontSize: 34),
                 ),
               ),
               ?trailing,

@@ -56,7 +56,7 @@ export default function CalendarPage() {
 
   return (
     <div className="max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
+      <h1 className="font-hand text-3xl mb-4">{t("title")}</h1>
       <Card className="p-4">
         {monthlyLoading ? (
           <p className="text-[var(--color-ink-muted)] text-sm text-center py-8">{tc("loading")}</p>

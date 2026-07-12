@@ -687,10 +687,10 @@ class _Avatar extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: context.colors.surface, width: 2),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt,
                 size: 11,
-                color: Colors.white,
+                color: context.colors.onPrimary,
               ),
             ),
           ),

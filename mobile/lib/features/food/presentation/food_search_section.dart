@@ -282,7 +282,7 @@ class _ModeTab extends StatelessWidget {
           style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : t.muted,
+            color: selected ? context.colors.onPrimary : t.muted,
           ),
         ),
       ),

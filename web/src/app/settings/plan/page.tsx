@@ -64,7 +64,7 @@ export default function PlanSettingsPage() {
   return (
     <section className="space-y-4">
       <header className="space-y-1">
-        <h2 className="text-lg font-bold tracking-tight">{t("title")}</h2>
+        <h2 className="font-hand text-2xl">{t("title")}</h2>
         <p className="text-sm text-[var(--color-ink-muted)]">
           {t("desc")}
         </p>

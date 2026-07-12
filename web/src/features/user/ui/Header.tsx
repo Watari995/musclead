@@ -50,14 +50,14 @@ export function Header() {
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
         <Link
           href="/"
-          className="flex items-center gap-2 font-bold text-lg tracking-tight text-[var(--color-ink)] hover:opacity-80 transition-opacity min-w-0"
+          className="flex items-center gap-2 font-hand text-2xl text-[var(--color-ink)] hover:opacity-80 transition-opacity min-w-0"
         >
           <Image
             src="/icon.png"
             alt=""
             width={28}
             height={28}
-            className="rounded-full shrink-0"
+            className="rough rough-pill shrink-0"
             priority
           />
           <span className="truncate">musclead</span>
@@ -132,7 +132,7 @@ export function Header() {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-[var(--color-ink)] text-[var(--color-surface)] px-4 h-9 inline-flex items-center rounded-md text-sm font-medium hover:opacity-90 whitespace-nowrap"
+                  className="rough bg-[var(--color-ink)] text-[var(--color-surface)] px-4 h-9 inline-flex items-center text-sm font-medium hover:opacity-90 whitespace-nowrap"
                 >
                   {t("register")}
                 </Link>
