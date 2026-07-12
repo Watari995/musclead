@@ -72,7 +72,7 @@ export default function WeeklyGoalSettingsPage() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold text-[var(--color-ink)]">{t("title")}</h2>
+        <h2 className="font-hand text-xl text-[var(--color-ink)]">{t("title")}</h2>
         <p className="text-sm text-[var(--color-ink-muted)] mt-1">
           {t("desc")}
         </p>

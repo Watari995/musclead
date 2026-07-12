@@ -104,10 +104,7 @@ class _FoodRegisterSheet extends HookConsumerWidget {
             children: [
               Text(
                 l.foodRegisterTitle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: const TextStyle(fontFamily: 'Caveat', fontSize: 24),
               ),
               const SizedBox(height: 16),
               if (initialBarcode != null) ...[

@@ -18,7 +18,7 @@ export default function AppearanceSettingsPage() {
     <div className="space-y-8">
       <section className="space-y-4">
         <header className="space-y-1">
-          <h2 className="text-lg font-bold tracking-tight">{t("title")}</h2>
+          <h2 className="font-hand text-2xl">{t("title")}</h2>
           <p className="text-sm text-[var(--color-ink-muted)]">
             {t("themeDesc")}
           </p>
@@ -27,7 +27,7 @@ export default function AppearanceSettingsPage() {
       </section>
       <section className="space-y-4">
         <header className="space-y-1">
-          <h2 className="text-lg font-bold tracking-tight">{t("calendarColor")}</h2>
+          <h2 className="font-hand text-2xl">{t("calendarColor")}</h2>
           <p className="text-sm text-[var(--color-ink-muted)]">
             {t("calendarColorDesc")}
           </p>
@@ -36,7 +36,7 @@ export default function AppearanceSettingsPage() {
       </section>
       <section className="space-y-4">
         <header className="space-y-1">
-          <h2 className="text-lg font-bold tracking-tight">{t("language")}</h2>
+          <h2 className="font-hand text-2xl">{t("language")}</h2>
           <p className="text-sm text-[var(--color-ink-muted)]">
             {t("languageDesc")}
           </p>

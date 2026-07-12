@@ -21,7 +21,7 @@ function WeeklyGoalDetail({ metadata, t }: { metadata: Record<string, unknown>; 
 
   return (
     <div className="space-y-4">
-      <p className="text-lg font-bold">
+      <p className="font-hand text-2xl">
         {achieved ? t("weeklyGoalAchievedBanner") : t("weeklyGoalResults")}
       </p>
       <ul className="space-y-2 text-sm">

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../data/routine_dtos.dart';
@@ -106,29 +107,32 @@ class _RoutineCreateScreenState extends ConsumerState<RoutineCreateScreen> {
             Text(
               l.trainingSelectExercisesHint,
               style: TextStyle(
-                fontWeight: FontWeight.w700,
+                fontFamily: 'Caveat',
+                fontSize: 18,
                 color: t.muted,
-                fontSize: 12.5,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             exercises.when(
               data: (list) => list.isEmpty
                   ? Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(l.trainingNoExercisesYet),
                     )
-                  : Column(
-                      children: [
-                        for (final ex in list)
-                          CheckboxListTile(
-                            value: _selected.contains(ex.id),
-                            title: Text(ex.name),
-                            dense: true,
-                            controlAffinity: ListTileControlAffinity.leading,
-                            onChanged: (_) => _toggle(ex.id),
-                          ),
-                      ],
+                  : RoughBox(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          for (final ex in list)
+                            CheckboxListTile(
+                              value: _selected.contains(ex.id),
+                              title: Text(ex.name),
+                              dense: true,
+                              controlAffinity: ListTileControlAffinity.leading,
+                              onChanged: (_) => _toggle(ex.id),
+                            ),
+                        ],
+                      ),
                     ),
               loading: () => const Padding(
                 padding: EdgeInsets.all(16),

@@ -11,7 +11,7 @@ export default async function PrivacyPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-8 space-y-8 text-[var(--color-ink)]">
-      <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <h1 className="font-hand text-3xl">{t("title")}</h1>
       <p className="text-sm text-[var(--color-ink-muted)]">{t("lastUpdated")}</p>
 
       <section className="space-y-3">

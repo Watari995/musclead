@@ -153,3 +153,59 @@ class RoughBox extends StatelessWidget {
     );
   }
 }
+
+/// ラベルなしの手描き輪郭インライン入力欄(セット入力・メモ欄など)。
+///
+/// `AppTextField` はラベル込みの入力欄用。ラベルを持たない小さな入力
+/// (数値入力の kg/回数、メモの TextField 等)は生の `TextField` +
+/// `OutlineInputBorder` を使うと `.rough` から外れて浮くため、これを使う。
+class RoughTextField extends StatelessWidget {
+  const RoughTextField({
+    super.key,
+    this.controller,
+    this.hint,
+    this.suffixText,
+    this.keyboardType,
+    this.maxLines = 1,
+    this.textAlign = TextAlign.start,
+    this.autofocus = false,
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 12,
+      vertical: 10,
+    ),
+    this.radius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  final TextEditingController? controller;
+  final String? hint;
+  final String? suffixText;
+  final TextInputType? keyboardType;
+  final int maxLines;
+  final TextAlign textAlign;
+  final bool autofocus;
+  final EdgeInsetsGeometry contentPadding;
+  final BorderRadius radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    return RoughBox(
+      radius: radius,
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        textAlign: textAlign,
+        autofocus: autofocus,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(color: tokens.subtle),
+          suffixText: suffixText,
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: contentPadding,
+        ),
+      ),
+    );
+  }
+}

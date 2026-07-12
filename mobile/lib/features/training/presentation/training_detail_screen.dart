@@ -168,7 +168,7 @@ class _ExerciseCard extends StatelessWidget {
         children: [
           Text(
             name,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            style: const TextStyle(fontFamily: 'Caveat', fontSize: 19),
           ),
           const SizedBox(height: 6),
           for (final s in exercise.sets)

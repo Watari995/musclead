@@ -62,7 +62,7 @@ function ExerciseProgressContent() {
       </select>
 
       {selectedExercise && (
-        <p className="text-lg font-bold tracking-tight">{selectedExercise.name}</p>
+        <p className="font-hand text-2xl">{selectedExercise.name}</p>
       )}
 
       {exerciseId ? (
