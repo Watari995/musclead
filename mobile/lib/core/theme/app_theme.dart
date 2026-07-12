@@ -41,6 +41,51 @@ ThemeData buildAppTheme(Brightness brightness, Color accent) {
       fontFamily: 'Architects Daughter',
       fontFamilyFallback: const ['Yomogi'],
     ),
+    // AppBar / Dialog / SnackBar / Chip は各画面が Material 標準のまま使っている
+    // ことが多いため、ここで一括して手描きトーンに寄せる（画面側の個別対応なしで
+    // 全 AppBar 利用箇所・全ダイアログに反映される）。
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      foregroundColor: tokens.ink,
+      iconTheme: IconThemeData(color: tokens.ink),
+      actionsIconTheme: IconThemeData(color: tokens.ink),
+      titleTextStyle: TextStyle(
+        fontFamily: 'Caveat',
+        fontSize: 22,
+        color: tokens.ink,
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: tokens.paper,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: tokens.border, width: 1.75),
+      ),
+      titleTextStyle: TextStyle(
+        fontFamily: 'Caveat',
+        fontSize: 20,
+        color: tokens.ink,
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: tokens.ink,
+      contentTextStyle: TextStyle(color: tokens.paper),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    chipTheme: base.chipTheme.copyWith(
+      backgroundColor: tokens.paper,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: tokens.border, width: 1.4),
+      ),
+      side: BorderSide(color: tokens.border, width: 1.4),
+    ),
     extensions: <ThemeExtension<dynamic>>[tokens],
   );
 }
