@@ -20,7 +20,7 @@ type NumberStepperProps = {
 };
 
 const stepBtn =
-  "h-11 w-11 shrink-0 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] text-xl leading-none inline-flex items-center justify-center transition-colors hover:bg-[var(--color-surface-alt)] disabled:opacity-50 disabled:cursor-not-allowed";
+  "rough rough-pill h-11 w-11 shrink-0 bg-[var(--color-surface)] text-[var(--color-ink)] text-xl leading-none inline-flex items-center justify-center transition-colors hover:bg-[var(--color-surface-alt)] disabled:opacity-50 disabled:cursor-not-allowed";
 
 /** step の小数桁で丸める(0.1 + 0.2 の浮動小数点誤差を防ぐ) */
 function roundToStep(n: number, step: number): number {

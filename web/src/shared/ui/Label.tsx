@@ -9,7 +9,7 @@ export function Label({
 }) {
   return (
     <label className="block">
-      <span className="block text-xs font-medium text-[var(--color-ink-muted)] mb-1.5">
+      <span className="font-hand block text-base text-[var(--color-ink)] mb-1.5">
         {label}
       </span>
       {children}

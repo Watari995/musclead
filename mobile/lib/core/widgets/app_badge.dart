@@ -13,20 +13,18 @@ class AppBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final (bg, fg) = switch (tone) {
-      BadgeTone.neutral => (t.accentWeak.withValues(alpha: 0), t.muted),
-      BadgeTone.accent => (t.accentWeak, t.accent),
-      BadgeTone.gold => (t.goldWeak, t.gold),
+    final (bg, border, fg) = switch (tone) {
+      BadgeTone.neutral => (Colors.transparent, t.hairline, t.muted),
+      BadgeTone.accent => (t.accentWeak, Colors.transparent, t.accent),
+      BadgeTone.gold => (t.goldWeak, Colors.transparent, t.gold),
     };
-    final background = tone == BadgeTone.neutral
-        ? context.colors.onSurface.withValues(alpha: 0.06)
-        : bg;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
-        color: background,
+        color: bg,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: border, width: 1.2),
       ),
       child: Text(
         label,

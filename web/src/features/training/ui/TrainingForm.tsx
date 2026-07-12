@@ -106,7 +106,7 @@ export function TrainingForm({
               setDraft((d) => updateTraining(d, { memo: e.target.value }))
             }
             rows={2}
-            className="block w-full px-3 py-2 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
+            className="block w-full px-3 py-2 rough bg-[var(--color-surface)] focus:outline-none focus:[--rough-color:var(--color-accent)]"
             placeholder={t("sessionMemo")}
             disabled={submitting}
           />

@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../core/error/failure.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../food/data/food_product_dtos.dart';
@@ -282,15 +283,11 @@ class MealRecordScreen extends HookConsumerWidget {
               // 日時
               GestureDetector(
                 onTap: pickDateTime,
-                child: Container(
+                child: RoughBox(
+                  radius: BorderRadius.circular(13),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 13,
                     vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: t.border),
-                    borderRadius: BorderRadius.circular(13),
-                    color: Theme.of(context).colorScheme.surface,
                   ),
                   child: Row(
                     children: [

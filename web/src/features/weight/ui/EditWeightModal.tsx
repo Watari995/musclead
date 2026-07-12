@@ -135,7 +135,7 @@ export function EditWeightModal({
               type="button"
               onClick={onClose}
               disabled={updateMutation.isPending}
-              className="flex-1 h-10 rounded-md border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)] disabled:opacity-50"
+              className="flex-1 h-10 rough text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)] disabled:opacity-50"
             >
               {tCommon("cancel")}
             </button>

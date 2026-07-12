@@ -82,10 +82,10 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
             key={m}
             type="button"
             onClick={() => handleModeChange(m)}
-            className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+            className={`rough rough-pill px-3 py-1 text-xs transition-colors ${
               mode === m
-                ? "bg-[var(--color-ink)] text-[var(--color-bg)] border-[var(--color-ink)]"
-                : "border-[var(--color-line)] text-[var(--color-ink-muted)] hover:border-[var(--color-ink)]"
+                ? "bg-[var(--color-ink)] text-[var(--color-surface)]"
+                : "text-[var(--color-ink-muted)]"
             }`}
           >
             {m === "name" ? t("searchByName") : t("barcode")}
@@ -114,7 +114,7 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
             type="button"
             onClick={handleBarcodeSearch}
             disabled={barcodeInput.trim().length < 8}
-            className="shrink-0 px-4 py-2 rounded-md bg-[var(--color-ink)] text-[var(--color-bg)] text-sm font-medium disabled:opacity-40 transition-opacity"
+            className="rough shrink-0 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-surface)] text-sm font-medium disabled:opacity-40 transition-opacity"
           >
             {t("search")}
           </button>
@@ -130,7 +130,7 @@ export function FoodSearchSection({ onSelect, onNotFound }: Props) {
       )}
 
       {showResults && (
-        <ul className="border border-[var(--color-line)] rounded-lg overflow-hidden bg-[var(--color-surface)] divide-y divide-[var(--color-line)]">
+        <ul className="rough overflow-hidden bg-[var(--color-surface)] divide-y divide-[var(--color-line)]">
           {activeResults.map((food) => (
             <li key={food.id}>
               <button

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers/core_providers.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/sketchy.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
@@ -470,14 +471,14 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
   bool _saving = false;
 
   static const _presets = [
-    Color(0xFF4A90E2),
-    Color(0xFF7ED321),
-    Color(0xFFFF6B6B),
-    Color(0xFFF5A623),
-    Color(0xFFBD10E0),
-    Color(0xFF50E3C2),
-    Color(0xFFB8E986),
-    Color(0xFF9013FE),
+    Color(0xFF1971C2),
+    Color(0xFF2F9E44),
+    Color(0xFFE03131),
+    Color(0xFFF08C00),
+    Color(0xFF9C36B6),
+    Color(0xFF0C8599),
+    Color(0xFFE64980),
+    Color(0xFF495057),
   ];
 
   String _colorToHex(Color c) {
@@ -491,7 +492,7 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
     try {
       return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
     } catch (_) {
-      return const Color(0xFF4A90E2);
+      return const Color(0xFF1971C2);
     }
   }
 
@@ -637,7 +638,7 @@ class _Avatar extends StatelessWidget {
     final t = context.tokens;
     final url = user.profileImageUrl;
     final initial = user.name.isNotEmpty ? user.name.characters.first : '?';
-    Widget placeholder() => Container(width: 52, height: 52, color: t.border);
+    Widget placeholder() => Container(width: 52, height: 52, color: t.paperAlt);
     Widget fallback() => Container(
       width: 52,
       height: 52,
@@ -645,10 +646,11 @@ class _Avatar extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          fontFamily: 'Caveat',
+          color: context.colors.onPrimary,
           fontWeight: FontWeight.w700,
-          fontSize: 18,
+          fontSize: 22,
         ),
       ),
     );
@@ -658,7 +660,10 @@ class _Avatar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          ClipOval(
+          RoughBox(
+            radius: RoughBox.pill,
+            clipBehavior: Clip.antiAlias,
+            fill: Colors.transparent,
             child: (url != null && url.isNotEmpty)
                 ? CachedNetworkImage(
                     imageUrl: url,

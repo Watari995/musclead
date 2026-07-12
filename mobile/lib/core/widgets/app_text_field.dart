@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
+import '../theme/sketchy.dart';
 
-/// プレビュー準拠の入力欄。ラベル + 枠線 + 16px（iOS の自動ズーム回避）。
-class AppTextField extends StatelessWidget {
+/// プレビュー準拠の入力欄。ラベル + 手描き輪郭 + 16px(iOS の自動ズーム回避)。
+class AppTextField extends StatefulWidget {
   const AppTextField({
     super.key,
     required this.label,
@@ -34,13 +35,40 @@ class AppTextField extends StatelessWidget {
   final Iterable<String>? autofillHints;
 
   @override
+  State<AppTextField> createState() => _AppTextFieldState();
+}
+
+class _AppTextFieldState extends State<AppTextField> {
+  late final FocusNode _focusNode = widget.focusNode ?? FocusNode();
+  late final bool _ownsFocusNode = widget.focusNode == null;
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  void _handleFocusChange() {
+    setState(() => _focused = _focusNode.hasFocus);
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    if (_ownsFocusNode) _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final cs = context.colors;
-    OutlineInputBorder border(Color c) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(13),
-      borderSide: BorderSide(color: c),
-    );
+    final hasError = widget.errorText != null;
+    final strokeColor = hasError
+        ? context.colors.error
+        : _focused
+        ? t.accent
+        : t.border;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,36 +76,42 @@ class AppTextField extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 2, bottom: 6),
           child: Text(
-            label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            widget.label,
+            style: TextStyle(fontFamily: 'Caveat', fontSize: 17, color: t.ink),
           ),
         ),
-        TextField(
-          controller: controller,
-          focusNode: focusNode,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          onChanged: onChanged,
-          onSubmitted: onSubmitted,
-          enabled: enabled,
-          autofillHints: autofillHints,
-          style: const TextStyle(fontSize: 16),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: t.subtle, fontSize: 16),
-            filled: true,
-            fillColor: cs.surface,
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 13,
-              vertical: 14,
+        RoughBox(
+          color: strokeColor,
+          radius: BorderRadius.circular(13),
+          padding: const EdgeInsets.symmetric(horizontal: 13),
+          child: TextField(
+            controller: widget.controller,
+            focusNode: _focusNode,
+            obscureText: widget.obscureText,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            onChanged: widget.onChanged,
+            onSubmitted: widget.onSubmitted,
+            enabled: widget.enabled,
+            autofillHints: widget.autofillHints,
+            style: const TextStyle(fontSize: 16),
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              hintStyle: TextStyle(color: t.subtle, fontSize: 16),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            enabledBorder: border(t.border),
-            focusedBorder: border(t.accent),
-            errorText: errorText,
           ),
         ),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.only(left: 2, top: 6),
+            child: Text(
+              widget.errorText!,
+              style: TextStyle(color: context.colors.error, fontSize: 12.5),
+            ),
+          ),
       ],
     );
   }

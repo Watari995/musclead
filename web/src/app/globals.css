@@ -6,8 +6,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-architects-daughter);
   --font-mono: var(--font-geist-mono);
+  --font-hand: var(--font-caveat);
+  --font-sketch: var(--font-architects-daughter);
 
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
@@ -15,34 +17,46 @@
   --color-surface: var(--surface);
   --color-surface-alt: var(--surface-alt);
   --color-accent: var(--accent);
+  --color-macro-protein: var(--macro-protein);
+  --color-macro-fat: var(--macro-fat);
+  --color-macro-carb: var(--macro-carb);
 }
 
-/* light mode (default) — 現状の snkrdunk テイストを維持 */
+/* light mode (default) — 手描き(Excalidraw 風)の紙 + インク基調。
+   モノクロ既定のアクセントは var(--ink) を直接参照するため、
+   ダークモードでも「ink と同色の accent が背景に沈む」問題が起きない。 */
 :root {
-  --ink: #111111;
-  --ink-muted: #6b7280;
-  --line: #e5e7eb;
-  --surface: #ffffff;
-  --surface-alt: #f6f6f6;
-  --accent: #ef3a3a;
+  --ink: #1e1e1e;
+  --ink-muted: #68685f;
+  --line: #c7c7bd;
+  --surface: #fafaf8;
+  --surface-alt: #eef0ea;
+  --accent: var(--ink);
+  --macro-protein: #1971c2;
+  --macro-fat: #e8830a;
+  --macro-carb: #2f9e44;
   color-scheme: light;
 }
 
-/* dark mode — GitHub Dark のパレットを採用。 */
+/* dark mode */
 .dark {
-  --ink: #c9d1d9;
-  --ink-muted: #8b949e;
-  --line: #30363d;
-  --surface: #0d1117;
-  --surface-alt: #161b22;
-  --accent: #f85149;
+  --ink: #e8e6de;
+  --ink-muted: #8d8e88;
+  --line: #37383d;
+  --surface: #17181c;
+  --surface-alt: #212227;
+  --accent: var(--ink);
+  --macro-protein: #5aa7f6;
+  --macro-fat: #f3a94b;
+  --macro-carb: #5ed676;
   color-scheme: dark;
 }
 
 html,
 body {
   font-family:
-    var(--font-geist-sans),
+    var(--font-architects-daughter),
+    var(--font-yomogi),
     -apple-system,
     BlinkMacSystemFont,
     "Hiragino Sans",
@@ -53,6 +67,41 @@ body {
   -webkit-font-smoothing: antialiased;
   /* mobile: 横スクロール厳禁。 子要素の overflow は個別に許可する */
   overflow-x: hidden;
+}
+
+/* ===== 手描き(Excalidraw 風)の輪郭ユーティリティ =====
+   同じ角丸の輪郭を、わずかにずらして二重に描くことでラフスケッチのような
+   線のゆらぎを表現する。カード/ボタン/入力欄など枠線を持つ要素全般で使う。
+   フチが持つ乱数っぽい変位は layout.tsx で 1 度だけ定義する SVG filter
+   #sketchy(feTurbulence + feDisplacementMap)で与える。 */
+/* 背景色は含めない(呼び出し側の bg-* ユーティリティと衝突させないため)。
+   カード/ボタンなど、塗りが必要な要素は個別に bg-[var(--color-surface)] 等を添える。
+   線の色は --rough-color 経由にしてあるので、 フォーカス時など状況に応じて
+   `focus:[--rough-color:var(--color-accent)]` のように上書きできる。 */
+.rough {
+  --rough-color: var(--color-ink);
+  position: relative;
+  border: 1.75px solid var(--rough-color);
+  border-radius: 16px 9px 18px 8px/9px 18px 8px 16px;
+}
+.rough::before {
+  content: "";
+  position: absolute;
+  inset: -2.5px;
+  border: 1.35px solid var(--rough-color);
+  border-radius: inherit;
+  opacity: 0.32;
+  transform: rotate(0.5deg);
+  pointer-events: none;
+}
+.rough-pill {
+  border-radius: 999px;
+}
+.rough-pill::before {
+  border-radius: 999px;
+}
+.icon-sketchy {
+  filter: url(#sketchy);
 }
 
 /* iOS Safari で <16px の入力欄は zoom-in されるため最低 16px を担保 */

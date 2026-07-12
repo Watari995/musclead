@@ -157,7 +157,7 @@ function CreateTemplateForm({ onCreated }: { onCreated: () => void }) {
           <select
             value={form.meal_type}
             onChange={(e) => setForm({ ...form, meal_type: e.target.value })}
-            className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
+            className="block w-full h-11 px-3 rough bg-[var(--color-surface)] focus:outline-none focus:[--rough-color:var(--color-accent)]"
           >
             <option value="breakfast">{tMeals("breakfast")}</option>
             <option value="lunch">{tMeals("lunch")}</option>

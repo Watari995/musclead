@@ -84,10 +84,10 @@ export function WeightGraph() {
               key={opt}
               type="button"
               onClick={() => setType(opt)}
-              className={`px-3 py-1.5 text-xs rounded-md border whitespace-nowrap ${
+              className={`rough px-3 py-1.5 text-xs whitespace-nowrap ${
                 type === opt
-                  ? "bg-[var(--color-ink)] text-[var(--color-surface)] border-[var(--color-ink)]"
-                  : "border-[var(--color-line)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-alt)]"
+                  ? "bg-[var(--color-ink)] text-[var(--color-surface)]"
+                  : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-alt)]"
               }`}
             >
               {typeLabels[opt]}
@@ -129,7 +129,7 @@ export function WeightGraph() {
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="var(--color-ink)"
+                  stroke="var(--color-accent)"
                   strokeWidth={2}
                   dot={false}
                 />
