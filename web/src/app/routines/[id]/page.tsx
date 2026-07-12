@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   useRoutineQuery,
@@ -19,6 +20,8 @@ export default function RoutineDetailPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const t = useTranslations("routines");
+  const tc = useTranslations("common");
   const query = useRoutineQuery(params.id, Boolean(token));
   const startTraining = useStartTrainingFromRoutineMutation();
 
@@ -26,7 +29,7 @@ export default function RoutineDetailPage() {
 
   if (query.isLoading) {
     return (
-      <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+      <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
     );
   }
   if (query.isError) {
@@ -42,17 +45,17 @@ export default function RoutineDetailPage() {
       <div className="flex items-center justify-between gap-4">
         <SectionTitle>{routine.name}</SectionTitle>
         <Link href={`/routines/${routine.id}/edit`}>
-          <Button variant="ghost">編集</Button>
+          <Button variant="ghost">{tc("edit")}</Button>
         </Link>
       </div>
 
       <Card className="p-4">
         <p className="text-xs text-[var(--color-ink-muted)] mb-3">
-          {exercises.length} 種目
+          {t("exerciseCount", { count: exercises.length })}
         </p>
         {exercises.length === 0 ? (
           <p className="text-sm text-[var(--color-ink-muted)]">
-            種目が登録されていません。
+            {t("noExercises")}
           </p>
         ) : (
           <ol className="space-y-2">
@@ -91,8 +94,8 @@ export default function RoutineDetailPage() {
         fullWidth
       >
         {startTraining.isPending
-          ? "Training を作成中…"
-          : "このルーティンで Training を開始"}
+          ? t("startingTraining")
+          : t("startTraining")}
       </Button>
     </div>
   );

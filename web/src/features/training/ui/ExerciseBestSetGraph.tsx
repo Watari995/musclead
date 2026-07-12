@@ -12,19 +12,24 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslations } from "next-intl";
 import {
   useExerciseBestSetTimeseriesQuery,
   type BestSetTimeseriesPeriod,
 } from "@/features/training/api/exercises";
 import { Card, ErrorText } from "@/shared/ui";
 
-const PERIOD_OPTIONS: { value: BestSetTimeseriesPeriod; label: string }[] = [
-  { value: "1week", label: "1週間" },
-  { value: "1month", label: "1ヶ月" },
-  { value: "3months", label: "3ヶ月" },
-  { value: "halfyear", label: "半年" },
-  { value: "1year", label: "1年" },
+const PERIOD_VALUES: BestSetTimeseriesPeriod[] = [
+  "1week", "1month", "3months", "halfyear", "1year",
 ];
+
+const PERIOD_KEY_MAP: Record<BestSetTimeseriesPeriod, string> = {
+  "1week": "period1Week",
+  "1month": "period1Month",
+  "3months": "period3Months",
+  "halfyear": "periodHalfYear",
+  "1year": "period1Year",
+};
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -39,12 +44,14 @@ const PERIOD_BUTTON_CLASS = (active: boolean) =>
   }`;
 
 function EmptyState({ loading, error }: { loading: boolean; error: Error | null }) {
-  if (loading) return <p className="text-sm text-center py-16 text-[var(--color-ink-muted)]">読み込み中…</p>;
+  const tCommon = useTranslations("common");
+  if (loading) return <p className="text-sm text-center py-16 text-[var(--color-ink-muted)]">{tCommon("loading")}</p>;
   if (error) return <ErrorText>{error.message}</ErrorText>;
-  return <p className="text-sm text-center py-16 text-[var(--color-ink-muted)]">データがありません</p>;
+  return <p className="text-sm text-center py-16 text-[var(--color-ink-muted)]">{tCommon("noData")}</p>;
 }
 
 export function ExerciseBestSetGraph({ exerciseId }: { exerciseId: string | null }) {
+  const t = useTranslations("graph");
   const [period, setPeriod] = useState<BestSetTimeseriesPeriod>("1month");
   const query = useExerciseBestSetTimeseriesQuery(exerciseId, period, Boolean(exerciseId));
 
@@ -61,7 +68,7 @@ export function ExerciseBestSetGraph({ exerciseId }: { exerciseId: string | null
     <div className="space-y-4">
       {/* 重量 LineChart */}
       <Card className="p-4 sm:p-5">
-        <p className="text-sm font-semibold text-[var(--color-ink-muted)] mb-3">重量推移 (kg)</p>
+        <p className="text-sm font-semibold text-[var(--color-ink-muted)] mb-3">{t("weightProgress")}</p>
         <div className="h-52">
           {showEmpty && (
             <EmptyState
@@ -75,7 +82,7 @@ export function ExerciseBestSetGraph({ exerciseId }: { exerciseId: string | null
                 <CartesianGrid stroke="var(--color-line)" strokeDasharray="3 3" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} domain={["auto", "auto"]} width={45} />
-                <Tooltip formatter={(v) => [`${String(v)} kg`, "重量"]} />
+                <Tooltip formatter={(v) => [`${String(v)} kg`, t("weightLabel")]} />
                 <Line
                   type="monotone"
                   dataKey="weight"
@@ -91,7 +98,7 @@ export function ExerciseBestSetGraph({ exerciseId }: { exerciseId: string | null
 
       {/* レップス BarChart */}
       <Card className="p-4 sm:p-5">
-        <p className="text-sm font-semibold text-[var(--color-ink-muted)] mb-3">レップス推移</p>
+        <p className="text-sm font-semibold text-[var(--color-ink-muted)] mb-3">{t("repsProgress")}</p>
         <div className="h-52">
           {showEmpty && (
             <EmptyState
@@ -110,7 +117,7 @@ export function ExerciseBestSetGraph({ exerciseId }: { exerciseId: string | null
                   width={45}
                   allowDecimals={false}
                 />
-                <Tooltip formatter={(v) => [`${String(v)} reps`, "レップス"]} />
+                <Tooltip formatter={(v) => [`${String(v)} reps`, t("repsLabel")]} />
                 <Bar dataKey="reps" fill="var(--color-ink)" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -120,14 +127,14 @@ export function ExerciseBestSetGraph({ exerciseId }: { exerciseId: string | null
 
       {/* 期間タブ */}
       <div className="flex gap-1 overflow-x-auto border-t border-[var(--color-line)] pt-3">
-        {PERIOD_OPTIONS.map((opt) => (
+        {PERIOD_VALUES.map((value) => (
           <button
-            key={opt.value}
+            key={value}
             type="button"
-            onClick={() => setPeriod(opt.value)}
-            className={PERIOD_BUTTON_CLASS(period === opt.value)}
+            onClick={() => setPeriod(value)}
+            className={PERIOD_BUTTON_CLASS(period === value)}
           >
-            {opt.label}
+            {t(PERIOD_KEY_MAP[value] as "period1Week" | "period1Month" | "period3Months" | "periodHalfYear" | "period1Year")}
           </button>
         ))}
       </div>

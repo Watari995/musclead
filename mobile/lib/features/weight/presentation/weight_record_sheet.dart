@@ -9,6 +9,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/number_stepper.dart';
 import '../data/weight_dtos.dart';
 import '../data/weight_repository.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// 体重記録のモーダルボトムシートを開く。
 Future<void> showWeightRecordSheet(BuildContext context) {
@@ -25,8 +26,8 @@ class _WeightRecordSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
-    // 直近の記録を初期値にして ± だけで入力完了できるようにする。
     final list = ref.read(weightsProvider).asData?.value ?? const <WeightDto>[];
     final last = list.isNotEmpty ? list.first : null;
 
@@ -45,7 +46,7 @@ class _WeightRecordSheet extends HookConsumerWidget {
     Future<void> submit() async {
       final w = Decimal.tryParse(weight.text.trim());
       if (w == null) {
-        error.value = '体重を入力してください';
+        error.value = l.weightInputRequired;
         return;
       }
       loading.value = true;
@@ -66,7 +67,7 @@ class _WeightRecordSheet extends HookConsumerWidget {
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = '記録に失敗しました';
+        error.value = l.weightRecordFailed;
       } finally {
         if (context.mounted) loading.value = false;
       }
@@ -83,22 +84,29 @@ class _WeightRecordSheet extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '体重を記録',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              Text(
+                l.weightRecordTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 18),
-              NumberStepper(label: '体重 (kg)', controller: weight, hint: '72.5'),
+              NumberStepper(
+                label: l.weightKgLabel,
+                controller: weight,
+                hint: '72.5',
+              ),
               const SizedBox(height: 14),
               NumberStepper(
-                label: '体脂肪率 (%) ・任意',
+                label: l.weightBodyFatLabel,
                 controller: bodyFat,
                 max: 100,
                 hint: '18.2',
               ),
               const SizedBox(height: 14),
               NumberStepper(
-                label: '骨格筋量 (kg) ・任意',
+                label: l.weightMuscleLabel,
                 controller: muscle,
                 hint: '33.1',
               ),
@@ -111,7 +119,7 @@ class _WeightRecordSheet extends HookConsumerWidget {
               ],
               const SizedBox(height: 20),
               AppButton(
-                label: '記録する',
+                label: l.commonRecord,
                 loading: loading.value,
                 onPressed: submit,
               ),

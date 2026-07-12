@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useDeleteWeightMutation } from "@/features/weight/api/weights";
 import {
   formatWeightDateTime,
@@ -9,6 +10,8 @@ import {
 import { EditWeightModal } from "./EditWeightModal";
 
 export function WeightRow({ weight }: { weight: Weight }) {
+  const t = useTranslations("weights");
+  const tCommon = useTranslations("common");
   const [editing, setEditing] = useState(false);
   const del = useDeleteWeightMutation();
 
@@ -27,10 +30,10 @@ export function WeightRow({ weight }: { weight: Weight }) {
           {(weight.bodyFatPercentage || weight.skeletalMuscleKg) && (
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--color-ink-muted)]">
               {weight.bodyFatPercentage && (
-                <span>体脂肪率 {weight.bodyFatPercentage}%</span>
+                <span>{t("bodyFatLabel", { value: weight.bodyFatPercentage })}</span>
               )}
               {weight.skeletalMuscleKg && (
-                <span>骨格筋量 {weight.skeletalMuscleKg} kg</span>
+                <span>{t("muscleMassLabel", { value: weight.skeletalMuscleKg })}</span>
               )}
             </div>
           )}
@@ -41,19 +44,19 @@ export function WeightRow({ weight }: { weight: Weight }) {
             onClick={() => setEditing(true)}
             className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
           >
-            編集
+            {tCommon("edit")}
           </button>
           <button
             type="button"
             onClick={() => {
-              if (confirm("この体重記録を削除しますか?")) {
+              if (confirm(t("deleteConfirm"))) {
                 del.mutate(weight.id);
               }
             }}
             disabled={del.isPending}
             className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)]"
           >
-            削除
+            {tCommon("delete")}
           </button>
         </div>
       </li>

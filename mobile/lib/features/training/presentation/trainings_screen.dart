@@ -9,6 +9,7 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
 import '../../../core/widgets/tab_page.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
 import 'training_detail_screen.dart';
@@ -18,9 +19,10 @@ class TrainingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final trainings = ref.watch(trainingsProvider);
     return TabPage(
-      title: 'トレーニング',
+      title: l.trainingTitle,
       trailing: IconButton(
         icon: Icon(Icons.add, color: context.tokens.accent),
         onPressed: () => context.push('/trainings/new'),
@@ -32,19 +34,19 @@ class TrainingsScreen extends ConsumerWidget {
           runSpacing: 10,
           children: [
             AppButton(
-              label: '種目',
+              label: l.trainingExercisesLabel,
               icon: Icons.fitness_center,
               variant: AppButtonVariant.glass,
               onPressed: () => context.push('/exercises'),
             ),
             AppButton(
-              label: '記録',
+              label: l.trainingRecordsLabel,
               icon: Icons.show_chart,
               variant: AppButtonVariant.glass,
               onPressed: () => context.push('/records'),
             ),
             AppButton(
-              label: 'ルーティン',
+              label: l.trainingRoutinesLabel,
               icon: Icons.list_alt,
               variant: AppButtonVariant.glass,
               onPressed: () => context.push('/routines'),
@@ -57,15 +59,15 @@ class TrainingsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(trainingsProvider),
           data: (list) {
             if (list.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
-                child: Center(child: Text('まだ記録がありません')),
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: Text(l.trainingNoRecords)),
               );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SectionTitle('履歴'),
+                SectionTitle(l.trainingHistory),
                 AppListBox(
                   children: [for (final tr in list) _TrainingRow(training: tr)],
                 ),
@@ -83,17 +85,15 @@ class _TrainingRow extends StatelessWidget {
 
   final TrainingDto training;
 
-  String? _duration() {
-    final end = training.endedAt;
-    if (end == null) return null;
-    final mins = end.difference(training.startedAt).inMinutes;
-    return '$mins分';
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final count = training.exercises.length;
+    final end = training.endedAt;
+    final duration = end != null
+        ? l.trainingDuration(end.difference(training.startedAt).inMinutes)
+        : null;
     return AppListRow(
       onTap: () => Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute<void>(
@@ -115,14 +115,14 @@ class _TrainingRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '$count 種目',
+                  l.trainingExerciseCount(count),
                   style: TextStyle(fontSize: 12, color: t.muted),
                 ),
               ],
             ),
           ),
-          if (_duration() != null)
-            Text(_duration()!, style: TextStyle(fontSize: 12, color: t.muted)),
+          if (duration != null)
+            Text(duration, style: TextStyle(fontSize: 12, color: t.muted)),
           const SizedBox(width: 6),
           Icon(Icons.chevron_right, color: t.subtle),
         ],

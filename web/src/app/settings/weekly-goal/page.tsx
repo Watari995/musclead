@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/shared/ui";
 import {
   useWeeklyGoalQuery,
@@ -18,6 +19,7 @@ function NullableIntInput({
   value: number | null;
   onChange: (v: number | null) => void;
 }) {
+  const tc = useTranslations("common");
   return (
     <div className="flex flex-col gap-1">
       <label className="text-sm font-medium text-[var(--color-ink)]">{label}</label>
@@ -25,7 +27,7 @@ function NullableIntInput({
         <input
           type="number"
           value={value ?? ""}
-          placeholder="未設定"
+          placeholder={tc("notSet")}
           onChange={(e) =>
             onChange(e.target.value === "" ? null : Number(e.target.value))
           }
@@ -40,6 +42,8 @@ function NullableIntInput({
 export default function WeeklyGoalSettingsPage() {
   const { data, isLoading } = useWeeklyGoalQuery();
   const upsert = useUpsertWeeklyGoalMutation();
+  const t = useTranslations("weeklyGoal");
+  const tc = useTranslations("common");
 
   const [trainingCount, setTrainingCount] = useState<number | null>(null);
   const [calorieAverage, setCalorieAverage] = useState<number | null>(null);
@@ -62,55 +66,55 @@ export default function WeeklyGoalSettingsPage() {
   }
 
   if (isLoading) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold text-[var(--color-ink)]">週次目標</h2>
+        <h2 className="text-base font-semibold text-[var(--color-ink)]">{t("title")}</h2>
         <p className="text-sm text-[var(--color-ink-muted)] mt-1">
-          毎週日曜に達成チェックの通知が届きます。設定しない項目は空欄のままにしてください。
+          {t("desc")}
         </p>
       </div>
 
       <div className="space-y-4">
         <NullableIntInput
-          label="トレーニング回数"
-          unit="回 / 週"
+          label={t("trainingCount")}
+          unit={t("trainingCountUnit")}
           value={trainingCount}
           onChange={setTrainingCount}
         />
         <NullableIntInput
-          label="平均カロリー目標"
-          unit="kcal 以内 / 日"
+          label={t("calorieAverage")}
+          unit={t("calorieAverageUnit")}
           value={calorieAverage}
           onChange={setCalorieAverage}
         />
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-[var(--color-ink)]">体重変化目標</label>
+          <label className="text-sm font-medium text-[var(--color-ink)]">{t("weightChange")}</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               step="0.1"
               value={weightChangeKg ?? ""}
-              placeholder="未設定"
+              placeholder={tc("notSet")}
               onChange={(e) =>
                 setWeightChangeKg(e.target.value === "" ? null : Number(e.target.value))
               }
               className="w-32 h-9 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-ink)]"
             />
-            <span className="text-sm text-[var(--color-ink-muted)]">kg（例: -0.5 で減量目標）</span>
+            <span className="text-sm text-[var(--color-ink-muted)]">{t("weightChangeUnit")}</span>
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={upsert.isPending}>
-          {upsert.isPending ? "保存中…" : "保存"}
+          {upsert.isPending ? tc("saving") : tc("save")}
         </Button>
-        {saved && <span className="text-sm text-green-600">保存しました</span>}
-        {upsert.isError && <span className="text-sm text-red-500">保存に失敗しました</span>}
+        {saved && <span className="text-sm text-green-600">{tc("saved")}</span>}
+        {upsert.isError && <span className="text-sm text-red-500">{t("saveFailed")}</span>}
       </div>
     </form>
   );

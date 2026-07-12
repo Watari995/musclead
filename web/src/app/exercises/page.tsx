@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   DndContext,
   KeyboardSensor,
@@ -33,6 +34,8 @@ import { Button, Card, ErrorText, SectionTitle } from "@/shared/ui";
 export default function ExercisesPage() {
   const router = useRouter();
   const { token, ready } = useAccessToken();
+  const t = useTranslations("exercises");
+  const tc = useTranslations("common");
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -64,22 +67,22 @@ export default function ExercisesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <SectionTitle>種目マスタ</SectionTitle>
+        <SectionTitle>{t("title")}</SectionTitle>
         <div className="flex items-center gap-2">
           <Link
             href="/exercises/progress"
             className="text-sm text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] px-3 py-2"
           >
-            記録グラフ →
+            {t("progressGraphLink")}
           </Link>
           <Link href="/exercises/new">
-            <Button>+ 新しい種目</Button>
+            <Button>{t("newExercise")}</Button>
           </Link>
         </div>
       </div>
 
       {query.isLoading && (
-        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
       )}
       {query.isError && (
         <ErrorText>{(query.error as Error).message}</ErrorText>
@@ -92,12 +95,12 @@ export default function ExercisesPage() {
         </ErrorText>
       )}
       {reorder.isError && (
-        <ErrorText>並び替えに失敗しました。 時間をおいて再度お試しください。</ErrorText>
+        <ErrorText>{tc("reorderFailed")}</ErrorText>
       )}
 
       {query.data && exercises.length === 0 && (
         <Card className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
-          まだ種目が登録されていません。 「+ 新しい種目」 から作成してください。
+          {t("noExercisesYet")}
         </Card>
       )}
 
@@ -117,7 +120,7 @@ export default function ExercisesPage() {
                   key={ex.id}
                   exercise={ex}
                   onDelete={() => {
-                    if (confirm(`「${ex.name}」 を削除しますか?`)) {
+                    if (confirm(t("deleteConfirm", { name: ex.name }))) {
                       del.mutate(ex.id);
                     }
                   }}
@@ -141,6 +144,8 @@ function SortableExerciseRow({
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const tc = useTranslations("common");
+  const t = useTranslations("exercises");
   const {
     attributes,
     listeners,
@@ -167,7 +172,7 @@ function SortableExerciseRow({
         type="button"
         {...attributes}
         {...listeners}
-        aria-label="ドラッグして並び替え"
+        aria-label={tc("dragToReorder")}
         className="shrink-0 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] touch-none cursor-grab active:cursor-grabbing px-1 h-8 inline-flex items-center"
       >
         <GripIcon />
@@ -183,7 +188,7 @@ function SortableExerciseRow({
           href={`/exercises/${exercise.id}/edit`}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] px-2 h-8 inline-flex items-center"
         >
-          編集
+          {tc("edit")}
         </Link>
         <button
           type="button"
@@ -191,7 +196,7 @@ function SortableExerciseRow({
           disabled={deleting}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] disabled:opacity-50 px-2 h-8"
         >
-          削除
+          {tc("delete")}
         </button>
       </div>
     </li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useUpdateWeightMutation,
   type UpsertWeightRequest,
@@ -22,6 +23,8 @@ export function EditWeightModal({
   weight: Weight;
   onClose: () => void;
 }) {
+  const t = useTranslations("weights");
+  const tCommon = useTranslations("common");
   const [form, setForm] = useState<FormState>(() => ({
     weight_kg: weight.weightKg,
     body_fat_percentage: weight.bodyFatPercentage ?? "",
@@ -38,17 +41,17 @@ export function EditWeightModal({
     >
       <button
         type="button"
-        aria-label="閉じる"
+        aria-label={t("closeAria")}
         onClick={onClose}
         className="absolute inset-0 bg-black/40"
       />
       <Card className="relative w-full max-w-md p-5 z-50">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold tracking-tight">体重を編集</h2>
+          <h2 className="text-sm font-bold tracking-tight">{t("weightEditTitle")}</h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="閉じる"
+            aria-label={t("closeAria")}
             className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] text-lg leading-none"
           >
             ×
@@ -76,12 +79,12 @@ export function EditWeightModal({
             );
           }}
         >
-          <Label label="体重 (kg)">
+          <Label label={t("weightKg")}>
             <TextInput
               type="number"
               step="0.01"
               min={0}
-              placeholder="例: 60.0"
+              placeholder={t("exampleWeight")}
               value={form.weight_kg}
               onChange={(e) =>
                 setForm({ ...form, weight_kg: e.target.value })
@@ -89,7 +92,7 @@ export function EditWeightModal({
               required
             />
           </Label>
-          <Label label="日時">
+          <Label label={tCommon("dateTime")}>
             <TextInput
               type="datetime-local"
               value={form.measured_at}
@@ -99,25 +102,25 @@ export function EditWeightModal({
               required
             />
           </Label>
-          <Label label="体脂肪率 (%) ※任意">
+          <Label label={t("bodyFatEdit")}>
             <TextInput
               type="number"
               step="0.01"
               min={0}
               max={100}
-              placeholder="例: 18.0"
+              placeholder={t("exampleBodyFat")}
               value={form.body_fat_percentage}
               onChange={(e) =>
                 setForm({ ...form, body_fat_percentage: e.target.value })
               }
             />
           </Label>
-          <Label label="骨格筋量 (kg) ※任意">
+          <Label label={t("muscleMassEdit")}>
             <TextInput
               type="number"
               step="0.01"
               min={0}
-              placeholder="例: 30.0"
+              placeholder={t("exampleMuscle")}
               value={form.skeletal_muscle_kg}
               onChange={(e) =>
                 setForm({ ...form, skeletal_muscle_kg: e.target.value })
@@ -134,14 +137,14 @@ export function EditWeightModal({
               disabled={updateMutation.isPending}
               className="flex-1 h-10 rounded-md border border-[var(--color-line)] text-sm text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)] disabled:opacity-50"
             >
-              キャンセル
+              {tCommon("cancel")}
             </button>
             <Button
               type="submit"
               fullWidth
               disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? "更新中…" : "更新する"}
+              {updateMutation.isPending ? tCommon("updating") : tCommon("update")}
             </Button>
           </div>
         </form>

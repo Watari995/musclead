@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { UpdateMealRequest } from "@/shared/api/client";
 import {
   useUpdateMealMutation,
@@ -42,6 +43,8 @@ type Props = {
 };
 
 export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
+  const t = useTranslations("meals");
+  const tCommon = useTranslations("common");
   const [form, setForm] = useState<FormState>(() => ({
     meal_type: meal.type,
     eaten_at: toLocalInput(new Date(meal.eatenAt)),
@@ -113,15 +116,15 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
     const next: LocalPhoto[] = [];
     for (const file of files) {
       if (!ACCEPT_TYPES.includes(file.type)) {
-        setUploadError("JPEG / PNG / WebP のみアップロード可能です");
+        setUploadError(tCommon("uploadError.type"));
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
-        setUploadError("ファイルサイズは 10 MB 以下にしてください");
+        setUploadError(tCommon("uploadError.size"));
         return;
       }
       if (totalPhotos + next.length >= MAX_PHOTOS) {
-        setUploadError(`写真は最大 ${MAX_PHOTOS} 枚まで追加できます`);
+        setUploadError(tCommon("uploadError.max", { max: MAX_PHOTOS }));
         break;
       }
       next.push({ file, previewURL: URL.createObjectURL(file) });
@@ -141,7 +144,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
         );
         newPaths = results.map((r) => r.path);
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "写真のアップロードに失敗しました";
+        const msg = err instanceof Error ? err.message : tCommon("uploadError.fail");
         setUploadError(msg);
         return;
       }
@@ -185,7 +188,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
           }}
         />
         {baseNutrients && (
-          <Label label="サービング数">
+          <Label label={t("servingCount")}>
             <NumberField
               step="0.5"
               min={0.5}
@@ -197,19 +200,19 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
         )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <Label label="種類">
+          <Label label={t("mealType")}>
             <select
               value={form.meal_type}
               onChange={(e) => setForm({ ...form, meal_type: e.target.value })}
               className="block w-full h-11 px-3 rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] focus:outline-none focus:border-[var(--color-ink)]"
             >
-              <option value="breakfast">朝食</option>
-              <option value="lunch">昼食</option>
-              <option value="dinner">夕食</option>
-              <option value="snack">間食</option>
+              <option value="breakfast">{t("breakfast")}</option>
+              <option value="lunch">{t("lunch")}</option>
+              <option value="dinner">{t("dinner")}</option>
+              <option value="snack">{t("snack")}</option>
             </select>
           </Label>
-          <Label label="日時">
+          <Label label={tCommon("dateTime")}>
             <TextInput
               type="datetime-local"
               value={form.eaten_at}
@@ -219,30 +222,30 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
           </Label>
           <div className="grid grid-cols-2 gap-3">
             <NumField
-              label="カロリー (kcal)"
+              label={t("calories")}
               value={form.calories}
               onChange={(v) => setForm({ ...form, calories: v })}
             />
             <NumField
-              label="タンパク質 (g)"
+              label={t("protein")}
               step="0.1"
               value={form.protein_g}
               onChange={(v) => setForm({ ...form, protein_g: v })}
             />
             <NumField
-              label="脂質 (g)"
+              label={t("fat")}
               step="0.1"
               value={form.fat_g}
               onChange={(v) => setForm({ ...form, fat_g: v })}
             />
             <NumField
-              label="炭水化物 (g)"
+              label={t("carbs")}
               step="0.1"
               value={form.carbohydrate_g}
               onChange={(v) => setForm({ ...form, carbohydrate_g: v })}
             />
           </div>
-          <Label label="メモ">
+          <Label label={tCommon("memo")}>
             <textarea
               value={form.memo}
               onChange={(e) => setForm({ ...form, memo: e.target.value })}
@@ -254,7 +257,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
           {/* 写真 */}
           <div className="space-y-2">
             <span className="block text-xs text-[var(--color-ink-muted)]">
-              写真({totalPhotos}/{MAX_PHOTOS})
+              {tCommon("photo")}({totalPhotos}/{MAX_PHOTOS})
             </span>
             {(existingPhotos.length > 0 || newPhotos.length > 0) && (
               <div className="flex flex-wrap gap-2">
@@ -269,7 +272,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
                     <button
                       type="button"
                       onClick={() => setExistingPhotos(existingPhotos.filter((_, j) => j !== i))}
-                      aria-label="削除"
+                      aria-label={tCommon("delete")}
                       disabled={isPending}
                       className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-black/70 text-white text-xs flex items-center justify-center hover:bg-black disabled:opacity-50"
                     >
@@ -291,7 +294,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
                         URL.revokeObjectURL(p.previewURL);
                         setNewPhotos(newPhotos.filter((_, j) => j !== i));
                       }}
-                      aria-label="削除"
+                      aria-label={tCommon("delete")}
                       disabled={isPending}
                       className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-black/70 text-white text-xs flex items-center justify-center hover:bg-black disabled:opacity-50"
                     >
@@ -307,7 +310,7 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
               disabled={isPending || totalPhotos >= MAX_PHOTOS}
               className="text-xs text-[var(--color-ink)] underline disabled:opacity-50 disabled:no-underline"
             >
-              写真を追加
+              {tCommon("addPhoto")}
             </button>
             <input
               ref={fileInputRef}
@@ -325,10 +328,10 @@ export function EditMealForm({ meal, onSuccess, onCancel }: Props) {
           )}
           <div className="flex gap-2">
             <Button type="button" variant="ghost" fullWidth onClick={onCancel} disabled={isPending}>
-              キャンセル
+              {tCommon("cancel")}
             </Button>
             <Button type="submit" fullWidth disabled={isPending}>
-              {isPending ? "保存中…" : "保存する"}
+              {isPending ? tCommon("saving") : tCommon("save")}
             </Button>
           </div>
         </form>

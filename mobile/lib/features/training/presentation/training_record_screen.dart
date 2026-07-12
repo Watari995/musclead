@@ -10,6 +10,7 @@ import '../../../core/widgets/app_card.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
+import '../../../l10n/app_localizations.dart';
 
 class _SetDraft {
   _SetDraft({String weight = '', String reps = ''})
@@ -50,10 +51,7 @@ class TrainingRecordScreen extends ConsumerStatefulWidget {
     this.editingTraining,
   });
 
-  /// ルーティンから開始する場合の初期種目（exerciseId + 表示名）。
   final List<({String exerciseId, String name})> initialExercises;
-
-  /// 編集モード時の既存トレーニングデータ。
   final TrainingDto? editingTraining;
 
   @override
@@ -96,7 +94,10 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     final exList = ref.read(exercisesProvider).asData?.value ?? [];
     final names = {for (final e in exList) e.id: e.name};
     for (final ex in training.exercises) {
-      final draft = _ExerciseDraft(ex.exerciseId, names[ex.exerciseId] ?? '種目');
+      final draft = _ExerciseDraft(
+        ex.exerciseId,
+        names[ex.exerciseId] ?? ex.exerciseId,
+      );
       draft.sets.first.dispose();
       draft.sets.clear();
       for (final s in ex.sets) {
@@ -126,9 +127,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       final list = await ref.read(trainingRepositoryProvider).bestSets(ids);
       if (!mounted) return;
       setState(() => _bestSets = {for (final b in list) b.exerciseId: b});
-    } catch (_) {
-      // 自己ベストは取得できなくても致命的でないため無視
-    }
+    } catch (_) {}
   }
 
   Future<void> _loadLastSessionSets() async {
@@ -140,9 +139,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
           .lastSessionSets(ids);
       if (!mounted) return;
       setState(() => _lastSessionSets = map);
-    } catch (_) {
-      // 前回セッションは取得できなくても致命的でないため無視
-    }
+    } catch (_) {}
   }
 
   void _addExercise(ExerciseDto ex) {
@@ -157,11 +154,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     _exercises.removeAt(i);
   });
 
-  /// セット追加時は直前セットの kg / 回数 を引き継ぐ。
   void _addSet(int i) => setState(() {
     final sets = _exercises[i].sets;
     final last = sets.isNotEmpty ? sets.last : null;
-    // kg は引き継ぐが、回数は引き継がない。
     sets.add(_SetDraft(weight: last?.weight.text ?? ''));
   });
 
@@ -171,6 +166,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   });
 
   Future<void> _save() async {
+    final l = AppLocalizations.of(context)!;
     final reqExercises = <RecordTrainingExerciseRequest>[];
     for (var i = 0; i < _exercises.length; i++) {
       final e = _exercises[i];
@@ -194,7 +190,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
       );
     }
     if (reqExercises.isEmpty) {
-      setState(() => _error = '種目を1つ以上追加してください');
+      setState(() => _error = l.trainingExerciseRequired2);
       return;
     }
     setState(() {
@@ -229,7 +225,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     } on Failure catch (f) {
       setState(() => _error = f.message);
     } catch (_) {
-      setState(() => _error = '保存に失敗しました');
+      if (mounted) {
+        setState(() => _error = AppLocalizations.of(context)!.commonSaveFailed);
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -245,7 +243,6 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     if (selected != null) _addExercise(selected);
   }
 
-  /// 既存カードの種目を別の種目に切り替える（入力済みのセットは保持）。
   Future<void> _switchExercise(int i) async {
     final selected = await showModalBottomSheet<ExerciseDto>(
       context: context,
@@ -263,10 +260,11 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? '記録を編集' : 'トレーニング記録'),
+        title: Text(_isEditing ? l.trainingEditTitle : l.trainingRecordTitle),
         backgroundColor: Colors.transparent,
       ),
       body: GestureDetector(
@@ -279,15 +277,15 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               for (var i = 0; i < _exercises.length; i++) _exerciseCard(i),
               const SizedBox(height: 4),
               AppButton(
-                label: '種目を追加',
+                label: l.trainingExercisesLabel,
                 icon: Icons.add,
                 variant: AppButtonVariant.glass,
                 onPressed: _pickExercise,
               ),
               const SizedBox(height: 12),
-              _overallMemoCard(),
+              _overallMemoCard(l),
               const SizedBox(height: 12),
-              _endedAtCard(),
+              _endedAtCard(l),
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Text(_error!, style: TextStyle(color: t.accent, fontSize: 13)),
@@ -300,13 +298,17 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
         child: SafeArea(
           top: false,
-          child: AppButton(label: '保存', loading: _saving, onPressed: _save),
+          child: AppButton(
+            label: l.trainingSaveBtn,
+            loading: _saving,
+            onPressed: _save,
+          ),
         ),
       ),
     );
   }
 
-  Widget _overallMemoCard() {
+  Widget _overallMemoCard(AppLocalizations l) {
     final t = context.tokens;
     return AppCard(
       padding: EdgeInsets.zero,
@@ -316,7 +318,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
           tilePadding: const EdgeInsets.symmetric(horizontal: 15),
           childrenPadding: const EdgeInsets.fromLTRB(15, 0, 15, 14),
           title: Text(
-            'メモ（全体）',
+            l.trainingMemoAll,
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: t.muted,
@@ -327,9 +329,9 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             TextField(
               controller: _memo,
               maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: '今日のコンディション など',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l.trainingMemoAllHint,
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
             ),
@@ -339,11 +341,13 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
-  Widget _endedAtCard() {
+  Widget _endedAtCard(AppLocalizations l) {
     final t = context.tokens;
     final label = _endedAt == null
-        ? '終了時刻を入力'
-        : '終了 ${_endedAt!.toLocal().hour.toString().padLeft(2, '0')}:${_endedAt!.toLocal().minute.toString().padLeft(2, '0')}';
+        ? l.trainingEndTimeEmpty
+        : l.trainingEndTimeSet(
+            '${_endedAt!.toLocal().hour.toString().padLeft(2, '0')}:${_endedAt!.toLocal().minute.toString().padLeft(2, '0')}',
+          );
     return AppCard(
       child: InkWell(
         onTap: () async {
@@ -395,6 +399,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
   }
 
   Widget _exerciseCard(int i) {
+    final l = AppLocalizations.of(context)!;
     final e = _exercises[i];
     final t = context.tokens;
     final best = _bestSets[e.exerciseId];
@@ -438,27 +443,30 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
                 ),
               ],
             ),
-            if (best != null) _bestSetLine(best),
+            if (best != null) _bestSetLine(best, l),
             if (lastSession != null && lastSession.sets.isNotEmpty)
-              _lastSessionLine(lastSession),
+              _lastSessionLine(lastSession, l),
             const SizedBox(height: 4),
-            for (var si = 0; si < e.sets.length; si++) _setRow(i, si),
+            for (var si = 0; si < e.sets.length; si++) _setRow(i, si, l),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 onPressed: () => _addSet(i),
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('セット追加'),
+                label: Text(l.trainingAddSet),
               ),
             ),
-            _exerciseMemo(e),
+            _exerciseMemo(e, l),
           ],
         ),
       ),
     );
   }
 
-  Widget _lastSessionLine(LastSessionSetsByExerciseDto lastSession) {
+  Widget _lastSessionLine(
+    LastSessionSetsByExerciseDto lastSession,
+    AppLocalizations l,
+  ) {
     final t = context.tokens;
     final d = lastSession.performedAt.toLocal();
     final date = '${d.year}/${d.month}/${d.day}';
@@ -471,7 +479,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
         TextSpan(
           children: [
             TextSpan(
-              text: '📅 前回 ',
+              text: '📅 ${l.trainingPrevSession}',
               style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
             ),
             TextSpan(
@@ -489,7 +497,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
-  Widget _bestSetLine(BestSetDto best) {
+  Widget _bestSetLine(BestSetDto best, AppLocalizations l) {
     final t = context.tokens;
     final d = best.performedAt?.toLocal();
     final date = d == null ? '' : ' (${d.year}/${d.month}/${d.day})';
@@ -503,11 +511,11 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
               style: TextStyle(color: t.gold),
             ),
             TextSpan(
-              text: '最高記録 ',
+              text: l.trainingBestRecord,
               style: TextStyle(color: t.muted, fontWeight: FontWeight.w600),
             ),
             TextSpan(
-              text: '${best.weightKg}kg × ${best.reps}回$date',
+              text: '${best.weightKg}kg × ${best.reps}${l.trainingReps}$date',
               style: TextStyle(color: t.muted),
             ),
           ],
@@ -517,21 +525,24 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
-  Widget _exerciseMemo(_ExerciseDraft e) {
+  Widget _exerciseMemo(_ExerciseDraft e, AppLocalizations l) {
     final t = context.tokens;
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: const EdgeInsets.only(bottom: 8),
-        title: Text('メモ', style: TextStyle(fontSize: 13, color: t.muted)),
+        title: Text(
+          l.trainingExerciseMemo,
+          style: TextStyle(fontSize: 13, color: t.muted),
+        ),
         children: [
           TextField(
             controller: e.memo,
             maxLines: 2,
-            decoration: const InputDecoration(
-              hintText: 'フォーム・感覚 など',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: l.trainingExerciseMemoHint,
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),
@@ -540,7 +551,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
     );
   }
 
-  Widget _setRow(int ei, int si) {
+  Widget _setRow(int ei, int si, AppLocalizations l) {
     final sets = _exercises[ei].sets;
     final s = sets[si];
     final t = context.tokens;
@@ -557,7 +568,7 @@ class _TrainingRecordScreenState extends ConsumerState<TrainingRecordScreen> {
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text('×'),
           ),
-          Expanded(child: _numField(s.reps, '回')),
+          Expanded(child: _numField(s.reps, l.trainingReps)),
           IconButton(
             icon: Icon(Icons.remove_circle_outline, size: 18, color: t.subtle),
             onPressed: sets.length > 1 ? () => _removeSet(ei, si) : null,
@@ -614,6 +625,7 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final exercises = ref.watch(exercisesProvider);
     return Padding(
       padding: EdgeInsets.only(
@@ -626,9 +638,12 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '種目を選択',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              Text(
+                l.trainingSelectExercise,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -636,16 +651,16 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
                   Expanded(
                     child: TextField(
                       controller: _name,
-                      decoration: const InputDecoration(
-                        hintText: '新規種目名',
+                      decoration: InputDecoration(
+                        hintText: l.trainingNewExerciseName,
                         isDense: true,
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   AppButton(
-                    label: '作成',
+                    label: l.commonCreate,
                     expand: false,
                     loading: _creating,
                     onPressed: _create,
@@ -659,9 +674,9 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
                 ),
                 child: exercises.when(
                   data: (list) => list.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Text('種目がありません。上で作成してください'),
+                      ? Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Text(l.trainingNoExercisesCreate),
                         )
                       : ListView(
                           shrinkWrap: true,
@@ -677,9 +692,9 @@ class _ExercisePickerState extends ConsumerState<_ExercisePicker> {
                     padding: EdgeInsets.all(20),
                     child: Center(child: CircularProgressIndicator()),
                   ),
-                  error: (e, _) => const Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Text('読み込みに失敗しました'),
+                  error: (e, _) => Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(l.commonLoadFailed),
                   ),
                 ),
               ),

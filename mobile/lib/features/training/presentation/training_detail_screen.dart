@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/util/formatters.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/exercise_dtos.dart';
 import '../data/training_dtos.dart';
 import '../data/training_repository.dart';
@@ -17,6 +18,7 @@ class TrainingDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final exList =
         ref.watch(exercisesProvider).asData?.value ?? const <ExerciseDto>[];
@@ -25,7 +27,7 @@ class TrainingDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${mdWeekday(training.startedAt)} の記録'),
+        title: Text(l.trainingDetailTitle(mdWeekday(training.startedAt))),
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
@@ -53,8 +55,8 @@ class TrainingDetailScreen extends ConsumerWidget {
                     child: _stat(
                       context,
                       minutes == null ? '-' : '$minutes',
-                      '分',
-                      '時間',
+                      l.trainingMinutes,
+                      l.trainingHoursLabel,
                     ),
                   ),
                   Container(width: 1, height: 36, color: t.border),
@@ -63,7 +65,7 @@ class TrainingDetailScreen extends ConsumerWidget {
                       context,
                       '${training.exercises.length}',
                       '',
-                      '種目',
+                      l.trainingExercisesLabel,
                     ),
                   ),
                 ],
@@ -73,7 +75,7 @@ class TrainingDetailScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(4, 12, 4, 0),
                 child: Text(
-                  'メモ: ${training.memo}',
+                  l.trainingMemoPrefix(training.memo!),
                   style: TextStyle(fontSize: 13, color: t.muted),
                 ),
               ),
@@ -82,7 +84,7 @@ class TrainingDetailScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _ExerciseCard(
-                  name: names[ex.exerciseId] ?? '種目',
+                  name: names[ex.exerciseId] ?? l.trainingExerciseDefault,
                   exercise: ex,
                 ),
               ),
@@ -93,22 +95,29 @@ class TrainingDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('記録を削除'),
-        content: const Text('このトレーニング記録を削除します。よろしいですか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('削除する', style: TextStyle(color: context.tokens.accent)),
-          ),
-        ],
-      ),
+      builder: (dialogContext) {
+        final dl = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(dl.trainingDeleteConfirmTitle),
+          content: Text(dl.trainingDeleteConfirmMsg),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl.commonCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                dl.commonDeleteOk,
+                style: TextStyle(color: context.tokens.accent),
+              ),
+            ),
+          ],
+        );
+      },
     );
     if (ok != true) return;
     try {
@@ -119,7 +128,7 @@ class TrainingDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+        ).showSnackBar(SnackBar(content: Text(l.commonDeleteFailed)));
       }
     }
   }
@@ -151,6 +160,7 @@ class _ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return AppCard(
       child: Column(
@@ -178,7 +188,10 @@ class _ExerciseCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const Spacer(),
-                  Text('${s.reps} 回', style: TextStyle(color: t.muted)),
+                  Text(
+                    l.trainingRepsUnit(s.reps),
+                    style: TextStyle(color: t.muted),
+                  ),
                 ],
               ),
             ),

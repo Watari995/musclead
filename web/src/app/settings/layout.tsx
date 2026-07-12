@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { SectionTitle } from "@/shared/ui";
 
@@ -11,18 +12,20 @@ import { SectionTitle } from "@/shared/ui";
 //
 // プランは Stripe の本番設定が整うまで動線を非表示にする。
 // 再開時は下のコメントアウトを外すだけ (ページ自体は /settings/plan に存在)。
-const NAV = [
-  { href: "/settings/appearance", label: "外観" },
-  { href: "/settings/weekly-goal", label: "週次目標" },
-  { href: "/settings/integrations", label: "連携" },
-  // { href: "/settings/plan", label: "プラン" },
-  { href: "/settings/account", label: "アカウント" },
-];
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { token, ready } = useAccessToken();
+  const t = useTranslations("settings");
+
+  const NAV = [
+    { href: "/settings/appearance", label: t("appearance") },
+    { href: "/settings/weekly-goal", label: t("weeklyGoal") },
+    { href: "/settings/integrations", label: t("integrations") },
+    // { href: "/settings/plan", label: t("plan") },
+    { href: "/settings/account", label: t("account") },
+  ];
 
   useEffect(() => {
     if (ready && !token) router.replace("/login");
@@ -32,7 +35,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>設定</SectionTitle>
+      <SectionTitle>{t("title")}</SectionTitle>
 
       <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 md:gap-8">
         <nav className="md:sticky md:top-20 self-start">

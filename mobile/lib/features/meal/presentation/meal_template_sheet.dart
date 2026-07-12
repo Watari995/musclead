@@ -9,10 +9,9 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/async_value_view.dart';
 import '../../../core/widgets/section_title.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/meal_template_dtos.dart';
 import '../data/meal_template_repository.dart';
-
-const _mealTypes = ['朝食', '昼食', '夕食', '間食'];
 
 /// テンプレート一覧シート。[onSelect] でテンプレートを選択して閉じる。
 Future<MealTemplateDto?> showMealTemplateSheet(BuildContext context) {
@@ -29,6 +28,7 @@ class _MealTemplateSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final templates = ref.watch(mealTemplatesProvider);
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -43,13 +43,16 @@ class _MealTemplateSheet extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '食事テンプレート',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                Text(
+                  l.mealTemplateTitle,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 TextButton(
                   onPressed: () => showCreateTemplateSheet(context, ref),
-                  child: const Text('+ 新規'),
+                  child: Text(l.mealTemplateNew),
                 ),
               ],
             ),
@@ -62,7 +65,7 @@ class _MealTemplateSheet extends ConsumerWidget {
                   if (list.isEmpty) {
                     return Center(
                       child: Text(
-                        'テンプレートはまだありません',
+                        l.mealTemplateEmpty,
                         style: TextStyle(color: context.tokens.muted),
                       ),
                     );
@@ -94,6 +97,7 @@ class _TemplateRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     return AppListRow(
       onTap: onTap,
@@ -123,20 +127,26 @@ class _TemplateRow extends ConsumerWidget {
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
-                builder: (dialogContext) => AlertDialog(
-                  title: const Text('削除'),
-                  content: Text('「${template.name}」を削除しますか?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext, false),
-                      child: const Text('キャンセル'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext, true),
-                      child: Text('削除', style: TextStyle(color: t.accent)),
-                    ),
-                  ],
-                ),
+                builder: (dialogContext) {
+                  final dl = AppLocalizations.of(dialogContext)!;
+                  return AlertDialog(
+                    title: Text(dl.mealTemplateDeleteLabel),
+                    content: Text(dl.mealTemplateDeleteConfirm(template.name)),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: Text(dl.commonCancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        child: Text(
+                          dl.commonDelete,
+                          style: TextStyle(color: t.accent),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               );
               if (confirmed == true && context.mounted) {
                 try {
@@ -146,9 +156,9 @@ class _TemplateRow extends ConsumerWidget {
                   ref.invalidate(mealTemplatesProvider);
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l.mealTemplateDeleteFailed)),
+                    );
                   }
                 }
               }
@@ -177,7 +187,9 @@ class _CreateTemplateSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final type = useState('朝食');
+    final l = AppLocalizations.of(context)!;
+    final mealTypes = [l.mealBreakfast, l.mealLunch, l.mealDinner, l.mealSnack];
+    final type = useState(l.mealBreakfast);
     final name = useTextEditingController();
     final calories = useTextEditingController();
     final protein = useTextEditingController();
@@ -190,11 +202,11 @@ class _CreateTemplateSheet extends HookConsumerWidget {
     Future<void> submit() async {
       final kcal = int.tryParse(calories.text.trim());
       if (name.text.trim().isEmpty) {
-        error.value = '名前を入力してください';
+        error.value = l.commonNameRequired;
         return;
       }
       if (kcal == null) {
-        error.value = 'カロリーを入力してください';
+        error.value = l.commonCaloriesRequired;
         return;
       }
       loading.value = true;
@@ -217,7 +229,7 @@ class _CreateTemplateSheet extends HookConsumerWidget {
       } on Failure catch (f) {
         error.value = f.message;
       } catch (_) {
-        error.value = '保存に失敗しました';
+        error.value = l.mealTemplateSaveFailed;
       } finally {
         if (context.mounted) loading.value = false;
       }
@@ -236,22 +248,25 @@ class _CreateTemplateSheet extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'テンプレートを作成',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              Text(
+                l.mealTemplateCreateTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'テンプレート名',
+                label: l.mealTemplateNameLabel,
                 controller: name,
-                hint: 'プロテインシェイク',
+                hint: 'Protein shake',
               ),
               const SizedBox(height: 14),
-              const SectionTitle('種類'),
+              SectionTitle(l.mealTemplateType),
               Wrap(
                 spacing: 8,
                 children: [
-                  for (final m in _mealTypes)
+                  for (final m in mealTypes)
                     ChoiceChip(
                       label: Text(m),
                       selected: type.value == m,
@@ -263,7 +278,7 @@ class _CreateTemplateSheet extends HookConsumerWidget {
               ),
               const SizedBox(height: 14),
               AppTextField(
-                label: 'カロリー (kcal)',
+                label: l.mealCaloriesLabel,
                 controller: calories,
                 hint: '420',
                 keyboardType: TextInputType.number,
@@ -308,7 +323,9 @@ class _CreateTemplateSheet extends HookConsumerWidget {
               ],
               const SizedBox(height: 20),
               AppButton(
-                label: loading.value ? '保存中…' : '保存する',
+                label: loading.value
+                    ? l.mealTemplateSaving
+                    : l.mealTemplateSaveBtn,
                 loading: loading.value,
                 onPressed: submit,
               ),

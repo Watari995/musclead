@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useDeleteMealMutation } from "@/features/meal/api/meals";
 import {
   formatMealDateTime,
   mealTypeEmoji,
-  mealTypeLabel,
+  mealTypeLabelKey,
   type Meal,
 } from "@/features/meal/model/meal";
 
 export function MealRow({ meal }: { meal: Meal }) {
+  const t = useTranslations("meals");
+  const tCommon = useTranslations("common");
   const del = useDeleteMealMutation();
 
   const firstPhoto = meal.photos[0];
@@ -31,7 +34,7 @@ export function MealRow({ meal }: { meal: Meal }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <span className="text-sm font-bold tracking-tight">
-            {mealTypeLabel(meal.type)}
+            {t(mealTypeLabelKey(meal.type))}
           </span>
           <span className="text-xs text-[var(--color-ink-muted)]">
             {formatMealDateTime(meal.eatenAt)}
@@ -74,19 +77,19 @@ export function MealRow({ meal }: { meal: Meal }) {
           href={`/meals/${meal.id}/edit`}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
         >
-          編集
+          {tCommon("edit")}
         </Link>
         <button
           type="button"
           onClick={() => {
-            if (confirm(`${mealTypeLabel(meal.type)} の記録を削除しますか?`)) {
+            if (confirm(t("deleteConfirm", { mealType: t(mealTypeLabelKey(meal.type)) }))) {
               del.mutate(meal.id);
             }
           }}
           disabled={del.isPending}
           className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] transition-colors"
         >
-          削除
+          {tCommon("delete")}
         </button>
       </div>
     </li>

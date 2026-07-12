@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   usePortalSessionMutation,
   useSubscribeMutation,
@@ -19,6 +20,8 @@ export default function PlanSettingsPage() {
   const subscriptionQuery = useSubscriptionQuery();
   const subscribe = useSubscribeMutation();
   const portal = usePortalSessionMutation();
+  const t = useTranslations("plan");
+  const tc = useTranslations("common");
 
   // Stripe Checkout からの戻りクエリ (?purchase=success|cancel) を読む。
   // useSearchParams は Suspense 境界が要るため、 既存流儀に倣い window から直接読む。
@@ -61,36 +64,36 @@ export default function PlanSettingsPage() {
   return (
     <section className="space-y-4">
       <header className="space-y-1">
-        <h2 className="text-lg font-bold tracking-tight">プラン</h2>
+        <h2 className="text-lg font-bold tracking-tight">{t("title")}</h2>
         <p className="text-sm text-[var(--color-ink-muted)]">
-          Pro にアップグレードすると、 すべての機能が利用できます。
+          {t("desc")}
         </p>
       </header>
 
       {returnStatus === "success" && (
         <p className="text-sm text-[var(--color-ink)] rounded-md border border-[var(--color-line)] bg-[var(--color-surface-alt)] px-3 py-2">
-          お申し込みありがとうございます。 Pro が有効になりました。
+          {t("subscribed")}
         </p>
       )}
       {returnStatus === "cancel" && (
         <p className="text-sm text-[var(--color-ink-muted)] rounded-md border border-[var(--color-line)] px-3 py-2">
-          お申し込みはキャンセルされました。
+          {t("cancelled")}
         </p>
       )}
 
       {subscriptionQuery.isPending ? (
-        <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>
       ) : isPro ? (
         <div className="rounded-md border border-[var(--color-line)] p-4 space-y-3">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="font-bold tracking-tight">現在のプラン: Pro</span>
+            <span className="font-bold tracking-tight">{t("currentPlan")}</span>
             <span className="text-sm text-[var(--color-ink-muted)]">
-              ¥480 / 月
+              {t("pricePerMonth")}
             </span>
           </div>
           {expiresAt && (
             <p className="text-sm text-[var(--color-ink-muted)]">
-              {new Date(expiresAt).toLocaleDateString("ja-JP")} まで有効
+              {t("validUntil", { date: new Date(expiresAt).toLocaleDateString("ja-JP") })}
             </p>
           )}
           <Button
@@ -99,13 +102,13 @@ export default function PlanSettingsPage() {
             onClick={handleManage}
             disabled={portal.isPending}
           >
-            {portal.isPending ? "リダイレクト中…" : "お支払い・解約の管理"}
+            {portal.isPending ? t("redirecting") : t("managePlan")}
           </Button>
           {portal.isError && (
             <p className="text-sm text-[var(--color-accent)]">
               {portal.error instanceof Error
                 ? portal.error.message
-                : "エラーが発生しました。 時間をおいて再度お試しください。"}
+                : tc("errorOccurred")}
             </p>
           )}
         </div>
@@ -114,7 +117,7 @@ export default function PlanSettingsPage() {
           <div className="flex items-baseline justify-between gap-2">
             <span className="font-bold tracking-tight">Pro</span>
             <span className="text-sm text-[var(--color-ink-muted)]">
-              ¥480 / 月
+              {t("pricePerMonth")}
             </span>
           </div>
           <Button
@@ -122,13 +125,13 @@ export default function PlanSettingsPage() {
             onClick={handleUpgrade}
             disabled={subscribe.isPending}
           >
-            {subscribe.isPending ? "リダイレクト中…" : "Pro にアップグレード"}
+            {subscribe.isPending ? t("redirecting") : t("upgradeToPro")}
           </Button>
           {subscribe.isError && (
             <p className="text-sm text-[var(--color-accent)]">
               {subscribe.error instanceof Error
                 ? subscribe.error.message
-                : "エラーが発生しました。 時間をおいて再度お試しください。"}
+                : tc("errorOccurred")}
             </p>
           )}
         </div>

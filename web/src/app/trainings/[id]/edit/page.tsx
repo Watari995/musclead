@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import {
   useTrainingQuery,
@@ -24,11 +25,12 @@ export default function EditTrainingPage() {
     if (ready && !token) router.replace("/login");
   }, [ready, token, router]);
 
+  const tc = useTranslations("common");
   const query = useTrainingQuery(params.id, Boolean(token));
 
   if (!ready || !token) return null;
   if (query.isLoading) {
-    return <p className="text-sm text-[var(--color-ink-muted)]">読み込み中…</p>;
+    return <p className="text-sm text-[var(--color-ink-muted)]">{tc("loading")}</p>;
   }
   if (query.isError) {
     return <ErrorText>{(query.error as Error).message}</ErrorText>;
@@ -42,17 +44,19 @@ export default function EditTrainingPage() {
 
 function EditTrainingForm({ id, dto }: { id: string; dto: TrainingDTO }) {
   const router = useRouter();
+  const t = useTranslations("trainings");
+  const tc = useTranslations("common");
   const [draft, setDraft] = useState<TrainingDraft>(() => fromTrainingDTO(dto));
   const mutation = useUpdateTrainingMutation(id);
 
   return (
     <div className="space-y-6">
-      <SectionTitle>トレーニングを編集</SectionTitle>
+      <SectionTitle>{t("editTraining")}</SectionTitle>
       <TrainingForm
         value={draft}
         onChange={setDraft}
-        submitLabel="保存する"
-        submittingLabel="保存中…"
+        submitLabel={tc("save")}
+        submittingLabel={tc("saving")}
         submitting={mutation.isPending}
         errorMessage={
           mutation.isError ? (mutation.error as Error).message : null

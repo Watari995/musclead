@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
+import { useTranslations } from "next-intl";
 import { Button } from "@/shared/ui";
 import { cropImageToBlob } from "./cropImage";
 
@@ -22,6 +23,7 @@ export function CropModal({
   onApply: (blob: Blob) => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("cropModal");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -75,19 +77,19 @@ export function CropModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="プロフィール画像をクロップ"
+      aria-label={t("aria")}
       className="fixed inset-0 z-50 flex items-center justify-center"
     >
       <button
         type="button"
-        aria-label="キャンセル"
+        aria-label={t("cancelAria")}
         onClick={onCancel}
         className="absolute inset-0 bg-black/50"
       />
       <div className="relative bg-[var(--color-surface)] rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
         <div className="px-5 py-4 border-b border-[var(--color-line)]">
           <h2 className="text-base font-bold tracking-tight">
-            プロフィール画像を編集
+            {t("title")}
           </h2>
         </div>
 
@@ -109,7 +111,7 @@ export function CropModal({
         {/* ズームスライダー */}
         <div className="px-5 py-4 space-y-2 border-t border-[var(--color-line)]">
           <label className="block text-xs text-[var(--color-ink-muted)]">
-            ズーム
+            {t("zoom")}
           </label>
           <input
             type="range"
@@ -131,7 +133,7 @@ export function CropModal({
             onClick={onCancel}
             disabled={working}
           >
-            キャンセル
+            {t("cancelAria")}
           </Button>
           <Button
             type="button"
@@ -139,7 +141,7 @@ export function CropModal({
             disabled={working || !croppedAreaPixels}
             className="flex-1"
           >
-            {working ? "処理中…" : "適用"}
+            {working ? t("processing") : t("apply")}
           </Button>
         </div>
       </div>

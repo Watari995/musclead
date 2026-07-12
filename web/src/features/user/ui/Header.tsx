@@ -4,21 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAccessToken } from "@/shared/auth/access-token";
 import { useMeQuery } from "@/features/user/api/user";
 import { Avatar } from "@/features/user/ui/Avatar";
 import { NotificationBell } from "@/features/notification/ui/NotificationBell";
 
 const NAV_ITEMS = [
-  { href: "/meals", label: "食事" },
-  { href: "/trainings", label: "トレーニング" },
-  { href: "/exercises", label: "種目" },
-  { href: "/routines", label: "ルーティン" },
-  { href: "/weights", label: "体重" },
-  { href: "/settings", label: "設定" },
+  { href: "/meals", key: "meals" },
+  { href: "/trainings", key: "trainings" },
+  { href: "/exercises", key: "exercises" },
+  { href: "/routines", key: "routines" },
+  { href: "/weights", key: "weights" },
+  { href: "/settings", key: "settings" },
 ] as const;
 
 export function Header() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const { token, ready } = useAccessToken();
   const loggedIn = Boolean(token);
@@ -69,7 +71,7 @@ export function Header() {
                 href={item.href}
                 className="hover:opacity-60 transition-opacity"
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             ))}
           </nav>
@@ -99,7 +101,7 @@ export function Header() {
                 {meQuery.data?.profile_image_url && (
                   <Link
                     href="/profile"
-                    aria-label="プロフィール"
+                    aria-label={t("profile")}
                     className="sm:hidden inline-flex items-center"
                   >
                     <Avatar
@@ -112,7 +114,7 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => setMenuOpen(true)}
-                  aria-label="メニューを開く"
+                  aria-label={t("openMenu")}
                   aria-expanded={menuOpen}
                   aria-controls="mobile-nav"
                   className="sm:hidden inline-flex items-center justify-center w-10 h-10 -mr-2 rounded-md text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
@@ -126,13 +128,13 @@ export function Header() {
                   href="/login"
                   className="text-[var(--color-ink)] hover:opacity-60"
                 >
-                  ログイン
+                  {t("login")}
                 </Link>
                 <Link
                   href="/register"
                   className="bg-[var(--color-ink)] text-[var(--color-surface)] px-4 h-9 inline-flex items-center rounded-md text-sm font-medium hover:opacity-90 whitespace-nowrap"
                 >
-                  新規登録
+                  {t("register")}
                 </Link>
               </>
             )}
@@ -163,6 +165,8 @@ function MobileMenu({
   pathname: string;
   onClose: () => void;
 }) {
+  const t = useTranslations("nav");
+
   return (
     <div
       id="mobile-nav"
@@ -173,7 +177,7 @@ function MobileMenu({
     >
       <button
         type="button"
-        aria-label="メニューを閉じる"
+        aria-label={t("closeMenu")}
         onClick={onClose}
         className={`absolute inset-0 bg-black/40 transition-opacity ${
           open ? "opacity-100" : "opacity-0"
@@ -195,13 +199,13 @@ function MobileMenu({
             </Link>
           ) : (
             <span className="text-sm font-bold tracking-tight truncate">
-              メニュー
+              {t("menu")}
             </span>
           )}
           <button
             type="button"
             onClick={onClose}
-            aria-label="閉じる"
+            aria-label={t("closeMenu")}
             className="inline-flex items-center justify-center w-10 h-10 -mr-2 rounded-md text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
           >
             <CloseIcon />
@@ -221,7 +225,7 @@ function MobileMenu({
                     : "border-transparent text-[var(--color-ink)] hover:bg-[var(--color-surface-alt)]"
                 }`}
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             );
           })}

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/core_providers.dart';
+import '../../../core/providers/locale_provider.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../core/widgets/app_card.dart';
@@ -15,20 +16,20 @@ import '../../../core/widgets/tab_page.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/user_dtos.dart';
 import '../data/user_repository.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     ref.listen<Uri?>(oauthCallbackProvider, (_, uri) {
       if (uri == null || !context.mounted) return;
       final connected = uri.queryParameters['connected'] == 'true';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            connected ? 'HealthPlanet を連携しました' : 'HealthPlanet 連携に失敗しました',
-          ),
+          content: Text(connected ? l.profileHpConnected : l.profileHpFailed),
         ),
       );
       if (connected) ref.invalidate(meProvider);
@@ -37,7 +38,7 @@ class ProfileScreen extends ConsumerWidget {
 
     final me = ref.watch(meProvider);
     return TabPage(
-      title: 'マイページ',
+      title: l.profileTitle,
       onRefresh: () async => ref.invalidate(meProvider),
       children: [
         AsyncValueView<MeResponse>(
@@ -59,9 +60,11 @@ class _ProfileBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final mode = ref.watch(themeModeProvider);
     final accent = ref.watch(accentProvider);
+    final locale = ref.watch(localeProvider);
     final versionText = ref
         .watch(packageInfoProvider)
         .when(
@@ -99,20 +102,24 @@ class _ProfileBody extends ConsumerWidget {
             ],
           ),
         ),
-        const SectionTitle('アカウント'),
+        SectionTitle(l.profileAccount),
         AppListBox(
           children: [
             AppListRow(
               onTap: () => _showThemeSheet(context, ref, mode),
-              child: _row(context, '外観', value: _modeLabel(mode)),
+              child: _row(
+                context,
+                l.profileAppearance,
+                value: _modeLabel(l, mode),
+              ),
             ),
             AppListRow(
               onTap: () => _showAccentSheet(context, ref),
               child: Row(
                 children: [
-                  const Text(
-                    'テーマカラー',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                  Text(
+                    l.profileThemeColor,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   const Spacer(),
                   Container(
@@ -128,35 +135,50 @@ class _ProfileBody extends ConsumerWidget {
                 ],
               ),
             ),
+            AppListRow(
+              onTap: () => _showLanguageSheet(context, ref, locale),
+              child: _row(
+                context,
+                l.profileLanguage,
+                value: locale.languageCode == 'ja'
+                    ? l.profileLanguageJa
+                    : l.profileLanguageEn,
+              ),
+            ),
           ],
         ),
         if (preferences != null) ...[
-          const SectionTitle('カレンダー'),
+          SectionTitle(l.profileCalendar),
           _CalendarColorSection(prefs: preferences!),
         ],
-        const SectionTitle('目標'),
+        SectionTitle(l.profileGoal),
         AppListBox(
           children: [
             AppListRow(
               onTap: () => context.push('/weekly-goal'),
-              child: _row(context, '週次目標'),
+              child: _row(context, l.profileWeeklyGoal),
             ),
           ],
         ),
-        const SectionTitle('連携サービス'),
+        SectionTitle(l.profileIntegrations),
         AppListBox(
           children: [
             AppListRow(
               onTap: () => _connectHealthPlanet(context, ref),
-              child: _row(context, 'Tanita HealthPlanet'),
+              child: _row(context, l.profileTanitaHp),
             ),
           ],
         ),
-        const SectionTitle('その他'),
+        SectionTitle(l.profileOther),
         AppListBox(
           children: [
             AppListRow(
-              child: _row(context, 'バージョン', value: versionText, chevron: false),
+              child: _row(
+                context,
+                l.profileVersion,
+                value: versionText,
+                chevron: false,
+              ),
             ),
           ],
         ),
@@ -167,7 +189,7 @@ class _ProfileBody extends ConsumerWidget {
               onTap: () => ref.read(authControllerProvider.notifier).logout(),
               child: Center(
                 child: Text(
-                  'ログアウト',
+                  l.profileLogout,
                   style: TextStyle(
                     color: context.colors.onSurface,
                     fontWeight: FontWeight.w600,
@@ -184,7 +206,7 @@ class _ProfileBody extends ConsumerWidget {
               onTap: () => _confirmDelete(context, ref, user.id),
               child: Center(
                 child: Text(
-                  'アカウントを削除',
+                  l.profileDeleteAccount,
                   style: TextStyle(
                     color: context.tokens.accent,
                     fontWeight: FontWeight.w600,
@@ -199,6 +221,7 @@ class _ProfileBody extends ConsumerWidget {
   }
 
   Future<void> _connectHealthPlanet(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context)!;
     try {
       final dio = ref.read(dioProvider);
       final res = await dio.get<Map<String, dynamic>>(
@@ -210,19 +233,20 @@ class _ProfileBody extends ConsumerWidget {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('HealthPlanet 連携の開始に失敗しました')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l.profileHpStartFailed)));
       }
     }
   }
 
   Future<void> _pickAndUpload(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context)!;
     final file = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 512,
       maxHeight: 512,
-      imageQuality: 80, // iOS では JPEG に再エンコードされる
+      imageQuality: 80,
     );
     if (file == null) return;
     final bytes = await file.readAsBytes();
@@ -234,18 +258,19 @@ class _ProfileBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('プロフィール画像を更新しました')));
+        ).showSnackBar(SnackBar(content: Text(l.profileAvatarSuccess)));
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('画像の更新に失敗しました')));
+        ).showSnackBar(SnackBar(content: Text(l.profileAvatarFailed)));
       }
     }
   }
 
   void _showAccentSheet(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context)!;
     final current = ref.read(accentProvider);
     showModalBottomSheet<void>(
       context: context,
@@ -257,9 +282,12 @@ class _ProfileBody extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'テーマカラー',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              Text(
+                l.profileThemeColor,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 18),
               Wrap(
@@ -299,24 +327,57 @@ class _ProfileBody extends ConsumerWidget {
     );
   }
 
+  void _showLanguageSheet(BuildContext context, WidgetRef ref, Locale current) {
+    final l = AppLocalizations.of(context)!;
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final loc in const [Locale('ja'), Locale('en')])
+              ListTile(
+                title: Text(
+                  loc.languageCode == 'ja'
+                      ? l.profileLanguageJa
+                      : l.profileLanguageEn,
+                ),
+                trailing: loc.languageCode == current.languageCode
+                    ? Icon(Icons.check, color: sheetContext.tokens.accent)
+                    : null,
+                onTap: () {
+                  ref.read(localeProvider.notifier).set(loc);
+                  Navigator.of(sheetContext).pop();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _confirmDelete(
     BuildContext context,
     WidgetRef ref,
     String userId,
   ) async {
+    final l = AppLocalizations.of(context)!;
     final ok = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('アカウントを削除'),
-        content: const Text('アカウントとすべてのデータが削除されます。この操作は取り消せません。'),
+        title: Text(l.profileDeleteAccount),
+        content: Text(l.profileDeleteAccountMsg),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('キャンセル'),
+            child: Text(l.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('削除する', style: TextStyle(color: context.tokens.accent)),
+            child: Text(
+              l.commonDeleteOk,
+              style: TextStyle(color: context.tokens.accent),
+            ),
           ),
         ],
       ),
@@ -329,7 +390,7 @@ class _ProfileBody extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+        ).showSnackBar(SnackBar(content: Text(l.profileDeleteFailed)));
       }
     }
   }
@@ -355,13 +416,14 @@ class _ProfileBody extends ConsumerWidget {
     );
   }
 
-  static String _modeLabel(ThemeMode m) => switch (m) {
-    ThemeMode.system => 'システム',
-    ThemeMode.light => 'ライト',
-    ThemeMode.dark => 'ダーク',
+  static String _modeLabel(AppLocalizations l, ThemeMode m) => switch (m) {
+    ThemeMode.system => l.profileThemeSystem,
+    ThemeMode.light => l.profileThemeLight,
+    ThemeMode.dark => l.profileThemeDark,
   };
 
   void _showThemeSheet(BuildContext context, WidgetRef ref, ThemeMode current) {
+    final l = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       builder: (sheetContext) => SafeArea(
@@ -370,7 +432,7 @@ class _ProfileBody extends ConsumerWidget {
           children: [
             for (final m in ThemeMode.values)
               ListTile(
-                title: Text(_modeLabel(m)),
+                title: Text(_modeLabel(l, m)),
                 trailing: m == current
                     ? Icon(Icons.check, color: sheetContext.tokens.accent)
                     : null,
@@ -452,6 +514,7 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final t = context.tokens;
     final trainingColor = _parseColor(widget.prefs.trainingColor);
     final mealColor = _parseColor(widget.prefs.mealColor);
@@ -462,7 +525,7 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'カレンダーの色',
+            l.profileCalendarColors,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -471,7 +534,7 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
           ),
           const SizedBox(height: 12),
           _ColorRow(
-            label: 'トレーニング',
+            label: l.calendarTraining,
             currentColor: trainingColor,
             presets: _presets,
             onSelect: (c) => _updateColor('training', c),
@@ -479,7 +542,7 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
           ),
           const SizedBox(height: 10),
           _ColorRow(
-            label: '食事',
+            label: l.calendarMeal,
             currentColor: mealColor,
             presets: _presets,
             onSelect: (c) => _updateColor('meal', c),
@@ -487,7 +550,7 @@ class _CalendarColorSectionState extends ConsumerState<_CalendarColorSection> {
           ),
           const SizedBox(height: 10),
           _ColorRow(
-            label: '体重',
+            label: l.calendarWeight,
             currentColor: weightColor,
             presets: _presets,
             onSelect: (c) => _updateColor('weight', c),
@@ -574,9 +637,7 @@ class _Avatar extends StatelessWidget {
     final t = context.tokens;
     final url = user.profileImageUrl;
     final initial = user.name.isNotEmpty ? user.name.characters.first : '?';
-    // 読み込み中の中立プレースホルダ（色付きイニシャルを出さないことでチラつきを防ぐ）。
     Widget placeholder() => Container(width: 52, height: 52, color: t.border);
-    // 通常はサーバーが必ずデフォルト画像 URL を返すため、これは読込失敗時のみ表示。
     Widget fallback() => Container(
       width: 52,
       height: 52,
@@ -604,7 +665,6 @@ class _Avatar extends StatelessWidget {
                     width: 52,
                     height: 52,
                     fit: BoxFit.cover,
-                    // フェードを無効化し、キャッシュ済みなら即時表示（チラつき防止）。
                     fadeInDuration: Duration.zero,
                     fadeOutDuration: Duration.zero,
                     placeholder: (_, _) => placeholder(),

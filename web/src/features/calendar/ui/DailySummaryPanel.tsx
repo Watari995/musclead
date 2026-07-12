@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { GetDailySummaryResponse } from "@/shared/api/client";
 
 type Props = {
@@ -7,6 +10,9 @@ type Props = {
 };
 
 export function DailySummaryPanel({ date, data, isLoading }: Props) {
+  const t = useTranslations("calendar");
+  const tCommon = useTranslations("common");
+
   const label = new Date(date + "T00:00:00").toLocaleDateString("ja-JP", {
     month: "long",
     day: "numeric",
@@ -17,36 +23,36 @@ export function DailySummaryPanel({ date, data, isLoading }: Props) {
     <div className="mt-4 border-t border-[var(--color-line)] pt-4">
       <h3 className="text-sm font-bold mb-3 text-[var(--color-ink)]">{label}</h3>
       {isLoading ? (
-        <p className="text-xs text-[var(--color-ink-muted)]">読み込み中…</p>
+        <p className="text-xs text-[var(--color-ink-muted)]">{tCommon("loading")}</p>
       ) : !data ? null : (
         <div className="space-y-3">
           {(data.trainings ?? []).length > 0 && (
-            <Section title="トレーニング">
-              {data.trainings!.map((t) => (
-                <Row key={t.training_id}>
-                  <span>{t.exercise_count}種目 / {t.set_count}セット</span>
+            <Section title={t("training")}>
+              {data.trainings!.map((tr) => (
+                <Row key={tr.training_id}>
+                  <span>{t("exerciseCount", { count: tr.exercise_count ?? 0 })} / {t("setsCount", { count: tr.set_count ?? 0 })}</span>
                   <span className="text-[var(--color-ink-muted)] text-xs">
-                    {new Date(t.started_at!).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(tr.started_at!).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </Row>
               ))}
             </Section>
           )}
           {(data.meals ?? []).length > 0 && (
-            <Section title="食事">
+            <Section title={t("meal")}>
               <Row>
-                <span>合計</span>
+                <span>{t("total")}</span>
                 <span className="text-[var(--color-ink-muted)] text-xs">{data.total_calories ?? 0}kcal</span>
               </Row>
             </Section>
           )}
           {(data.weights ?? []).length > 0 && (
-            <Section title="体重">
+            <Section title={t("weight")}>
               {data.weights!.map((w) => (
                 <Row key={w.weight_id}>
                   <span>{w.weight_kg}kg</span>
                   {w.body_fat_percentage && (
-                    <span className="text-[var(--color-ink-muted)] text-xs">体脂肪 {w.body_fat_percentage}%</span>
+                    <span className="text-[var(--color-ink-muted)] text-xs">{t("bodyFat", { value: w.body_fat_percentage })}</span>
                   )}
                 </Row>
               ))}
@@ -55,7 +61,7 @@ export function DailySummaryPanel({ date, data, isLoading }: Props) {
           {(data.trainings ?? []).length === 0 &&
            (data.meals ?? []).length === 0 &&
            (data.weights ?? []).length === 0 && (
-            <p className="text-xs text-[var(--color-ink-muted)]">この日の記録はありません</p>
+            <p className="text-xs text-[var(--color-ink-muted)]">{t("noRecords")}</p>
           )}
         </div>
       )}
