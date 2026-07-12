@@ -103,7 +103,7 @@ export function Popover({ trigger, children, align = "start" }: Props) {
           ref={contentRef}
           id={contentId}
           role="dialog"
-          className="fixed invisible z-20 bg-[var(--color-surface)] rounded-lg shadow-lg border border-[var(--color-line)]"
+          className="rough fixed invisible z-20 bg-[var(--color-surface)]"
         >
           {children}
         </div>
