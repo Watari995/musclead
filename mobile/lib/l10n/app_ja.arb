@@ -120,6 +120,13 @@
       "count": { "type": "int" }
     }
   },
+  "trainingRoutineDeleteConfirmTitle": "ルーティンを削除",
+  "trainingRoutineDeleteConfirmMsg": "「{name}」を削除しますか？",
+  "@trainingRoutineDeleteConfirmMsg": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "trainingDetailTitle": "{date} の記録",
   "@trainingDetailTitle": {
     "placeholders": {
