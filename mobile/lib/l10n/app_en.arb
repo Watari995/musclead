@@ -120,6 +120,13 @@
       "count": { "type": "int" }
     }
   },
+  "trainingRoutineDeleteConfirmTitle": "Delete routine",
+  "trainingRoutineDeleteConfirmMsg": "Delete \"{name}\"?",
+  "@trainingRoutineDeleteConfirmMsg": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
   "trainingDetailTitle": "{date} log",
   "@trainingDetailTitle": {
     "placeholders": {

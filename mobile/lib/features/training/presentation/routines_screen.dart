@@ -138,7 +138,7 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
             children: [
               IconButton(
                 icon: Icon(Icons.delete_outline, size: 20, color: t.subtle),
-                onPressed: () => _delete(r),
+                onPressed: () => _confirmDelete(r),
               ),
               ReorderableDragStartListener(
                 index: index,
@@ -152,6 +152,34 @@ class _RoutinesScreenState extends ConsumerState<RoutinesScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(RoutineDto r) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final dl = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(dl.trainingRoutineDeleteConfirmTitle),
+          content: Text(dl.trainingRoutineDeleteConfirmMsg(r.name)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(dl.commonCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                dl.commonDeleteOk,
+                style: TextStyle(color: context.tokens.accent),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (ok != true) return;
+    await _delete(r);
   }
 
   Future<void> _delete(RoutineDto r) async {
